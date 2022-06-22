@@ -113,6 +113,9 @@ fclaw_register (fclaw_options_t* fclaw_opt, sc_options_t * opt)
     sc_options_add_bool (opt, 0, "output", &fclaw_opt->output, 0,
                             "Enable output [F]");
 
+    sc_options_add_string (opt, 0, "output-dir", &fclaw_opt->output_dir, 0,
+                            "Output directory. Can be absolute or relative. null value means current working directory is used. [NULL]");
+
 
     /* -------------------------------------- Gauges  --------------------------------- */
     /* Gauge options */

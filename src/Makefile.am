@@ -83,7 +83,7 @@ libforestclaw_compiled_sources = \
 	src/fclaw2d_elliptic_solver.c \
 	src/fclaw2d_physical_bc.c \
 	src/fclaw2d_ghost_fill.c \
-	src/fclaw2d_output.c \
+	src/fclaw2d_output.cpp \
 	src/fclaw2d_run.c \
 	src/fclaw2d_diagnostics.c \
 	src/fclaw2d_update_single_step.c \

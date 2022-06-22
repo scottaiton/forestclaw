@@ -195,6 +195,7 @@ struct fclaw_options
     /* Output and console IO */
     int verbosity;              /**< TODO: Do we have guidelines here? */
 
+    const char *output_dir;
     int output;                    
     int tikz_out;      /* Boolean */
 

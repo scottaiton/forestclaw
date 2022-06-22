@@ -28,6 +28,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw2d_options.h>
 #include <fclaw2d_vtable.h>
 
+#include <filesystem>
+#include <iostream>
+
 /* -----------------------------------------------------------------------
     Public interface
     -------------------------------------------------------------------- */
@@ -36,6 +39,26 @@ void
 fclaw2d_output_frame (fclaw2d_global_t * glob, int iframe)
 {
     const fclaw_options_t *fclaw_opt = fclaw2d_get_options(glob);
+
+	std::filesystem::path current_path = std::filesystem::current_path();
+    if(fclaw_opt->output_dir)
+    {
+        std::filesystem::path output_dir = fclaw_opt->output_dir;
+	    std::filesystem::path output_path;
+        if(output_dir.is_absolute())
+        {
+	        output_path = output_dir;
+        }
+        else
+        {
+            output_path = current_path;
+            output_path /= output_dir;
+        }
+
+	    std::filesystem::create_directory(output_path);
+
+	    std::filesystem::current_path(output_path);
+    }
 
     double time;
     time = glob->curr_time;
@@ -68,6 +91,11 @@ fclaw2d_output_frame (fclaw2d_global_t * glob, int iframe)
     if (fclaw_opt->tikz_out)
     {
         fclaw2d_output_frame_tikz(glob,iframe);
+    }
+
+    if(fclaw_opt->output_dir)
+    {
+	    std::filesystem::current_path(current_path);
     }
 }
 

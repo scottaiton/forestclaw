@@ -24,7 +24,7 @@ add_library(forestclaw_c OBJECT
   fclaw2d_elliptic_solver.c 
   fclaw2d_physical_bc.c 
   fclaw2d_ghost_fill.c 
-  fclaw2d_output.c 
+  fclaw2d_output.cpp 
   fclaw2d_run.c 
   fclaw2d_diagnostics.c 
   fclaw2d_update_single_step.c 
