@@ -210,13 +210,13 @@ void fclaw2d_global_options_store(fclaw2d_global_t* glob,
                                   void* options,
                                   fclaw_destroy_callback_t callback)
 {
-    FCLAW_ASSERT(fclaw_pointer_map_get(glob->options,"user") == NULL);
-    fclaw_pointer_map_insert(glob->options, "user", options, callback);
+    FCLAW_ASSERT(fclaw_pointer_map_get(glob->options, name) == NULL);
+    fclaw_pointer_map_insert(glob->options, name, options, callback);
 }
 
 void* fclaw2d_global_get_options(fclaw2d_global_t* glob, const char* name)
 {
-    void* user = fclaw_pointer_map_get(glob->options, "user");
+    void* user = fclaw_pointer_map_get(glob->options, name);
     FCLAW_ASSERT(user != NULL);
     return user;
 }
