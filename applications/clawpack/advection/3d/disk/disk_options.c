@@ -28,8 +28,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw2d_clawpatch.h>
 #include <fclaw2d_clawpatch_options.h>
 
-static int s_user_options_package_id = -1;
-
 static void *
 disk_register (user_options_t *user_opt, sc_options_t * opt)
 {
@@ -168,15 +166,12 @@ user_options_t* disk_options_register (fclaw_app_t * app,
 
 void disk_options_store (fclaw2d_global_t* glob, user_options_t* user_opt)
 {
-    FCLAW_ASSERT(s_user_options_package_id == -1);
-    int id = fclaw_package_container_add_pkg(glob,user_opt);
-    s_user_options_package_id = id;
+    fclaw2d_global_options_store(glob, "user", user_opt, NULL);
 }
 
 const user_options_t* disk_get_options(fclaw2d_global_t* glob)
 {
-    int id = s_user_options_package_id;
-    return (user_options_t*) fclaw_package_get_options(glob, id);    
+    return (user_options_t*) fclaw2d_global_get_options(glob, "user");
 }
 
 void disk_global_post_process(fclaw_options_t *fclaw_opt,

@@ -46,7 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 #include <fclaw2d_global.h>
-#include <fclaw_pointer_map.h>
 
 static void *
 clawpatch_register(fclaw2d_clawpatch_options_t *clawpatch_options,
@@ -256,15 +255,12 @@ void
 fclaw2d_clawpatch_options_store (fclaw2d_global_t *glob, 
                                  fclaw2d_clawpatch_options_t* clawpatch_options)
 {
-	FCLAW_ASSERT(fclaw_pointer_map_get(glob->options,CLAWPATCH_OPTION_NAME) == NULL);
-	fclaw_pointer_map_insert(glob->options, CLAWPATCH_OPTION_NAME, clawpatch_options, NULL);
+	fclaw2d_global_options_store(glob, CLAWPATCH_OPTION_NAME, clawpatch_options, NULL);
 }
 
 fclaw2d_clawpatch_options_t* 
 fclaw2d_clawpatch_get_options(fclaw2d_global_t* glob)
 {
-    fclaw2d_clawpatch_options_t* clawptch_options = (fclaw2d_clawpatch_options_t*) 
-	   							fclaw_pointer_map_get(glob->options, CLAWPATCH_OPTION_NAME);
-	FCLAW_ASSERT(clawptch_options != NULL);
-	return clawptch_options;
+    return (fclaw2d_clawpatch_options_t*) 
+	   			fclaw2d_global_get_options(glob, CLAWPATCH_OPTION_NAME);
 }

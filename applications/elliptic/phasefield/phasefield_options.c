@@ -25,7 +25,6 @@
 
 #include "phasefield_user.h"
 
-#include <fclaw_pointer_map.h>
 
 static void *
 phasefield_register (phasefield_options_t *user, sc_options_t * opt)
@@ -190,14 +189,11 @@ phasefield_options_t* phasefield_options_register (fclaw_app_t * app,
 
 void phasefield_options_store (fclaw2d_global_t* glob, phasefield_options_t* user)
 {
-    FCLAW_ASSERT(fclaw_pointer_map_get(glob->options,"user") == NULL);
-    fclaw_pointer_map_insert(glob->options, "user", user, NULL);
+    fclaw2d_global_options_store(glob,"user",user,NULL);
 }
 
 const phasefield_options_t* phasefield_get_options(fclaw2d_global_t* glob)
 {
-    phasefield_options_t* user = (phasefield_options_t*) 
-                              fclaw_pointer_map_get(glob->options, "user");
-    FCLAW_ASSERT(user != NULL);
-    return user;
+    return (phasefield_options_t*) 
+                fclaw2d_global_get_options(glob, "user");
 }

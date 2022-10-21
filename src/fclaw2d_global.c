@@ -205,6 +205,23 @@ void fclaw2d_global_iterate_partitioned (fclaw2d_global_t * glob,
     fclaw2d_domain_iterate_partitioned (glob->domain,new_domain,tcb,&g);
 }
 
+void fclaw2d_global_options_store(fclaw2d_global_t* glob, 
+                                  const char* name, 
+                                  void* options,
+                                  fclaw_destroy_callback_t callback)
+{
+    FCLAW_ASSERT(fclaw_pointer_map_get(glob->options,"user") == NULL);
+    fclaw_pointer_map_insert(glob->options, "user", options, callback);
+}
+
+void* fclaw2d_global_get_options(fclaw2d_global_t* glob, const char* name)
+{
+    void* user = fclaw_pointer_map_get(glob->options, "user");
+    FCLAW_ASSERT(user != NULL);
+    return user;
+}
+
+
 fclaw2d_global_t* global_glob = NULL;
 
 void fclaw2d_global_set_global(fclaw2d_global_t* glob)

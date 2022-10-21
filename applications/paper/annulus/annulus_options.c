@@ -27,7 +27,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw2d_include_all.h>
 
-#include <fclaw_pointer_map.h>
 
 static void *
 annulus_register(user_options_t *user, sc_options_t * opt)
@@ -189,8 +188,7 @@ user_options_t* annulus_options_register (fclaw_app_t * app,
 
 void annulus_options_store (fclaw2d_global_t* glob, user_options_t* user)
 {
-    FCLAW_ASSERT(fclaw_pointer_map_get(glob->options,"user") == NULL);
-    fclaw_pointer_map_insert(glob->options, "user", user, NULL);
+    fclaw2d_global_options_store(glob,"user",user,NULL);
 }
 
 const user_options_t* annulus_get_options(fclaw2d_global_t* glob)

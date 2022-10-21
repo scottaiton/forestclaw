@@ -141,6 +141,31 @@ void fclaw2d_global_iterate_partitioned (fclaw2d_global_t * glob,
                                          fclaw2d_transfer_callback_t tcb,
                                          void *user);
 
+typedef void (*fclaw_destroy_callback_t)(void* value);
+
+/**
+ * @brief Store an options structure in glob
+ * 
+ * @param glob the glob structure
+ * @param name the name of the options, must be unique for a glob
+ * @param options the structure to store
+ * @param destroy_callback callback to destroy structure, can be set to NULL
+ */
+void fclaw2d_global_options_store(fclaw2d_global_t* glob, 
+                                  const char* name, 
+                                  void* options,
+                                  fclaw_destroy_callback_t destroy_callback);
+
+
+/**
+ * @brief Get an opitons structure from a glob
+ * 
+ * @param glob 
+ * @param name 
+ * @return void* 
+ */
+void* fclaw2d_global_get_options(fclaw2d_global_t* glob, const char* name);
+
 /**
  * @brief Store a glob variable
  * 
