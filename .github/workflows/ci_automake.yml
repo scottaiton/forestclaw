@@ -125,7 +125,7 @@ jobs:
        export V=0
        make -j -C sc
        make -j -C p4est
-       make -j || make -j || make -j || make -j || make -j
+       make -j
 
     - name: Tests
       if: ${{ !matrix.cuda }}
