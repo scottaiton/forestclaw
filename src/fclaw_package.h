@@ -35,14 +35,7 @@ extern "C"
 }
 #endif
 #endif
-#if defined(__GNUC__) || defined(__clang__)
-#define DEPRECATED __attribute__((deprecated))
-#elif defined(_MSC_VER)
-#define DEPRECATED __declspec(deprecated)
-#else
-#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-#define DEPRECATED
-#endif
+
 struct fclaw2d_global;
 
 /* Opaque pointers */
@@ -60,9 +53,45 @@ int fclaw_package_container_add (fclaw_package_container_t * pkg_container,
 void fclaw_package_container_new_app (fclaw_app_t *app);
 void fclaw_package_container_destroy_app (fclaw_app_t *app);
 
-DEPRECATED int fclaw_package_container_add_pkg(struct fclaw2d_global* glob,
-                                    void* opt);
-DEPRECATED void* fclaw_package_get_options(struct fclaw2d_global *glob, int id);
+#define FCLAW_PACKAGE_MESSAGE "\n\n\
+    WARNING: The way of storing options has changed. Use fclaw2d_global_options_store and fclaw2d_global_get_options.  \n\
+\n\
+    Update the options_store and get_options functions in your application:\n\
+\n\
+        void swirl_options_store (fclaw2d_global_t* glob, user_options_t* user)\n\
+        {\n\
+            FCLAW_ASSERT(s_user_options_package_id == -1);\n\
+            int id = fclaw_package_container_add_pkg(glob,user);\n\
+            s_user_options_package_id = id;\n\
+        }\n\
+\n\
+        const user_options_t* swirl_get_options(fclaw2d_global_t* glob)\n\
+        {\n\
+            int id = s_user_options_package_id;\n\
+            return (user_options_t*) \n\
+                    fclaw_package_get_options(glob, id);\n\
+        }\n\
+\n\
+    with the updated calls:\n\
+\n\
+        void swirl_options_store (fclaw2d_global_t* glob, user_options_t* user)\n\
+        {\n\
+            fclaw2d_global_options_store(glob, \"user\", user);\n\
+        }\n\
+\n\
+        const user_options_t* swirl_get_options(fclaw2d_global_t* glob)\n\
+        {\n\
+            return (user_options_t*) fclaw2d_global_get_options(glob, \"user\");\n\
+        }\n\
+\n\
+    "
+
+int fclaw_package_container_add_pkg(struct fclaw2d_global* glob,
+                                    void* opt) 
+FCLAW_DEPRECATED_MESSAGE(FCLAW_PACKAGE_MESSAGE);
+
+void* fclaw_package_get_options(struct fclaw2d_global *glob, int id)
+FCLAW_DEPRECATED_MESSAGE(FCLAW_PACKAGE_MESSAGE);
 
 
 #ifdef __cplusplus

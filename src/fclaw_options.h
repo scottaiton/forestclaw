@@ -65,7 +65,19 @@ void fclaw_options_destroy(fclaw_options_t* fclaw_opt);
 
 
 
-int fclaw_options_read_from_file(sc_options_t* opt);
+int fclaw_options_read_from_file(sc_options_t* opt)
+    FCLAW_DEPRECATED_MESSAGE("\n\n\
+    WARNING: fclaw_app_get_options and fclaw_options_read_from_file have been deprecated in favor of fclaw_app_options_read.\n\
+\n\
+    Replace the following two lines in your application:\n\
+\n\
+        options = fclaw_app_get_options (app);\n\
+        retval = fclaw_app_options_read(options);\n\
+\n\
+    with this single line:\n\
+\n\
+        retval = fclaw_options_read_from_file(app);\n\n\
+    ");
 
 /** Add a string option and prepare using it for an integer array.
  * \param [in,out] opt          Option container (see sc/sc_options.h).

@@ -38,6 +38,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FCLAW_BASE_H
 #define FCLAW_BASE_H
 
+#if defined(__GNUC__) || defined(__clang__)
+    #define FCLAW_DEPRECATED_MESSAGE(m) __attribute__((deprecated(m)))
+#elif defined(_MSC_VER)
+    #define FCLAW_DEPRECATED_MESSAGE(m) __declspec(deprecated)
+#else
+    #define FCLAW_DEPRECATED_MESSAGE(m)
+#endif
+
 /* include config headers */
 
 #include <fclaw_config.h>
@@ -556,7 +564,21 @@ sc_MPI_Comm fclaw_app_get_mpi_size_rank (fclaw_app_t * a,
 /** Return a pointer to the options structure.
  * \deprecated TODO: We shall provide an interface that will not need this function.
  */
-sc_options_t *fclaw_app_get_options (fclaw_app_t * a);
+sc_options_t *fclaw_app_get_options (fclaw_app_t * a) 
+    FCLAW_DEPRECATED_MESSAGE("\n\n\
+    WARNING: fclaw_app_get_options and fclaw_options_read_from_file have been deprecated in favor of fclaw_app_options_read.\n\
+\n\
+    Replace the following two lines in your application:\n\
+\n\
+        options = fclaw_app_get_options (app);\n\
+        retval = fclaw_options_read_from_file(options);\n\
+\n\
+    with this single line:\n\
+\n\
+        retval = fclaw_app_options_read(app);\n\n\
+    ");
+
+fclaw_exit_type_t fclaw_app_options_read (fclaw_app_t * a);
 
 /**
  * @brief Set a logging prefix.
@@ -567,87 +589,7 @@ sc_options_t *fclaw_app_get_options (fclaw_app_t * a);
  * @param prefix the logging prefix
  */
 void fclaw_set_logging_prefix(const char* prefix);
-#if 0
 
-/*** rename the following names without the 2D ***/
-
-///@}
-/* ---------------------------------------------------------------------- */
-///                      @name Fundamentals
-/* ---------------------------------------------------------------------- */
-///@{
-
-/** Log a message only on rank zero. */
-void fclaw2d_global_log (int log_priority, const char *message);
-
-///@}
-/* ---------------------------------------------------------------------- */
-///                         @name Allocation
-/* ---------------------------------------------------------------------- */
-///@{
-
-/**
- * @brief Allocate memory
- *
- * @param size the size in bytes
- * @return void* the newly allocated memory
- */
-void *fclaw2d_alloc (size_t size);
-/**
- * @brief Allocate a number of objects, intializes to 0
- *
- * @param nmemb the number of objects
- * @param size the size of an object (in bytes)
- * @return void* the newly allocated memory
- */
-void *fclaw2d_calloc (size_t nmemb, size_t size);
-/**
- * @brief Reallocate memory
- *
- * @param ptr the memory to be reallocated
- * @param size the size in bytes
- * @return void* the newly allocated memory
- */
-void *fclaw2d_realloc (void *ptr, size_t size);
-/**
- * @brief Free allocated memory
- *
- * @param ptr the memory to free
- */
-void fclaw2d_free (void *ptr);
-/**
- * @brief Allocate an array with given length
- *
- * @param t the type
- * @param n the length of the array
- * @return t* the newly allocateed memory
- */
-#define FCLAW2D_ALLOC(t,n)      (t *) fclaw2d_alloc ((n) * sizeof (t))
-/**
- * @brief Allocate an array with given length, initialized to zero
- *
- * @param t the type
- * @param n the length of the array
- * @return t* the newly allocateed memory
- */
-#define FCLAW2D_ALLOC_ZERO(t,n) (t *) fclaw2d_calloc ((n), sizeof (t))
-/**
- * @brief Allocate an array with given length, initialized to zero
- *
- * @param p pointer to memory to be reallocated
- * @param t the type
- * @param n the length of the array
- * @return t* the newly allocateed memory
- */
-#define FCLAW2D_REALLOC(p,t,n)  (t *) fclaw2d_realloc ((p), (n) * sizeof (t))
-/**
- * @brief Free allocated memory
- *
- * @param p the memory to free
- */
-#define FCLAW2D_FREE(p)         fclaw2d_free (p)
-
-#endif /* 0 */
 
 #ifdef __cplusplus
 #if 0
