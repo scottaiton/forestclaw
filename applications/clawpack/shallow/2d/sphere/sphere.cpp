@@ -208,7 +208,6 @@ main (int argc, char **argv)
     fclaw_exit_type_t vexit;
 
     /* Options */
-    sc_options_t     *options;
     user_options_t    suser_options, *user = &suser_options;
 
     int retval;
@@ -224,8 +223,7 @@ main (int argc, char **argv)
     register_user_options (app, "fclaw_options.ini", user);
 
     /* Read configuration file(s) */
-    options = fclaw_app_get_options (app);
-    retval = fclaw_options_read_from_file(options);
+    retval = fclaw_app_options_read(app);
     vexit =  fclaw_app_options_parse (app, &first_arg,"fclaw_options.ini.used");
 
     /* Link packages to patches */

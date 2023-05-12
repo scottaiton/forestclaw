@@ -148,7 +148,6 @@ main (int argc, char **argv)
 	fclaw_exit_type_t vexit;
 
 	/* Options */
-	sc_options_t                *options;
 	user_options_t              *user_opt;
 	fclaw_options_t             *fclaw_opt;
 	fclaw2d_clawpatch_options_t *clawpatch_opt;

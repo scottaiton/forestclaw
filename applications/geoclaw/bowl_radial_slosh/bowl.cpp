@@ -42,7 +42,6 @@ main (int argc, char **argv)
     fclaw_exit_type_t vexit;
 
     /* Options */
-    sc_options_t                *options;
 
     radial_user_options_t       *radial_user_opt;
     fclaw_options_t             *radial_gparms;
@@ -76,8 +75,7 @@ main (int argc, char **argv)
     slosh_user_opt =                    slosh_options_register(app, "slosh-user",      "fclaw_options.ini");  
 
     /* Read configuration file(s) and command line, and process options */
-    options = fclaw_app_get_options (app);
-    retval = fclaw_options_read_from_file(options);
+    retval = fclaw_app_options_read(app);
     vexit =  fclaw_app_options_parse (app, &first_arg,"fclaw_options.ini.used");
 
     if (!retval & !vexit)
