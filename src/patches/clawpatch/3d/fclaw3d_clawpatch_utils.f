@@ -5,7 +5,7 @@ c     ---------------------------------------------------------------
 c>    @brief Determines the tranformation from a coarse patch to it's
 c>    half-sized neighbor's coordinate system
 c>
-c>    @param[in]  the pointer to the fclaw2d_patch_transform_data struct
+c>    @param[in]  the pointer to the fclaw3d_patch_transform_data struct
 c>    @param[out] a the 2x2 tranform matrix for the i,j indexes of a patch
 c>    @param[out] f the transform vector
 c     ---------------------------------------------------------------
@@ -18,7 +18,7 @@ c     ---------------------------------------------------------------
       integer mi(4),mj(4)
       integer i1,j1
 
-c     # Assume index mapping fclaw2d_transform_face_half has the
+c     # Assume index mapping fclaw3d_transform_face_half has the
 c     # the form
 c     #
 c     #       T(ic,jc) = A*(ic,jc) + F = (iff,jff)

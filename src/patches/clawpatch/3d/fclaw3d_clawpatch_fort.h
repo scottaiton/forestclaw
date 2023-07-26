@@ -31,10 +31,10 @@ extern "C"
 {
 #endif
 
-struct fclaw2d_global;
-struct fclaw2d_patch;
+struct fclaw3d_global;
+struct fclaw3d_patch;
 
-struct fclaw2d_patch_transform_data;  /* Should be replaced by long int?  */
+struct fclaw3d_patch_transform_data;  /* Should be replaced by long int?  */
 
 /**
  * @file 
@@ -69,7 +69,7 @@ typedef void (*fclaw3d_clawpatch_fort_copy_face_t)(const int* mx,
                                                     double qthis[],
                                                     double qneighbor[], 
                                                     const int* iface,
-                                                    struct fclaw2d_patch_transform_data** transform_ptr);
+                                                    struct fclaw3d_patch_transform_data** transform_ptr);
 
 /**
  * @brief Averages values from a face-neighboring fine grid
@@ -104,7 +104,7 @@ typedef void (*fclaw3d_clawpatch_fort_average_face_t)(const int* mx,
                                                        const int* refratio, 
                                                        const int* igrid,
                                                        const int* manifold, 
-                                                       struct fclaw2d_patch_transform_data** transform_ptr);
+                                                       struct fclaw3d_patch_transform_data** transform_ptr);
 /**
  * @brief Interpolates values from a face-neighboring coarse grid
  * 
@@ -134,7 +134,7 @@ typedef void (*fclaw3d_clawpatch_fort_interpolate_face_t)(const int* mx,
                                                            const int* num_neighbors,
                                                            const int* refratio, 
                                                            const int* igrid,
-                                                           struct fclaw2d_patch_transform_data** transform_ptr);
+                                                           struct fclaw3d_patch_transform_data** transform_ptr);
 	
 /**
  * @brief Copies ghost data from a corner-neighboring grid on the same level
@@ -155,7 +155,7 @@ typedef void (*fclaw3d_clawpatch_fort_copy_corner_t)(const int* mx,
                                                       double qthis[],
                                                       double qneighbor[],
                                                       const int* icorner_coarse,
-                                                      struct fclaw2d_patch_transform_data** transform_ptr);
+                                                      struct fclaw3d_patch_transform_data** transform_ptr);
 
 /**
  * @brief Averages values from a corner neighboring fine grid
@@ -183,7 +183,7 @@ typedef void (*fclaw3d_clawpatch_fort_average_corner_t)(const int* mx,
                                                          double areafine[],
                                                          const int* manifold,
                                                          const int* a_corner, 
-                                                         struct fclaw2d_patch_transform_data** transform_ptr);
+                                                         struct fclaw3d_patch_transform_data** transform_ptr);
 
 /**
  * @brief Interpolates values form a corner-neighboring coarse grid
@@ -206,7 +206,7 @@ typedef void (*fclaw3d_clawpatch_fort_interpolate_corner_t)(const int* mx,
                                                              double qcoarse[],
                                                              double qfine[], 
                                                              const int* icorner_coarse,
-                                                             struct fclaw2d_patch_transform_data** transform_ptr);
+                                                             struct fclaw3d_patch_transform_data** transform_ptr);
 	
 /** @} */
 
@@ -678,7 +678,7 @@ int FCLAW3D_CLAWPATCH_EXCEEDS_THRESHOLD(const int *blockno,
 
 
 /* ----------------------------- Value threshold -------------------------------------- */
-/** @brief C declaration of fclaw2d_clawpatch_value_exceeds_th() subroutine */
+/** @brief C declaration of fclaw3d_clawpatch_value_exceeds_th() subroutine */
 #define FCLAW3D_CLAWPATCH_VALUE_EXCEEDS_TH \
                   FCLAW_F77_FUNC(fclaw3d_clawpatch_value_exceeds_th, \
                                  FCLAW3D_CLAWPATCH_VALUE_EXCEEDS_TH)

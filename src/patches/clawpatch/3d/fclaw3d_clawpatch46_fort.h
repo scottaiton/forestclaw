@@ -40,7 +40,7 @@ extern "C"
 /* Fix syntax highlighting */
 #endif
 
-struct fclaw2d_patch_transform_data;  /* Should be replaced by long int?  */
+struct fclaw3d_patch_transform_data;  /* Should be replaced by long int?  */
 
 /** @{ @name Time Stepping Functions *//*---------------------------------------------- */
 
@@ -173,7 +173,7 @@ void FCLAW3D_CLAWPATCH46_FORT_COPY_FACE(const int* mx,
                                          double qthis[],
                                          double qneighbor[], 
                                          const int* a_idir,
-                                         struct fclaw2d_patch_transform_data** 
+                                         struct fclaw3d_patch_transform_data** 
                                          transform_cptr);
 
 
@@ -197,7 +197,7 @@ void FCLAW3D_CLAWPATCH46_FORT_AVERAGE_FACE(const int* mx,
                                             const int* refratio, 
                                             const int* igrid,
                                             const int* manifold, 
-                                            struct fclaw2d_patch_transform_data** 
+                                            struct fclaw3d_patch_transform_data** 
                                             transform_cptr);
   
 /** Fortran subroutine name */
@@ -217,7 +217,7 @@ void FCLAW3D_CLAWPATCH46_FORT_INTERPOLATE_FACE(const int* mx,
                                                 const int* num_neighbors,
                                                 const int* refratio, 
                                                 const int* igrid,
-                                                struct fclaw2d_patch_transform_data** 
+                                                struct fclaw3d_patch_transform_data** 
                                                 transform_cptr);
 
 /** Fortran subroutine name */
@@ -233,7 +233,7 @@ void FCLAW3D_CLAWPATCH46_FORT_COPY_CORNER(const int* mx,
                                            double this_q[],
                                            double neighbor_q[],
                                            const int* a_corner,
-                                           struct fclaw2d_patch_transform_data** 
+                                           struct fclaw3d_patch_transform_data** 
                                            transform_cptr);
 
 /** Fortran subroutine name */
@@ -253,7 +253,7 @@ void FCLAW3D_CLAWPATCH46_FORT_AVERAGE_CORNER(const int* mx,
                                               double areafine[],
                                               const int* manifold,
                                               const int* a_corner, 
-                                              struct fclaw2d_patch_transform_data** 
+                                              struct fclaw3d_patch_transform_data** 
                                               transform_cptr);
   
 /** Fortran subroutine name */
@@ -270,7 +270,7 @@ void FCLAW3D_CLAWPATCH46_FORT_INTERPOLATE_CORNER(const int* mx,
                                                   double this_q[],
                                                   double neighbor_q[], 
                                                   const int* a_corner,
-                                                  struct fclaw2d_patch_transform_data** 
+                                                  struct fclaw3d_patch_transform_data** 
                                                   transform_cptr);
 
 /** @} */
@@ -283,7 +283,7 @@ void FCLAW3D_CLAWPATCH46_FORT_INTERPOLATE_CORNER(const int* mx,
                FCLAW_F77_FUNC(fclaw3d_pillow46_copy_block_corner, \
                               FCLAW3D_PILLOW46_COPY_BLOCK_CORNER)
 
-/** @copydoc fclaw2d_pillow46_copy_block_corner() */
+/** @copydoc fclaw3d_pillow46_copy_block_corner() */
 void FCLAW3D_PILLOW46_COPY_BLOCK_CORNER(int* mx, 
                                          int* my, 
                                          int* mz,
@@ -299,7 +299,7 @@ void FCLAW3D_PILLOW46_COPY_BLOCK_CORNER(int* mx,
           FCLAW_F77_FUNC(fclaw3d_pillow46_average_block_corner,\
                          FCLAW3D_PILLOW46_AVERAGE_BLOCK_CORNER)
 
-/** @copydoc fclaw2d_pillow46_average_block_corner() */
+/** @copydoc fclaw3d_pillow46_average_block_corner() */
 void  FCLAW3D_PILLOW46_AVERAGE_BLOCK_CORNER(int* mx, 
                                              int* my, 
                                              int* mz, 
@@ -319,7 +319,7 @@ void  FCLAW3D_PILLOW46_AVERAGE_BLOCK_CORNER(int* mx,
           FCLAW_F77_FUNC(fclaw3d_pillow46_interpolate_block_corner, \
                          FCLAW3D_PILLOW46_INTERPOLATE_BLOCK_CORNER)
 
-/** @copydoc fclaw2d_pillow46_interpolate_block_corner() */
+/** @copydoc fclaw3d_pillow46_interpolate_block_corner() */
 void  FCLAW3D_PILLOW46_INTERPOLATE_BLOCK_CORNER(int* mx, 
                                                  int* my, 
                                                  int* mz, 

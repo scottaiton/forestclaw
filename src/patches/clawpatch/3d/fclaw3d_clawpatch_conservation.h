@@ -38,9 +38,9 @@ extern "C"
 {
 #endif
 
-struct fclaw2d_patch_transform_data;
-struct fclaw2d_global;
-struct fclaw2d_patch;
+struct fclaw3d_patch_transform_data;
+struct fclaw3d_global;
+struct fclaw3d_patch;
 
 /**
  * @brief fclaw3d_clawpatch_registers type
@@ -97,7 +97,7 @@ struct fclaw3d_clawpatch_registers
  * @param[in]     eff0, eff1, eff2, eff3 the values of the flux 
  *                function along the fine patch edges
  * @param[in,out] qfine_dummy work vector for determining values in the fine patch
- * @param[in]     transform_cptr the pointer to the fclaw2d_patch_transform_data struct
+ * @param[in]     transform_cptr the pointer to the fclaw3d_patch_transform_data struct
  */ 
 typedef void  (*fclaw3d_clawpatch_fort_time_sync_f2c_t)(const int* mx,
                         const int* my,
@@ -122,7 +122,7 @@ typedef void  (*fclaw3d_clawpatch_fort_time_sync_f2c_t)(const int* mx,
                         double eff0[], double eff1[],
                         double eff2[], double eff3[],
                         double qfine_dummy[],
-                        struct fclaw2d_patch_transform_data** 
+                        struct fclaw3d_patch_transform_data** 
                         transform_cptr);
 
 /**
@@ -150,7 +150,7 @@ typedef void  (*fclaw3d_clawpatch_fort_time_sync_f2c_t)(const int* mx,
  * @param[in]     efnbr0, efnbr1, efnbr2, efnbr3 the values of the flux 
  *                function along the neighbor patch edges
  * @param[in,out] qnbr_dummy work vector for determining values in the fine patch
- * @param[in]     transform_cptr the pointer to the fclaw2d_patch_transform_data struct
+ * @param[in]     transform_cptr the pointer to the fclaw3d_patch_transform_data struct
  */
 typedef void  (*fclaw3d_clawpatch_fort_time_sync_samesize_t)(const int* mx,
                                                      const int* my,
@@ -174,7 +174,7 @@ typedef void  (*fclaw3d_clawpatch_fort_time_sync_samesize_t)(const int* mx,
                                                      double efnbr0[], double efnbr1[],
                                                      double efnbr2[], double efnbr3[],
                                                      double qnbr_dummy[],
-                                                     struct fclaw2d_patch_transform_data** 
+                                                     struct fclaw3d_patch_transform_data** 
                                                      transform_cptr);
 
 
@@ -188,8 +188,8 @@ typedef void  (*fclaw3d_clawpatch_fort_time_sync_samesize_t)(const int* mx,
  * @param[in] patchno the patch number
  * @param[out] registers the newly allocated registers struct
  */
-void fclaw3d_clawpatch_time_sync_new(struct fclaw2d_global* glob,
-                                     struct fclaw2d_patch* this_patch,
+void fclaw3d_clawpatch_time_sync_new(struct fclaw3d_global* glob,
+                                     struct fclaw3d_patch* this_patch,
                                      int blockno,int patchno,
                                      fclaw3d_clawpatch_registers_t **registers);
 
@@ -208,8 +208,8 @@ void fclaw3d_clawpatch_time_sync_delete(fclaw3d_clawpatch_registers_t **register
  * @param[in] blockno the block number
  * @param[in] patchno the patch number
  */
-void fclaw3d_clawpatch_time_sync_setup(struct fclaw2d_global* glob,
-                                       struct fclaw2d_patch* this_patch,
+void fclaw3d_clawpatch_time_sync_setup(struct fclaw3d_global* glob,
+                                       struct fclaw3d_patch* this_patch,
                                        int blockno,int patchno);
 
 /**
@@ -228,16 +228,16 @@ void fclaw3d_clawpatch_time_sync_setup(struct fclaw2d_global* glob,
  * @param[in] time_interp NOT USED
  * @param[in] transform_data the transform for the neighbor's coordinates
  */
-void fclaw3d_clawpatch_time_sync_f2c(struct fclaw2d_global* glob,
-                                     struct fclaw2d_patch* coarse_patch,
-                                     struct fclaw2d_patch* fine_patch,
+void fclaw3d_clawpatch_time_sync_f2c(struct fclaw3d_global* glob,
+                                     struct fclaw3d_patch* coarse_patch,
+                                     struct fclaw3d_patch* fine_patch,
                                      int coarse_blockno, int fine_blockno,
                                      int coarse_patchno, 
                                      int idir,
                                      int igrid,
                                      int iface_coarse,
                                      int time_interp,
-                                     struct fclaw2d_patch_transform_data
+                                     struct fclaw3d_patch_transform_data
                                      *transform_data);
 	
 /**
@@ -251,11 +251,11 @@ void fclaw3d_clawpatch_time_sync_f2c(struct fclaw2d_global* glob,
  *            1 for left/right
  * @param[in] transform_data the transform for the neighbor's coordinates
  */
-void fclaw3d_clawpatch_time_sync_samesize(struct fclaw2d_global* glob,
-                                          struct fclaw2d_patch* this_patch,
-                                          struct fclaw2d_patch* neighbor_patch,
+void fclaw3d_clawpatch_time_sync_samesize(struct fclaw3d_global* glob,
+                                          struct fclaw3d_patch* this_patch,
+                                          struct fclaw3d_patch* neighbor_patch,
                                           int this_iface,int idir,
-                                          struct fclaw2d_patch_transform_data
+                                          struct fclaw3d_patch_transform_data
                                           *transform_data);
 
 /**
@@ -264,10 +264,10 @@ void fclaw3d_clawpatch_time_sync_samesize(struct fclaw2d_global* glob,
  * @param[in] glob the global context
  * @param[in,out] this_patch the patch context
  * @param[in] coarse_level the the level of the coarse patch
- * @param[in] reset_mode the reset mode ::fclaw2d_time_sync_type
+ * @param[in] reset_mode the reset mode ::fclaw3d_time_sync_type
  */
-void fclaw3d_clawpatch_time_sync_reset(struct fclaw2d_global* glob,
-                                       struct fclaw2d_patch *this_patch,
+void fclaw3d_clawpatch_time_sync_reset(struct fclaw3d_global* glob,
+                                       struct fclaw3d_patch *this_patch,
                                        int coarse_level,
                                        int reset_mode);
 
@@ -281,8 +281,8 @@ void fclaw3d_clawpatch_time_sync_reset(struct fclaw2d_global* glob,
  * @param[in] packmode the packing mode
  * @param[out] ierror the error value
  */
-void fclaw3d_clawpatch_time_sync_pack_registers(struct fclaw2d_global *glob,
-                                                struct fclaw2d_patch *this_patch,
+void fclaw3d_clawpatch_time_sync_pack_registers(struct fclaw3d_global *glob,
+                                                struct fclaw3d_patch *this_patch,
                                                 double *qpack,
                                                 int frsize, 
                                                 fclaw_clawpatch_packmode_t packmode, 

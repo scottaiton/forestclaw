@@ -26,16 +26,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FCLAW3D_CLAWPATCH_PILLOW_H
 #define FCLAW3D_CLAWPATCH_PILLOW_H
 
-#include <fclaw2d_defs.h>
+#include <fclaw3d_defs.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-struct fclaw2d_glob;
-struct fclaw2d_patch;
-struct fclaw2d_patch_transform;
+struct fclaw3d_glob;
+struct fclaw3d_patch;
+struct fclaw3d_patch_transform;
 
 /**
  * @file
@@ -127,7 +127,7 @@ typedef void  (*fclaw3d_clawpatch_pillow_fort_interpolate_block_corner_t)(int* m
 /**
  * @brief Sets global patch_vtable to use pollow sphere routines
  */
-void fclaw3d_clawpatch_use_pillowsphere(struct fclaw2d_global* glob);
+void fclaw3d_clawpatch_use_pillowsphere(struct fclaw3d_global* glob);
 
 /* --------------------------------- Virtual table ------------------------------------ */
 
@@ -137,7 +137,7 @@ void fclaw3d_clawpatch_use_pillowsphere(struct fclaw2d_global* glob);
  * @param glob the global context
  * @param claw_version the clawaptck verstion 4 for v4.6, 5 for v5
  */
-void fclaw3d_clawpatch_pillow_vtable_initialize(struct fclaw2d_global* glob,
+void fclaw3d_clawpatch_pillow_vtable_initialize(struct fclaw3d_global* glob,
                                                  int claw_version);
 
 /**
@@ -166,7 +166,7 @@ struct fclaw3d_clawpatch_pillow_vtable
  * @param glob the global context
  * @return fclaw3d_clawpatch_pillow_vtable_t* the vtable
  */
-fclaw3d_clawpatch_pillow_vtable_t* fclaw3d_clawpatch_pillow_vt(struct fclaw2d_global* glob);
+fclaw3d_clawpatch_pillow_vtable_t* fclaw3d_clawpatch_pillow_vt(struct fclaw3d_global* glob);
 
 
 #ifdef __cplusplus
