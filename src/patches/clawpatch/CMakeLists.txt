@@ -3,8 +3,8 @@ set(metric ${PROJECT_SOURCE_DIR}/src/patches/metric)
 # -- fortran object library
 
 add_library(clawpatch_f OBJECT
-  fclaw2d_clawpatch_utils.f
-  fclaw3dx_clawpatch_utils.f
+  2d/fclaw2d_clawpatch_utils.f
+  3dx/fclaw3dx_clawpatch_utils.f
   fort_user/fclaw2d_clawpatch_difference_exceeds_th.f90
   fort_user/fclaw2d_clawpatch_value_exceeds_th.f90
   fort_user/fclaw2d_clawpatch_minmax_exceeds_th.f90
@@ -61,25 +61,25 @@ target_include_directories(clawpatch_f INTERFACE
 
 add_library(clawpatch
   $<TARGET_OBJECTS:clawpatch_f>
-  fclaw2d_clawpatch.cpp
-  fclaw2d_clawpatch_options.c
-  fclaw2d_clawpatch_diagnostics.c
-  fclaw2d_clawpatch_diagnostics_default.c
-  fclaw2d_clawpatch_pillow.c
-  fclaw2d_clawpatch_transform.c
-  fclaw2d_clawpatch_output_ascii.c
-  fclaw2d_clawpatch_output_vtk.c
-  fclaw2d_clawpatch_conservation.c
+  2d/fclaw2d_clawpatch.cpp
+  2d/fclaw2d_clawpatch_options.c
+  2d/fclaw2d_clawpatch_diagnostics.c
+  2d/fclaw2d_clawpatch_diagnostics_default.c
+  2d/fclaw2d_clawpatch_pillow.c
+  2d/fclaw2d_clawpatch_transform.c
+  2d/fclaw2d_clawpatch_output_ascii.c
+  2d/fclaw2d_clawpatch_output_vtk.c
+  2d/fclaw2d_clawpatch_conservation.c
 
-  fclaw3dx_clawpatch.cpp
-  fclaw3dx_clawpatch_options.c
-  fclaw3dx_clawpatch_diagnostics.c
-  fclaw3dx_clawpatch_diagnostics_default.c
-  fclaw3dx_clawpatch_pillow.c
-  fclaw3dx_clawpatch_transform.c
-  fclaw3dx_clawpatch_output_ascii.c
-  fclaw3dx_clawpatch_output_vtk.c
-  fclaw3dx_clawpatch_conservation.c
+  3dx/fclaw3dx_clawpatch.cpp
+  3dx/fclaw3dx_clawpatch_options.c
+  3dx/fclaw3dx_clawpatch_diagnostics.c
+  3dx/fclaw3dx_clawpatch_diagnostics_default.c
+  3dx/fclaw3dx_clawpatch_pillow.c
+  3dx/fclaw3dx_clawpatch_transform.c
+  3dx/fclaw3dx_clawpatch_output_ascii.c
+  3dx/fclaw3dx_clawpatch_output_vtk.c
+  3dx/fclaw3dx_clawpatch_conservation.c
 
   fort_user/fclaw2d_clawpatch_tag_criteria.c
   fort3_user/fclaw3dx_clawpatch_tag_criteria.c
@@ -92,6 +92,8 @@ add_library(clawpatch
 target_include_directories(clawpatch
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/2d>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/3dx>
   $<BUILD_INTERFACE:${metric}/fortran_source2d>
   $<BUILD_INTERFACE:${metric}/fortran_source3d>
   $<BUILD_INTERFACE:${metric}>
@@ -105,30 +107,30 @@ target_link_libraries(clawpatch PUBLIC forestclaw)
 install(FILES
   fclaw_clawpatch_enums.h
 
-  fclaw2d_clawpatch.h
-	fclaw2d_clawpatch.hpp
-	fclaw2d_clawpatch_options.h
-	fclaw2d_clawpatch_conservation.h
-	fclaw2d_clawpatch_transform.h
-	fclaw2d_clawpatch_diagnostics.h
-	fclaw2d_clawpatch_pillow.h
-	fclaw2d_clawpatch_fort.h
-	fclaw2d_clawpatch46_fort.h
-	fclaw2d_clawpatch5_fort.h
-	fclaw2d_clawpatch_output_ascii.h
-	fclaw2d_clawpatch_output_vtk.h
+  2d/fclaw2d_clawpatch.h
+	2d/fclaw2d_clawpatch.hpp
+	2d/fclaw2d_clawpatch_options.h
+	2d/fclaw2d_clawpatch_conservation.h
+	2d/fclaw2d_clawpatch_transform.h
+	2d/fclaw2d_clawpatch_diagnostics.h
+	2d/fclaw2d_clawpatch_pillow.h
+	2d/fclaw2d_clawpatch_fort.h
+	2d/fclaw2d_clawpatch46_fort.h
+	2d/fclaw2d_clawpatch5_fort.h
+	2d/fclaw2d_clawpatch_output_ascii.h
+	2d/fclaw2d_clawpatch_output_vtk.h
 
-  fclaw3dx_clawpatch.h
-	fclaw3dx_clawpatch.hpp
-	fclaw3dx_clawpatch_options.h
-	fclaw3dx_clawpatch_conservation.h
-	fclaw3dx_clawpatch_transform.h
-	fclaw3dx_clawpatch_diagnostics.h
-	fclaw3dx_clawpatch_pillow.h
-	fclaw3dx_clawpatch_fort.h
-	fclaw3dx_clawpatch46_fort.h
-	fclaw3dx_clawpatch_output_ascii.h
-	fclaw3dx_clawpatch_output_vtk.h
+  3dx/fclaw3dx_clawpatch.h
+	3dx/fclaw3dx_clawpatch.hpp
+	3dx/fclaw3dx_clawpatch_options.h
+	3dx/fclaw3dx_clawpatch_conservation.h
+	3dx/fclaw3dx_clawpatch_transform.h
+	3dx/fclaw3dx_clawpatch_diagnostics.h
+	3dx/fclaw3dx_clawpatch_pillow.h
+	3dx/fclaw3dx_clawpatch_fort.h
+	3dx/fclaw3dx_clawpatch46_fort.h
+	3dx/fclaw3dx_clawpatch_output_ascii.h
+	3dx/fclaw3dx_clawpatch_output_vtk.h
 
 	${metric}/fclaw2d_metric.h
 	${metric}/fclaw2d_metric.hpp
@@ -156,11 +158,12 @@ target_link_libraries(FORESTCLAW::CLAWPATCH INTERFACE clawpatch)
 
 if(BUILD_TESTING)
   add_executable(clawpatch.TEST
-      fclaw2d_clawpatch.h.TEST.cpp
-      fclaw2d_clawpatch_diagnostics.h.TEST.cpp
-      fclaw2d_clawpatch_fort.h.TEST.cpp
-      fclaw2d_clawpatch_options.h.TEST.cpp
-      fclaw3dx_clawpatch.h.TEST.cpp
+      2d/fclaw2d_clawpatch.h.TEST.cpp
+      2d/fclaw2d_clawpatch_diagnostics.h.TEST.cpp
+      2d/fclaw2d_clawpatch_fort.h.TEST.cpp
+      2d/fclaw2d_clawpatch_options.h.TEST.cpp
+
+      3dx/fclaw3dx_clawpatch.h.TEST.cpp
       ${metric}/fclaw2d_metric.h.TEST.cpp
   )
   target_link_libraries(clawpatch.TEST testutils clawpatch forestclaw)
