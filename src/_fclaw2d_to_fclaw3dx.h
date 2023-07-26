@@ -22,6 +22,34 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+//Metric terms
+#define fclaw2d_metric_vtable_t              fclaw3d_metric_vtable_t
+#define fclaw2d_metric_vt                    fclaw3d_metric_vt
+#define fclaw2d_metric_patch_scalar          fclaw3d_metric_patch_scalar
+#define fclaw2d_metric_patch_new             fclaw3d_metric_patch_new
+#define fclaw2d_metric_patch_delete          fclaw3d_metric_patch_delete
+#define fclaw2d_metric_patch_build           fclaw3d_metric_patch_build
+#define fclaw2d_metric_patch_build_from_fine fclaw3d_metric_patch_build_from_fine
+#define fclaw2d_metric_vtable_initialize     fclaw3d_metric_vtable_initialize
+#define fclaw2d_metric_patch_get_area        fclaw3d_metric_patch_get_volume
+#define fclaw2d_metric_get_metric_patch      fclaw3d_metric_get_metric_patch
+#define fclaw2d_metric_patch_compute_area    fclaw3d_metric_patch_compute_volume
+#define fclaw2d_metric_vtable_initialize     fclaw3d_metric_vtable_initialize
+#define fclaw2d_metric_patch_nodes_size      fclaw3d_metric_patch_nodes_size
+
+// static names
+#define metric_average_area_from_fine        metric_average_volume_from_fine
+
+// fclaw3d_metric.hpp
+#define fclaw2d_metric_patch_t               fclaw3d_metric_patch_t
+
+//For Clawpatch
+#define fclaw2d_clawpatch_get_metric_patch   fclaw3d_clawpatch_get_metric_patch
+#define fclaw2d_clawpatch_metric_scalar      fclaw3d_clawpatch_metric_scalar
+#define fclaw2d_clawpatch_metric_vector      fclaw3d_clawpatch_metric_basis
+#define fclaw2d_clawpatch_metric_data        fclaw3d_clawpatch_metric_data
+#define fclaw2d_clawpatch_get_area           fclaw3d_clawpatch_get_volume
+#define clawpatch_get_area                   clawpatch_get_volume
 
 //fclaw2d_clawpatch_conservation.h
 #define fclaw2d_clawpatch_registers_t fclaw3dx_clawpatch_registers_t
@@ -126,14 +154,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_clawpatch_save_current_step fclaw3dx_clawpatch_save_current_step
 #define fclaw2d_clawpatch_grid_data fclaw3dx_clawpatch_grid_data
 
-#if 0
-/* These are included in 3d files */
-#define fclaw2d_clawpatch_metric_scalar fclaw3dx_clawpatch_metric_scalar
-#define fclaw2d_clawpatch_metric_vector fclaw3dx_clawpatch_metric_vector
-#define fclaw2d_clawpatch_metric_data fclaw3dx_clawpatch_metric_data
-#define fclaw2d_clawpatch_metric_data2 fclaw3dx_clawpatch_metric_data2
-#endif
-
 //#define fclaw2d_clawpatch_get_area fclaw3dx_clawpatch_get_area
 #define fclaw2d_clawpatch_soln_data fclaw3dx_clawpatch_soln_data
 #define fclaw2d_clawpatch_aux_data fclaw3dx_clawpatch_aux_data
@@ -155,7 +175,3 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //fclaw2d_clawpatch.hpp
 #define fclaw2d_clawpatch_t fclaw3dx_clawpatch_t
 #define fclaw2d_clawpatch_get_clawpatch fclaw3dx_clawpatch_get_clawpatch
-
-#if 0
-#define fclaw2d_clawpatch_get_metric_patch fclaw3dx_clawpatch_get_metric_patch
-#endif
