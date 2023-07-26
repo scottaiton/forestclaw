@@ -31,11 +31,11 @@
 
 #include <fclaw2d_global.h>
 
-#include "../fclaw3dx_clawpatch.h"
+#include <fclaw3dx_clawpatch.h>
 
-#include "../fclaw3dx_clawpatch_options.h"
+#include <fclaw3dx_clawpatch_options.h>
 // #include "../fclaw2d_clawpatch_fort.h"
-#include "../fclaw3dx_clawpatch_fort.h"
+#include <fclaw3dx_clawpatch_fort.h>
 
 
 

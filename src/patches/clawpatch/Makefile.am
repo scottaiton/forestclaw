@@ -4,28 +4,28 @@ libclawpatch_generated_headers =
 libclawpatch_installed_headers = \
 	src/patches/clawpatch/fclaw_clawpatch_enums.h \
 	\
-	src/patches/clawpatch/fclaw2d_clawpatch.h \
-	src/patches/clawpatch/fclaw2d_clawpatch.hpp \
-	src/patches/clawpatch/fclaw2d_clawpatch_options.h \
-	src/patches/clawpatch/fclaw2d_clawpatch_transform.h \
-	src/patches/clawpatch/fclaw2d_clawpatch_diagnostics.h \
-	src/patches/clawpatch/fclaw2d_clawpatch_pillow.h \
-	src/patches/clawpatch/fclaw2d_clawpatch_fort.h \
-	src/patches/clawpatch/fclaw2d_clawpatch46_fort.h \
-	src/patches/clawpatch/fclaw2d_clawpatch5_fort.h \
-	src/patches/clawpatch/fclaw2d_clawpatch_output_ascii.h \
-	src/patches/clawpatch/fclaw2d_clawpatch_output_vtk.h \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch.h \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch.hpp \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_options.h \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_transform.h \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_diagnostics.h \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_pillow.h \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_fort.h \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch46_fort.h \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch5_fort.h \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_output_ascii.h \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_output_vtk.h \
 	\
-	src/patches/clawpatch/fclaw3dx_clawpatch.h \
-	src/patches/clawpatch/fclaw3dx_clawpatch.hpp \
-	src/patches/clawpatch/fclaw3dx_clawpatch_options.h \
-	src/patches/clawpatch/fclaw3dx_clawpatch_transform.h \
-	src/patches/clawpatch/fclaw3dx_clawpatch_diagnostics.h \
-	src/patches/clawpatch/fclaw3dx_clawpatch_pillow.h \
-	src/patches/clawpatch/fclaw3dx_clawpatch_fort.h \
-	src/patches/clawpatch/fclaw3dx_clawpatch46_fort.h \
-	src/patches/clawpatch/fclaw3dx_clawpatch_output_ascii.h \
-	src/patches/clawpatch/fclaw3dx_clawpatch_output_vtk.h \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch.h \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch.hpp \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_options.h \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_transform.h \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_diagnostics.h \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_pillow.h \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_fort.h \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch46_fort.h \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_output_ascii.h \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_output_vtk.h \
 	\
 	src/patches/metric/fclaw2d_metric.h \
 	src/patches/metric/fclaw2d_metric.hpp \
@@ -35,27 +35,27 @@ libclawpatch_installed_headers = \
 	src/patches/metric/fclaw3d_metric_default_fort.h
 
 libclawpatch_compiled_sources = \
-	src/patches/clawpatch/fclaw2d_clawpatch.cpp \
-	src/patches/clawpatch/fclaw2d_clawpatch_options.c \
-	src/patches/clawpatch/fclaw2d_clawpatch_conservation.c \
-	src/patches/clawpatch/fclaw2d_clawpatch_diagnostics.c \
-	src/patches/clawpatch/fclaw2d_clawpatch_diagnostics_default.c \
-	src/patches/clawpatch/fclaw2d_clawpatch_pillow.c \
-	src/patches/clawpatch/fclaw2d_clawpatch_transform.c \
-	src/patches/clawpatch/fclaw2d_clawpatch_output_ascii.c \
-	src/patches/clawpatch/fclaw2d_clawpatch_output_vtk.c \
-	src/patches/clawpatch/fclaw2d_clawpatch_utils.f \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch.cpp \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_options.c \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_conservation.c \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_diagnostics.c \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_diagnostics_default.c \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_pillow.c \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_transform.c \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_output_ascii.c \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_output_vtk.c \
+	src/patches/clawpatch/2d/fclaw2d_clawpatch_utils.f \
 	\
-	src/patches/clawpatch/fclaw3dx_clawpatch.cpp \
-	src/patches/clawpatch/fclaw3dx_clawpatch_options.c \
-	src/patches/clawpatch/fclaw3dx_clawpatch_conservation.c \
-	src/patches/clawpatch/fclaw3dx_clawpatch_diagnostics.c \
-	src/patches/clawpatch/fclaw3dx_clawpatch_diagnostics_default.c \
-	src/patches/clawpatch/fclaw3dx_clawpatch_pillow.c \
-	src/patches/clawpatch/fclaw3dx_clawpatch_transform.c \
-	src/patches/clawpatch/fclaw3dx_clawpatch_output_ascii.c \
-	src/patches/clawpatch/fclaw3dx_clawpatch_output_vtk.c \
-	src/patches/clawpatch/fclaw3dx_clawpatch_utils.f \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch.cpp \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_options.c \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_conservation.c \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_diagnostics.c \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_diagnostics_default.c \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_pillow.c \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_transform.c \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_output_ascii.c \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_output_vtk.c \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch_utils.f \
 	\
 	src/patches/clawpatch/fort_user/fclaw2d_clawpatch_tag_criteria.c \
 	src/patches/clawpatch/fort_user/fclaw2d_clawpatch_difference_exceeds_th.f90 \
@@ -115,7 +115,9 @@ lib_LTLIBRARIES += src/patches/clawpatch/libclawpatch.la
 
 ## Named variables that can be referenced from other libraries/apps
 FCLAW_CLAWPATCH_CPPFLAGS = -I@top_srcdir@/src/patches/clawpatch \
-                           -I@top_srcdir@/src/patches/metric
+                           -I@top_srcdir@/src/patches/metric \
+                           -I@top_srcdir@/src/patches/2d \
+                           -I@top_srcdir@/src/patches/3dx
 
 ## Needed for fclaw2d_metric_terms.i
 FCLAW_CLAWPATCH_FFLAGS = -I@top_srcdir@/src/patches/metric/fortran_source2d
@@ -143,11 +145,11 @@ check_PROGRAMS += src/patches/clawpatch/clawpatch.TEST
 TESTS += src/patches/clawpatch/clawpatch.TEST
 
 src_patches_clawpatch_clawpatch_TEST_SOURCES = \
-    src/patches/clawpatch/fclaw2d_clawpatch.h.TEST.cpp \
-    src/patches/clawpatch/fclaw2d_clawpatch_diagnostics.h.TEST.cpp \
-    src/patches/clawpatch/fclaw2d_clawpatch_fort.h.TEST.cpp \
-    src/patches/clawpatch/fclaw2d_clawpatch_options.h.TEST.cpp \
-	src/patches/clawpatch/fclaw3dx_clawpatch.h.TEST.cpp \
+    src/patches/clawpatch/2d/fclaw2d_clawpatch.h.TEST.cpp \
+    src/patches/clawpatch/2d/fclaw2d_clawpatch_diagnostics.h.TEST.cpp \
+    src/patches/clawpatch/2d/fclaw2d_clawpatch_fort.h.TEST.cpp \
+    src/patches/clawpatch/2d/fclaw2d_clawpatch_options.h.TEST.cpp \
+	src/patches/clawpatch/3dx/fclaw3dx_clawpatch.h.TEST.cpp \
 	src/patches/metric/fclaw2d_metric.h.TEST.cpp
 
 src_patches_clawpatch_clawpatch_TEST_CPPFLAGS = \
