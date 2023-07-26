@@ -116,8 +116,8 @@ lib_LTLIBRARIES += src/patches/clawpatch/libclawpatch.la
 ## Named variables that can be referenced from other libraries/apps
 FCLAW_CLAWPATCH_CPPFLAGS = -I@top_srcdir@/src/patches/clawpatch \
                            -I@top_srcdir@/src/patches/metric \
-                           -I@top_srcdir@/src/patches/2d \
-                           -I@top_srcdir@/src/patches/3dx
+                           -I@top_srcdir@/src/patches/clawpatch/2d \
+                           -I@top_srcdir@/src/patches/clawpatch/3dx
 
 ## Needed for fclaw2d_metric_terms.i
 FCLAW_CLAWPATCH_FFLAGS = -I@top_srcdir@/src/patches/metric/fortran_source2d
