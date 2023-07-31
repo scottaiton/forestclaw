@@ -305,7 +305,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* translations for the options */
 #define fclaw2d_options_store           fclaw3d_options_store
-#define fclaw2d_get_options            fclaw3d_get_options
+#define fclaw2d_get_options             fclaw3d_get_options
+
+/* translations for the global vtable */
+#define fclaw2d_problem_setup_t         fclaw3d_problem_setup_t
+#define fclaw2d_output_frame_t          fclaw3d_output_frame_t
+#define fclaw2d_after_regrid_t          fclaw3d_after_regrid_t
+#define fclaw2d_vtable                  fclaw3d_vtable
+#define fclaw2d_vtable_t                fclaw3d_vtable_t
+#define fclaw2d_vt                      fclaw3d_vt
+#define fclaw2d_vtable_initialize       fclaw3d_vtable_initialize
+#define fclaw2d_after_regrid            fclaw3d_after_regrid
 
 /* translations not found in p4est */
 #ifndef p4est_wrap_new_unitsquare
