@@ -329,6 +329,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw3d_time_sync_type_t        fclaw3d_time_sync_type_t
 #define fclaw3d_time_sync               fclaw3d_time_sync
 
+/* translations for diagnostics */
+#define fclaw2d_diagnostics_vtable_t          fclaw3d_diagnostics_vtable_t
+#define fclaw2d_diagnostics_accumulator_t     fclaw3d_diagnostics_accumulator_t
+#define fclaw2d_diagnostics_accumulator       fclaw3d_diagnostics_accumulator
+#define fclaw2d_diagnostics_initialize_t      fclaw3d_diagnostics_initialize_t
+#define fclaw2d_diagnostics_compute_t         fclaw3d_diagnostics_compute_t
+#define fclaw2d_diagnostics_gather_t          fclaw3d_diagnostics_gather_t
+#define fclaw2d_diagnostics_reset_t           fclaw3d_diagnostics_reset_t
+#define fclaw2d_diagnostics_finalize_t        fclaw3d_diagnostics_finalize_t
+#define fclaw2d_diagnostics_vtable            fclaw3d_diagnostics_vtable
+#define fclaw2d_diagnostics_vt                fclaw3d_diagnostics_vt
+#define fclaw2d_diagnostics_vtable_initialize fclaw3d_diagnostics_vtable_initialize
+#define fclaw2d_domain_global_minimum         fclaw3d_domain_global_minimum
+#define fclaw2d_diagnostics_initialize        fclaw3d_diagnostics_initialize
+#define fclaw2d_diagnostics_gather            fclaw3d_diagnostics_gather
+#define fclaw2d_diagnostics_reset             fclaw3d_diagnostics_reset
+#define fclaw2d_diagnostics_finalize          fclaw3d_diagnostics_finalize
+
 /* translations not found in p4est */
 #ifndef p4est_wrap_new_unitsquare
 #define p4est_wrap_new_unitsquare       p8est_wrap_new_unitcube
