@@ -321,6 +321,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_timeinterp              fclaw3d_timeinterp
 #define FCLAW2D_TIMEINTERP_FORT         FCLAW3D_TIMEINTERP_FORT
 
+/* translations for time_sync */
+#define fclaw3d_time_sync_type          fclaw3d_time_sync_type
+#define FCLAW3D_TIME_SYNC_RESET_F2C     FCLAW3D_TIME_SYNC_RESET_F2C
+#define FCLAW3D_TIME_SYNC_RESET_SAMESIZE FCLAW3D_TIME_SYNC_RESET_SAMESIZE
+#define FCLAW3D_TIME_SYNC_RESET_PHYS    FCLAW3D_TIME_SYNC_RESET_PHYS
+#define fclaw3d_time_sync_type_t        fclaw3d_time_sync_type_t
+#define fclaw3d_time_sync               fclaw3d_time_sync
+
 /* translations not found in p4est */
 #ifndef p4est_wrap_new_unitsquare
 #define p4est_wrap_new_unitsquare       p8est_wrap_new_unitcube
