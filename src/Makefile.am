@@ -8,6 +8,7 @@ libforestclaw_installed_headers = \
 	src/fclaw_base.h \
 	src/fclaw_timer.h \
 	src/fclaw_package.h \
+	src/fclaw_farraybox.hpp \
 	src/fclaw_filesystem.h \
 	src/fclaw_pointer_map.h \
 	src/fclaw_options.h \
@@ -72,6 +73,7 @@ libforestclaw_compiled_sources = \
 	src/fclaw_options.c \
 	src/fclaw_gauges.c \
 	src/fclaw_package.c \
+	src/fclaw_farraybox.cpp \
 	src/fclaw_filesystem.cpp \
 	src/fclaw_pointer_map.c \
 	src/fclaw_math.c \
@@ -106,7 +108,6 @@ libforestclaw_compiled_sources = \
 	src/fclaw2d_time_sync.c \
 	src/fclaw2d_corner_neighbors.c \
 	src/fclaw2d_face_neighbors.c \
-	src/fclaw2d_farraybox.cpp \
 	src/fclaw2d_output_tikz.c \
 	src/forestclaw2d.c \
 	src/forestclaw3d.c \

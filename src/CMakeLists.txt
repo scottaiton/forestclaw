@@ -40,7 +40,7 @@ add_library(forestclaw_c OBJECT
   fclaw2d_time_sync.c
   fclaw2d_corner_neighbors.c
   fclaw2d_face_neighbors.c
-  fclaw2d_farraybox.cpp
+  fclaw_farraybox.cpp
   fclaw2d_output_tikz.c
   forestclaw2d.c
   forestclaw3d.c
@@ -116,6 +116,7 @@ install(FILES
 	fclaw_timer.h 
 	fclaw_package.h 
 	fclaw_pointer_map.h 
+	fclaw_farraybox.hpp 
 	fclaw_filesystem.h 
 	fclaw_options.h 
 	fclaw_gauges.h 
