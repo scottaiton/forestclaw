@@ -317,6 +317,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_vtable_initialize       fclaw3d_vtable_initialize
 #define fclaw2d_after_regrid            fclaw3d_after_regrid
 
+/* translations for timeinterp */
+#define fclaw2d_timeinterp              fclaw3d_timeinterp
+#define FCLAW2D_TIMEINTERP_FORT         FCLAW3D_TIMEINTERP_FORT
+
 /* translations not found in p4est */
 #ifndef p4est_wrap_new_unitsquare
 #define p4est_wrap_new_unitsquare       p8est_wrap_new_unitcube
