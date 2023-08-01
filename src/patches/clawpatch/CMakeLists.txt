@@ -44,6 +44,7 @@ add_library(clawpatch_f OBJECT
   fort3_4.6/fclaw3dx_clawpatch46_pillowsphere.f90 
   fort3_4.6/fclaw3dx_clawpatch46_diagnostics.f90 
   ${metric}/fortran_source2d/fclaw2d_metric_default_fort.f90
+  ${metric}/fortran_source3dx/fclaw3dx_metric_default_fort.f90
   ${metric}/fortran_source3d/fclaw3d_metric_default_fort.f90
 )
 
@@ -83,8 +84,13 @@ add_library(clawpatch
 
   fort_user/fclaw2d_clawpatch_tag_criteria.c
   fort3_user/fclaw3dx_clawpatch_tag_criteria.c
+
   ${metric}/fclaw2d_metric.cpp
   ${metric}/fclaw2d_metric_default.c
+
+  ${metric}/fclaw3dx_metric.cpp 
+  ${metric}/fclaw3dx_metric_default.c
+
   ${metric}/fclaw3d_metric.cpp 
   ${metric}/fclaw3d_metric_default.c
 )
@@ -137,9 +143,14 @@ install(FILES
 	${metric}/fclaw2d_metric_default_fort.h
 	${metric}/fortran_source2d/fclaw2d_metric_terms.i 
 
+  ${metric}/fclaw3dx_metric.h
+  ${metric}/fclaw3dx_metric.hpp
+  ${metric}/fclaw3dx_metric_default_fort.h
+
   ${metric}/fclaw3d_metric.h
   ${metric}/fclaw3d_metric.hpp
   ${metric}/fclaw3d_metric_default_fort.h
+
   DESTINATION include
 )
 

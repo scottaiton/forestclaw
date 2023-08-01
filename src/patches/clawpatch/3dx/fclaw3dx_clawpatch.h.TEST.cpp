@@ -32,8 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw2d_domain.h>
 #include <fclaw2d_patch.h>
 #include <fclaw2d_convenience.h>
-#include <fclaw3d_metric.hpp>
-#include <fclaw3d_metric.h>
+#include <fclaw3dx_metric.hpp>
+#include <fclaw3dx_metric.h>
 #include <fclaw2d_options.h>
 #include <test.hpp>
 #include <test/test.hpp>
@@ -373,7 +373,7 @@ TEST_CASE("fclaw3dx_clawpatch get_metric_patch")
 
     //CHECK
     fclaw3dx_clawpatch_t* cp = fclaw3dx_clawpatch_get_clawpatch(&test_data.domain->blocks[0].patches[0]);
-    CHECK(fclaw3d_patch_metric_patch(test_data.glob, &test_data.domain->blocks[0].patches[0]) == cp->mp);
+    CHECK(fclaw3dx_patch_metric_patch(test_data.glob, &test_data.domain->blocks[0].patches[0]) == cp->mp);
 }
 #endif
 
@@ -387,7 +387,7 @@ TEST_CASE("fclaw3dx_clawpatch_get_metric_patch")
     //CHECK
     fclaw3dx_clawpatch_t* cp = 
         fclaw3dx_clawpatch_get_clawpatch(&test_data.domain->blocks[0].patches[0]);
-    CHECK(fclaw3d_clawpatch_get_metric_patch(&test_data.domain->blocks[0].patches[0]) == cp->mp);
+    CHECK(fclaw3dx_clawpatch_get_metric_patch(&test_data.domain->blocks[0].patches[0]) == cp->mp);
 }
 #endif
 
@@ -398,8 +398,8 @@ TEST_CASE("fclaw3dx_clawpatch_get_volume")
     test_data.setup();
 
     //CHECK
-    fclaw3d_metric_patch_t* mp = fclaw3dx_clawpatch_get_metric_patch(&test_data.domain->blocks[0].patches[0]);
-    CHECK(fclaw3d_clawpatch_get_volume(test_data.glob, 
+    fclaw3dx_metric_patch_t* mp = fclaw3dx_clawpatch_get_metric_patch(&test_data.domain->blocks[0].patches[0]);
+    CHECK(fclaw3dx_clawpatch_get_volume(test_data.glob, 
                 &test_data.domain->blocks[0].patches[0]) == mp->volume.dataPtr());
 }
 #endif
@@ -648,7 +648,7 @@ TEST_CASE("fclaw3dx_clawpatch_metric_scalar")
     double *volume, *faceareas;
 
     /* DAC : What is the right test here? */
-    fclaw3d_metric_patch_scalar(test_data.glob, 
+    fclaw3dx_metric_patch_scalar(test_data.glob, 
                                 &test_data.domain->blocks[0].patches[0], 
                                 &mp_volume, &mp_faceareas);
 
@@ -662,7 +662,7 @@ TEST_CASE("fclaw3dx_clawpatch_metric_scalar")
 #endif
 
 #if 0
-/* DAC : Fix this test for fclaw3d_metric? */
+/* DAC : Fix this test for fclaw3dx_metric? */
 TEST_CASE("fclaw3dx_clawpatch_metric_vector")
 {
     fclaw2d_global_t* glob = fclaw2d_global_new(); 
@@ -674,7 +674,7 @@ TEST_CASE("fclaw3dx_clawpatch_metric_vector")
     double *mp_xnormals, *mp_ynormals, *mp_xtangents, *mp_ytangents, *mp_curvature;
     double *xnormals, *ynormals, *xtangents, *ytangents, *curvature;
 
-    fclaw3d_metric_patch_vector(test_data.glob, &test_data.domain->blocks[0].patches[0], 
+    fclaw3dx_metric_patch_vector(test_data.glob, &test_data.domain->blocks[0].patches[0], 
                                 &mp_xnormals, &mp_ynormals,
                                 &mp_xtangents, &mp_ytangents,
                                 &mp_curvature);
@@ -703,7 +703,7 @@ TEST_CASE("fclaw3dx_clawpatch_metric_data")
     double *mp_xp, *mp_yp, *mp_zp, *mp_xd, *mp_yd, *mp_zd, *mp_area;
     double *xp, *yp, *zp, *xd, *yd, *zd, *area;
 
-    fclaw3d_metric_patch_mesh_data(test_data.glob, &test_data.domain->blocks[0].patches[0], 
+    fclaw3dx_metric_patch_mesh_data(test_data.glob, &test_data.domain->blocks[0].patches[0], 
                                    &mp_xp, &mp_yp, &mp_zp,
                                    &mp_xd, &mp_yd, &mp_zd,
                                    &mp_area);
@@ -732,7 +732,7 @@ TEST_CASE("fclaw3dx_clawpatch_metric_data2")
     double *mp_xnormals, *mp_ynormals, *mp_xtangents, *mp_ytangents, *mp_surfnormals, *mp_edgelengths, *mp_curvature;
     double *xnormals, *ynormals, *xtangents, *ytangents, *surfnormals, *edgelengths, *curvature;
 
-    fclaw3d_metric_patch_mesh_data2(test_data.glob, &test_data.domain->blocks[0].patches[0], 
+    fclaw3dx_metric_patch_mesh_data2(test_data.glob, &test_data.domain->blocks[0].patches[0], 
                                     &mp_xnormals, &mp_ynormals,
                                     &mp_xtangents, &mp_ytangents,
                                     &mp_surfnormals, &mp_edgelengths, &mp_curvature);

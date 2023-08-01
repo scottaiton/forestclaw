@@ -73,8 +73,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw3dx_clawpatch46_fort.h>
 
-#include <fclaw3d_metric.h>
-#include <fclaw3d_metric.hpp>
+#include <fclaw3dx_metric.h>
+#include <fclaw3dx_metric.hpp>
 
 #include <_fclaw2d_to_fclaw3dx.h>
 
@@ -360,7 +360,7 @@ void clawpatch_define(fclaw2d_global_t* glob,
 		                            cp->xlower,cp->ylower, cp->xupper, cp->yupper, 
 		                            blockno, patchno, build_mode);
 #elif PATCH_DIM == 3
-		fclaw3d_metric_patch_define(glob,patch, 
+		fclaw3dx_metric_patch_define(glob,patch, 
 		                            cp->mx, cp->my, cp->mz, cp->mbc, 
 		                            cp->dx, cp->dy, cp->dz,
 		                            cp->xlower,cp->ylower, cp->zlower, 
@@ -1815,26 +1815,26 @@ void fclaw3d_clawpatch_metric_scalar(fclaw2d_global_t* glob,
                                      fclaw2d_patch_t* patch,
                                      double **volume, double** faceareas)
 {
-	fclaw3d_metric_patch_scalar(glob,patch,volume,faceareas);
+	fclaw3dx_metric_patch_scalar(glob,patch,volume,faceareas);
 }
 
 void fclaw2d_clawpatch_metric_basis(struct fclaw2d_global* glob,
                                      struct fclaw2d_patch* patch,
                                      double **xrot, double** yrot, double** zrot)
 {
-	fclaw3d_metric_patch_basis(glob,patch,xrot, yrot, zrot);
+	fclaw3dx_metric_patch_basis(glob,patch,xrot, yrot, zrot);
 }
 
 
 
 
-void fclaw3d_clawpatch_mesh_data(fclaw2d_global_t* glob,
+void fclaw3dx_clawpatch_mesh_data(fclaw2d_global_t* glob,
                                  fclaw2d_patch_t* patch,
                                  double **xp, double **yp, double **zp,
                                  double **xd, double **yd, double **zd,
                                  double **volume, double **faceareas)
 {
-	fclaw3d_metric_patch_mesh_data(glob,patch,xp,yp,zp,xd,yd,zd,
+	fclaw3dx_metric_patch_mesh_data(glob,patch,xp,yp,zp,xd,yd,zd,
 	                               volume, faceareas);
 }
 

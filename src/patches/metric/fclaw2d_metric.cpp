@@ -48,10 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define METRIC_VTABLE_NAME "fclaw3d_metric"
 
-#include "fclaw3d_metric.h"
-#include "fclaw3d_metric.hpp"
+#include "fclaw3dx_metric.h"
+#include "fclaw3dx_metric.hpp"
 
-#include <_fclaw2d_to_fclaw3d.h>
+#include <_fclaw2d_to_fclaw3dx.h>
 
 #else
 #error "Octree refinement not yet implemented"
@@ -97,7 +97,7 @@ void fclaw2d_metric_patch_define(fclaw2d_global_t* glob,
                                  int blockno, int patchno, 
                                  fclaw2d_build_mode_t build_mode)
 #elif PATCH_DIM == 3
-void fclaw3d_metric_patch_define(fclaw2d_global_t* glob,
+void fclaw3dx_metric_patch_define(fclaw2d_global_t* glob,
                                  fclaw2d_patch_t* patch, 
                                  int mx, int my, int mz, int mbc, 
                                  double dx, double dy,double dz,
@@ -286,10 +286,10 @@ void metric_average_area_from_fine(fclaw2d_global_t *glob,
 #elif PATCH_DIM == 3
     int mz;
     double zlower, dz;
-    fclaw3d_metric_patch_grid_data(glob,coarse_patch,&mx,&my,&mz,&mbc,
+    fclaw3dx_metric_patch_grid_data(glob,coarse_patch,&mx,&my,&mz,&mbc,
                                    &xlower,&ylower,&zlower,&dx,&dy,&dz);    
     double *volcoarse, *fa_coarse;
-    fclaw3d_metric_patch_scalar(glob,coarse_patch,&volcoarse, &fa_coarse);
+    fclaw3dx_metric_patch_scalar(glob,coarse_patch,&volcoarse, &fa_coarse);
 #endif
 
 
@@ -305,7 +305,7 @@ void metric_average_area_from_fine(fclaw2d_global_t *glob,
 #elif PATCH_DIM == 3
 #if REFINE_DIM == 2
         double *volfine, *fa_fine;
-        fclaw3d_metric_patch_scalar(glob,&fine_patches[igrid],&volfine, &fa_fine);
+        fclaw3dx_metric_patch_scalar(glob,&fine_patches[igrid],&volfine, &fa_fine);
 
         /* Average from fine to coarse when creating coarse grid from a fine grid. 
            This will be exact, since both volume and face areas are computing at 
@@ -465,14 +465,14 @@ void fclaw2d_metric_vtable_initialize(fclaw2d_global_t* glob)
     metric_vt->fort_compute_tangents      = &FCLAW2D_METRIC_FORT_COMPUTE_TANGENTS;
     metric_vt->fort_compute_surf_normals  = &FCLAW2D_METRIC_FORT_COMPUTE_SURF_NORMALS;
 #elif PATCH_DIM == 3
-    metric_vt->compute_mesh          = fclaw3d_metric_compute_mesh_default;
-    metric_vt->compute_volume        = fclaw3d_metric_compute_volume_default;
-    metric_vt->compute_volume_ghost  = fclaw3d_metric_compute_volume_ghost_default;
-    metric_vt->compute_basis         = fclaw3d_metric_compute_basis_default;    
+    metric_vt->compute_mesh          = fclaw3dx_metric_compute_mesh_default;
+    metric_vt->compute_volume        = fclaw3dx_metric_compute_volume_default;
+    metric_vt->compute_volume_ghost  = fclaw3dx_metric_compute_volume_ghost_default;
+    metric_vt->compute_basis         = fclaw3dx_metric_compute_basis_default;    
 
-    metric_vt->fort_compute_mesh     = &FCLAW3D_METRIC_FORT_COMPUTE_MESH;
-    metric_vt->fort_compute_volume   = &FCLAW3D_METRIC_FORT_COMPUTE_VOLUME;
-    metric_vt->fort_compute_basis    = &FCLAW3D_METRIC_FORT_COMPUTE_BASIS;
+    metric_vt->fort_compute_mesh     = &FCLAW3DX_METRIC_FORT_COMPUTE_MESH;
+    metric_vt->fort_compute_volume   = &FCLAW3DX_METRIC_FORT_COMPUTE_VOLUME;
+    metric_vt->fort_compute_basis    = &FCLAW3DX_METRIC_FORT_COMPUTE_BASIS;
 
 #endif
 
@@ -515,7 +515,7 @@ void fclaw2d_metric_patch_scalar(fclaw2d_global_t* glob,
                                  double **area, double** edgelengths,
                                  double **curvature)
 #elif PATCH_DIM == 3
-void fclaw3d_metric_patch_scalar(fclaw2d_global_t* glob,
+void fclaw3dx_metric_patch_scalar(fclaw2d_global_t* glob,
                                  fclaw2d_patch_t* patch,
                                  double **volume, double** faceareas)
 #endif
@@ -540,7 +540,7 @@ void fclaw2d_metric_patch_vector(struct fclaw2d_global* glob,
                                  double **xtangents, double **ytangents,
                                  double **surfnormals)
 #elif PATCH_DIM == 3
-void fclaw3d_metric_patch_basis(fclaw2d_global_t* glob,
+void fclaw3dx_metric_patch_basis(fclaw2d_global_t* glob,
                                 fclaw2d_patch_t* patch,
                                 double **xrot, double **yrot, double **zrot)
 #endif
@@ -566,7 +566,7 @@ void fclaw2d_metric_patch_grid_data(fclaw2d_global_t* glob,
                                     double* xlower, double* ylower,
                                     double* dx, double* dy)
 #elif PATCH_DIM == 3
-void fclaw3d_metric_patch_grid_data(fclaw2d_global_t* glob,
+void fclaw3dx_metric_patch_grid_data(fclaw2d_global_t* glob,
                                     fclaw2d_patch_t* patch,
                                     int* mx, int* my, int* mz, 
                                     int* mbc,
@@ -597,7 +597,7 @@ void fclaw2d_metric_patch_mesh_data(fclaw2d_global_t* glob,
                                     double **xd, double **yd, double **zd,
                                     double **area)
 #elif PATCH_DIM == 3
-void fclaw3d_metric_patch_mesh_data(fclaw2d_global_t* glob,
+void fclaw3dx_metric_patch_mesh_data(fclaw2d_global_t* glob,
                                     fclaw2d_patch_t* patch,
                                     double **xp, double **yp, double **zp,
                                     double **xd, double **yd, double **zd,

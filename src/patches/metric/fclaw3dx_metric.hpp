@@ -27,15 +27,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * C++ structures for metric patch
  */
 
-#ifndef FCLAW3D_METRIC_HPP
-#define FCLAW3D_METRIC_HPP
+#ifndef FCLAW3DX_METRIC_HPP
+#define FCLAW3DX_METRIC_HPP
 
 #include <fclaw_farraybox.hpp>     /* Needed for FArray box used to store metric data */
 
 /**
  * @brief Struct for patch metric data
  */
-struct fclaw3d_metric_patch_t
+struct fclaw3dx_metric_patch_t
 {
     /** The number of cells in the x direction */
     int mx;           
@@ -104,15 +104,15 @@ struct fclaw3d_metric_patch_t
 /**
  * @brief Allocate a new metric patch
  * 
- * @return fclaw3d_metric_patch_t* the new metric patch
+ * @return fclaw2d_metric_patch_t* the new metric patch
  */
-fclaw3d_metric_patch_t* fclaw3d_metric_patch_new();
+fclaw3dx_metric_patch_t* fclaw3dx_metric_patch_new();
 
 /**
  * @brief Delete the metric patch
  * 
  * @param patchmp the metric patch, null on return
  */
-void fclaw3d_metric_patch_delete(fclaw3d_metric_patch_t **patchmp);
+void fclaw3dx_metric_patch_delete(fclaw3dx_metric_patch_t **patchmp);
 
-#endif /* !FCLAW3D_METRIC_HPP */
+#endif /* !FCLAW3DX_METRIC_HPP */
