@@ -28,7 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw3d_defs.h>      /* Needed to get correction def. of PATCHDIM */
 
-#include <forestclaw2d.h>       /* Need patch callback def */
+#include <forestclaw3d.h>       /* Need patch callback def */
 
 #include <fclaw3d_clawpatch_fort.h>
 #include <fclaw3d_clawpatch_conservation.h>

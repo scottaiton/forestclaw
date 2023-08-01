@@ -45,14 +45,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw3dx_clawpatch_options.h>
 
 #include <_fclaw2d_to_fclaw3dx.h>
-//
+
+#elif REFINE_DIM == 3 && PATCH_DIM == 3
+
+#include <fclaw3d_clawpatch_diagnostics.h>
+
+#include <fclaw3d_clawpatch.h>
+#include <fclaw3d_clawpatch_options.h>
+
+#include <_fclaw2d_to_fclaw3d.h>
 
 #endif
+
+#if REFINE_DIM == 2
 
 #include <fclaw2d_global.h>
 #include <fclaw2d_options.h>
 #include <fclaw2d_domain.h>
 #include <fclaw2d_diagnostics.h>
+
+#elif REFINE_DIM == 3
+
+#include <fclaw3d_global.h>
+#include <fclaw3d_options.h>
+#include <fclaw3d_domain.h>
+#include <fclaw3d_diagnostics.h>
+
+#include <fclaw2d_to_3d.h>
+
+#endif
 
 void fclaw2d_clawpatch_diagnostics_cons_default(fclaw2d_global_t *glob,
                                                 fclaw2d_patch_t *patch,

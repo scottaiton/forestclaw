@@ -51,14 +51,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define PATCH_CHILDREN 8
 
+#elif REFINE_DIM == 3 && PATCH_DIM == 3
+
+#include <fclaw3d_clawpatch_output_vtk.h>
+
+#include <fclaw3d_clawpatch.h>
+#include <fclaw3d_clawpatch_options.h>
+
+#include <_fclaw2d_to_fclaw3d.h>
+
+#define PATCH_CHILDREN 8
+
 #else
 #error "This combination of REFINE_DIM and PATCH_DIM is unsupported"
 #endif
+
+#if REFINE_DIM == 2
 
 #include <fclaw2d_global.h>
 
 #include <fclaw2d_options.h>
 #include <fclaw2d_map.h>
+
+#elif REFINE_DIM == 3
+
+#include <fclaw3d_global.h>
+
+#include <fclaw3d_options.h>
+#include <fclaw3d_map.h>
+
+#include <fclaw2d_to_3d.h>
+
+#endif
 
 typedef struct fclaw2d_vtk_state
 {
@@ -759,7 +783,11 @@ fclaw2d_output_vtk_coordinate_cb (fclaw2d_global_t * glob,
                 if (fclaw_opt->manifold)
                 {
                     fclaw2d_map_context_t *cont = glob->cont;
+#if REFINE_DIM == 2
                     FCLAW3DX_MAP_C2M(&cont,&blockno,&x,&y,&z,&xpp,&ypp,&zpp);
+#elif REFINE_DIM == 3
+                    // TODO 
+#endif
                     *d++ = xpp;
                     *d++ = ypp;
                     *d++ = zpp;

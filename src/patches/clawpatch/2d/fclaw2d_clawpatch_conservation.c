@@ -32,31 +32,53 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PATCH_DIM 2
 #endif
 
-#include <fclaw2d_time_sync.h>
+#include <fclaw_math.h>
 
+#if REFINE_DIM == 2
+
+#include <fclaw2d_time_sync.h>
 #include <fclaw2d_patch.h>
 #include <fclaw2d_options.h>
-
 #include <fclaw2d_global.h>
-#include <fclaw_math.h>
+
+#elif REFINE_DIM == 3
+
+#include <fclaw3d_time_sync.h>
+#include <fclaw3d_patch.h>
+#include <fclaw3d_options.h>
+#include <fclaw3d_global.h>
+
+#include <fclaw2d_to_3d.h>
+
+#endif
 
 #if REFINE_DIM == 2 && PATCH_DIM == 2
 
-#include "fclaw2d_clawpatch_conservation.h"
-#include "fclaw2d_clawpatch_conservation_fort.h"
+#include <fclaw2d_clawpatch_conservation.h>
+#include <fclaw2d_clawpatch_conservation_fort.h>
 
-#include "fclaw2d_clawpatch.h"
-#include "fclaw2d_clawpatch_options.h"
+#include <fclaw2d_clawpatch.h>
+#include <fclaw2d_clawpatch_options.h>
 
 #elif REFINE_DIM == 2 && PATCH_DIM == 3
 
-#include "fclaw3dx_clawpatch_conservation.h"
-#include "fclaw3dx_clawpatch_conservation_fort.h"
+#include <fclaw3dx_clawpatch_conservation.h>
+#include <fclaw3dx_clawpatch_conservation_fort.h>
 
-#include "fclaw3dx_clawpatch.h"
-#include "fclaw3dx_clawpatch_options.h"
+#include <fclaw3dx_clawpatch.h>
+#include <fclaw3dx_clawpatch_options.h>
 
 #include <_fclaw2d_to_fclaw3dx.h>
+
+#elif REFINE_DIM == 3 && PATCH_DIM == 3
+
+#include <fclaw3d_clawpatch_conservation.h>
+#include <fclaw3d_clawpatch_conservation_fort.h>
+
+#include <fclaw3d_clawpatch.h>
+#include <fclaw3d_clawpatch_options.h>
+
+#include <_fclaw2d_to_fclaw3d.h>
 
 #endif
 
@@ -424,9 +446,9 @@ void fclaw2d_clawpatch_time_sync_f2c(fclaw2d_global_t* glob,
 }
 
 
-void fclaw2d_clawpatch_time_sync_samesize (struct fclaw2d_global* glob,
-                                           struct fclaw2d_patch* this_patch,
-                                           struct fclaw2d_patch* neighbor_patch,
+void fclaw2d_clawpatch_time_sync_samesize (fclaw2d_global_t* glob,
+                                           fclaw2d_patch_t* this_patch,
+                                           fclaw2d_patch_t* neighbor_patch,
                                            int this_iface,int idir,
                                            fclaw2d_patch_transform_data_t
                                            *transform_data)

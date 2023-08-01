@@ -47,10 +47,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <_fclaw2d_to_fclaw3dx.h>
 
+#elif REFINE_DIM == 3 && PATCH_DIM == 3
+
+#include <fclaw3d_clawpatch_transform.h>
+
+#include <fclaw3d_clawpatch_options.h>
+
+#include <fclaw3d_clawpatch_transform.h>
+
+#include <_fclaw2d_to_fclaw3d.h>
+#include <fclaw2d_to_3d.h>
+
 #endif
+
+#if REFINE_DIM == 2
 
 #include <fclaw2d_patch.h>
 #include <fclaw2d_global.h>
+
+#elif REFINE_DIM == 3
+
+#include <fclaw3d_patch.h>
+#include <fclaw3d_global.h>
+
+#endif
 
 void fclaw2d_clawpatch_transform_init_data(fclaw2d_global_t* glob, 
                                            fclaw2d_patch_t* this_patch,
@@ -80,7 +100,14 @@ void fclaw2d_clawpatch_face_transformation_intra (int ftransform[])
 /* Same size neighbor across a face */
 void
 FCLAW2D_CLAWPATCH_TRANSFORM_FACE (const int *i1, const int *j1,
-                        int *i2, int *j2, fclaw2d_patch_transform_data_t** ptdata)
+#if REFINE_DIM == 3
+                                  const int *k1,
+#endif
+                                  int *i2, int *j2, 
+#if REFINE_DIM == 3
+                                   int *k2,
+#endif
+                                  fclaw2d_patch_transform_data_t** ptdata)
 {
     fclaw2d_patch_transform_data_t *tdata = *ptdata;
     const fclaw2d_clawpatch_options_t *clawpatch_opt = 
@@ -88,19 +115,37 @@ FCLAW2D_CLAWPATCH_TRANSFORM_FACE (const int *i1, const int *j1,
 
     *i2 = *i1;
     *j2 = *j1;
+#if REFINE_DIM == 3
+    *k2 = *k1;
+#endif
     fclaw2d_patch_transform_face (tdata->this_patch,
                                   tdata->neighbor_patch,
                                   tdata->transform,
                                   clawpatch_opt->mx, 
                                   clawpatch_opt->my, 
-                                  tdata->based, i2, j2);
+#if REFINE_DIM == 3
+                                  clawpatch_opt->mz,
+#endif
+                                  tdata->based, 
+                                  i2, 
+                                  j2
+#if REFINE_DIM == 3
+                                  ,k2
+#endif
+                                  );
 }
 
 
 /* Half size neighbor across a face */
 void
 FCLAW2D_CLAWPATCH_TRANSFORM_FACE_HALF (const int *i1, const int *j1,
+#if REFINE_DIM == 3
+                                       const int *k1,
+#endif
                                        int i2[], int j2[],
+#if REFINE_DIM == 3
+                                       int k2[],
+#endif
                                        fclaw2d_patch_transform_data_t** ptdata)
 {
     fclaw2d_patch_transform_data_t *tdata = *ptdata;
@@ -109,18 +154,36 @@ FCLAW2D_CLAWPATCH_TRANSFORM_FACE_HALF (const int *i1, const int *j1,
 
     i2[0] = *i1;
     j2[0] = *j1;
+#if REFINE_DIM == 3
+    k2[0] = *k1;
+#endif
     fclaw2d_patch_transform_face2 (tdata->this_patch,
                                    tdata->neighbor_patch,
                                    tdata->transform, 
                                    clawpatch_opt->mx, 
                                    clawpatch_opt->my,
-                                   tdata->based, i2, j2);
+#if REFINE_DIM == 3
+                                   clawpatch_opt->mz,
+#endif                    
+                                   tdata->based, 
+                                   i2, 
+                                   j2
+#if REFINE_DIM == 3
+                                   ,k2
+#endif                    
+                                   );
 }
 
 
 void
 FCLAW2D_CLAWPATCH_TRANSFORM_CORNER (const int *i1, const int *j1,
+#if REFINE_DIM == 3
+                                    const int *k1,
+#endif                    
                                     int *i2, int *j2,
+#if REFINE_DIM == 3
+                                    int *k2,
+#endif                    
                                     fclaw2d_patch_transform_data_t** ptdata)
 {
     fclaw2d_patch_transform_data_t *tdata = *ptdata;
@@ -129,6 +192,9 @@ FCLAW2D_CLAWPATCH_TRANSFORM_CORNER (const int *i1, const int *j1,
 
     *i2 = *i1;
     *j2 = *j1;
+#if REFINE_DIM == 3
+    *k2 = *k1;
+#endif
     if (tdata->block_iface >= 0)
     {
         /* block-face but not a block-corner */
@@ -138,7 +204,14 @@ FCLAW2D_CLAWPATCH_TRANSFORM_CORNER (const int *i1, const int *j1,
         fclaw2d_patch_transform_face (tdata->this_patch,
                                       tdata->neighbor_patch, tdata->transform,
                                       clawpatch_opt->mx, clawpatch_opt->my,
-                                      tdata->based, i2, j2);
+#if REFINE_DIM == 3
+                                      clawpatch_opt->mz,
+#endif
+                                      tdata->based, i2, j2
+#if REFINE_DIM == 3
+                                      ,k2
+#endif
+                                      );
     }
     else
     {
@@ -150,13 +223,26 @@ FCLAW2D_CLAWPATCH_TRANSFORM_CORNER (const int *i1, const int *j1,
                                         tdata->neighbor_patch,
                                         tdata->icorner, tdata->is_block_corner,
                                         clawpatch_opt->mx, clawpatch_opt->my,
-                                        tdata->based, i2, j2);
+#if REFINE_DIM == 3
+                                        clawpatch_opt->mz,
+#endif
+                                        tdata->based, i2, j2
+#if REFINE_DIM == 3
+                                        ,k2
+#endif
+                                        );
     }
 }
 
 void
 FCLAW2D_CLAWPATCH_TRANSFORM_CORNER_HALF (const int *i1, const int *j1,
+#if REFINE_DIM == 3
+                                         const int *k1,
+#endif
                                          int *i2, int *j2,
+#if REFINE_DIM == 3
+                                         int *k2,
+#endif
                                          fclaw2d_patch_transform_data_t** ptdata)
 {
     fclaw2d_patch_transform_data_t *tdata = *ptdata;
@@ -165,6 +251,9 @@ FCLAW2D_CLAWPATCH_TRANSFORM_CORNER_HALF (const int *i1, const int *j1,
 
     i2[0] = *i1;
     j2[0] = *j1;
+#if REFINE_DIM == 3
+    k2[0] = *k1;
+#endif
     if (tdata->block_iface >= 0)
     {
         /* block-face but not a block-corner. */
@@ -173,7 +262,14 @@ FCLAW2D_CLAWPATCH_TRANSFORM_CORNER_HALF (const int *i1, const int *j1,
                                        tdata->transform, 
                                        clawpatch_opt->mx, 
                                        clawpatch_opt->my,
-                                       tdata->based, i2, j2);
+#if REFINE_DIM == 3
+                                       clawpatch_opt->mz,
+#endif
+                                       tdata->based, i2, j2
+#if REFINE_DIM == 3
+                                       ,k2
+#endif
+                                       );
     }
     else
     {
@@ -185,6 +281,13 @@ FCLAW2D_CLAWPATCH_TRANSFORM_CORNER_HALF (const int *i1, const int *j1,
                                          tdata->neighbor_patch,
                                          tdata->icorner, tdata->is_block_corner,
                                          clawpatch_opt->mx, clawpatch_opt->my,
-                                         tdata->based, i2, j2);
+#if REFINE_DIM == 3
+                                         clawpatch_opt->mz,
+#endif
+                                         tdata->based, i2, j2
+#if REFINE_DIM == 3
+                                         ,k2
+#endif
+                                         );
     }
 }

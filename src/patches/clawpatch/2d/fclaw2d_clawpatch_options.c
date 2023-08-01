@@ -36,16 +36,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CLAWPATCH_OPTION_NAME "fclaw2d_clawpatch"
 
 #include <fclaw2d_clawpatch_options.h>
+#include <fclaw2d_global.h>
 
 #elif REFINE_DIM == 2 && PATCH_DIM == 3
 
 #define CLAWPATCH_OPTION_NAME "fclaw3dx_clawpatch"
 
 #include <fclaw3dx_clawpatch_options.h>
+#include <fclaw2d_global.h>
 #include <_fclaw2d_to_fclaw3dx.h>
 
+#elif REFINE_DIM == 3 && PATCH_DIM == 3
+
+#define CLAWPATCH_OPTION_NAME "fclaw3d_clawpatch"
+
+#include <fclaw3d_clawpatch_options.h>
+#include <fclaw3d_global.h>
+#include <_fclaw2d_to_fclaw3d.h>
+#include <fclaw2d_to_3d.h>
+
 #endif
-#include <fclaw2d_global.h>
 
 static void *
 clawpatch_register(fclaw2d_clawpatch_options_t *clawpatch_options,

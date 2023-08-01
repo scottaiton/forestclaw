@@ -82,6 +82,16 @@ add_library(clawpatch
   3dx/fclaw3dx_clawpatch_output_vtk.c
   3dx/fclaw3dx_clawpatch_conservation.c
 
+  3d/fclaw3d_clawpatch.cpp
+  3d/fclaw3d_clawpatch_options.c
+  3d/fclaw3d_clawpatch_diagnostics.c
+  3d/fclaw3d_clawpatch_diagnostics_default.c
+#  3d/fclaw3d_clawpatch_pillow.c
+  3d/fclaw3d_clawpatch_transform.c
+  3d/fclaw3d_clawpatch_output_ascii.c
+  3d/fclaw3d_clawpatch_output_vtk.c
+  3d/fclaw3d_clawpatch_conservation.c
+
   fort_user/fclaw2d_clawpatch_tag_criteria.c
   fort3_user/fclaw3dx_clawpatch_tag_criteria.c
 
@@ -100,6 +110,7 @@ target_include_directories(clawpatch
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/2d>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/3dx>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/3d>
   $<BUILD_INTERFACE:${metric}/fortran_source2d>
   $<BUILD_INTERFACE:${metric}/fortran_source3d>
   $<BUILD_INTERFACE:${metric}>

@@ -78,8 +78,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <_fclaw2d_to_fclaw3dx.h>
 
+#elif REFINE_DIM == 3 && PATCH_DIM == 3
+
+#define CLAWPATCH_VTABLE_NAME "fclaw3d_clawpatch"
+
+#include <fclaw3d_clawpatch.h>
+#include <fclaw3d_clawpatch.hpp>
+
+#include <fclaw3d_clawpatch_diagnostics.h>
+#include <fclaw3d_clawpatch_options.h>
+#include <fclaw3d_clawpatch_output_ascii.h> 
+#include <fclaw3d_clawpatch_output_vtk.h>
+#include <fclaw3d_clawpatch_fort.h>
+#include <fclaw3d_clawpatch_conservation.h>
+#include <fclaw3d_clawpatch_conservation_fort.h>
+#include <fclaw3d_clawpatch_transform.h>
+//#include <fclaw3d_clawpatch_pillow.h>  
+
+#include <fclaw3d_clawpatch46_fort.h>
+
+#include <fclaw3d_metric.h>
+#include <fclaw3d_metric.hpp>
+
+#include <_fclaw2d_to_fclaw3d.h>
+#include <fclaw2d_to_3d.h>
 
 #endif
+
+#if REFINE_DIM == 2
 
 #include <fclaw2d_patch.h>  /* Needed to get enum for build modes */
 
@@ -93,9 +119,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw2d_map_query.h>
 
+#elif REFINE_DIM == 3
+
+#include <fclaw3d_patch.h>  /* Needed to get enum for build modes */
+
+#include <fclaw3d_defs.h>
+#include <fclaw3d_global.h>
+#include <fclaw3d_vtable.h>
+#include <fclaw3d_options.h>
+
+#include <fclaw3d_timeinterp.h>
+#include <fclaw3d_diagnostics.h>
+
+#include <fclaw3d_map_query.h>
+
+#endif
+
 #include <fclaw_pointer_map.h>
-
-
 
 /* ------------------------------- Static function defs ------------------------------- */
 
