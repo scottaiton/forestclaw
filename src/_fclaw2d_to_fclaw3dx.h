@@ -176,6 +176,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_clawpatch_vtable fclaw3dx_clawpatch_vtable
 #define fclaw2d_clawpatch_save_current_step fclaw3dx_clawpatch_save_current_step
 #define fclaw2d_clawpatch_grid_data fclaw3dx_clawpatch_grid_data
+#define fclaw3d_clawpatch_grid_data fclaw3dx_clawpatch_grid_data
+#define fclaw3d_clawpatch_mesh_data fclaw3dx_clawpatch_mesh_data
 
 //#define fclaw2d_clawpatch_get_area fclaw3dx_clawpatch_get_area
 #define fclaw2d_clawpatch_soln_data fclaw3dx_clawpatch_soln_data

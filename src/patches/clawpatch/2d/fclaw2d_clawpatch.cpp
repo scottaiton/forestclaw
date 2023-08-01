@@ -194,7 +194,7 @@ double* q_time_sync(fclaw2d_patch_t* patch, int time_interp)
 }
 
 static 
-double* clawpatch_get_area(struct fclaw2d_global* glob,
+double* clawpatch_get_area(fclaw2d_global_t* glob,
 	                       fclaw2d_patch_t* patch)
 {
 	return fclaw2d_metric_patch_get_area(glob, patch);
@@ -257,7 +257,12 @@ void clawpatch_define(fclaw2d_global_t* glob,
 
 	fclaw2d_map_context_t* cont = glob->cont;
 
+#if REFINE_DIM == 2
 	int is_brick = FCLAW2D_MAP_IS_BRICK(&cont);
+#else
+	int is_brick = false;
+	fclaw_global_essentialf("clawpatch::define : Octrees not yet implemented.\n");
+#endif
 
 	cp->manifold = fclaw_opt->manifold;
 	if (cp->manifold)
@@ -272,7 +277,8 @@ void clawpatch_define(fclaw2d_global_t* glob,
 		cp->zlower = 0;
 		cp->zupper = 1;
 #else
-#error "clawpatch::define : Octrees not yet implemented."
+		cp->zlower = patch->zlower;
+		cp->zupper = patch->zupper;
 #endif
 #endif
 	}
@@ -294,8 +300,12 @@ void clawpatch_define(fclaw2d_global_t* glob,
 		{
 			double z;
 			/* Scale to [0,1]x[0,1], based on blockno */
+#if REFINE_DIM == 2
 			fclaw2d_map_c2m_nomap_brick(cont,cp->blockno,xl,yl,&xlower,&ylower,&z);
 			fclaw2d_map_c2m_nomap_brick(cont,cp->blockno,xu,yu,&xupper,&yupper,&z);
+#else
+			fclaw_global_essentialf("clawpatch::define : Octrees not yet implemented.\n");
+#endif
 		}
 		else
 		{
@@ -319,7 +329,8 @@ void clawpatch_define(fclaw2d_global_t* glob,
 		double zlower = 0;		
 		double zupper = 1;
 #else
-#error "clawpatch::define : Octrees not yet implemented."
+		double zlower = cp->zlower;
+		double zupper = cp->zupper;
 #endif		
 		cp->zlower = az + (bz - az)*zlower;
 		cp->zupper = az + (bz - az)*zupper;
@@ -334,11 +345,8 @@ void clawpatch_define(fclaw2d_global_t* glob,
 #if REFINE_DIM == 2
 	/* For extruded mesh, we don't have any refinement in z */
 	cp->mz = clawpatch_opt->mz;
-	cp->dz = (cp->zupper - cp->zlower)/cp->mz;
-
-#else
-#error "clawpatch::define : Octrees not yet implemented."
 #endif  /* REFINE_DIM == 2 */
+	cp->dz = (cp->zupper - cp->zlower)/cp->mz;
 #endif  /* PATCH_DIM == 3 */
 
 
@@ -400,7 +408,7 @@ void clawpatch_define(fclaw2d_global_t* glob,
 		                            cp->xlower,cp->ylower, cp->xupper, cp->yupper, 
 		                            blockno, patchno, build_mode);
 #elif PATCH_DIM == 3
-		fclaw3dx_metric_patch_define(glob,patch, 
+		fclaw3d_metric_patch_define(glob,patch, 
 		                            cp->mx, cp->my, cp->mz, cp->mbc, 
 		                            cp->dx, cp->dy, cp->dz,
 		                            cp->xlower,cp->ylower, cp->zlower, 
@@ -875,7 +883,7 @@ int clawpatch_tag4refinement(fclaw2d_global_t *glob,
 #elif PATCH_DIM == 3
 		int mz;
 		double zlower,dz;
-		fclaw3dx_clawpatch_grid_data(glob,patch,&mx,&my,&mz, &mbc,
+		fclaw3d_clawpatch_grid_data(glob,patch,&mx,&my,&mz, &mbc,
 		                            &xlower,&ylower,&zlower, &dx,&dy,&dz);
 
 		clawpatch_vt->fort_tag4refinement(&mx,&my,&mz, &mbc,&meqn,
@@ -1515,7 +1523,7 @@ void fclaw2d_clawpatch_vtable_initialize(fclaw2d_global_t* glob,
 
 		clawpatch_vt->fort_timeinterp            = FCLAW2D_CLAWPATCH5_FORT_TIMEINTERP;
 	}
-#elif PATCH_DIM == 3
+#elif REFINE_DIM == 2 && PATCH_DIM == 3
 	/* Signatures (defined in 'typedefs') for 3d Fortran routines are different 
 	   those used in 2d routines above */
 	if (claw_version == 4)
@@ -1558,7 +1566,9 @@ void fclaw2d_clawpatch_vtable_initialize(fclaw2d_global_t* glob,
 	fclaw2d_clawpatch_diagnostics_vtable_initialize(glob);
 
 	/* Set the virtual table, even if it isn't used */
+#if REFINE_DIM == 2
 	fclaw2d_clawpatch_pillow_vtable_initialize(glob, claw_version);
+#endif 
 
 	clawpatch_vt->is_set = 1;
 
@@ -1621,14 +1631,14 @@ void fclaw2d_clawpatch_grid_data(fclaw2d_global_t* glob,
 	*dy = cp->dy;
 }
 #elif PATCH_DIM == 3
-void fclaw3dx_clawpatch_grid_data(fclaw2d_global_t* glob,
+void fclaw3d_clawpatch_grid_data(fclaw2d_global_t* glob,
 								 fclaw2d_patch_t* patch,
 								 int* mx, int* my, int* mz, int* mbc,
 								 double* xlower, double* ylower,
 								 double* zlower, 
 								 double* dx, double* dy, double* dz)
 {
-	fclaw3dx_clawpatch_t *cp = get_clawpatch(patch);
+	fclaw2d_clawpatch_t *cp = get_clawpatch(patch);
 	*mx = cp->mx;
 	*my = cp->my;
 	*mz = cp->mz;
@@ -1639,20 +1649,6 @@ void fclaw3dx_clawpatch_grid_data(fclaw2d_global_t* glob,
 	*dx = cp->dx;
 	*dy = cp->dy;
 	*dz = cp->dz;
-}
-
-/* The metric terms only know about fclaw3d routines;  not 3dx routines */
-void fclaw3d_clawpatch_grid_data(fclaw2d_global_t* glob,
-								 fclaw2d_patch_t* patch,
-								 int* mx, int* my, int* mz, int* mbc,
-								 double* xlower, double* ylower,
-								 double* zlower, 
-								 double* dx, double* dy, double* dz)
-
-{
-	fclaw3dx_clawpatch_grid_data(glob,patch,mx,my,mz,mbc,
-	                             xlower,ylower,zlower,
-	                             dx,dy,dz);
 }
 
 #endif
@@ -1855,26 +1851,26 @@ void fclaw3d_clawpatch_metric_scalar(fclaw2d_global_t* glob,
                                      fclaw2d_patch_t* patch,
                                      double **volume, double** faceareas)
 {
-	fclaw3dx_metric_patch_scalar(glob,patch,volume,faceareas);
+	fclaw3d_metric_patch_scalar(glob,patch,volume,faceareas);
 }
 
-void fclaw2d_clawpatch_metric_basis(struct fclaw2d_global* glob,
-                                     struct fclaw2d_patch* patch,
-                                     double **xrot, double** yrot, double** zrot)
+void fclaw2d_clawpatch_metric_basis(fclaw2d_global_t* glob,
+                                    fclaw2d_patch_t* patch,
+                                    double **xrot, double** yrot, double** zrot)
 {
-	fclaw3dx_metric_patch_basis(glob,patch,xrot, yrot, zrot);
+	fclaw3d_metric_patch_basis(glob,patch,xrot, yrot, zrot);
 }
 
 
 
 
-void fclaw3dx_clawpatch_mesh_data(fclaw2d_global_t* glob,
+void fclaw3d_clawpatch_mesh_data(fclaw2d_global_t* glob,
                                  fclaw2d_patch_t* patch,
                                  double **xp, double **yp, double **zp,
                                  double **xd, double **yd, double **zd,
                                  double **volume, double **faceareas)
 {
-	fclaw3dx_metric_patch_mesh_data(glob,patch,xp,yp,zp,xd,yd,zd,
+	fclaw3d_metric_patch_mesh_data(glob,patch,xp,yp,zp,xd,yd,zd,
 	                               volume, faceareas);
 }
 
