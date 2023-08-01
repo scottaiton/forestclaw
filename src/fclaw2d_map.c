@@ -95,7 +95,7 @@ FCLAW2D_MAP_C2M_BASIS (fclaw2d_map_context_t ** pcont,
 
 //#if PATCH_DIM == 3 && REFINE_DIM == 2
 void
-FCLAW3D_MAP_C2M (fclaw2d_map_context_t ** pcont, int *blockno,
+FCLAW3DX_MAP_C2M (fclaw2d_map_context_t ** pcont, int *blockno,
                  const double *xc, const double *yc, const double *zc,
                  double *xp, double *yp, double *zp)
 {
@@ -107,7 +107,7 @@ FCLAW3D_MAP_C2M (fclaw2d_map_context_t ** pcont, int *blockno,
 
 
 void
-FCLAW3D_MAP_C2M_BASIS (fclaw2d_map_context_t ** pcont,
+FCLAW3DX_MAP_C2M_BASIS (fclaw2d_map_context_t ** pcont,
                        const double *xc, const double *yc, const double *zc, 
                        double *t, double *tinv, double *tderivs,
                        int *flag)

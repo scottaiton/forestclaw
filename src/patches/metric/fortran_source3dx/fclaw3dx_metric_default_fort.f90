@@ -52,7 +52,7 @@ subroutine fclaw3dx_metric_fort_compute_mesh(mx,my,mz,mbc, &
                 yc = ylower + (j-1)*dyf
                 zc = zlower + (k-1)*dzf
 
-                call fclaw3d_map_c2m(map_context_ptr, &
+                call fclaw3dx_map_c2m(map_context_ptr, &
                                      blockno,xc,yc,zc,xd1,yd1,zd1)
 
                 !! whole integer indices are cell centers. 
@@ -187,7 +187,7 @@ subroutine fclaw3dx_metric_fort_compute_volume_general(mx,my,mz, mbc, blockno, &
                             yef = ye + jj*dyf
                             zef = ze + kk*dzf
 
-                            call fclaw3d_map_c2m(cont, & 
+                            call fclaw3dx_map_c2m(cont, & 
                                 blockno,xef,yef,zef, xp1,yp1,zp1)
 
                             hexfine(ii,jj,kk,1) = xp1
@@ -312,7 +312,7 @@ subroutine fclaw3dx_metric_fort_compute_volume_affine(mx,my,mz, mbc, blockno, &
                 ye = ylower + (j-1)*dy
                 ze = zlower + (k-1)*dz
 
-                call fclaw3d_map_c2m(cont, & 
+                call fclaw3dx_map_c2m(cont, & 
                                 blockno,xe,ye,ze, xd1,yd1,zd1)
 
                 xd(i,j,k) = xd1
@@ -421,7 +421,7 @@ subroutine fclaw3dx_metric_fort_compute_basis(mx, my, mz, mbc, xd, yd, zd, &
 !!                            xcorner = xe + icell*dx
 !!                            ycorner = ye + jcell*dy
 !!                            zcorner = ze + kcell*dz
-!!                            call fclaw3d_map_c2m(map_context_ptr, & 
+!!                            call fclaw3dx_map_c2m(map_context_ptr, & 
 !!                                blockno,xcorner,ycorner,zcorner,xp1,yp1,zp1)
                             hex(icell,jcell,kcell,1) = xd(i+icell,j+jcell,k+kcell)
                             hex(icell,jcell,kcell,2) = yd(i+icell,j+jcell,k+kcell)
