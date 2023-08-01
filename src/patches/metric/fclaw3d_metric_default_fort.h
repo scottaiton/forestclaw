@@ -26,7 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FCLAW3D_METRIC_DEFAULT_FORT_H
 #define FCLAW3D_METRIC_DEFAULT_FORT_H
 
-#include "forestclaw2d.h"   /* Needed for FCLAW_F77_FUNC macro */
+#include <forestclaw3d.h>   /* Needed for FCLAW_F77_FUNC macro */
 
 #ifdef __cplusplus
 extern "C"

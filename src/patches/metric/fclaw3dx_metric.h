@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw2d_patch.h>                /* Needed to get enum for build modes */
 
-#include "fclaw3dx_metric_default_fort.h"  /* Needed for fort typdefs in vtable */
+#include <fclaw3dx_metric_default_fort.h>  /* Needed for fort typdefs in vtable */
 
 
 #ifdef __cplusplus

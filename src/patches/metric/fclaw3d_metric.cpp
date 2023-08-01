@@ -24,7 +24,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#define REFINE_DIM 2
+#define REFINE_DIM 3
 #define PATCH_DIM 3
 
 #include <fclaw2d_metric.cpp>

@@ -52,8 +52,8 @@ subroutine fclaw3d_metric_fort_compute_mesh(mx,my,mz,mbc, &
                 yc = ylower + (j-1)*dyf
                 zc = zlower + (k-1)*dzf
 
-                call fclaw3d_map_c2m(map_context_ptr, &
-                                     blockno,xc,yc,zc,xd1,yd1,zd1)
+                !!call fclaw3d_map_c2m(map_context_ptr, &
+                !!                     blockno,xc,yc,zc,xd1,yd1,zd1)
 
                 !! whole integer indices are cell centers. 
                 if (abs(mod(i,2)) .eq. 1) then
@@ -187,8 +187,8 @@ subroutine fclaw3d_metric_fort_compute_volume_general(mx,my,mz, mbc, blockno, &
                             yef = ye + jj*dyf
                             zef = ze + kk*dzf
 
-                            call fclaw3d_map_c2m(cont, & 
-                                blockno,xef,yef,zef, xp1,yp1,zp1)
+                            !! call fclaw3d_map_c2m(cont, & 
+                            !!     blockno,xef,yef,zef, xp1,yp1,zp1)
 
                             hexfine(ii,jj,kk,1) = xp1
                             hexfine(ii,jj,kk,2) = yp1
@@ -312,8 +312,8 @@ subroutine fclaw3d_metric_fort_compute_volume_affine(mx,my,mz, mbc, blockno, &
                 ye = ylower + (j-1)*dy
                 ze = zlower + (k-1)*dz
 
-                call fclaw3d_map_c2m(cont, & 
-                                blockno,xe,ye,ze, xd1,yd1,zd1)
+                !! call fclaw3d_map_c2m(cont, & 
+                !!                 blockno,xe,ye,ze, xd1,yd1,zd1)
 
                 xd(i,j,k) = xd1
                 yd(i,j,k) = yd1

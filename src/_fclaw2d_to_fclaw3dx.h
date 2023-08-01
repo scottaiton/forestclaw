@@ -37,6 +37,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_metric_vtable_initialize     fclaw3dx_metric_vtable_initialize
 #define fclaw2d_metric_patch_nodes_size      fclaw3dx_metric_patch_nodes_size
 
+#define fclaw3d_metric_vtable_t              fclaw3dx_metric_vtable_t
+#define fclaw3d_metric_vt                    fclaw3dx_metric_vt
+#define fclaw3d_metric_patch_scalar          fclaw3dx_metric_patch_scalar
+#define fclaw3d_metric_patch_new             fclaw3dx_metric_patch_new
+#define fclaw3d_metric_patch_delete          fclaw3dx_metric_patch_delete
+#define fclaw3d_metric_patch_build           fclaw3dx_metric_patch_build
+#define fclaw3d_metric_patch_build_from_fine fclaw3dx_metric_patch_build_from_fine
+#define fclaw3d_metric_vtable_initialize     fclaw3dx_metric_vtable_initialize
+#define fclaw3d_metric_patch_get_area        fclaw3dx_metric_patch_get_volume
+#define fclaw3d_metric_get_metric_patch      fclaw3dx_metric_get_metric_patch
+#define fclaw3d_metric_patch_compute_area    fclaw3dx_metric_patch_compute_volume
+#define fclaw3d_metric_vtable_initialize     fclaw3dx_metric_vtable_initialize
+#define fclaw3d_metric_patch_nodes_size      fclaw3dx_metric_patch_nodes_size
+#define fclaw3d_metric_patch_grid_data       fclaw3dx_metric_patch_grid_data
+#define fclaw3d_metric_patch_mesh_data       fclaw3dx_metric_patch_mesh_data
+#define fclaw3d_metric_patch_basis           fclaw3dx_metric_patch_basis
+#define fclaw3d_metric_patch_define          fclaw3dx_metric_patch_define
+
 // static names
 #define metric_average_area_from_fine        metric_average_volume_from_fine
 
@@ -49,6 +67,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_clawpatch_metric_vector      fclaw3dx_clawpatch_metric_basis
 #define fclaw2d_clawpatch_metric_data        fclaw3dx_clawpatch_metric_data
 #define fclaw2d_clawpatch_get_area           fclaw3dx_clawpatch_get_volume
+#define fclaw3d_clawpatch_get_metric_patch   fclaw3dx_clawpatch_get_metric_patch
+#define fclaw3d_clawpatch_metric_scalar      fclaw3dx_clawpatch_metric_scalar
+#define fclaw3d_clawpatch_metric_basis       fclaw3dx_clawpatch_metric_basis
+#define fclaw3d_clawpatch_metric_data        fclaw3dx_clawpatch_metric_data
+#define fclaw3d_clawpatch_get_volume         fclaw3dx_clawpatch_get_volume
 #define clawpatch_get_area                   clawpatch_get_volume
 
 //fclaw2d_clawpatch_conservation.h
