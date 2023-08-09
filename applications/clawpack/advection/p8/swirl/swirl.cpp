@@ -26,12 +26,13 @@
 #include "swirl_user.h"
 
 #include <fclaw3d_defs.h>
+#include <fclaw_math.h>
 
 static
 fclaw3d_domain_t* create_domain(sc_MPI_Comm mpicomm,
                                 fclaw_options_t* fclaw_opt,
                                 user_options_t *user,
-                                void *clawpatch_opt,
+                                fclaw3d_clawpatch_options_t *clawpatch_opt,
                                 void *claw3_opt)
 {
     /* Mapped, multi-block domain */
@@ -51,10 +52,8 @@ fclaw3d_domain_t* create_domain(sc_MPI_Comm mpicomm,
 
     int minlevel = fclaw_opt->minlevel;
 
-#ifdef P8HACK
     int mx = clawpatch_opt->mx;
     int check = mi*mx*pow_int(2,minlevel);
-#endif
 
     switch (user->example)
     {
@@ -183,11 +182,10 @@ main (int argc, char **argv)
 
     /* Options */
     user_options_t               *user_opt;
+    fclaw3d_clawpatch_options_t  *clawpatch_opt = NULL;
 #if 0
-    fclaw3dx_clawpatch_options_t *clawpatch_opt = NULL;
     fc3d_clawpack46_options_t    *claw46_opt = NULL;
 #endif
-    void                         *clawpatch_opt = NULL;
     void                         *claw46_opt = NULL;
     fclaw_options_t              *fclaw_opt;
     sc_options_t                 *options;
@@ -207,8 +205,8 @@ main (int argc, char **argv)
     /* Create new options packages */
     fclaw_opt =                   fclaw_options_register(app,  NULL,       "fclaw_options.ini");
 
+    clawpatch_opt =   fclaw3d_clawpatch_options_register(app, "clawpatch", "fclaw_options.ini");
 #ifdef P8HACK
-    clawpatch_opt =  fclaw3dx_clawpatch_options_register(app, "clawpatch", "fclaw_options.ini");
     claw46_opt =        fc3d_clawpack46_options_register(app, "claw3",     "fclaw_options.ini");
 #endif /* P8HACK */
 
@@ -234,8 +232,8 @@ main (int argc, char **argv)
         /* Store option packages in glob */
         fclaw3d_options_store           (glob, fclaw_opt);
 
+        fclaw3d_clawpatch_options_store (glob, clawpatch_opt);
 #ifdef P8HACK
-        fclaw3dx_clawpatch_options_store(glob, clawpatch_opt);
         fc3d_clawpack46_options_store   (glob, claw46_opt);
 #endif /* P8HACK */
         swirl_options_store             (glob, user_opt);

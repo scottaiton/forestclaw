@@ -28,15 +28,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw3d_include_all.h>
 
-#ifdef P8HACK
 
-#include <fclaw3dx_clawpatch_pillow.h>
+//#include <fclaw3d_clawpatch_pillow.h>
 
 /* Headers for both Clawpack 4.6 and  Clawpack 5.0 */
-#include <fclaw3dx_clawpatch.h>
-#include <fclaw3dx_clawpatch_options.h>
-#include <fclaw3dx_clawpatch_fort.h>
+#include <fclaw3d_clawpatch.h>
+#include <fclaw3d_clawpatch_options.h>
+#include <fclaw3d_clawpatch_fort.h>
 
+#ifdef P8HACK
 
 /* Clawpack 4.6 headers */  
 #include <fc3d_clawpack46.h>  
