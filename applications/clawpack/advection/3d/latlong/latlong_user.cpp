@@ -73,8 +73,8 @@ void latlong_link_solvers(fclaw2d_global_t *glob)
     const user_options_t   *user = latlong_get_options(glob);
     if (user->claw_version == 4)
     {
-        fc3d_clawpack46_vtable_t *clawpack46_vt = fc3d_clawpack46_vt(glob);
-        fc3d_clawpack46_options_t *clawopt = fc3d_clawpack46_get_options(glob);
+        fc3dx_clawpack46_vtable_t *clawpack46_vt = fc3dx_clawpack46_vt(glob);
+        fc3dx_clawpack46_options_t *clawopt = fc3dx_clawpack46_get_options(glob);
 
         /* mcapa should be non-zero for mapped examples */
         FCLAW_ASSERT(clawopt->mcapa != 0);

@@ -77,8 +77,8 @@ void sphere_link_solvers(fclaw2d_global_t *glob)
 
     if (user->claw_version == 4)
     {
-        fc3d_clawpack46_vtable_t *claw46_vt = fc3d_clawpack46_vt(glob);
-        fc3d_clawpack46_options_t *claw46_opt = fc3d_clawpack46_get_options(glob);
+        fc3dx_clawpack46_vtable_t *claw46_vt = fc3dx_clawpack46_vt(glob);
+        fc3dx_clawpack46_options_t *claw46_opt = fc3dx_clawpack46_get_options(glob);
 
         FCLAW_ASSERT(claw46_opt->mcapa != 0);
 

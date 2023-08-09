@@ -18,8 +18,8 @@ add_library(clawpack3_46)
 set_target_properties(clawpack3_46 PROPERTIES EXPORT_NAME CLAWPACK3_46)
 
 target_sources(clawpack3_46 PRIVATE
-  fc3d_clawpack46.cpp
-  fc3d_clawpack46_options.c
+  fc3dx_clawpack46.cpp
+  fc3dx_clawpack46_options.c
   $<TARGET_OBJECTS:clawpack3_46_f>
 )
 
@@ -34,9 +34,9 @@ target_include_directories(clawpack3_46
 # -- install
 
 install(FILES
-	fc3d_clawpack46.h
+	fc3dx_clawpack46.h
   fc3d_clawpack46_fort.h
-	fc3d_clawpack46_options.h
+	fc3dx_clawpack46_options.h
   fc3d_clawpack46_user_fort.h
 DESTINATION include
 )
@@ -54,8 +54,8 @@ target_link_libraries(FORESTCLAW::CLAWPACK3_46 INTERFACE clawpack3_46)
 
 if(BUILD_TESTING)
   add_executable(fc3d_clawpack46.TEST
-    fc3d_clawpack46.h.TEST.cpp
-    fc3d_clawpack46_options.h.TEST.cpp
+    fc3dx_clawpack46.h.TEST.cpp
+    fc3dx_clawpack46_options.h.TEST.cpp
   )
   target_link_libraries(fc3d_clawpack46.TEST testutils clawpack3_46)
   register_unit_tests(fc3d_clawpack46.TEST)

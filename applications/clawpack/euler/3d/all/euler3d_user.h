@@ -36,8 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 /* Clawpack 4.6 headers */  
-#include <fc3d_clawpack46.h>  
-#include <fc3d_clawpack46_options.h>
+#include <fc3dx_clawpack46.h>  
+#include <fc3dx_clawpack46_options.h>
 #include <fc3d_clawpack46_fort.h>  
 #include <fc3d_clawpack46_user_fort.h>  
 #include <fclaw3dx_clawpatch46_fort.h>

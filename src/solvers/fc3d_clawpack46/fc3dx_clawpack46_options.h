@@ -37,9 +37,9 @@ extern "C"
 #endif
 
 struct fclaw2d_global;
-typedef struct fc3d_clawpack46_options fc3d_clawpack46_options_t;
+typedef struct fc3dx_clawpack46_options fc3dx_clawpack46_options_t;
 
-struct fc3d_clawpack46_options
+struct fc3dx_clawpack46_options
 {
     int mwaves;
 
@@ -64,12 +64,12 @@ struct fc3d_clawpack46_options
     int is_registered;
 };
 
-fclaw_exit_type_t fc3d_clawpack46_postprocess (fc3d_clawpack46_options_t *
+fclaw_exit_type_t fc3dx_clawpack46_postprocess (fc3dx_clawpack46_options_t *
                                                clawopt);
 
-fclaw_exit_type_t fc3d_clawpack46_check (fc3d_clawpack46_options_t * clawopt);
+fclaw_exit_type_t fc3dx_clawpack46_check (fc3dx_clawpack46_options_t * clawopt);
 
-void fc3d_clawpack46_reset (fc3d_clawpack46_options_t * clawopt);
+void fc3dx_clawpack46_reset (fc3dx_clawpack46_options_t * clawopt);
 
 /**
  * @brief Register options in SC
@@ -77,21 +77,21 @@ void fc3d_clawpack46_reset (fc3d_clawpack46_options_t * clawopt);
  * @param a the app context
  * @param section the section name
  * @param configfile the config file
- * @return fc3d_clawpack46_options_t* a newly allocated options struct
+ * @return fc3dx_clawpack46_options_t* a newly allocated options struct
  */
-fc3d_clawpack46_options_t*  fc3d_clawpack46_options_register (fclaw_app_t * app,
+fc3dx_clawpack46_options_t*  fc3dx_clawpack46_options_register (fclaw_app_t * app,
                                                               const char *section,
                                                               const char *configfile);
 
-void fc3d_clawpack46_package_register(fclaw_app_t* app,
-                                      fc3d_clawpack46_options_t* clawopt);
+void fc3dx_clawpack46_package_register(fclaw_app_t* app,
+                                      fc3dx_clawpack46_options_t* clawopt);
 
-fc3d_clawpack46_options_t* fc3d_clawpack46_get_options(struct fclaw2d_global *glob);
+fc3dx_clawpack46_options_t* fc3dx_clawpack46_get_options(struct fclaw2d_global *glob);
 
-void fc3d_clawpack46_options_store (struct fclaw2d_global* glob, 
-                                    fc3d_clawpack46_options_t* clawopt);
+void fc3dx_clawpack46_options_store (struct fclaw2d_global* glob, 
+                                    fc3dx_clawpack46_options_t* clawopt);
 
-void fc3d_clawpack46_output(struct fclaw2d_global *glob, int iframe);
+void fc3dx_clawpack46_output(struct fclaw2d_global *glob, int iframe);
 
 
 #ifdef __cplusplus

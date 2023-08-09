@@ -23,14 +23,14 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "fc3d_clawpack46_options.h"
+#include "fc3dx_clawpack46_options.h"
 
 #include <fclaw2d_clawpatch_options.h>
 #include <fclaw2d_global.h>
 #include <fclaw_options.h>
 
 static void*
-clawpack_register (fc3d_clawpack46_options_t* clawopt, sc_options_t * opt)
+clawpack_register (fc3dx_clawpack46_options_t* clawopt, sc_options_t * opt)
 {
     fclaw_options_add_int_array (opt, 0, "order", &clawopt->order_string,
                                "2 2 2", &clawopt->order, 3,
@@ -71,7 +71,7 @@ clawpack_register (fc3d_clawpack46_options_t* clawopt, sc_options_t * opt)
 }
 
 static fclaw_exit_type_t
-clawpack_postprocess (fc3d_clawpack46_options_t * clawopt)
+clawpack_postprocess (fc3dx_clawpack46_options_t * clawopt)
 {
     fclaw_options_convert_int_array (clawopt->mthbc_string, &clawopt->mthbc,6);
     
@@ -84,7 +84,7 @@ clawpack_postprocess (fc3d_clawpack46_options_t * clawopt)
 
 
 static fclaw_exit_type_t
-clawpack_check(fc3d_clawpack46_options_t *clawopt)
+clawpack_check(fc3dx_clawpack46_options_t *clawopt)
 {
     clawopt->method[0] = 0;  /* Time stepping is controlled outside of clawpack */
 
@@ -99,7 +99,7 @@ clawpack_check(fc3d_clawpack46_options_t *clawopt)
 }
 
 static
-void clawpack_destroy (fc3d_clawpack46_options_t * clawopt)
+void clawpack_destroy (fc3dx_clawpack46_options_t * clawopt)
 {
     fclaw_options_destroy_array (clawopt->mthbc);
     fclaw_options_destroy_array (clawopt->order);
@@ -114,12 +114,12 @@ void clawpack_destroy (fc3d_clawpack46_options_t * clawopt)
 static void*
 options_register (fclaw_app_t * app, void *package, sc_options_t * opt)
 {
-    fc3d_clawpack46_options_t *clawopt;
+    fc3dx_clawpack46_options_t *clawopt;
 
     FCLAW_ASSERT (app != NULL);
     FCLAW_ASSERT (package != NULL);
 
-    clawopt = (fc3d_clawpack46_options_t*) package;
+    clawopt = (fc3dx_clawpack46_options_t*) package;
 
     return clawpack_register(clawopt,opt);
 }
@@ -128,13 +128,13 @@ options_register (fclaw_app_t * app, void *package, sc_options_t * opt)
 static fclaw_exit_type_t
 options_postprocess (fclaw_app_t * app, void *package, void *registered)
 {
-    fc3d_clawpack46_options_t *clawopt;
+    fc3dx_clawpack46_options_t *clawopt;
 
     FCLAW_ASSERT (app != NULL);
     FCLAW_ASSERT (package != NULL);
     FCLAW_ASSERT (registered == NULL);
 
-    clawopt = (fc3d_clawpack46_options_t*) package;
+    clawopt = (fc3dx_clawpack46_options_t*) package;
     FCLAW_ASSERT (clawopt->is_registered);
 
     return clawpack_postprocess (clawopt);
@@ -144,13 +144,13 @@ options_postprocess (fclaw_app_t * app, void *package, void *registered)
 static fclaw_exit_type_t
 options_check (fclaw_app_t * app, void *package, void *registered)
 {
-    fc3d_clawpack46_options_t *clawopt;
+    fc3dx_clawpack46_options_t *clawopt;
 
     FCLAW_ASSERT (app != NULL);
     FCLAW_ASSERT (package != NULL);
     FCLAW_ASSERT (registered == NULL);
 
-    clawopt = (fc3d_clawpack46_options_t*) package;
+    clawopt = (fc3dx_clawpack46_options_t*) package;
     FCLAW_ASSERT (clawopt->is_registered);
 
     return clawpack_check(clawopt);
@@ -159,13 +159,13 @@ options_check (fclaw_app_t * app, void *package, void *registered)
 static void
 options_destroy (fclaw_app_t * app, void *package, void *registered)
 {
-    fc3d_clawpack46_options_t *clawopt;
+    fc3dx_clawpack46_options_t *clawopt;
 
     FCLAW_ASSERT (app != NULL);
     FCLAW_ASSERT (package != NULL);
     FCLAW_ASSERT (registered == NULL);
 
-    clawopt = (fc3d_clawpack46_options_t*) package;
+    clawopt = (fc3dx_clawpack46_options_t*) package;
     FCLAW_ASSERT (clawopt->is_registered);
 
     clawpack_destroy (clawopt);
@@ -183,15 +183,15 @@ static const fclaw_app_options_vtable_t clawpack_options_vtable = {
 /* ----------------------------------------------------------
    Public interface to clawpack options
    ---------------------------------------------------------- */
-fc3d_clawpack46_options_t*  fc3d_clawpack46_options_register (fclaw_app_t * app,
+fc3dx_clawpack46_options_t*  fc3dx_clawpack46_options_register (fclaw_app_t * app,
                                                               const char *section,
                                                               const char *configfile)
 {
-    fc3d_clawpack46_options_t *clawopt;
+    fc3dx_clawpack46_options_t *clawopt;
 
     FCLAW_ASSERT (app != NULL);
 
-    clawopt = FCLAW_ALLOC (fc3d_clawpack46_options_t, 1);
+    clawopt = FCLAW_ALLOC (fc3dx_clawpack46_options_t, 1);
     fclaw_app_options_register (app, section, configfile,
                                 &clawpack_options_vtable, clawopt);
     
@@ -199,12 +199,12 @@ fc3d_clawpack46_options_t*  fc3d_clawpack46_options_register (fclaw_app_t * app,
     return clawopt;
 }
 
-fc3d_clawpack46_options_t* fc3d_clawpack46_get_options(fclaw2d_global_t *glob)
+fc3dx_clawpack46_options_t* fc3dx_clawpack46_get_options(fclaw2d_global_t *glob)
 {
-    return (fc3d_clawpack46_options_t*) fclaw2d_global_get_options(glob,"fc3d_clawpack46");
+    return (fc3dx_clawpack46_options_t*) fclaw2d_global_get_options(glob,"fc3dx_clawpack46");
 }
 
-void fc3d_clawpack46_options_store (fclaw2d_global_t* glob, fc3d_clawpack46_options_t* clawopt)
+void fc3dx_clawpack46_options_store (fclaw2d_global_t* glob, fc3dx_clawpack46_options_t* clawopt)
 {
-    fclaw2d_global_options_store(glob, "fc3d_clawpack46", clawopt);
+    fclaw2d_global_options_store(glob, "fc3dx_clawpack46", clawopt);
 }

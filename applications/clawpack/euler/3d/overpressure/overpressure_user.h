@@ -31,8 +31,8 @@
 #include <fclaw3dx_clawpatch_options.h>
 #include <fclaw3dx_clawpatch.h>
 
-#include <fc3d_clawpack46.h>
-#include <fc3d_clawpack46_options.h>
+#include <fc3dx_clawpack46.h>
+#include <fc3dx_clawpack46_options.h>
 
 #include "../all/euler3d_user.h"
 

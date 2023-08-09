@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static
 fclaw2d_domain_t* create_domain(sc_MPI_Comm mpicomm, 
                                 fclaw_options_t* fclaw_opt,
-                                fc3d_clawpack46_options_t *claw3_opt,
+                                fc3dx_clawpack46_options_t *claw3_opt,
                                 user_options_t *user,
                                 fclaw3dx_clawpatch_options_t *clawpatch_opt)
 {
@@ -137,7 +137,7 @@ void run_program(fclaw2d_global_t* glob)
     /* Initialize virtual tables for solvers */
     if (user_opt->claw_version == 4)
     {
-        fc3d_clawpack46_solver_initialize(glob);
+        fc3dx_clawpack46_solver_initialize(glob);
     }
     else if (user_opt->claw_version == 5)
     {
@@ -165,7 +165,7 @@ main (int argc, char **argv)
     /* Options */
     fclaw_options_t               *fclaw_opt;
     fclaw3dx_clawpatch_options_t  *clawpatch_opt;
-    fc3d_clawpack46_options_t     *claw46_opt;
+    fc3dx_clawpack46_options_t     *claw46_opt;
     user_options_t                *user_opt;
 
     fclaw2d_global_t            *glob;
@@ -178,7 +178,7 @@ main (int argc, char **argv)
     /* Create new options packages */
     fclaw_opt =                   fclaw_options_register(app,  NULL,        "fclaw_options.ini");
     clawpatch_opt =   fclaw3dx_clawpatch_options_register(app, "clawpatch",  "fclaw_options.ini");
-    claw46_opt =        fc3d_clawpack46_options_register(app, "claw3", "fclaw_options.ini");
+    claw46_opt =        fc3dx_clawpack46_options_register(app, "claw3", "fclaw_options.ini");
     user_opt =              overpressure_options_register(app,"fclaw_options.ini");  
 
     /* Read configuration file(s) and command line, and process options */
@@ -199,7 +199,7 @@ main (int argc, char **argv)
         /* Store option packages in glob */
         fclaw2d_options_store           (glob, fclaw_opt);
         fclaw3dx_clawpatch_options_store(glob, clawpatch_opt);
-        fc3d_clawpack46_options_store   (glob, claw46_opt);
+        fc3dx_clawpack46_options_store   (glob, claw46_opt);
         overpressure_options_store       (glob, user_opt);
 
         /* Run the program */

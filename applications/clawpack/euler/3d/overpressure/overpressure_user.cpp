@@ -32,8 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw3dx_clawpatch.h>
 #include <fclaw3dx_clawpatch_fort.h>
 
-#include <fc3d_clawpack46.h>
-#include <fc3d_clawpack46_options.h>
+#include <fc3dx_clawpack46.h>
+#include <fc3dx_clawpack46_options.h>
 
 #include <fc3d_clawpack46_user_fort.h>
 #include <fclaw3dx_metric.h>
@@ -43,7 +43,7 @@ void overpressure_problem_setup(fclaw2d_global_t* glob)
 {
     const user_options_t* user = overpressure_get_options(glob);
     fclaw_options_t* fclaw_opt = fclaw2d_get_options(glob);
-    fc3d_clawpack46_options_t *clawopt = fc3d_clawpack46_get_options(glob);
+    fc3dx_clawpack46_options_t *clawopt = fc3dx_clawpack46_get_options(glob);
 
     if (glob->mpirank == 0)
     {
@@ -110,7 +110,7 @@ void overpressure_patch_setup(fclaw2d_global_t *glob,
     double *aux;
     fclaw3dx_clawpatch_aux_data(glob,patch,&aux,&maux);
 
-    fc3d_clawpack46_options_t *clawopt = fc3d_clawpack46_get_options(glob);
+    fc3dx_clawpack46_options_t *clawopt = fc3dx_clawpack46_get_options(glob);
 
     /* Use mcapa as an offset into geometry */
     int mcapa = clawopt->mcapa;
@@ -134,8 +134,8 @@ void overpressure_link_solvers(fclaw2d_global_t *glob)
 
     if (user->claw_version == 4)
     {
-        fc3d_clawpack46_vtable_t *claw46_vt = fc3d_clawpack46_vt(glob);
-        fc3d_clawpack46_options_t *clawopt = fc3d_clawpack46_get_options(glob);
+        fc3dx_clawpack46_vtable_t *claw46_vt = fc3dx_clawpack46_vt(glob);
+        fc3dx_clawpack46_options_t *clawopt = fc3dx_clawpack46_get_options(glob);
 
         /* Initial configuration defined in fdisc.f90 */
         claw46_vt->fort_qinit  = &CLAWPACK46_QINIT;
