@@ -247,6 +247,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_domain_ghost_exchange_begin fclaw3d_domain_ghost_exchange_begin
 #define fclaw2d_domain_ghost_exchange_end   fclaw3d_domain_ghost_exchange_end
 #define fclaw2d_domain_free_after_exchange  fclaw3d_domain_free_after_exchange
+#define fclaw2d_output_frame            fclaw3d_output_frame
 
 #define fclaw2d_exchange_setup          fclaw3d_exchange_setup
 #define fclaw2d_exchange_delete         fclaw3d_exchange_delete

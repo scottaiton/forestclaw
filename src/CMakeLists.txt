@@ -46,11 +46,15 @@ add_library(forestclaw_c OBJECT
   forestclaw3d.c
   fclaw3d_convenience.c
   fclaw3d_domain.c
+  fclaw3d_domain.c
+  fclaw3d_diagnostics.c
   fclaw3d_global.c
   fclaw3d_map.c
   fclaw3d_patch.c
   fclaw3d_exchange.c
   fclaw3d_options.c
+  fclaw3d_output.c
+  fclaw3d_vtable.c
   fclaw_domain.c
   fclaw_global.c
   fp_exception_glibc_extension.c

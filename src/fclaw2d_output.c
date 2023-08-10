@@ -23,10 +23,21 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef P4_TO_P8
+
 #include <fclaw2d_output.h>
 #include <fclaw2d_global.h>
 #include <fclaw2d_options.h>
 #include <fclaw2d_vtable.h>
+
+#else
+
+#include <fclaw3d_output.h>
+#include <fclaw3d_global.h>
+#include <fclaw3d_options.h>
+#include <fclaw3d_vtable.h>
+
+#endif
 
 /* -----------------------------------------------------------------------
     Public interface
@@ -65,10 +76,13 @@ fclaw2d_output_frame (fclaw2d_global_t * glob, int iframe)
     }
 
 
+/* only 2d */
+#ifndef P4_TO_P8
     if (fclaw_opt->tikz_out)
     {
         fclaw2d_output_frame_tikz(glob,iframe);
     }
+#endif
 }
 
 

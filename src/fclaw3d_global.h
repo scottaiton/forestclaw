@@ -89,9 +89,9 @@ struct fclaw3d_global
     /* CB: is this a good place for the accumulator?
            Would it be possible to add and retrieve it as an anonymous
            object that does not need to be known to this file? */
+#endif
 
     struct fclaw3d_diagnostics_accumulator *acc;
-#endif
 
     void *user;
 };
