@@ -23,8 +23,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FC3DX_CLAWPACK46_OPTIONS_H
-#define FC3DX_CLAWPACK46_OPTIONS_H
+#ifndef FC3D_CLAWPACK46_OPTIONS_H
+#define FC3D_CLAWPACK46_OPTIONS_H
 
 #include <fclaw_base.h>
 
@@ -36,10 +36,10 @@ extern "C"
 #endif
 #endif
 
-struct fclaw2d_global;
-typedef struct fc3dx_clawpack46_options fc3dx_clawpack46_options_t;
+struct fclaw3d_global;
+typedef struct fc3d_clawpack46_options fc3d_clawpack46_options_t;
 
-struct fc3dx_clawpack46_options
+struct fc3d_clawpack46_options
 {
     int mwaves;
 
@@ -64,12 +64,12 @@ struct fc3dx_clawpack46_options
     int is_registered;
 };
 
-fclaw_exit_type_t fc3dx_clawpack46_postprocess (fc3dx_clawpack46_options_t *
+fclaw_exit_type_t fc3d_clawpack46_postprocess (fc3d_clawpack46_options_t *
                                                clawopt);
 
-fclaw_exit_type_t fc3dx_clawpack46_check (fc3dx_clawpack46_options_t * clawopt);
+fclaw_exit_type_t fc3d_clawpack46_check (fc3d_clawpack46_options_t * clawopt);
 
-void fc3dx_clawpack46_reset (fc3dx_clawpack46_options_t * clawopt);
+void fc3d_clawpack46_reset (fc3d_clawpack46_options_t * clawopt);
 
 /**
  * @brief Register options in SC
@@ -77,21 +77,21 @@ void fc3dx_clawpack46_reset (fc3dx_clawpack46_options_t * clawopt);
  * @param a the app context
  * @param section the section name
  * @param configfile the config file
- * @return fc3dx_clawpack46_options_t* a newly allocated options struct
+ * @return fc3d_clawpack46_options_t* a newly allocated options struct
  */
-fc3dx_clawpack46_options_t*  fc3dx_clawpack46_options_register (fclaw_app_t * app,
+fc3d_clawpack46_options_t*  fc3d_clawpack46_options_register (fclaw_app_t * app,
                                                               const char *section,
                                                               const char *configfile);
 
-void fc3dx_clawpack46_package_register(fclaw_app_t* app,
-                                      fc3dx_clawpack46_options_t* clawopt);
+void fc3d_clawpack46_package_register(fclaw_app_t* app,
+                                      fc3d_clawpack46_options_t* clawopt);
 
-fc3dx_clawpack46_options_t* fc3dx_clawpack46_get_options(struct fclaw2d_global *glob);
+fc3d_clawpack46_options_t* fc3d_clawpack46_get_options(struct fclaw3d_global *glob);
 
-void fc3dx_clawpack46_options_store (struct fclaw2d_global* glob, 
-                                    fc3dx_clawpack46_options_t* clawopt);
+void fc3d_clawpack46_options_store (struct fclaw3d_global* glob, 
+                                    fc3d_clawpack46_options_t* clawopt);
 
-void fc3dx_clawpack46_output(struct fclaw2d_global *glob, int iframe);
+void fc3d_clawpack46_output(struct fclaw3d_global *glob, int iframe);
 
 
 #ifdef __cplusplus

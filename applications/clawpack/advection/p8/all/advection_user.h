@@ -36,7 +36,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw3d_clawpatch_options.h>
 #include <fclaw3d_clawpatch_fort.h>
 
-#ifdef P8HACK
 
 /* Clawpack 4.6 headers */  
 #include <fc3d_clawpack46.h>  
@@ -55,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 
+#ifdef P8HACK
 /* Headers for common FORTRAN files */
 #include "advection_user_fort3.h"
 

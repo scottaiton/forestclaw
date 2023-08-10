@@ -20,6 +20,8 @@ set_target_properties(clawpack3_46 PROPERTIES EXPORT_NAME CLAWPACK3_46)
 target_sources(clawpack3_46 PRIVATE
   fc3dx_clawpack46.cpp
   fc3dx_clawpack46_options.c
+  fc3d_clawpack46.cpp
+  fc3d_clawpack46_options.c
   $<TARGET_OBJECTS:clawpack3_46_f>
 )
 

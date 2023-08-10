@@ -23,8 +23,8 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FC3DX_CLAWPACK46_H
-#define FC3DX_CLAWPACK46_H
+#ifndef FC3D_CLAWPACK46_H
+#define FC3D_CLAWPACK46_H
 
 #include <fclaw_base.h>   /* Needed for FCLAW_F77_FUNC */
 
@@ -33,28 +33,28 @@ extern "C"
 {
 #endif
 
-struct fclaw2d_global;
-struct fclaw2d_patch;
+struct fclaw3d_global;
+struct fclaw3d_patch;
 
-typedef  struct fc3dx_clawpack46_vtable  fc3dx_clawpack46_vtable_t;
+typedef  struct fc3d_clawpack46_vtable  fc3d_clawpack46_vtable_t;
 
 
 /* --------------------------- Clawpack solver functions ------------------------------ */
 
 /* Virtualize clawpack-specific wrapper functions */
-typedef void (*clawpack46_src3x_t)(struct fclaw2d_global* glob,
-								   struct fclaw2d_patch *this_patch,
-								   int blockno,
-								   int patchno,
-								   double t,
-								   double dt);
+typedef void (*clawpack46_src3_t)(struct fclaw3d_global* glob,
+								  struct fclaw3d_patch *this_patch,
+								  int blockno,
+								  int patchno,
+								  double t,
+								  double dt);
 	
-typedef void (*clawpack46_b4step3x_t)(struct fclaw2d_global* glob,
-									  struct fclaw2d_patch *this_patch,
-									  int this_block_idx,
-									  int this_patch_idx,
-									  double t,
-									  double dt);
+typedef void (*clawpack46_b4step3_t)(struct fclaw3d_global* glob,
+									 struct fclaw3d_patch *this_patch,
+									 int this_block_idx,
+									 int this_patch_idx,
+									 double t,
+									 double dt);
 
 /* ---------------------- Clawpack solver functions (Fortran) ------------------------- */
 
@@ -163,12 +163,12 @@ typedef void (*clawpack46_fort_rpn3_cons_t)(const int* meqn, const int* maux,
 
 /* --------------------------------- Virtual table ------------------------------------ */
 
-struct fc3dx_clawpack46_vtable
+struct fc3d_clawpack46_vtable
 {
 
 	/* C wrappers */
-	clawpack46_b4step3x_t   b4step3;
-	clawpack46_src3x_t      src3;
+	clawpack46_b4step3_t   b4step3;
+	clawpack46_src3_t      src3;
 
 	/* Fortran routines */
 	clawpack46_fort_setprob_t   fort_setprob;
@@ -194,51 +194,51 @@ struct fc3dx_clawpack46_vtable
  * 
  * fclaw2d_vtables_intialize should be called before this function.
  * 
- * fclaw3dx_clawpatch_options, and fc3dx_clawpack46_options should be stored in glob.
- * fc3dx_clawpack46_options will be changed in this call.
+ * fclaw3dx_clawpatch_options, and fc3d_clawpack46_options should be stored in glob.
+ * fc3d_clawpack46_options will be changed in this call.
  * 
  * @param glob the global context
  */
-void fc3dx_clawpack46_solver_initialize(struct fclaw2d_global* glob);
+void fc3d_clawpack46_solver_initialize(struct fclaw3d_global* glob);
 
 /**
  * @brief Get the clawpack46 vtable
  * 
  * @param glob the global context
- * @return fc3dx_clawpack46_vtable_t* the vtable
+ * @return fc3d_clawpack46_vtable_t* the vtable
  */
-fc3dx_clawpack46_vtable_t* fc3dx_clawpack46_vt(struct fclaw2d_global* glob);
+fc3d_clawpack46_vtable_t* fc3d_clawpack46_vt(struct fclaw3d_global* glob);
 
 
 /* ----------------------------- User access to solver functions ---------------------- */
 
-void fc3dx_clawpack46_setprob(struct fclaw2d_global* glob);
+void fc3d_clawpack46_setprob(struct fclaw3d_global* glob);
 
 
-void fc3dx_clawpack46_setaux(struct fclaw2d_global* glob,
-							struct fclaw2d_patch *this_patch,
+void fc3d_clawpack46_setaux(struct fclaw3d_global* glob,
+							struct fclaw3d_patch *this_patch,
 							int this_block_idx,
 							int this_patch_idx);
 
-void fc3dx_clawpack46_set_capacity(struct fclaw2d_global* glob,
-								  struct fclaw2d_patch *this_patch,
+void fc3d_clawpack46_set_capacity(struct fclaw3d_global* glob,
+								  struct fclaw3d_patch *this_patch,
 								  int this_block_idx,
 								  int this_patch_idx);
 
-void fc3dx_clawpack46_qinit(struct fclaw2d_global* glob,
-						   struct fclaw2d_patch *this_patch,
+void fc3d_clawpack46_qinit(struct fclaw3d_global* glob,
+						   struct fclaw3d_patch *this_patch,
 						   int this_block_idx,
 						   int this_patch_idx);
 
-void fc3dx_clawpack46_b4step3(struct fclaw2d_global* glob,
-							 struct fclaw2d_patch *this_patch,
+void fc3d_clawpack46_b4step3(struct fclaw3d_global* glob,
+							 struct fclaw3d_patch *this_patch,
 							 int this_block_idx,
 							 int this_patch_idx,
 							 double t,
 							 double dt);
 
-void fc3dx_clawpack46_bc3(struct fclaw2d_global *glob,
-						 struct fclaw2d_patch *this_patch,
+void fc3d_clawpack46_bc3(struct fclaw3d_global *glob,
+						 struct fclaw3d_patch *this_patch,
 						 int this_block_idx,
 						 int this_patch_idx,
 						 double t,
@@ -246,8 +246,8 @@ void fc3dx_clawpack46_bc3(struct fclaw2d_global *glob,
 						 int intersects_bc[],
 						 int time_interp);
 
-void fc3dx_clawpack46_src2(struct fclaw2d_global* glob,
-						  struct fclaw2d_patch *this_patch,
+void fc3d_clawpack46_src2(struct fclaw3d_global* glob,
+						  struct fclaw3d_patch *this_patch,
 						  int this_block_idx,
 						  int this_patch_idx,
 						  double t,

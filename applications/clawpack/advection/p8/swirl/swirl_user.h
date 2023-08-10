@@ -50,11 +50,7 @@ typedef struct user_options
 
 } user_options_t;
 
-#ifdef P8HACK
-
-void swirl_link_solvers(fclaw2d_global_t *glob);
-
-#endif /* P8HACK */
+void swirl_link_solvers(fclaw3d_global_t *glob);
 
 /* ------------------------------------- Options ---------------------------------------*/
 

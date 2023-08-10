@@ -1,0 +1,183 @@
+/*
+Copyright (c) 2012-2022 Carsten Burstedde, Donna Calhoun, Scott Aiton
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+//Metric terms
+#define fclaw3dx_metric_vtable_t              fclaw3d_metric_vtable_t
+#define fclaw3dx_metric_vt                    fclaw3d_metric_vt
+#define fclaw3dx_metric_patch_scalar          fclaw3d_metric_patch_scalar
+#define fclaw3dx_metric_patch_new             fclaw3d_metric_patch_new
+#define fclaw3dx_metric_patch_delete          fclaw3d_metric_patch_delete
+#define fclaw3dx_metric_patch_build           fclaw3d_metric_patch_build
+#define fclaw3dx_metric_patch_build_from_fine fclaw3d_metric_patch_build_from_fine
+#define fclaw3dx_metric_vtable_initialize     fclaw3d_metric_vtable_initialize
+#define fclaw3dx_metric_patch_get_area        fclaw3d_metric_patch_get_volume
+#define fclaw3dx_metric_get_metric_patch      fclaw3d_metric_get_metric_patch
+#define fclaw3dx_metric_patch_compute_area    fclaw3d_metric_patch_compute_volume
+#define fclaw3dx_metric_vtable_initialize     fclaw3d_metric_vtable_initialize
+#define fclaw3dx_metric_patch_nodes_size      fclaw3d_metric_patch_nodes_size
+
+// static names
+#define metric_average_area_from_fine        metric_average_volume_from_fine
+
+// fclaw3d_metric.hpp
+#define fclaw3dx_metric_patch_t               fclaw3d_metric_patch_t
+
+//For Clawpatch
+#define fclaw3dx_clawpatch_get_metric_patch   fclaw3d_clawpatch_get_metric_patch
+#define fclaw3dx_clawpatch_metric_scalar      fclaw3d_clawpatch_metric_scalar
+#define fclaw3dx_clawpatch_metric_vector      fclaw3d_clawpatch_metric_basis
+#define fclaw3dx_clawpatch_metric_data        fclaw3d_clawpatch_metric_data
+#define fclaw3dx_clawpatch_get_area           fclaw3d_clawpatch_get_volume
+#define clawpatch_get_area                   clawpatch_get_volume
+
+
+//fclaw3dx_clawpatch_conservation.h
+#define fclaw3dx_clawpatch_registers_t fclaw3d_clawpatch_registers_t
+#define fclaw3dx_clawpatch_registers fclaw3d_clawpatch_registers
+#define fclaw3dx_clawpatch_packmode fclaw3d_clawpatch_packmode
+#define fclaw3dx_clawpatch_fort_time_sync_f2c_t fclaw3d_clawpatch_fort_time_sync_f2c_t
+#define fclaw3dx_clawpatch_fort_time_sync_samesize_t fclaw3d_clawpatch_fort_time_sync_samesize_t
+#define fclaw3dx_clawpatch_time_sync_new fclaw3d_clawpatch_time_sync_new
+#define fclaw3dx_clawpatch_time_sync_delete fclaw3d_clawpatch_time_sync_delete
+#define fclaw3dx_clawpatch_time_sync_setup fclaw3d_clawpatch_time_sync_setup
+#define fclaw3dx_clawpatch_time_sync_f2c fclaw3d_clawpatch_time_sync_f2c
+#define fclaw3dx_clawpatch_time_sync_samesize fclaw3d_clawpatch_time_sync_samesize
+#define fclaw3dx_clawpatch_time_sync_reset fclaw3d_clawpatch_time_sync_reset
+#define fclaw3dx_clawpatch_time_sync_pack_registers fclaw3d_clawpatch_time_sync_pack_registers
+
+//fclaw3dx_clawpatch_diagnostics.h
+#define error_info_t fclaw3d_clawpatch_error_info_t
+#define fclaw3dx_clawpatch_diagnostics_initialize fclaw3d_clawpatch_diagnostics_initialize
+#define fclaw3dx_clawpatch_diagnostics_compute fclaw3d_clawpatch_diagnostics_compute
+#define fclaw3dx_clawpatch_diagnostics_gather fclaw3d_clawpatch_diagnostics_gather
+#define fclaw3dx_clawpatch_diagnostics_reset fclaw3d_clawpatch_diagnostics_reset
+#define fclaw3dx_clawpatch_diagnostics_finalize fclaw3d_clawpatch_diagnostics_finalize
+#define fclaw3dx_clawpatch_diagnostics_vtable_initialize fclaw3d_clawpatch_diagnostics_vtable_initialize
+#define fclaw3dx_clawpatch_diagnostics_cons_default fclaw3d_clawpatch_diagnostics_cons_default
+#define fclaw3dx_clawpatch_diagnostics_error_default fclaw3d_clawpatch_diagnostics_error_default
+
+//fclaw3dx_clawpatch_fort.h
+#define clawpatch_fort_copy_face_t fclaw3d_clawpatch_fort_copy_face_t
+#define clawpatch_fort_average_face_t fclaw3d_clawpatch_fort_average_face_t
+#define clawpatch_fort_interpolate_face_t fclaw3d_clawpatch_fort_interpolate_face_t
+#define clawpatch_fort_copy_corner_t fclaw3d_clawpatch_fort_copy_corner_t
+#define clawpatch_fort_average_corner_t fclaw3d_clawpatch_fort_average_corner_t
+#define clawpatch_fort_interpolate_corner_t fclaw3d_clawpatch_fort_interpolate_corner_t
+#define clawpatch_fort_tag4refinement_t fclaw3d_clawpatch_fort_tag4refinement_t
+#define clawpatch_fort_tag4coarsening_t fclaw3d_clawpatch_fort_tag4coarsening_t
+#define clawpatch_fort_exceeds_threshold_t fclaw3d_clawpatch_fort_exceeds_threshold_t
+#define clawpatch_fort_interpolate2fine_t fclaw3d_clawpatch_fort_interpolate2fine_t
+#define clawpatch_fort_average2coarse_t fclaw3d_clawpatch_fort_average2coarse_t
+#define clawpatch_fort_timeinterp_t fclaw3d_clawpatch_fort_timeinterp_t
+#define clawpatch_fort_local_ghost_pack_t fclaw3d_clawpatch_fort_local_ghost_pack_t
+#define clawpatch_fort_header_ascii_t fclaw3d_clawpatch_fort_header_ascii_t
+#define clawpatch_fort_output_ascii_t fclaw3d_clawpatch_fort_output_ascii_t
+#define clawpatch_fort_error_t fclaw3d_clawpatch_fort_error_t
+#define clawpatch_fort_conscheck_t fclaw3d_clawpatch_fort_conscheck_t
+//#define clawpatch_fort_area_t fclaw3d_clawpatch_fort_area_t
+#define clawpatch_fort_norm_t fclaw3d_clawpatch_fort_norm_t
+#define FCLAW2D_CLAWPATCH_GET_REFINEMENT_CRITERIA fclaw3d_CLAWPATCH_GET_REFINEMENT_CRITERIA
+#define FCLAW2D_CLAWPATCH_EXCEEDS_THRESHOLD fclaw3d_CLAWPATCH_EXCEEDS_THRESHOLD
+
+//fclaw3dx_clawpatch_options.h
+#define fclaw3dx_clawpatch_options_t fclaw3d_clawpatch_options_t
+#define fclaw3dx_clawpatch_options fclaw3d_clawpatch_options
+#define fclaw3dx_clawpatch_options_register fclaw3d_clawpatch_options_register
+#define fclaw3dx_clawpatch_options_store  fclaw3d_clawpatch_options_store 
+#define fclaw3dx_clawpatch_get_options fclaw3d_clawpatch_get_options
+#define fclaw3dx_clawpatch_set_refinement_criteria fclaw3d_clawpatch_set_refinement_criteria
+#define fclaw3dx_clawpatch_get_refinement_criteria fclaw3d_clawpatch_get_refinement_criteria
+
+//fclaw3dx_clawpatch_output_ascii.h
+#define cb_clawpatch_output_ascii fclaw3d_clawpatch_output_ascii_cb
+#define fclaw3dx_clawpatch_output_ascii fclaw3d_clawpatch_output_ascii
+#define fclaw3dx_clawpatch_time_header_ascii fclaw3d_clawpatch_time_header_ascii
+
+//fclaw3dx_clawpatch_output_vtk.h
+#define fclaw3dx_vtk_patch_data_t fclaw3d_vtk_patch_data_t
+#define fclaw3dx_vtk_write_file fclaw3d_vtk_write_file
+#define fclaw3dx_clawpatch_output_vtk fclaw3d_clawpatch_output_vtk
+
+//fclaw3dx_clawpatch_pillow.h
+#define fclaw3dx_clawpatch_pillow_vtable_t fclaw3d_clawpatch_pillow_vtable_t
+#if 0
+#define pillow_fort_copy_block_corner_t fclaw3d_clawpatch_pillow_fort_copy_block_corner_t
+#define pillow_fort_average_block_corner_t fclaw3d_clawpatch_pillow_fort_average_block_corner_t
+#define pillow_fort_interpolate_block_corner_t fclaw3d_clawpatch_pillow_fort_interpolate_block_corner_t
+#endif
+#define fclaw3dx_clawpatch_use_pillowsphere fclaw3d_clawpatch_use_pillowsphere
+#define fclaw3dx_clawpatch_pillow_vtable_initialize fclaw3d_clawpatch_pillow_vtable_initialize
+#define fclaw3dx_clawpatch_pillow_vtable fclaw3d_clawpatch_pillow_vtable
+#define fclaw3dx_clawpatch_pillow_vt fclaw3d_clawpatch_pillow_vt
+
+//fclaw3dx_clawpatch_transform.h
+#define fclaw3dx_clawpatch_transform_init_data fclaw3d_clawpatch_transform_init_data
+#define fclaw3dx_clawpatch_face_transformation fclaw3d_clawpatch_face_transformation
+#define fclaw3dx_clawpatch_face_transformation_intra fclaw3d_clawpatch_face_transformation_intra 
+#define FCLAW2D_CLAWPATCH_TRANSFORM_FACE fclaw3d_CLAWPATCH_TRANSFORM_FACE
+#define FCLAW2D_CLAWPATCH_TRANSFORM_FACE_HALF fclaw3d_CLAWPATCH_TRANSFORM_FACE_HALF
+#define FCLAW2D_CLAWPATCH_TRANSFORM_CORNER fclaw3d_CLAWPATCH_TRANSFORM_CORNER
+#define FCLAW2D_CLAWPATCH_TRANSFORM_CORNER_HALF fclaw3d_CLAWPATCH_TRANSFORM_CORNER_HALF
+
+//fclaw3dx_clawpatch.h
+#define fclaw3dx_clawpatch_vtable_t fclaw3d_clawpatch_vtable_t
+#define fclaw3dx_clawpatch_set_user_data_t fclaw3d_clawpatch_set_user_data_t
+#define fclaw3dx_clawpatch_time_sync_pack_registers_t fclaw3d_clawpatch_time_sync_pack_registers_t
+#define fclaw3dx_clawpatch_local_ghost_pack_aux_t fclaw3d_clawpatch_local_ghost_pack_aux_t
+#define fclaw3dx_clawpatch_fort_local_ghost_pack_registers_t fclaw3d_clawpatch_fort_local_ghost_pack_registers_t
+#define fclaw3dx_clawpatch_time_header_t fclaw3d_clawpatch_time_header_t
+#define fclaw3dx_clawpatch_diagnostics_cons_t fclaw3d_clawpatch_diagnostics_cons_t
+#define fclaw3dx_clawpatch_diagnostics_error_t fclaw3d_clawpatch_diagnostics_error_t
+#define fclaw3dx_clawpatch_vtable_initialize fclaw3d_clawpatch_vtable_initialize
+#define fclaw3dx_clawpatch_vt fclaw3d_clawpatch_vt
+#define fclaw3dx_clawpatch_vtable fclaw3d_clawpatch_vtable
+#define fclaw3dx_clawpatch_save_current_step fclaw3d_clawpatch_save_current_step
+#define fclaw3dx_clawpatch_grid_data fclaw3d_clawpatch_grid_data
+
+#define fclaw3dx_clawpatch_get_volume fclaw3d_clawpatch_get_volume
+#define fclaw3dx_clawpatch_soln_data fclaw3d_clawpatch_soln_data
+#define fclaw3dx_clawpatch_aux_data fclaw3d_clawpatch_aux_data
+#define fclaw3dx_clawpatch_rhs_data fclaw3d_clawpatch_rhs_data
+#define fclaw3dx_clawpatch_elliptic_error_data fclaw3d_clawpatch_elliptic_error_data
+#define fclaw3dx_clawpatch_elliptic_soln_data fclaw3d_clawpatch_elliptic_soln_data
+#define fclaw3dx_clawpatch_get_q fclaw3d_clawpatch_get_q
+#define fclaw3dx_clawpatch_get_error fclaw3d_clawpatch_get_error
+#define fclaw3dx_clawpatch_get_exactsoln fclaw3d_clawpatch_get_exactsoln
+#define fclaw3dx_clawpatch_size fclaw3d_clawpatch_size
+#define fclaw3dx_clawpatch_get_user_data fclaw3d_clawpatch_get_user_data
+#define fclaw3dx_clawpatch_set_user_data fclaw3d_clawpatch_set_user_data
+#define fclaw3dx_clawpatch_get_solver_data fclaw3d_clawpatch_get_solver_data
+#define fclaw3dx_clawpatch_set_solver_data fclaw3d_clawpatch_set_solver_data
+#define fclaw3dx_clawpatch_timesync_data fclaw3d_clawpatch_timesync_data
+#define fclaw3dx_clawpatch_get_q_timesync fclaw3d_clawpatch_get_q_timesync
+#define fclaw3dx_clawpatch_get_registers fclaw3d_clawpatch_get_registers
+
+//fclaw3dx_clawpatch.hpp
+#define fclaw3dx_clawpatch_t fclaw3d_clawpatch_t
+#define fclaw3dx_clawpatch_get_clawpatch fclaw3d_clawpatch_get_clawpatch
+
+
+
+

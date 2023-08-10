@@ -23,11 +23,10 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef FC3DX_TO_3D
+
 #include "fc3dx_clawpack46.h"
 #include "fc3dx_clawpack46_options.h"
-#include "fc3d_clawpack46_fort.h"
-
-#include <fclaw_pointer_map.h>
 
 #include <fclaw3dx_clawpatch.hpp>
 #include <fclaw3dx_clawpatch.h>
@@ -37,8 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw3dx_clawpatch_output_vtk.h>
 #include <fclaw3dx_clawpatch_fort.h>
 
-#include <fclaw3d_metric.h>
-#include <fclaw3d_metric.hpp>
+#include <fclaw3dx_metric.h>
+#include <fclaw3dx_metric.hpp>
 
 #include <fclaw3dx_clawpatch_conservation.h>
 
@@ -47,6 +46,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw2d_vtable.h>
 #include <fclaw2d_options.h>
 #include <fclaw2d_defs.h>
+
+#else
+
+#include "fc3d_clawpack46.h"
+#include "fc3d_clawpack46_options.h"
+
+#include <fclaw3d_clawpatch.hpp>
+#include <fclaw3d_clawpatch.h>
+
+#include <fclaw3d_clawpatch_options.h>
+#include <fclaw3d_clawpatch_output_ascii.h> 
+#include <fclaw3d_clawpatch_output_vtk.h>
+#include <fclaw3d_clawpatch_fort.h>
+
+#include <fclaw3d_metric.h>
+#include <fclaw3d_metric.hpp>
+
+#include <fclaw3d_clawpatch_conservation.h>
+
+#include <fclaw3d_patch.h>
+#include <fclaw3d_global.h>
+#include <fclaw3d_vtable.h>
+#include <fclaw3d_options.h>
+#include <fclaw3d_defs.h>
+
+#include <fclaw2d_to_3d.h>
+#include <_fclaw3dx_to_fclaw3d.h>
+#include "_fc3dx_to_fc3d.h"
+
+#endif
+
+#include <fclaw_pointer_map.h>
+
+#include "fc3d_clawpack46_fort.h"
 
 
 /* --------------------- Clawpack solver functions (required) ------------------------- */

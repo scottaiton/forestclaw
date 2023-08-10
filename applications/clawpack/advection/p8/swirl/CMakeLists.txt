@@ -1,12 +1,24 @@
 set(all ${PROJECT_SOURCE_DIR}/clawpack/advection/p8/all)
 set(all2d ${PROJECT_SOURCE_DIR}/clawpack/advection/2d/all)
+set(all3d ${PROJECT_SOURCE_DIR}/clawpack/advection/3d/all)
 
 add_executable(swirlp8
   swirl.cpp
+  swirl_user.cpp
   swirl_options.c
   ${all2d}/fclaw2d_map_cart.c
   ${all2d}/fclaw2d_map_fivepatch.c
   ${all2d}/fclaw2d_map_bilinear.c
+
+  ${all3d}/rpn3_vc_advection.f90
+  ${all3d}/rpt3_vc_advection.f90
+  ${all3d}/rptt3_vc_advection.f90
+
+  setprob.f90
+  user_exceeds_th.f90
+
+  user_4.6/qinit.f90
+  user_4.6/swirl_setaux.f90
 )
 
 set_target_properties(swirlp8 PROPERTIES OUTPUT_NAME swirl)

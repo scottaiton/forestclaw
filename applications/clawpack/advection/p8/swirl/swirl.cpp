@@ -149,9 +149,10 @@ void run_program(fclaw3d_global_t* glob)
 
     user_opt = swirl_get_options(glob);
 
-#ifdef P8HACK
     /* Initialize virtual table for ForestClaw */
-    fclaw2d_vtables_initialize(glob);
+#ifdef P8HACK
+    fclaw3d_vtables_initialize(glob);
+#endif
 
     if (user_opt->claw_version == 4)
     {
@@ -165,14 +166,15 @@ void run_program(fclaw3d_global_t* glob)
 
     swirl_link_solvers(glob);
 
+#ifdef P8HACK
     /* ---------------------------------------------------------------
        Run
        --------------------------------------------------------------- */
     fclaw2d_initialize(glob);
     fclaw2d_run(glob);
     fclaw2d_finalize(glob);
-
 #endif /* P8HACK */
+
 }
 
 int
@@ -183,10 +185,7 @@ main (int argc, char **argv)
     /* Options */
     user_options_t               *user_opt;
     fclaw3d_clawpatch_options_t  *clawpatch_opt = NULL;
-#if 0
     fc3d_clawpack46_options_t    *claw46_opt = NULL;
-#endif
-    void                         *claw46_opt = NULL;
     fclaw_options_t              *fclaw_opt;
     sc_options_t                 *options;
 
@@ -206,9 +205,7 @@ main (int argc, char **argv)
     fclaw_opt =                   fclaw_options_register(app,  NULL,       "fclaw_options.ini");
 
     clawpatch_opt =   fclaw3d_clawpatch_options_register(app, "clawpatch", "fclaw_options.ini");
-#ifdef P8HACK
     claw46_opt =        fc3d_clawpack46_options_register(app, "claw3",     "fclaw_options.ini");
-#endif /* P8HACK */
 
     user_opt =                    swirl_options_register(app,              "fclaw_options.ini");
 
@@ -233,9 +230,7 @@ main (int argc, char **argv)
         fclaw3d_options_store           (glob, fclaw_opt);
 
         fclaw3d_clawpatch_options_store (glob, clawpatch_opt);
-#ifdef P8HACK
         fc3d_clawpack46_options_store   (glob, claw46_opt);
-#endif /* P8HACK */
         swirl_options_store             (glob, user_opt);
 
         run_program(glob);

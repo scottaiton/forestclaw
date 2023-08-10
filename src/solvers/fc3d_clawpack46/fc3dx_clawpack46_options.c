@@ -23,11 +23,24 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef FC3DX_TO_3D
 #include "fc3dx_clawpack46_options.h"
 
 #include <fclaw2d_clawpatch_options.h>
 #include <fclaw2d_global.h>
 #include <fclaw_options.h>
+#else
+#include "fc3d_clawpack46_options.h"
+
+#include <fclaw3d_clawpatch_options.h>
+#include <fclaw3d_global.h>
+#include <fclaw_options.h>
+
+#include <fclaw2d_to_3d.h>
+
+#include "_fc3dx_to_fc3d.h"
+
+#endif
 
 static void*
 clawpack_register (fc3dx_clawpack46_options_t* clawopt, sc_options_t * opt)
