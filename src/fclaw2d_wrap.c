@@ -100,15 +100,8 @@ void copy_block(fclaw_block_t* block, fclaw2d_block_t* block_2d)
     block->zupper = block_2d->zupper;
 #endif
 
-    for(int i=0; i < 3*FCLAW2D_NUMCORNERS; ++i)
-    {
-        block->vertices[i] = block_2d->vertices[i];
-    }
-
-    for(int i=0; i < FCLAW2D_NUMFACES; ++i)
-    {
-        block->is_boundary[i] = block_2d->is_boundary[i];
-    }
+    block->vertices = block_2d->vertices;
+    block->is_boundary = block_2d->is_boundary;
 
     block->minlevel = block_2d->minlevel;
     block->maxlevel = block_2d->maxlevel;

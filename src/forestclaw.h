@@ -102,9 +102,9 @@ typedef struct fclaw_block
     /** @{ @brief bottom/top coordinate. For 2D refinement these are always set to 0,1 respectively */
     double zlower, zupper;
     /** @} */
-    double vertices[8 * 3];     /**< for each block corner, the xyz coordinates
-                                     of the p8est_connectivity structure */
-    int is_boundary[6];         /**< physical boundary flag */
+    double* vertices;     /**< for each block corner, the xyz coordinates
+                                     of the connectivity structure */
+    int* is_boundary;         /**< physical boundary flag */
     /** @{ 
      * @brief min/max level
      * local over this block.  If this proc doesn't
