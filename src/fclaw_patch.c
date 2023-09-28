@@ -1177,13 +1177,11 @@ fclaw_patch_on_parallel_boundary (const fclaw_patch_t * patch)
 {
     if(patch->refine_dim == 2)
     {
-        fclaw2d_patch_t* patch_2d = fclaw_patch_get_2d_patch(patch);
-        return patch_2d->flags & FCLAW2D_PATCH_ON_PARALLEL_BOUNDARY ? 1 : 0;
+        return patch->d2->flags & FCLAW2D_PATCH_ON_PARALLEL_BOUNDARY ? 1 : 0;
     }
     else if(patch->refine_dim == 3) 
     {
-        fclaw3d_patch_t* patch_3d = fclaw_patch_get_3d_patch(patch);
-        return patch_3d->flags & FCLAW3D_PATCH_ON_PARALLEL_BOUNDARY ? 1 : 0;
+        return patch->d3->flags & FCLAW3D_PATCH_ON_PARALLEL_BOUNDARY ? 1 : 0;
     }
     else 
     {

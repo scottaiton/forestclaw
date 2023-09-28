@@ -124,13 +124,11 @@ void build_remote_ghost_patches(fclaw_global_t* glob)
         //TODO better way
         if(domain->refine_dim == 2)
         {
-            fclaw2d_patch_t* patch_2d = fclaw_patch_get_2d_patch(ghost_patch);
-            blockno = patch_2d->u.blockno;
+            blockno = ghost_patch->d2->u.blockno;
         }
         else
         {
-            fclaw3d_patch_t* patch_3d = fclaw_patch_get_3d_patch(ghost_patch);
-            blockno = patch_3d->u.blockno;
+            blockno = ghost_patch->d3->u.blockno;
 
         }
 
@@ -181,13 +179,11 @@ unpack_remote_ghost_patches(fclaw_global_t* glob,
             //TODO better way
             if(domain->refine_dim == 2)
             {
-                fclaw2d_patch_t* patch_2d = fclaw_patch_get_2d_patch(ghost_patch);
-                blockno = patch_2d->u.blockno;
+                blockno = ghost_patch->d2->u.blockno;
             }
             else
             {
-                fclaw3d_patch_t* patch_3d = fclaw_patch_get_3d_patch(ghost_patch);
-                blockno = patch_3d->u.blockno;
+                blockno = ghost_patch->d3->u.blockno;
             }
 
             int patchno = i;

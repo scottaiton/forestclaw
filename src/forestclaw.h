@@ -55,6 +55,10 @@ typedef struct fclaw_block fclaw_block_t;
 /** Typedef for fclaw_patch */
 typedef struct fclaw_patch fclaw_patch_t;
 
+/* forward declare dimensioned patch types */
+struct fclaw2d_patch;
+struct fclaw3d_patch;
+
 /** 
  * @brief The metadata structure for a forest leaf, which is a forestclaw patch.
  * The patch may be either a process-local patch or a ghost patch.
@@ -62,6 +66,9 @@ typedef struct fclaw_patch fclaw_patch_t;
 struct fclaw_patch
 {
     int refine_dim;                    /**< dimension */
+    struct fclaw2d_patch* d2;          /**< 2D patch */
+    struct fclaw3d_patch* d3;          /**< 3D patch */
+
     /** @{ @brief left/right coordinate */
     double xlower, xupper;
     /** @} */
@@ -73,13 +80,12 @@ struct fclaw_patch
     /** @} */
     int level;                  /**< 0 is root, increases if refined */
 
-    void* llp;                  /**< opaque pointer to low level fclaw2d_patch_t or fclaw3d_patch_t */
     void *user;                 /**< User Pointer */
 };
 
 /* forward declare dimensioned block types */
-struct fclaw2d_domain;
-struct fclaw3d_domain;
+struct fclaw2d_block;
+struct fclaw3d_block;
 
 /**
  * @brief Data Structure for a block

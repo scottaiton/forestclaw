@@ -164,13 +164,11 @@ fclaw_patch_corner_dimension (const fclaw_patch_t * patch, int cornerno)
 {
     if(patch->refine_dim == 2)
     {
-        fclaw2d_patch_t* patch_2d = fclaw_patch_get_2d_patch(patch);
-        return fclaw2d_patch_corner_dimension(patch_2d, cornerno);
+        return fclaw2d_patch_corner_dimension(patch->d2, cornerno);
     }
     else if(patch->refine_dim == 3)
     {
-        fclaw3d_patch_t* patch_3d = fclaw_patch_get_3d_patch(patch);
-        return fclaw3d_patch_corner_dimension(patch_3d, cornerno);
+        return fclaw3d_patch_corner_dimension(patch->d3, cornerno);
     }
     else 
     {
@@ -183,13 +181,11 @@ fclaw_patch_childid (const fclaw_patch_t * patch)
 {
     if(patch->refine_dim == 2)
     {
-        fclaw2d_patch_t* patch_2d = fclaw_patch_get_2d_patch(patch);
-        return fclaw2d_patch_childid(patch_2d);
+        return fclaw2d_patch_childid(patch->d2);
     } 
     else if(patch->refine_dim == 3)
     {
-        fclaw3d_patch_t* patch_3d = fclaw_patch_get_3d_patch(patch);
-        return fclaw3d_patch_childid(patch_3d);
+        return fclaw3d_patch_childid(patch->d3);
     }
     else 
     {
@@ -202,13 +198,11 @@ fclaw_patch_is_first_sibling (const fclaw_patch_t * patch)
 {
     if(patch->refine_dim == 2)
     {
-        fclaw2d_patch_t* patch_2d = fclaw_patch_get_2d_patch(patch);
-        return fclaw2d_patch_is_first_sibling(patch_2d);
+        return fclaw2d_patch_is_first_sibling(patch->d2);
     } 
     else if(patch->refine_dim == 3)
     {
-        fclaw3d_patch_t* patch_3d = fclaw_patch_get_3d_patch(patch);
-        return fclaw3d_patch_is_first_sibling(patch_3d);
+        return fclaw3d_patch_is_first_sibling(patch->d3);
     }
     else 
     {
@@ -221,13 +215,11 @@ fclaw_patch_is_ghost (const fclaw_patch_t * patch)
 {
     if(patch->refine_dim == 2)
     {
-        fclaw2d_patch_t* patch_2d = fclaw_patch_get_2d_patch(patch);
-        return fclaw2d_patch_is_ghost(patch_2d);
+        return fclaw2d_patch_is_ghost(patch->d2);
     }
     else if(patch->refine_dim == 3)
     {
-        fclaw3d_patch_t* patch_3d = fclaw_patch_get_3d_patch(patch);
-        return fclaw3d_patch_is_ghost(patch_3d);
+        return fclaw3d_patch_is_ghost(patch->d3);
     }
     else
     {
@@ -379,9 +371,9 @@ fclaw_patch_2d_transform_face (fclaw_patch_t * ipatch,
                                const int ftransform[],
                                int mx, int my, int based, int *i, int *j)
 {
-    fclaw2d_patch_t* ipatch_2d = fclaw_patch_get_2d_patch(ipatch);
-    fclaw2d_patch_t* opatch_2d = fclaw_patch_get_2d_patch(opatch);
-    fclaw2d_patch_transform_face(ipatch_2d,opatch_2d,ftransform,mx,my,based,i,j);
+    FCLAW_ASSERT(ipatch->refine_dim == 2);
+    FCLAW_ASSERT(opatch->refine_dim == 2);
+    fclaw2d_patch_transform_face(ipatch->d2,opatch->d2,ftransform,mx,my,based,i,j);
 }
 
 void 
@@ -391,9 +383,9 @@ fclaw_patch_2d_transform_face2 (fclaw_patch_t * ipatch,
                                 int mx, int my, int based, int i[],
                                 int j[])
 {
-    fclaw2d_patch_t* ipatch_2d = fclaw_patch_get_2d_patch(ipatch);
-    fclaw2d_patch_t* opatch_2d = fclaw_patch_get_2d_patch(opatch);
-    fclaw2d_patch_transform_face2(ipatch_2d,opatch_2d,ftransform,mx,my,based,i,j);
+    FCLAW_ASSERT(ipatch->refine_dim == 2);
+    FCLAW_ASSERT(opatch->refine_dim == 2);
+    fclaw2d_patch_transform_face2(ipatch->d2,opatch->d2,ftransform,mx,my,based,i,j);
 }
 
 void 
@@ -403,9 +395,9 @@ fclaw_patch_3d_transform_face (fclaw_patch_t * ipatch,
                                int mx, int my, int mz, int based,
                                int *i, int *j, int *k)
 {
-    fclaw3d_patch_t* ipatch_3d = fclaw_patch_get_3d_patch(ipatch);
-    fclaw3d_patch_t* opatch_3d = fclaw_patch_get_3d_patch(opatch);
-    fclaw3d_patch_transform_face(ipatch_3d,opatch_3d,ftransform,mx,my,mz,based,i,j,k);
+    FCLAW_ASSERT(ipatch->refine_dim == 3);
+    FCLAW_ASSERT(opatch->refine_dim == 3);
+    fclaw3d_patch_transform_face(ipatch->d3,opatch->d3,ftransform,mx,my,mz,based,i,j,k);
 }
 
 void 
@@ -415,9 +407,9 @@ fclaw_patch_3d_transform_face2 (fclaw_patch_t * ipatch,
                                 int mx, int my, int mz, int based,
                                 int i[], int j[], int k[])
 {
-    fclaw3d_patch_t* ipatch_3d = fclaw_patch_get_3d_patch(ipatch);
-    fclaw3d_patch_t* opatch_3d = fclaw_patch_get_3d_patch(opatch);
-    fclaw3d_patch_transform_face2(ipatch_3d,opatch_3d,ftransform,mx,my,mz,based,i,j,k);
+    FCLAW_ASSERT(ipatch->refine_dim == 3);
+    FCLAW_ASSERT(opatch->refine_dim == 3);
+    fclaw3d_patch_transform_face2(ipatch->d3,opatch->d3,ftransform,mx,my,mz,based,i,j,k);
 }
 
 
@@ -427,9 +419,9 @@ void fclaw_patch_3d_transform_edge (fclaw_patch_t * ipatch,
                                       int mx, int my, int mz,
                                       int based, int *i, int *j, int *k)
 {
-    fclaw3d_patch_t* ipatch_3d = fclaw_patch_get_3d_patch(ipatch);
-    fclaw3d_patch_t* opatch_3d = fclaw_patch_get_3d_patch(opatch);
-    fclaw3d_patch_transform_edge(ipatch_3d,opatch_3d,iedge,is_block_boundary,
+    FCLAW_ASSERT(ipatch->refine_dim == 3);
+    FCLAW_ASSERT(opatch->refine_dim == 3);
+    fclaw3d_patch_transform_edge(ipatch->d3,opatch->d3,iedge,is_block_boundary,
                                    mx,my,mz,based,i,j,k);
 }
 
@@ -439,9 +431,7 @@ void fclaw_patch_3d_transform_edge2 (fclaw_patch_t * ipatch,
                                        int mx, int my, int mz, int based,
                                        int i[], int j[], int k[])
 {
-    fclaw3d_patch_t* ipatch_3d = fclaw_patch_get_3d_patch(ipatch);
-    fclaw3d_patch_t* opatch_3d = fclaw_patch_get_3d_patch(opatch);
-    fclaw3d_patch_transform_edge2(ipatch_3d,opatch_3d,iedge,is_block_boundary,
+    fclaw3d_patch_transform_edge2(ipatch->d3,opatch->d3,iedge,is_block_boundary,
                                     mx,my,mz,based,i,j,k);
 }
 
@@ -490,9 +480,9 @@ void fclaw_patch_2d_transform_corner (fclaw_patch_t * ipatch,
                                       int mx, int my,
                                       int based, int *i, int *j)
 {
-    fclaw2d_patch_t* ipatch_2d = fclaw_patch_get_2d_patch(ipatch);
-    fclaw2d_patch_t* opatch_2d = fclaw_patch_get_2d_patch(opatch);
-    fclaw2d_patch_transform_corner(ipatch_2d,opatch_2d,icorner,is_block_boundary,
+    FCLAW_ASSERT(ipatch->refine_dim == 2);
+    FCLAW_ASSERT(opatch->refine_dim == 2);
+    fclaw2d_patch_transform_corner(ipatch->d2,opatch->d2,icorner,is_block_boundary,
                                    mx,my,based,i,j);
 }
 
@@ -502,9 +492,9 @@ void fclaw_patch_2d_transform_corner2 (fclaw_patch_t * ipatch,
                                        int mx, int my, int based,
                                        int i[], int j[])
 {
-    fclaw2d_patch_t* ipatch_2d = fclaw_patch_get_2d_patch(ipatch);
-    fclaw2d_patch_t* opatch_2d = fclaw_patch_get_2d_patch(opatch);
-    fclaw2d_patch_transform_corner2(ipatch_2d,opatch_2d,icorner,is_block_boundary,
+    FCLAW_ASSERT(ipatch->refine_dim == 2);
+    FCLAW_ASSERT(opatch->refine_dim == 2);
+    fclaw2d_patch_transform_corner2(ipatch->d2,opatch->d2,icorner,is_block_boundary,
                                     mx,my,based,i,j);
 }
 
@@ -532,9 +522,9 @@ void fclaw_patch_3d_transform_corner (fclaw_patch_t * ipatch,
                                       int mx, int my, int mz,
                                       int based, int *i, int *j, int *k)
 {
-    fclaw3d_patch_t* ipatch_3d = fclaw_patch_get_3d_patch(ipatch);
-    fclaw3d_patch_t* opatch_3d = fclaw_patch_get_3d_patch(opatch);
-    fclaw3d_patch_transform_corner(ipatch_3d,opatch_3d,icorner,is_block_boundary,
+    FCLAW_ASSERT(ipatch->refine_dim == 3);
+    FCLAW_ASSERT(opatch->refine_dim == 3);
+    fclaw3d_patch_transform_corner(ipatch->d3,opatch->d3,icorner,is_block_boundary,
                                    mx,my,mz,based,i,j,k);
 }
 
@@ -544,9 +534,9 @@ void fclaw_patch_3d_transform_corner2 (fclaw_patch_t * ipatch,
                                        int mx, int my, int mz, int based,
                                        int i[], int j[], int k[])
 {
-    fclaw3d_patch_t* ipatch_3d = fclaw_patch_get_3d_patch(ipatch);
-    fclaw3d_patch_t* opatch_3d = fclaw_patch_get_3d_patch(opatch);
-    fclaw3d_patch_transform_corner2(ipatch_3d,opatch_3d,icorner,is_block_boundary,
+    FCLAW_ASSERT(ipatch->refine_dim == 3);
+    FCLAW_ASSERT(opatch->refine_dim == 3);
+    fclaw3d_patch_transform_corner2(ipatch->d3,opatch->d3,icorner,is_block_boundary,
                                     mx,my,mz,based,i,j,k);
 }
 
