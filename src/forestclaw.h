@@ -77,12 +77,19 @@ struct fclaw_patch
     void *user;                 /**< User Pointer */
 };
 
+/* forward declare dimensioned block types */
+struct fclaw2d_domain;
+struct fclaw3d_domain;
+
 /**
  * @brief Data Structure for a block
  */
 typedef struct fclaw_block
 {
-    int refine_dim;                    /**< dimension */
+    int refine_dim;             /**< dimension */
+    struct fclaw2d_block *d2;   /**< 2D block */
+    struct fclaw3d_block *d3;   /**< 3D block */
+
     int num_patches;            /**< local patches in this block */
     int num_patches_before;     /**< in all previous blocks */
     int num_exchange_patches;   /**< exchange patches in this block */

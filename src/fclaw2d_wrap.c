@@ -78,6 +78,12 @@ static
 void copy_block(fclaw_block_t* block, fclaw2d_block_t* block_2d)
 {
     block->refine_dim = FCLAW2D_SPACEDIM;
+#ifndef P4_TO_P8
+    block->d2 = block_2d;
+#else
+    block->d3 = block_2d;
+#endif
+
     block->num_patches = block_2d->num_patches;
     block->num_patches_before = block_2d->num_patches_before;
     block->num_exchange_patches = block_2d->num_exchange_patches;
