@@ -47,15 +47,12 @@ fclaw2d_patch_t* fclaw_patch_get_2d_patch(const fclaw_patch_t* patch);
 
 typedef struct fclaw2d_domain_wrap
 {
-    fclaw2d_domain_t*          domain;
     fclaw2d_domain_exchange_t* exchange;
     fclaw2d_domain_indirect_t* indirect;
 } fclaw2d_domain_wrap_t;
 
 
 struct fclaw_domain* fclaw_domain_wrap_2d(fclaw2d_domain_t *domain2d);
-
-fclaw2d_domain_t* fclaw_domain_get_2d_domain(const struct fclaw_domain* domain);
 
 fclaw2d_domain_wrap_t* fclaw_domain_get_2d_domain_wrap(struct fclaw_domain* domain);
 

@@ -111,6 +111,10 @@ typedef struct fclaw_block
     void *user;                       /**< User pointer */
 } fclaw_block_t;
 
+/* forward declare dimensioned domain types */
+struct fclaw2d_domain;
+struct fclaw3d_domain;
+
 /**
  * @brief The domain structure is a collection of blocks
  * 
@@ -123,6 +127,9 @@ typedef struct fclaw_block
 struct fclaw_domain
 {
     int refine_dim;                    /**< dimension */
+    struct fclaw2d_domain *d2;         /**< 2D domain */
+    struct fclaw3d_domain *d3;         /**< 3D domain */
+
     int count_set_patch;
     int count_delete_patch;
 

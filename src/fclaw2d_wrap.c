@@ -52,15 +52,6 @@ fclaw2d_domain_wrap_t* fclaw_domain_get_2d_domain_wrap(fclaw_domain_t* domain)
     return (fclaw2d_domain_wrap_t*) domain->lld;
 }
 
-fclaw2d_domain_t* fclaw_domain_get_2d_domain(const fclaw_domain_t* domain)
-{
-    FCLAW_ASSERT(domain->lld != NULL);
-    FCLAW_ASSERT(domain->refine_dim == FCLAW2D_SPACEDIM);
-    // cast away const since this won't be modifying the wrapped domain
-    fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap((fclaw_domain_t*) domain);
-    return wrap->domain;
-}
-
 static
 void copy_patch(fclaw_patch_t* patch, fclaw2d_patch_t* patch_2d)
 {
@@ -132,6 +123,11 @@ fclaw_domain_t* fclaw_domain_wrap_2d(fclaw2d_domain_t* domain_2d)
 
     fclaw_domain_t* domain = FCLAW_ALLOC_ZERO(fclaw_domain_t, 1);
     domain->refine_dim = FCLAW2D_SPACEDIM;
+#ifndef P4_TO_P8
+    domain->d2 = domain_2d;
+#else
+    domain->d3 = domain_2d;
+#endif
 
     domain->mpicomm = domain_2d->mpicomm;
     domain->mpisize = domain_2d->mpisize;
@@ -167,7 +163,6 @@ fclaw_domain_t* fclaw_domain_wrap_2d(fclaw2d_domain_t* domain_2d)
     domain->attributes = domain_2d->attributes;
 
     fclaw2d_domain_wrap_t* wrap = FCLAW_ALLOC_ZERO(fclaw2d_domain_wrap_t, 1);
-    wrap->domain = domain_2d;
     domain->lld = wrap;
 
     domain_2d->user = domain;
@@ -295,15 +290,16 @@ fclaw_domain_t* domain_wrap_meta(fclaw2d_domain_t* domain_2d)
     /* Only the mpi-information
        (mpicomm, mpisize and mpirank) should be copied */
     fclaw_domain_t* domain = FCLAW_ALLOC_ZERO(fclaw_domain_t, 1);
-    fclaw2d_domain_wrap_t* domain_wrap = FCLAW_ALLOC_ZERO(fclaw2d_domain_wrap_t, 1);
-    domain_wrap->domain = domain_2d;
-
+#ifndef P4_TO_P8
+    domain->d2 = domain_2d;
+#else
+    domain->d3 = domain_2d;
+#endif
     domain->refine_dim = FCLAW2D_SPACEDIM;
     domain->mpicomm = domain_2d->mpicomm;
     domain->mpisize = domain_2d->mpisize;
     domain->mpirank = domain_2d->mpirank;
     domain->attributes = domain_2d->attributes;
-    domain->lld = domain_wrap;
     domain_2d->user = domain;
 
     return domain;
@@ -355,8 +351,6 @@ fclaw2d_interpolate_point_wrap (fclaw2d_domain_t * domain_2d,
 
     if(domain_is_meta)
     {
-        fclaw2d_domain_wrap_t* domain_wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        FCLAW_FREE(domain_wrap);
         FCLAW_FREE(domain);
         domain_2d->user = NULL;
     }

@@ -350,7 +350,7 @@ void fc2d_thunderegg_heat_solve(fclaw_global_t *glob)
 
     // get p4est structure
     fclaw_domain_t *domain = glob->domain;
-    p4est_wrap_t *wrap = (p4est_wrap_t *) fclaw_domain_get_2d_domain(domain)->pp;
+    p4est_wrap_t *wrap = (p4est_wrap_t *) domain->d2->pp;
 
     // create map function
     fclaw2d_map_context_t* cont = fclaw2d_map_get(glob);

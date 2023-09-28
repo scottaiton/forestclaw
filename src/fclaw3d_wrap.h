@@ -48,14 +48,11 @@ fclaw3d_patch_t* fclaw_patch_get_3d_patch(const fclaw_patch_t* patch);
 
 typedef struct fclaw3d_domain_wrap
 {
-    fclaw3d_domain_t*          domain;
     fclaw3d_domain_exchange_t* exchange;
     fclaw3d_domain_indirect_t* indirect;
 } fclaw3d_domain_wrap_t;
 
 struct fclaw_domain* fclaw_domain_wrap_3d(fclaw3d_domain_t *domain2d);
-
-fclaw3d_domain_t* fclaw_domain_get_3d_domain(const struct fclaw_domain* patch);
 
 fclaw3d_domain_wrap_t* fclaw_domain_get_3d_domain_wrap(struct fclaw_domain* domain);
 

@@ -39,8 +39,8 @@ int fclaw_patch_edge_neighbors (fclaw_domain_t * domain,
                                 int *redge,
                                 fclaw_patch_relation_t * neighbor_size)
 {
-    fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-    return fclaw3d_patch_edge_neighbors(domain_3d,blockno,patchno,edgeno,
+    FCLAW_ASSERT(domain->refine_dim == 3);
+    return fclaw3d_patch_edge_neighbors(domain->d3,blockno,patchno,edgeno,
                                         rproc,rblockno,rpatchno,redge,
                                         (fclaw3d_patch_relation_t*) neighbor_size);
 }
@@ -147,13 +147,11 @@ fclaw_domain_corner_faces (const fclaw_domain_t * domain,
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-        return fclaw2d_domain_corner_faces(domain_2d, icorner, faces);
+        return fclaw2d_domain_corner_faces(domain->d2, icorner, faces);
     }
     else if(domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-        return fclaw3d_domain_corner_faces(domain_3d, icorner, faces);
+        return fclaw3d_domain_corner_faces(domain->d3, icorner, faces);
     }
     else 
     {
@@ -242,13 +240,11 @@ fclaw_patch_boundary_type(fclaw_domain_t *domain, int blockno, int patchno, int 
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-        return fclaw2d_patch_boundary_type(domain_2d,blockno,patchno,boundaries);
+        return fclaw2d_patch_boundary_type(domain->d2,blockno,patchno,boundaries);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-        return fclaw3d_patch_boundary_type(domain_3d,blockno,patchno,boundaries);
+        return fclaw3d_patch_boundary_type(domain->d3,blockno,patchno,boundaries);
     }
     else
     {
@@ -261,13 +257,11 @@ fclaw_patch_normal_match(fclaw_domain_t *domain, int blockno, int patchno, int f
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-        return fclaw2d_patch_normal_match(domain_2d,blockno,patchno,faceno);
+        return fclaw2d_patch_normal_match(domain->d2,blockno,patchno,faceno);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-        return fclaw3d_patch_normal_match(domain_3d,blockno,patchno,faceno);
+        return fclaw3d_patch_normal_match(domain->d3,blockno,patchno,faceno);
     }
     else
     {
@@ -280,13 +274,11 @@ fclaw_patch_face_neighbors(fclaw_domain_t *domain, int blockno, int patchno, int
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-        return (fclaw_patch_relation_t) fclaw2d_patch_face_neighbors(domain_2d,blockno,patchno,faceno,rproc,rblockno,rpatchno,rfaceno);
+        return (fclaw_patch_relation_t) fclaw2d_patch_face_neighbors(domain->d2,blockno,patchno,faceno,rproc,rblockno,rpatchno,rfaceno);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-        return (fclaw_patch_relation_t) fclaw3d_patch_face_neighbors(domain_3d,blockno,patchno,faceno,rproc,rblockno,rpatchno,rfaceno);
+        return (fclaw_patch_relation_t) fclaw3d_patch_face_neighbors(domain->d3,blockno,patchno,faceno,rproc,rblockno,rpatchno,rfaceno);
     }
     else
     {
@@ -458,17 +450,15 @@ fclaw_patch_corner_neighbors(fclaw_domain_t *domain, int blockno, int patchno, i
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t *domain_2d = fclaw_domain_get_2d_domain(domain);
         fclaw2d_patch_relation_t neighbor_size2d;
-        int retval = fclaw2d_patch_corner_neighbors(domain_2d,blockno,patchno,cornerno,rproc,rblockno,rpatchno,rcorner,&neighbor_size2d);
+        int retval = fclaw2d_patch_corner_neighbors(domain->d2,blockno,patchno,cornerno,rproc,rblockno,rpatchno,rcorner,&neighbor_size2d);
         *neighbor_size = (fclaw_patch_relation_t) neighbor_size2d;
         return retval;
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t *domain_3d = fclaw_domain_get_3d_domain(domain);
         fclaw3d_patch_relation_t neighbor_size3d;
-        int retval = fclaw3d_patch_corner_neighbors(domain_3d,blockno,patchno,cornerno,rproc,rblockno,rpatchno,rcorner,&neighbor_size3d);
+        int retval = fclaw3d_patch_corner_neighbors(domain->d3,blockno,patchno,cornerno,rproc,rblockno,rpatchno,rcorner,&neighbor_size3d);
         *neighbor_size = (fclaw_patch_relation_t) neighbor_size3d;
         return retval;
     }
@@ -570,16 +560,12 @@ fclaw_domain_iterate_level (fclaw_domain_t * domain, int level,
 
     if (domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-
-        fclaw2d_domain_iterate_level(domain_2d,level,fclaw2d_patch_callback_wrap,
+        fclaw2d_domain_iterate_level(domain->d2,level,fclaw2d_patch_callback_wrap,
                                      &wrap);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-
-        fclaw3d_domain_iterate_level(domain_3d,level,fclaw3d_patch_callback_wrap,
+        fclaw3d_domain_iterate_level(domain->d3,level,fclaw3d_patch_callback_wrap,
                                      &wrap);
     }
     else
@@ -598,16 +584,12 @@ fclaw_domain_iterate_patches (fclaw_domain_t * domain,
 
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-
-        fclaw2d_domain_iterate_patches(domain_2d,fclaw2d_patch_callback_wrap,
+        fclaw2d_domain_iterate_patches(domain->d2,fclaw2d_patch_callback_wrap,
                                        &wrap);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-
-        fclaw3d_domain_iterate_patches(domain_3d,fclaw3d_patch_callback_wrap,
+        fclaw3d_domain_iterate_patches(domain->d3,fclaw3d_patch_callback_wrap,
                                        &wrap);
     }
     else
@@ -626,16 +608,12 @@ fclaw_domain_iterate_families (fclaw_domain_t * domain,
 
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-
-        fclaw2d_domain_iterate_families(domain_2d,fclaw2d_patch_callback_wrap,
+        fclaw2d_domain_iterate_families(domain->d2,fclaw2d_patch_callback_wrap,
                                         &wrap);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-
-        fclaw3d_domain_iterate_families(domain_3d,fclaw3d_patch_callback_wrap,
+        fclaw3d_domain_iterate_families(domain->d3,fclaw3d_patch_callback_wrap,
                                         &wrap);
     }
     else
@@ -736,14 +714,12 @@ fclaw_domain_set_refinement (fclaw_domain_t * domain,
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t *domain_2d = fclaw_domain_get_2d_domain(domain);
-        fclaw2d_domain_set_refinement(domain_2d,smooth_refine,smooth_level,
+        fclaw2d_domain_set_refinement(domain->d2,smooth_refine,smooth_level,
                                       coarsen_delay);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t *domain_3d = fclaw_domain_get_3d_domain(domain);
-        fclaw3d_domain_set_refinement(domain_3d,smooth_refine,smooth_level,
+        fclaw3d_domain_set_refinement(domain->d3,smooth_refine,smooth_level,
                                       coarsen_delay);
     }
     else
@@ -757,13 +733,11 @@ fclaw_patch_mark_refine(fclaw_domain_t *domain, int blockno, int patchno)
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t *domain_2d = fclaw_domain_get_2d_domain(domain);
-        fclaw2d_patch_mark_refine(domain_2d,blockno,patchno);
+        fclaw2d_patch_mark_refine(domain->d2,blockno,patchno);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t *domain_3d = fclaw_domain_get_3d_domain(domain);
-        fclaw3d_patch_mark_refine(domain_3d,blockno,patchno);
+        fclaw3d_patch_mark_refine(domain->d3,blockno,patchno);
     }
     else
     {
@@ -776,13 +750,11 @@ fclaw_patch_mark_coarsen(fclaw_domain_t *domain, int blockno, int patchno)
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t *domain_2d = fclaw_domain_get_2d_domain(domain);
-        fclaw2d_patch_mark_coarsen(domain_2d,blockno,patchno);
+        fclaw2d_patch_mark_coarsen(domain->d2,blockno,patchno);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t *domain_3d = fclaw_domain_get_3d_domain(domain);
-        fclaw3d_patch_mark_coarsen(domain_3d,blockno,patchno);
+        fclaw3d_patch_mark_coarsen(domain->d3,blockno,patchno);
     }
     else
     {
@@ -793,27 +765,23 @@ fclaw_patch_mark_coarsen(fclaw_domain_t *domain, int blockno, int patchno)
 void
 fclaw_domain_iterate_adapted(fclaw_domain_t *old_domain, fclaw_domain_t *new_domain, fclaw_match_callback_t mcb, void *user)
 {
+    FCLAW_ASSERT(old_domain->refine_dim == new_domain->refine_dim);
+
     fclaw_match_callback_wrap_user_t mcb_wrap_user;
     mcb_wrap_user.mcb = mcb;
     mcb_wrap_user.user = user;
 
     if(old_domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* old_domain_2d = fclaw_domain_get_2d_domain(old_domain);
-        fclaw2d_domain_t* new_domain_2d = fclaw_domain_get_2d_domain(new_domain);
-
-        fclaw2d_domain_iterate_adapted(old_domain_2d,
-                                       new_domain_2d,
+        fclaw2d_domain_iterate_adapted(old_domain->d2,
+                                       new_domain->d2,
                                        fclaw2d_match_callback_wrap,
                                        &mcb_wrap_user);
     }
     else if (old_domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* old_domain_3d = fclaw_domain_get_3d_domain(old_domain);
-        fclaw3d_domain_t* new_domain_3d = fclaw_domain_get_3d_domain(new_domain);
-
-        fclaw3d_domain_iterate_adapted(old_domain_3d,
-                                       new_domain_3d,
+        fclaw3d_domain_iterate_adapted(old_domain->d3,
+                                       new_domain->d3,
                                        fclaw3d_match_callback_wrap,
                                        &mcb_wrap_user);
     }
@@ -827,13 +795,11 @@ void fclaw_domain_allocate_before_partition(fclaw_domain_t *domain, size_t data_
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-        fclaw2d_domain_allocate_before_partition(domain_2d,data_size,patch_data);
+        fclaw2d_domain_allocate_before_partition(domain->d2,data_size,patch_data);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-        fclaw3d_domain_allocate_before_partition(domain_3d,data_size,patch_data);
+        fclaw3d_domain_allocate_before_partition(domain->d3,data_size,patch_data);
     }
     else
     {
@@ -845,13 +811,11 @@ void fclaw_domain_retrieve_after_partition(fclaw_domain_t *domain, void ***patch
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-        fclaw2d_domain_retrieve_after_partition(domain_2d,patch_data);
+        fclaw2d_domain_retrieve_after_partition(domain->d2,patch_data);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-        fclaw3d_domain_retrieve_after_partition(domain_3d,patch_data);
+        fclaw3d_domain_retrieve_after_partition(domain->d3,patch_data);
     }
     else
     {
@@ -862,25 +826,22 @@ void fclaw_domain_retrieve_after_partition(fclaw_domain_t *domain, void ***patch
 void fclaw_domain_iterate_partitioned(fclaw_domain_t *old_domain, fclaw_domain_t *new_domain, fclaw_transfer_callback_t tcb, void *user)
 {
     FCLAW_ASSERT(old_domain->refine_dim == new_domain->refine_dim);
+
     fclaw_transfer_callback_wrap_user_t wrap;
     wrap.tcb = tcb;
     wrap.user = user;
 
     if(old_domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* old_domain_2d = fclaw_domain_get_2d_domain(old_domain);
-        fclaw2d_domain_t* new_domain_2d = fclaw_domain_get_2d_domain(new_domain);
-        fclaw2d_domain_iterate_partitioned(old_domain_2d,
-                                           new_domain_2d,
+        fclaw2d_domain_iterate_partitioned(old_domain->d2,
+                                           new_domain->d2,
                                            fclaw2d_transfer_callback_wrap,
                                            &wrap);
     }
     else if(old_domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* old_domain_3d = fclaw_domain_get_3d_domain(old_domain);
-        fclaw3d_domain_t* new_domain_3d = fclaw_domain_get_3d_domain(new_domain);
-        fclaw3d_domain_iterate_partitioned(old_domain_3d,
-                                           new_domain_3d,
+        fclaw3d_domain_iterate_partitioned(old_domain->d3,
+                                           new_domain->d3,
                                            fclaw3d_transfer_callback_wrap,
                                            &wrap);
     }
@@ -894,13 +855,11 @@ void fclaw_domain_free_after_partition(fclaw_domain_t *domain, void ***patch_dat
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-        fclaw2d_domain_free_after_partition(domain_2d,patch_data);
+        fclaw2d_domain_free_after_partition(domain->d2,patch_data);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-        fclaw3d_domain_free_after_partition(domain_3d,patch_data);
+        fclaw3d_domain_free_after_partition(domain->d3,patch_data);
     }
     else
     {
@@ -916,13 +875,13 @@ fclaw_domain_allocate_before_exchange (fclaw_domain_t * domain,
     {
         fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
         FCLAW_ASSERT(wrap->exchange == NULL);
-        wrap->exchange = fclaw2d_domain_allocate_before_exchange(wrap->domain,data_size);
+        wrap->exchange = fclaw2d_domain_allocate_before_exchange(domain->d2,data_size);
     }
     else if (domain->refine_dim == 3)
     {
         fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain);
         FCLAW_ASSERT(wrap->exchange == NULL);
-        wrap->exchange = fclaw3d_domain_allocate_before_exchange(wrap->domain,data_size);
+        wrap->exchange = fclaw3d_domain_allocate_before_exchange(domain->d3,data_size);
     }
     else
     {
@@ -937,13 +896,15 @@ void fclaw_domain_ghost_exchange (fclaw_domain_t * domain,
     if(domain->refine_dim == 2)
     {
         fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        fclaw2d_domain_ghost_exchange(wrap->domain,wrap->exchange,
-                                      exchange_minlevel,exchange_maxlevel);
+        fclaw2d_domain_ghost_exchange(domain->d2,
+                                      wrap->exchange,
+                                      exchange_minlevel,
+                                      exchange_maxlevel);
     }
     else if (domain->refine_dim == 3)
     {
         fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain);
-        fclaw3d_domain_ghost_exchange(wrap->domain,
+        fclaw3d_domain_ghost_exchange(domain->d3,
                                       wrap->exchange,
                                       exchange_minlevel,
                                       exchange_maxlevel);
@@ -961,7 +922,7 @@ void fclaw_domain_ghost_exchange_begin (fclaw_domain_t * domain,
     if(domain->refine_dim == 2)
     {
         fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        fclaw2d_domain_ghost_exchange_begin(wrap->domain,
+        fclaw2d_domain_ghost_exchange_begin(domain->d2,
                                             wrap->exchange,
                                             exchange_minlevel,
                                             exchange_maxlevel);
@@ -969,7 +930,7 @@ void fclaw_domain_ghost_exchange_begin (fclaw_domain_t * domain,
     else if (domain->refine_dim == 3)
     {
         fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain);
-        fclaw3d_domain_ghost_exchange_begin(wrap->domain,
+        fclaw3d_domain_ghost_exchange_begin(domain->d3,
                                             wrap->exchange,
                                             exchange_minlevel,
                                             exchange_maxlevel);
@@ -985,13 +946,13 @@ void fclaw_domain_ghost_exchange_end (fclaw_domain_t * domain)
     if(domain->refine_dim == 2)
     {
         fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        fclaw2d_domain_ghost_exchange_end(wrap->domain,
+        fclaw2d_domain_ghost_exchange_end(domain->d2,
                                           wrap->exchange);
     }
     else if (domain->refine_dim == 3)
     {
         fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain);
-        fclaw3d_domain_ghost_exchange_end(wrap->domain,
+        fclaw3d_domain_ghost_exchange_end(domain->d3,
                                           wrap->exchange);
     }
     else
@@ -1005,14 +966,14 @@ void fclaw_domain_free_after_exchange (fclaw_domain_t * domain)
     if(domain->refine_dim == 2)
     {
         fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        fclaw2d_domain_free_after_exchange(wrap->domain,
+        fclaw2d_domain_free_after_exchange(domain->d2,
                                            wrap->exchange);
         wrap->exchange = NULL;
     }
     else if (domain->refine_dim == 3)
     {
         fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain);
-        fclaw3d_domain_free_after_exchange(wrap->domain,
+        fclaw3d_domain_free_after_exchange(domain->d3,
                                            wrap->exchange);
         wrap->exchange = NULL;
     }
@@ -1028,13 +989,13 @@ void fclaw_domain_indirect_begin (fclaw_domain_t * domain)
     {
         fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
         FCLAW_ASSERT(wrap->indirect == NULL);
-        wrap->indirect = fclaw2d_domain_indirect_begin(wrap->domain);
+        wrap->indirect = fclaw2d_domain_indirect_begin(domain->d2);
     }
     else if (domain->refine_dim == 3)
     {
         fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain);
         FCLAW_ASSERT(wrap->indirect == NULL);
-        wrap->indirect = fclaw3d_domain_indirect_begin(wrap->domain);
+        wrap->indirect = fclaw3d_domain_indirect_begin(domain->d3);
     }
     else
     {
@@ -1047,12 +1008,12 @@ void fclaw_domain_indirect_end (fclaw_domain_t * domain)
     if(domain->refine_dim == 2)
     {
         fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        fclaw2d_domain_indirect_end(wrap->domain,wrap->indirect);
+        fclaw2d_domain_indirect_end(domain->d2,wrap->indirect);
     }
     else if (domain->refine_dim == 3)
     {
         fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain);
-        fclaw3d_domain_indirect_end(wrap->domain,wrap->indirect);
+        fclaw3d_domain_indirect_end(domain->d3,wrap->indirect);
     }
     else
     {
@@ -1069,14 +1030,14 @@ fclaw_domain_indirect_neighbors (fclaw_domain_t * domain,
     if(domain->refine_dim == 2)
     {
         fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        return (fclaw_patch_relation_t) fclaw2d_domain_indirect_neighbors(wrap->domain,wrap->indirect,
+        return (fclaw_patch_relation_t) fclaw2d_domain_indirect_neighbors(domain->d2,wrap->indirect,
                                                                           ghostno,faceno,rproc,rblockno,
                                                                           rpatchno,rfaceno);
     }
     else if (domain->refine_dim == 3)
     {
         fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain);
-        return (fclaw_patch_relation_t) fclaw3d_domain_indirect_neighbors(wrap->domain,wrap->indirect,
+        return (fclaw_patch_relation_t) fclaw3d_domain_indirect_neighbors(domain->d3,wrap->indirect,
                                                                           ghostno,faceno,rproc,rblockno,
                                                                           rpatchno,rfaceno);
     }
@@ -1091,13 +1052,13 @@ void fclaw_domain_indirect_destroy (fclaw_domain_t * domain)
     if(domain->refine_dim == 2)
     {
         fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        fclaw2d_domain_indirect_destroy(wrap->domain,wrap->indirect);
+        fclaw2d_domain_indirect_destroy(domain->d2,wrap->indirect);
         wrap->indirect = NULL;
     }
     else if (domain->refine_dim == 3)
     {
         fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain); 
-        fclaw3d_domain_indirect_destroy(wrap->domain,wrap->indirect);
+        fclaw3d_domain_indirect_destroy(domain->d3,wrap->indirect);
         wrap->indirect = NULL;
     }
     else
@@ -1111,13 +1072,11 @@ int fclaw_domain_is_meta (fclaw_domain_t * domain)
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_t* domain_2d = fclaw_domain_get_2d_domain(domain);
-        return fclaw2d_domain_is_meta(domain_2d);
+        return fclaw2d_domain_is_meta(domain->d2);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_t* domain_3d = fclaw_domain_get_3d_domain(domain);
-        return fclaw3d_domain_is_meta(domain_3d);
+        return fclaw3d_domain_is_meta(domain->d3);
     }
     else
     {
