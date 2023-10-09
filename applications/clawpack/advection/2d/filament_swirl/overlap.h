@@ -1,5 +1,6 @@
 /*
-Copyright (c) 2012-2022 Carsten Burstedde, Donna Calhoun, Scott Aiton
+Copyright (c) 2012-2023 Carsten Burstedde, Donna Calhoun, Scott Aiton,
+Hannes Brandt
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -23,49 +24,70 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FILAMENT_USER_H
-#define FILAMENT_USER_H
-
-#include "../../all/advection_user.h"
+#ifndef OVERLAP_H
+#define OVERLAP_H
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#if 0
-/* Fix syntax highlighting */
-#endif
+#include <fclaw_options.h>
 
-typedef struct filament_options
+#include <fclaw_domain.h>
+#include <fclaw_patch.h>    
+#include <fclaw_global.h>
+
+
+typedef struct overlap_prodata
 {
-    int example;
-    double alpha;
+  double myvalue[7];
+  int    isset;
+}
+overlap_prodata_t;
 
-    double *center;
-    const char* center_string;
-    int claw_version;
+typedef struct overlap_point
+{
+  size_t  lnum;
+  double  xy[3];
+  overlap_prodata_t   prodata;
+}
+overlap_point_t;
 
-    int is_registered;
+typedef struct overlap_consumer
+{
+  fclaw_global_t   *glob;
+  fclaw_domain_t   *domain;
+  sc_array_t         *query_points;
+  size_t              cell_idx;
+  int                 num_cells_in_patch;
+}
+overlap_consumer_t;
 
-} filament_options_t;
+
+typedef struct overlap_geometry
+{
+    fclaw_options_t *fclaw_opt;
+    fclaw_block_t *blocks;
+}
+overlap_geometry_t;
 
 
+void apply_consumer_mapping (overlap_point_t * op);
 
-filament_options_t* filament_options_register (fclaw_app_t * app,
-                                               const char *section,
-                                               const char *configfile);
+void create_query_points (overlap_consumer_t * c);
 
-void filament_options_store (fclaw_global_t* glob, filament_options_t* user);
+int apply_inverse_producer_mapping (overlap_point_t * op, double xy[3],
+                                    int blockno, overlap_geometry_t * geo);
 
-const filament_options_t* filament_get_options(fclaw_global_t* glob);
+int overlap_interpolate (fclaw_domain_t * domain, fclaw_patch_t * patch,
+                         int blockno, int patchno, void *point, void *user);
 
-void filament_link_solvers(fclaw_global_t *glob);
+void output_query_points (overlap_consumer_t * c);
 
-/* Filament */
-void filament_create_domain(fclaw_global_t *glob);
-void filament_initialize(fclaw_global_t* glob);
-void filament_finalize(fclaw_global_t* glob);
+
+void add_cell_centers (fclaw_domain_t * domain, fclaw_patch_t * patch,
+                       int blockno, int patchno, void *user);
 
 
 #ifdef __cplusplus
@@ -73,3 +95,4 @@ void filament_finalize(fclaw_global_t* glob);
 #endif
 
 #endif
+

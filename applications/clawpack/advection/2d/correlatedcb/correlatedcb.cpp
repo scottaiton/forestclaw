@@ -25,21 +25,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "correlatedcb_user.h"
 
-void
-store_domain_map (fclaw_global_t * glob, fclaw_options_t * fclaw_opt,
-                  user_options_t * user_opt)
+void create_domain(fclaw_global_t *glob)
 {
-    /* Mapped, multi-block domain */
-    fclaw_domain_t *domain = NULL;
-    fclaw2d_map_context_t *cont = NULL;
+    const fclaw_options_t* fclaw_opt = fclaw_get_options(glob);
 
     /* Used locally */
     double pi = M_PI;
-    double rotate[2];
 
+    double rotate[2];
     rotate[0] = pi*fclaw_opt->theta/180.0;
     rotate[1] = 0;
 
+    fclaw2d_map_context_t *cont = NULL;
+    fclaw_domain_t *domain = NULL;
+
+    const user_options_t *user_opt = correlatedcb_get_options(glob);
     switch (user_opt->mapping) {
     case 0:
         domain =
@@ -56,22 +56,22 @@ store_domain_map (fclaw_global_t * glob, fclaw_options_t * fclaw_opt,
         SC_ABORT_NOT_REACHED (); /* must be checked in torus_checkparms */
     }
 
-    fclaw_domain_list_levels (domain, FCLAW_VERBOSITY_ESSENTIAL);
-    fclaw_domain_list_neighbors (domain, FCLAW_VERBOSITY_DEBUG);
-    fclaw_global_store_domain (glob, domain);
-    fclaw2d_map_store (glob, cont);
+    /* Store mapping in the glob */
+    fclaw2d_map_store (glob, cont);            
+
+    /* Store the domain in the glob */
+    fclaw_global_store_domain(glob, domain);
+
+    /* print out some info */
+    fclaw_domain_list_levels(domain, FCLAW_VERBOSITY_ESSENTIAL);
+    fclaw_domain_list_neighbors(domain, FCLAW_VERBOSITY_DEBUG);
 }
 
 
 static
 void run_program(fclaw_global_t* glob)
 {
-    const user_options_t           *user_opt;
-
-    /* ---------------------------------------------------------------
-       Set domain data.
-       --------------------------------------------------------------- */
-    user_opt = correlatedcb_get_options(glob);
+    const user_options_t  *user_opt = correlatedcb_get_options(glob);
 
     /* Initialize virtual table for ForestClaw */
     fclaw_vtables_initialize(glob);
@@ -100,47 +100,43 @@ void run_program(fclaw_global_t* glob)
 int
 main (int argc, char **argv)
 {
-    fclaw_app_t *app;
-    int first_arg;
-    fclaw_exit_type_t vexit;
+    /* Initialize application */
+    fclaw_app_t *app = fclaw_app_new (&argc, &argv, NULL);
 
-    /* Options */
-    user_options_t              *user_opt;
-    fclaw_options_t             *fclaw_opt;
     fclaw_clawpatch_options_t *clawpatch_opt;
     fc2d_clawpack46_options_t   *claw46_opt;
     fc2d_clawpack5_options_t    *claw5_opt;
+    fclaw_options_t *fclaw_opt;
+    user_options_t *user_opt; 
 
-    /* Initialize application */
-    app = fclaw_app_new (&argc, &argv, NULL);
-
-    /* Create new options packages */
-    fclaw_opt =                   fclaw_options_register(app,  NULL,        "fclaw_options.ini");
+    fclaw_opt =      fclaw_options_register(app,  NULL, "fclaw_options.ini");
     clawpatch_opt =   fclaw_clawpatch_2d_options_register(app, "clawpatch",  "fclaw_options.ini");
     claw46_opt =        fc2d_clawpack46_options_register(app, "clawpack46", "fclaw_options.ini");
     claw5_opt =          fc2d_clawpack5_options_register(app, "clawpack5",  "fclaw_options.ini");
-    user_opt =             correlatedcb_options_register(app,               "fclaw_options.ini");  
+    user_opt =             correlatedcb_options_register(app, "fclaw_options.ini");  
 
-    /* Read configuration file(s) and command line, and process options */
+    int first_arg;
+    fclaw_exit_type_t vexit;
     vexit =  fclaw_app_options_parse (app, &first_arg,"fclaw_options.ini.used");
 
     if (!vexit)
     {
         /* Options have been checked and are valid */
-
-        /* Create global structure which stores the domain, timers, etc */
+        
+        /* Create glob */
         int size, rank;
         sc_MPI_Comm mpicomm = fclaw_app_get_mpi_size_rank (app, &size, &rank);
-        fclaw_global_t *glob =
-            fclaw_global_new_comm (mpicomm, size, rank);
-        store_domain_map (glob, fclaw_opt, user_opt);
+        fclaw_global_t *glob = fclaw_global_new_comm (mpicomm, size, rank);
 
         /* Store option packages in glob */
         fclaw_options_store           (glob, fclaw_opt);
         fclaw_clawpatch_options_store (glob, clawpatch_opt);
         fc2d_clawpack46_options_store   (glob, claw46_opt);
         fc2d_clawpack5_options_store    (glob, claw5_opt);
-        correlatedcb_options_store          (glob, user_opt);
+        correlatedcb_options_store      (glob, user_opt);
+
+        /* Create domain and store domain in glob */
+        create_domain(glob);
 
         /* Run the program */
         run_program(glob);
