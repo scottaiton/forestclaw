@@ -45,7 +45,6 @@ extern "C"
 
 typedef struct fclaw2d_domain_wrap
 {
-    fclaw2d_domain_exchange_t* exchange;
     fclaw2d_domain_indirect_t* indirect;
 } fclaw2d_domain_wrap_t;
 

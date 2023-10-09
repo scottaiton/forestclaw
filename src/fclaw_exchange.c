@@ -38,61 +38,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static 
 void** get_patch_data(fclaw_domain_t *domain)
 {
+    FCLAW_ASSERT(domain->refine_dim == 2 || domain->refine_dim == 3);
+    FCLAW_ASSERT(domain->exchange != NULL);
+
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        FCLAW_ASSERT(wrap->exchange != NULL);
-        return wrap->exchange->patch_data;
+        return domain->exchange->d2->patch_data;
     }
-    else if (domain->refine_dim == 3)
+    else
     {
-        fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain);
-        FCLAW_ASSERT(wrap->exchange != NULL);
-        return wrap->exchange->patch_data;
-    }
-    else 
-    {
-        SC_ABORT_NOT_REACHED();
+        return domain->exchange->d3->patch_data;
     }
 }
 
 static 
 void** get_ghost_data(fclaw_domain_t *domain)
 {
-    if(domain->refine_dim == 2)
-    {
-        fclaw2d_domain_wrap_t *wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        FCLAW_ASSERT(wrap->exchange != NULL);
-        return wrap->exchange->ghost_data;
-    }
-    else if (domain->refine_dim == 3)
-    {
-        fclaw3d_domain_wrap_t *wrap = fclaw_domain_get_3d_domain_wrap(domain);
-        FCLAW_ASSERT(wrap->exchange != NULL);
-        return wrap->exchange->ghost_data;
-    }
-    else 
-    {
-        SC_ABORT_NOT_REACHED();
-    }
-}
+    FCLAW_ASSERT(domain->refine_dim == 2 || domain->refine_dim == 3);
+    FCLAW_ASSERT(domain->exchange != NULL);
 
-static
-int exchange_allocated(fclaw_domain_t* domain)
-{
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_wrap_t* wrap = fclaw_domain_get_2d_domain_wrap(domain);
-        return wrap->exchange != NULL;
+        return domain->exchange->d2->ghost_data;
     }
-    else if (domain->refine_dim == 3)
+    else
     {
-        fclaw3d_domain_wrap_t* wrap = fclaw_domain_get_3d_domain_wrap(domain);
-        return wrap->exchange != NULL;
-    }
-    else 
-    {
-        SC_ABORT_NOT_REACHED();
+        return domain->exchange->d3->ghost_data;
     }
 }
 
@@ -219,7 +190,7 @@ void fclaw_exchange_setup(fclaw_global_t* glob,
     /* we just created a grid by fclaw_initialize or fclaw_regrid
        and we now need to allocate data to store and retrieve local
        boundary patches and remote ghost patches */
-    fclaw_domain_allocate_before_exchange (domain, data_size);
+    domain->exchange = fclaw_domain_allocate_before_exchange (domain, data_size);
 
     /* Store locations of on-proc boundary patches that will be communicated
        to neighboring remote procs.  The pointer stored in e->patch_data[]
@@ -299,7 +270,7 @@ void fclaw_exchange_delete(fclaw_global_t* glob)
 
     /* Free contiguous memory, if allocated.  If no memory was allocated
        (because we are not storing the area), nothing de-allocated. */
-    if (exchange_allocated(domain))
+    if (fclaw_domain_exchange_allocated(domain))
     {
         void** patch_data = get_patch_data(domain);
         /* Delete local patches which are passed to other procs */
@@ -320,7 +291,8 @@ void fclaw_exchange_delete(fclaw_global_t* glob)
 
     /* Delete ghost patches from remote neighboring patches */
     delete_remote_ghost_patches(glob);
-    fclaw_domain_free_after_exchange (domain);
+    fclaw_domain_free_after_exchange (domain, domain->exchange);
+    domain->exchange = NULL;
 
     /* Destroy indirect data needed to communicate between ghost patches
        from different procs */
@@ -383,11 +355,11 @@ void fclaw_exchange_ghost_patches_begin(fclaw_global_t* glob,
         int time_interp_level = minlevel-1;
 
         fclaw_domain_ghost_exchange_begin
-            (domain, time_interp_level, maxlevel);
+            (domain, domain->exchange, time_interp_level, maxlevel);
     }
     else
     {
-        fclaw_domain_ghost_exchange_begin(domain, minlevel, maxlevel);
+        fclaw_domain_ghost_exchange_begin(domain, domain->exchange, minlevel, maxlevel);
 
     }
     fclaw_timer_stop (&glob->timers[FCLAW_TIMER_GHOSTPATCH_COMM]);
@@ -414,11 +386,11 @@ void fclaw_exchange_ghost_patches_end(fclaw_global_t* glob,
     /* Exchange only over levels currently in use */
     if (time_interp)
     {
-        fclaw_domain_ghost_exchange_end (domain);
+        fclaw_domain_ghost_exchange_end (domain, domain->exchange);
     }
     else
     {
-        fclaw_domain_ghost_exchange_end (domain);
+        fclaw_domain_ghost_exchange_end (domain, domain->exchange);
     }
 
     fclaw_timer_stop (&glob->timers[FCLAW_TIMER_GHOSTPATCH_COMM]);

@@ -55,6 +55,8 @@ typedef struct fclaw_block fclaw_block_t;
 /** Typedef for fclaw_patch */
 typedef struct fclaw_patch fclaw_patch_t;
 
+typedef struct fclaw_domain_exchange fclaw_domain_exchange_t;
+
 /* forward declare dimensioned patch types */
 struct fclaw2d_patch;
 struct fclaw3d_patch;
@@ -143,9 +145,6 @@ struct fclaw_domain
     struct fclaw2d_domain *d2;         /**< 2D domain */
     struct fclaw3d_domain *d3;         /**< 3D domain */
 
-    int count_set_patch;
-    int count_delete_patch;
-
     sc_MPI_Comm mpicomm;        /**< MPI communicator */
     int mpisize;                /**< MPI size */
     int mpirank;                /**< MPI rank */
@@ -175,6 +174,13 @@ struct fclaw_domain
     fclaw_patch_t *ghost_patches;     /**< array of off-proc patches */
 
     sc_keyvalue_t *attributes;  /**< Reserved to store domain attributes */
+
+    /* formerly in domain_data_t */
+
+    int count_set_patch;
+    int count_delete_patch;
+
+    fclaw_domain_exchange_t* exchange;
 
     void *lld;       /**< opaque pointer to low level domain data */
     void *user; /**< user data pointer */
@@ -1050,13 +1056,28 @@ void fclaw_domain_serialization_leave (fclaw_domain_t * domain);
 /* ---------------------------------------------------------------------- */
 ///@{
 
+/**
+ * @brief Simple wrapper struct for fclaw2d_exchange_info_t 
+ *        and fclaw3d_exchange_info_t
+ */
+struct fclaw_domain_exchange
+{
+    int refine_dim; /**< refinement dimension */
+    struct fclaw2d_domain_exchange *d2; /**< 2d exchange data */
+    struct fclaw3d_domain_exchange *d3; /**< 3d exchange data */
+};
+
 /** Allocate buffer to hold the data from off-processor patches.
  * Free this by fclaw_domain_free_after_exchange before regridding.
  * \param [in] domain           The domain is not modified.
  * \param [in] data_size        Number of bytes per patch to exchange.
+ * \return                      Allocated data structure.
+ *                              The pointers in patch_data[i] need to be set
+ *                              after this call by forestclaw.
  */
-void fclaw_domain_allocate_before_exchange (fclaw_domain_t * domain,
-                                            size_t data_size);
+fclaw_domain_exchange_t *
+fclaw_domain_allocate_before_exchange (fclaw_domain_t * domain,
+                                       size_t data_size);
 
 /** Exchange data for parallel ghost neighbors.
  * This function receives data from parallel neighbor (ghost) patches.
@@ -1065,10 +1086,13 @@ void fclaw_domain_allocate_before_exchange (fclaw_domain_t * domain,
  * \param [in] domain           Used to access forest and ghost metadata.
  *                              #(sent patches) is domain->num_exchange_patches.
  *                              #(received patches) is domain->num_ghost_patches.
+ * \param [in] e                Allocated buffers whose e->patch_data[i] pointers
+ *                              must have been set properly by forestclaw.
  * \param [in] exchange_minlevel The minimum quadrant level that is exchanged.
  * \param [in] exchange_maxlevel The maximum quadrant level that is exchanged.
  */
 void fclaw_domain_ghost_exchange (fclaw_domain_t * domain,
+                                  fclaw_domain_exchange_t * e,
                                   int exchange_minlevel,
                                   int exchange_maxlevel);
 
@@ -1077,8 +1101,14 @@ void fclaw_domain_ghost_exchange (fclaw_domain_t * domain,
  * It must be followed by a call to fclaw_domain_ghost_exchange_end.
  * Between begin and end, neither of \ref fclaw_domain_indirect_begin
  * and _end must be called.
+ * \param [in,out] e            Its ghost_data member must survive and not
+ *                              be written to until the completion of
+ *                              fclaw_domain_ghost_exchange_end.
+ *                              Its patch_data member may already be
+ *                              overwritten after this function returns.
  */
 void fclaw_domain_ghost_exchange_begin (fclaw_domain_t * domain,
+                                        fclaw_domain_exchange_t * e,
                                         int exchange_minlevel,
                                         int exchange_maxlevel);
 
@@ -1086,14 +1116,18 @@ void fclaw_domain_ghost_exchange_begin (fclaw_domain_t * domain,
  * Must be called at some point after fclaw_domain_ghost_exchange_begin.
  * Between begin and end, neither of \ref fclaw_domain_indirect_begin
  * and _end must be called.
+ * \param [in,out] e            Its ghost_data member must have survived.
  */
-void fclaw_domain_ghost_exchange_end (fclaw_domain_t * domain);
+void fclaw_domain_ghost_exchange_end (fclaw_domain_t * domain,
+                                      fclaw_domain_exchange_t * e);
 
 /** Free buffers used in exchanging off-processor data during time stepping.
  * This should be done just before regridding.
  * \param [in] domain           The domain is not modified.
+ * \param [in] e                Allocated buffers.
  */
-void fclaw_domain_free_after_exchange (fclaw_domain_t * domain);
+void fclaw_domain_free_after_exchange (fclaw_domain_t * domain,
+                                       fclaw_domain_exchange_t * e);
 
 ///@}
 /* ---------------------------------------------------------------------- */
