@@ -40,22 +40,21 @@ void radial_link_solvers(fclaw_global_t *glob)
 
 }
 
-fclaw_domain_t* radial_create_domain(sc_MPI_Comm mpicomm, 
-                                       fclaw_options_t* gparms)
+void radial_create_domain(fclaw_global_t* glob)
 {
-    p4est_connectivity_t     *conn = NULL;
-    fclaw_domain_t         *domain;
-    fclaw2d_map_context_t    *cont = NULL;
+    fclaw_options_t *fclaw_opts = fclaw_get_options(glob);
 
     /* Size is set by [ax,bx] x [ay, by], set in .ini file */
-    conn = p4est_connectivity_new_unitsquare();
-    cont = fclaw2d_map_new_nomap();
+    fclaw_domain_t *domain = 
+        fclaw_domain_new_unitsquare(glob->mpicomm, fclaw_opts->minlevel);
+    fclaw2d_map_context_t* cont = fclaw2d_map_new_nomap();
 
-    domain = fclaw_domain_wrap_2d(fclaw2d_domain_new_conn_map (mpicomm, gparms->minlevel, conn, cont));
+    /* store domain and map in glob */
+    fclaw_global_store_domain(glob, domain);
+    fclaw2d_map_store(glob, cont);
+
     fclaw_domain_list_levels(domain, FCLAW_VERBOSITY_ESSENTIAL);
     fclaw_domain_list_neighbors(domain, FCLAW_VERBOSITY_DEBUG);
-
-    return domain;
 }
 
 void radial_run_program(fclaw_global_t* glob)

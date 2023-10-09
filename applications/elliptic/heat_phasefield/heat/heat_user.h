@@ -177,7 +177,7 @@ void HEAT_FORT_BC2(const int* meqn, const int* mbc,
                    double q[], double* t, double *dt, 
                    int intersects_bc[]);
 
-fclaw_domain_t* heat_create_domain(sc_MPI_Comm mpicomm, fclaw_options_t* fclaw_opt);
+void heat_create_domain(fclaw_global_t* glob);
 
 void heat_run_program(fclaw_global_t* glob);
 

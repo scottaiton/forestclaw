@@ -42,12 +42,10 @@
 #include <fc2d_thunderegg_options.h>
 
 
-fclaw_domain_t* heat_create_domain(sc_MPI_Comm mpicomm, fclaw_options_t* fclaw_opt)
+void heat_create_domain(fclaw_global_t* glob)
 {
     /* Mapped, multi-block domain */
-    p4est_connectivity_t     *conn = NULL;
-    fclaw_domain_t         *domain;
-    fclaw2d_map_context_t    *cont = NULL, *brick = NULL;
+    fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
  
     int mi = fclaw_opt->mi;
     int mj = fclaw_opt->mj;
@@ -55,15 +53,17 @@ fclaw_domain_t* heat_create_domain(sc_MPI_Comm mpicomm, fclaw_options_t* fclaw_o
     int a = fclaw_opt->periodic_x;
     int b = fclaw_opt->periodic_y;
 
-    /* Map unit square to disk using mapc2m_disk.f */
-    conn = p4est_connectivity_new_brick(mi,mj,a,b);
-    brick = fclaw2d_map_new_brick_conn (conn,mi,mj);
-    cont = fclaw2d_map_new_nomap_brick(brick);
+    fclaw_domain_t *domain = fclaw_domain_new_2d_brick(glob->mpicomm, mi,mj,a,b, fclaw_opt->minlevel);
 
-    domain = fclaw_domain_wrap_2d(fclaw2d_domain_new_conn_map (mpicomm, fclaw_opt->minlevel, conn, cont));
+    /* Map unit square to disk using mapc2m_disk.f */
+    fclaw2d_map_context_t *brick = fclaw2d_map_new_brick(domain, mi, mj, a, b);
+    fclaw2d_map_context_t *cont = fclaw2d_map_new_nomap_brick(brick);
+
+    fclaw_global_store_domain(glob, domain);
+    fclaw2d_map_store(glob, cont);
+
     fclaw_domain_list_levels(domain, FCLAW_VERBOSITY_ESSENTIAL);
     fclaw_domain_list_neighbors(domain, FCLAW_VERBOSITY_DEBUG);  
-    return domain;
 }
 
 void heat_run_program(fclaw_global_t* glob)
