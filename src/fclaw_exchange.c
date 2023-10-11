@@ -190,6 +190,7 @@ void fclaw_exchange_setup(fclaw_global_t* glob,
     /* we just created a grid by fclaw_initialize or fclaw_regrid
        and we now need to allocate data to store and retrieve local
        boundary patches and remote ghost patches */
+    FCLAW_ASSERT(domain->exchange == NULL);
     domain->exchange = fclaw_domain_allocate_before_exchange (domain, data_size);
 
     /* Store locations of on-proc boundary patches that will be communicated
@@ -227,7 +228,8 @@ void fclaw_exchange_setup(fclaw_global_t* glob,
     }
 
     fclaw_timer_start (&glob->timers[FCLAW_TIMER_GHOSTPATCH_COMM]);
-    fclaw_domain_indirect_begin(domain);
+    FCLAW_ASSERT(domain->indirect == NULL);
+    domain->indirect = fclaw_domain_indirect_begin(domain);
 
     fclaw_timer_stop (&glob->timers[FCLAW_TIMER_GHOSTPATCH_COMM]);
 
@@ -254,7 +256,7 @@ void fclaw_exchange_setup(fclaw_global_t* glob,
     }
 
     fclaw_timer_start (&glob->timers[FCLAW_TIMER_GHOSTPATCH_COMM]);
-    fclaw_domain_indirect_end(domain);
+    fclaw_domain_indirect_end(domain, domain->indirect);
     fclaw_timer_stop (&glob->timers[FCLAW_TIMER_GHOSTPATCH_COMM]);
 
     if (running != FCLAW_TIMER_NONE)
@@ -296,7 +298,8 @@ void fclaw_exchange_delete(fclaw_global_t* glob)
 
     /* Destroy indirect data needed to communicate between ghost patches
        from different procs */
-    fclaw_domain_indirect_destroy(domain);
+    fclaw_domain_indirect_destroy(domain, domain->indirect);
+    domain->indirect = NULL;
     fclaw_timer_stop (&glob->timers[FCLAW_TIMER_GHOSTPATCH_BUILD]);
 }
 

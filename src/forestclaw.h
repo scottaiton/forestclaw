@@ -56,6 +56,8 @@ typedef struct fclaw_block fclaw_block_t;
 typedef struct fclaw_patch fclaw_patch_t;
 
 typedef struct fclaw_domain_exchange fclaw_domain_exchange_t;
+/* Data structure for storing indirect parallel neighbor information */
+typedef struct fclaw_domain_indirect fclaw_domain_indirect_t;
 
 /* forward declare dimensioned patch types */
 struct fclaw2d_patch;
@@ -181,6 +183,7 @@ struct fclaw_domain
     int count_delete_patch;
 
     fclaw_domain_exchange_t* exchange;
+    fclaw_domain_indirect_t* indirect;
 
     void *lld;       /**< opaque pointer to low level domain data */
     void *user; /**< user data pointer */
@@ -1135,6 +1138,7 @@ void fclaw_domain_free_after_exchange (fclaw_domain_t * domain,
 /* ---------------------------------------------------------------------- */
 ///@{
 
+
 /** Begin sending messages to determine neighbors of ghost patches.
  * This call must not be interleaved with any ghost_exchange calls.
  * \param [in] domain           This domain must remain valid until
@@ -1142,7 +1146,8 @@ void fclaw_domain_free_after_exchange (fclaw_domain_t * domain,
  * \return                      A private data structure that will hold
  *                              the context for indirect ghost neighbors.
  */
-void fclaw_domain_indirect_begin (fclaw_domain_t * domain);
+fclaw_domain_indirect_t
+ * fclaw_domain_indirect_begin (fclaw_domain_t * domain);
 
 /** End sending messages to determine neighbors of ghost patches.
  * This call must not be interleaved with any ghost_exchange calls.
@@ -1153,7 +1158,8 @@ void fclaw_domain_indirect_begin (fclaw_domain_t * domain);
  *                              \ref fclaw_domain_indirect_begin
  *                              and will be completed with parallel information.
  */
-void fclaw_domain_indirect_end (fclaw_domain_t * domain);
+void fclaw_domain_indirect_end (fclaw_domain_t * domain, 
+                                fclaw_domain_indirect_t * ind);
 
 /** Call this analogously to \ref fclaw_domain_face_neighbors.
  * We only return an indirect ghost neighbor patch:  This is defined as a ghost
@@ -1180,6 +1186,7 @@ void fclaw_domain_indirect_end (fclaw_domain_t * domain);
  */
 fclaw_patch_relation_t
 fclaw_domain_indirect_neighbors (fclaw_domain_t * domain,
+                                 fclaw_domain_indirect_t * ind,
                                  int ghostno, int faceno, int rproc[],
                                  int *rblockno, int rpatchno[],
                                  int *rfaceno);
@@ -1188,7 +1195,8 @@ fclaw_domain_indirect_neighbors (fclaw_domain_t * domain,
  * \param [in] domain           Must be the same domain used in begin and end.
  * \param [in,out] ind          Memory will be freed.
  */
-void fclaw_domain_indirect_destroy (fclaw_domain_t * domain);
+void fclaw_domain_indirect_destroy (fclaw_domain_t * domain,
+                                    fclaw_domain_indirect_t * ind);
 
 ///@}
 /* ---------------------------------------------------------------------- */

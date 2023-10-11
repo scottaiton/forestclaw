@@ -46,7 +46,7 @@ extern "C"
 
 typedef struct fclaw3d_domain_wrap
 {
-    fclaw3d_domain_indirect_t* indirect;
+    void* nothing;
 } fclaw3d_domain_wrap_t;
 
 struct fclaw_domain* fclaw_domain_wrap_3d(fclaw3d_domain_t *domain2d);
