@@ -35,31 +35,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fc2d_clawpack5.h>
 
 static void
-store_domain_map (fclaw_global_t * glob, fclaw_options_t * fclaw_opt)
+create_domain_map (fclaw_global_t * glob)
 {
-    fclaw_domain_t *domain = NULL;
-    domain =
+    const fclaw_options_t* fclaw_opt = fclaw_get_options(glob);
+
+    fclaw_domain_t *domain = 
         fclaw_domain_new_unitsquare (glob->mpicomm, fclaw_opt->minlevel);
+
+    /* Create "empty" mapping */
+    fclaw2d_map_context_t* cont = fclaw2d_map_new_nomap();
+
+    /* Store the domain in the glob struct */
+    fclaw_global_store_domain(glob, domain);
+
+    /* Store the mapping context in the glob */
+    fclaw2d_map_store(glob, cont);
+
+    /* List some info */
     fclaw_domain_list_levels (domain, FCLAW_VERBOSITY_ESSENTIAL);
     fclaw_domain_list_neighbors (domain, FCLAW_VERBOSITY_DEBUG);
-    fclaw_global_store_domain (glob, domain);
-    fclaw2d_map_store (glob, fclaw2d_map_new_nomap ());
 }
 
 static
 void run_program(fclaw_global_t* glob)
 {
-    const user_options_t           *user_opt;
-
-    /* ---------------------------------------------------------------
-       Set domain data.
-       --------------------------------------------------------------- */
-    user_opt = interface_get_options(glob);
-
     /* Initialize virtual table for ForestClaw */
     fclaw_vtables_initialize(glob);
 
     /* Initialize virtual tables for solvers */
+    const user_options_t *user_opt = interface_get_options(glob);
     if (user_opt->claw_version == 4)
     {
         fc2d_clawpack46_solver_initialize(glob);
@@ -83,9 +87,9 @@ void run_program(fclaw_global_t* glob)
 int
 main (int argc, char **argv)
 {
-    fclaw_app_t *app;
-    int first_arg;
-    fclaw_exit_type_t vexit;
+    /* Initialize application */
+    fclaw_app_t *app = fclaw_app_new (&argc, &argv, NULL);
+
 
     /* Options */
     user_options_t              *user_opt;
@@ -94,8 +98,6 @@ main (int argc, char **argv)
     fc2d_clawpack46_options_t   *claw46_opt;
     fc2d_clawpack5_options_t    *claw5_opt;
 
-    /* Initialize application */
-    app = fclaw_app_new (&argc, &argv, NULL);
 
     /* Create new options packages */
     fclaw_opt =                   fclaw_options_register(app,  NULL,        "fclaw_options.ini");
@@ -105,6 +107,8 @@ main (int argc, char **argv)
     user_opt =                interface_options_register(app,               "fclaw_options.ini");  
 
     /* Read configuration file(s) and command line, and process options */
+    int first_arg;
+    fclaw_exit_type_t vexit;
     vexit =  fclaw_app_options_parse (app, &first_arg,"fclaw_options.ini.used");
 
     /* Run the program */
@@ -117,7 +121,6 @@ main (int argc, char **argv)
         sc_MPI_Comm mpicomm = fclaw_app_get_mpi_size_rank (app, &size, &rank);
         fclaw_global_t *glob =
             fclaw_global_new_comm (mpicomm, size, rank);
-        store_domain_map (glob, fclaw_opt);
 
         /* Store option packages in glob */
         fclaw_options_store           (glob, fclaw_opt);
@@ -125,6 +128,9 @@ main (int argc, char **argv)
         fc2d_clawpack46_options_store   (glob, claw46_opt);
         fc2d_clawpack5_options_store    (glob, claw5_opt);
         interface_options_store         (glob, user_opt);
+
+        /* Create and store domain */
+        create_domain_map (glob);
 
         run_program(glob);
         

@@ -37,28 +37,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fc2d_clawpack5.h>
 
 static
-void create_domain_map (fclaw_global_t *glob,
-                        fclaw_options_t *fclaw_opt, user_options_t *user)
+void create_domain(fclaw_global_t *glob)
 {
-    /* Mapped, multi-block domain */
-    fclaw_domain_t         *domain = NULL;
-    fclaw2d_map_context_t    *cont = NULL;
+    const fclaw_options_t* fclaw_opt = fclaw_get_options(glob);
 
-    switch (user->example)
-    {
-    case 0:
-        /* Use [ax,bx]x[ay,by] */
-        cont = fclaw2d_map_new_nomap();
-        break;
-    default:
-        SC_ABORT_NOT_REACHED ();
-    }
+    fclaw_domain_t *domain = 
+        fclaw_domain_new_unitsquare (glob->mpicomm, 
+                                       fclaw_opt->minlevel);
 
-    domain = fclaw_domain_new_unitsquare (glob->mpicomm, fclaw_opt->minlevel);
+    fclaw2d_map_context_t *cont = fclaw2d_map_new_nomap();
+
+    /* Store mapping in the glob */
+    fclaw2d_map_store (glob, cont);            
+
+    /* Store the domain in the glob */
+    fclaw_global_store_domain(glob, domain);
+
+    /* print out some info */
     fclaw_domain_list_levels (domain, FCLAW_VERBOSITY_ESSENTIAL);
     fclaw_domain_list_neighbors (domain, FCLAW_VERBOSITY_DEBUG);
-    fclaw_global_store_domain (glob, domain);
-    fclaw2d_map_store (glob, cont);
 }
 
 static
@@ -96,9 +93,8 @@ void run_program(fclaw_global_t* glob)
 int
 main (int argc, char **argv)
 {
-    fclaw_app_t *app;
-    int first_arg;
-    fclaw_exit_type_t vexit;
+    /* Initialize application */
+    fclaw_app_t *app = fclaw_app_new (&argc, &argv, NULL);
 
     /* Options */
     user_options_t              *user_opt;
@@ -107,8 +103,6 @@ main (int argc, char **argv)
     fc2d_clawpack46_options_t   *claw46_opt;
     fc2d_clawpack5_options_t    *claw5_opt;
 
-    /* Initialize application */
-    app = fclaw_app_new (&argc, &argv, NULL);
 
     /* Create new options packages */
     fclaw_opt =                   fclaw_options_register(app,  NULL,        "fclaw_options.ini");
@@ -118,7 +112,9 @@ main (int argc, char **argv)
     user_opt =                     bump_options_register(app,               "fclaw_options.ini");
 
     /* Read configuration file(s) and command line, and process options */
-    vexit =  fclaw_app_options_parse (app, &first_arg,"fclaw_options.ini.used");
+    int first_arg;
+    fclaw_exit_type_t vexit = 
+        fclaw_app_options_parse (app, &first_arg,"fclaw_options.ini.used");
 
     /* Run the program */
     if (!vexit)
@@ -129,7 +125,6 @@ main (int argc, char **argv)
         int size, rank;
         sc_MPI_Comm mpicomm = fclaw_app_get_mpi_size_rank (app, &size, &rank);
         fclaw_global_t *glob = fclaw_global_new_comm (mpicomm, size, rank);
-        create_domain_map (glob, fclaw_opt, user_opt);
 
         /* Store option packages in glob */
         fclaw_options_store           (glob, fclaw_opt);
@@ -137,6 +132,9 @@ main (int argc, char **argv)
         fc2d_clawpack46_options_store   (glob, claw46_opt);
         fc2d_clawpack5_options_store    (glob, claw5_opt);
         bump_options_store         (glob, user_opt);
+
+        /* Create domain and store domain in glob */
+        create_domain(glob);
 
         run_program(glob);
 

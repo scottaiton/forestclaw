@@ -28,14 +28,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fc2d_cuda_profiler.h>
 
 static
-fclaw_domain_t* create_domain(sc_MPI_Comm mpicomm, 
-                                fclaw_options_t* fclaw_opt)
+void create_domain(fclaw_global_t* glob)
 {
     /* Mapped, multi-block domain */
-    p4est_connectivity_t     *conn = NULL;
-    fclaw_domain_t         *domain;
-    fclaw2d_map_context_t    *cont = NULL, *brick = NULL;
-
+    fclaw_options_t* fclaw_opt = fclaw_get_options(glob);
 
     int mi,mj,a,b;
     mi = fclaw_opt->mi;
@@ -43,17 +39,19 @@ fclaw_domain_t* create_domain(sc_MPI_Comm mpicomm,
     a = fclaw_opt->periodic_x;
     b = fclaw_opt->periodic_y;
 
-    /* Use [ax,bx]x[ay,by] */
+    fclaw_domain_t* domain = 
+        fclaw_domain_new_2d_brick(glob->mpicomm, mi, mj, a, b, fclaw_opt->minlevel);
 
-    conn = p4est_connectivity_new_brick(mi,mj,a,b);
-    brick = fclaw2d_map_new_brick_conn (conn,mi,mj);
+    /* Use [ax,bx]x[ay,by] */
+    fclaw2d_map_context_t    *cont = NULL, *brick = NULL;
+    brick = fclaw2d_map_new_brick (domain, mi, mj, a, b);
     cont = fclaw2d_map_new_nomap_brick(brick);
 
-    domain = fclaw_domain_wrap_2d(fclaw2d_domain_new_conn_map (mpicomm, 
-                                          fclaw_opt->minlevel, conn, cont));
+    fclaw_global_store_domain(glob, domain);
+    fclaw2d_map_store(glob, cont);
+
     fclaw_domain_list_levels(domain, FCLAW_VERBOSITY_ESSENTIAL);
     fclaw_domain_list_neighbors(domain, FCLAW_VERBOSITY_DEBUG);  
-    return domain;    
 }
 
 static
@@ -99,22 +97,14 @@ void run_program(fclaw_global_t* glob)
 int
 main (int argc, char **argv)
 {
-    fclaw_app_t *app;
-    int first_arg;
-    fclaw_exit_type_t vexit;
+    /* Initialize application */
+    fclaw_app_t *app = fclaw_app_new (&argc, &argv, NULL);
 
     /* Options */
     user_options_t              *user_opt;
     fclaw_options_t             *fclaw_opt;
     fclaw_clawpatch_options_t *clawpatch_opt;
     fc2d_cudaclaw_options_t     *cuclaw_opt;
-
-    fclaw_global_t            *glob;
-    fclaw_domain_t            *domain;
-    sc_MPI_Comm mpicomm;
-
-    /* Initialize application */
-    app = fclaw_app_new (&argc, &argv, NULL);
 
     /* Create new options packages */
     fclaw_opt =                   fclaw_options_register(app,  NULL,       "fclaw_options.ini");
@@ -123,24 +113,26 @@ main (int argc, char **argv)
     user_opt =              shockbubble_options_register(app,              "fclaw_options.ini");  
 
     /* Read configuration file(s) and command line, and process options */
+    int first_arg;
+    fclaw_exit_type_t vexit;
     vexit =  fclaw_app_options_parse (app, &first_arg,"fclaw_options.ini.used");
 
     if (!vexit)
     {
         /* Options have been checked and are valid */
-
-        mpicomm = fclaw_app_get_mpi_size_rank (app, NULL, NULL);
-        domain = create_domain(mpicomm, fclaw_opt);
+        int size, rank;
+        sc_MPI_Comm mpicomm = fclaw_app_get_mpi_size_rank (app, &size, &rank);
     
         /* Create global structure which stores the domain, timers, etc */
-        glob = fclaw_global_new();
-        fclaw_global_store_domain(glob, domain);
+        fclaw_global_t *glob = fclaw_global_new_comm(mpicomm, size, rank);
 
         /* Store option packages in glob */
         fclaw_options_store           (glob, fclaw_opt);
         fclaw_clawpatch_options_store (glob, clawpatch_opt);
         fc2d_cudaclaw_options_store     (glob, cuclaw_opt);
         shockbubble_options_store       (glob, user_opt);
+
+        create_domain(glob);
 
         /* Run the program */
         run_program(glob);

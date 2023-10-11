@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012-2022 Carsten Burstedde, Donna Calhoun, Scott Aiton
+Copyright (c) 2012-2023 Carsten Burstedde, Donna Calhoun, Scott Aiton
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -23,57 +23,71 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "slosh_user.h"
-#include "fclaw_global.h"
-#include <fclaw_filesystem.h>
+/* This example demonstrates the use of fclaw2d_overlap_exchange to exchange
+ * interpolation data between two meshes.
+ * Both meshes have a clearly assigned role:
+ *  consumer (e.g. Gemini) - queries data for points - represented by swirl
+ *  producer (e.g. MAGIC) - provides data - represented by filament. */
 
-void slosh_link_solvers(fclaw_global_t *glob)
+#include "swirl/swirl_user.h"
+
+void swirl_create_domain(fclaw_global_t *glob)
 {
-    fc2d_geoclaw_vtable_t* geoclaw_vt = fc2d_geoclaw_vt(glob);
-    geoclaw_vt->qinit       = &FC2D_GEOCLAW_QINIT;
-}
+    fclaw_set_global_context(glob);    
 
-void slosh_create_domain(fclaw_global_t* glob)
-{
-    fclaw_options_t *fclaw_opts = fclaw_get_options(glob);
+    const fclaw_options_t* fclaw_opt = fclaw_get_options(glob);
 
-    /* Size is set by [ax,bx] x [ay, by], set in .ini file */
     fclaw_domain_t *domain = 
-        fclaw_domain_new_unitsquare(glob->mpicomm, fclaw_opts->minlevel);
+          fclaw_domain_new_unitsquare(glob->mpicomm, 
+                                        fclaw_opt->minlevel);
+    /* Create "empty" mapping */
     fclaw2d_map_context_t* cont = fclaw2d_map_new_nomap();
 
-    /* store domain and map in glob */
+    /* Store domain in the glob */
     fclaw_global_store_domain(glob, domain);
-    fclaw2d_map_store(glob, cont);
 
-    fclaw_domain_list_levels(domain, FCLAW_VERBOSITY_ESSENTIAL);
-    fclaw_domain_list_neighbors(domain, FCLAW_VERBOSITY_DEBUG);
+    fclaw2d_map_store (glob, cont);
+
+    fclaw_clear_global_context(glob);    
 }
 
-void slosh_run_program(fclaw_global_t* glob)
+void swirl_initialize(fclaw_global_t* glob)
 {
     fclaw_set_global_context(glob);
 
-    /* ---------------------------------------------------------------
-       Set domain data.
-       --------------------------------------------------------------- */
+    const swirl_options_t *swirl_opt = swirl_get_options(glob);
+
     /* Initialize virtual table for ForestClaw */
     fclaw_vtables_initialize(glob);
 
-    fc2d_geoclaw_solver_initialize(glob);
+    /* Initialize virtual tables for solvers */
+    if (swirl_opt->claw_version == 4)
+    {
+        fc2d_clawpack46_solver_initialize(glob);
+    }
+    else if (swirl_opt->claw_version == 5)
+    {
+        fc2d_clawpack5_solver_initialize(glob);
+    }
 
-    slosh_link_solvers(glob);
+    swirl_link_solvers(glob);
 
     /* ---------------------------------------------------------------
        Run
        --------------------------------------------------------------- */
-    fc2d_geoclaw_module_setup(glob);
-
-
     fclaw_initialize(glob);
-    fc2d_geoclaw_run(glob);
 
+    fclaw_clear_global_context(glob);
+}
+
+
+void swirl_finalize(fclaw_global_t* glob)
+{
+    fclaw_set_global_context(glob);
+
+    fclaw_problem_setup(glob);
     fclaw_finalize(glob);
 
     fclaw_clear_global_context(glob);
 }
+
