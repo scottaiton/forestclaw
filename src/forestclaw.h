@@ -185,7 +185,6 @@ struct fclaw_domain
     fclaw_domain_exchange_t* exchange;
     fclaw_domain_indirect_t* indirect;
 
-    void *lld;       /**< opaque pointer to low level domain data */
     void *user; /**< user data pointer */
 };
 

@@ -43,15 +43,7 @@ extern "C"
 #endif
 #endif
 
-typedef struct fclaw2d_domain_wrap
-{
-    void* nothing;
-} fclaw2d_domain_wrap_t;
-
-
 struct fclaw_domain* fclaw_domain_wrap_2d(fclaw2d_domain_t *domain2d);
-
-fclaw2d_domain_wrap_t* fclaw_domain_get_2d_domain_wrap(struct fclaw_domain* domain);
 
 void fclaw2d_patch_callback_wrap(fclaw2d_domain_t * domain, 
                                  fclaw2d_patch_t * patch,

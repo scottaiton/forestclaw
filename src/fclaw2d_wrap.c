@@ -37,13 +37,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
-fclaw2d_domain_wrap_t* fclaw_domain_get_2d_domain_wrap(fclaw_domain_t* domain)
-{
-    FCLAW_ASSERT(domain->lld != NULL);
-    FCLAW_ASSERT(domain->refine_dim == FCLAW2D_SPACEDIM);
-    return (fclaw2d_domain_wrap_t*) domain->lld;
-}
-
 static
 void copy_patch(fclaw_patch_t* patch, fclaw2d_patch_t* patch_2d)
 {
@@ -156,9 +149,6 @@ fclaw_domain_t* fclaw_domain_wrap_2d(fclaw2d_domain_t* domain_2d)
     }
 
     domain->attributes = domain_2d->attributes;
-
-    fclaw2d_domain_wrap_t* wrap = FCLAW_ALLOC_ZERO(fclaw2d_domain_wrap_t, 1);
-    domain->lld = wrap;
 
     domain_2d->user = domain;
 

@@ -44,14 +44,7 @@ extern "C"
 #endif
 
 
-typedef struct fclaw3d_domain_wrap
-{
-    void* nothing;
-} fclaw3d_domain_wrap_t;
-
 struct fclaw_domain* fclaw_domain_wrap_3d(fclaw3d_domain_t *domain2d);
-
-fclaw3d_domain_wrap_t* fclaw_domain_get_3d_domain_wrap(struct fclaw_domain* domain);
 
 void fclaw3d_patch_callback_wrap(fclaw3d_domain_t * domain, 
                                  fclaw3d_patch_t * patch,
