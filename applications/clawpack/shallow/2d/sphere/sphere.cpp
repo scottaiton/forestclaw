@@ -25,167 +25,106 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "sphere_user.h"
 
-#include <fclaw_forestclaw.h>
-#include <fclaw_clawpatch.hpp>
-
-#include <fclaw_map.h>
-#include <fclaw_map_query.h>
-#include <p4est_connectivity.h>
-
-#include <fc2d_clawpack46.h>
-
-
-typedef struct user_options
-{
-    int example;
-
-    const char* latitude_string;
-    double *latitude;
-
-    const char* longitude_string;
-    double *longitude;
-
-    int is_registered;
-
-} user_options_t;
-
-static void *
-options_register_user (fclaw_app_t * app, void *package, sc_options_t * opt)
-{
-    user_options_t* user = (user_options_t*) package;
-
-    /* [user] User options */
-    sc_options_add_int (opt, 0, "example", &user->example, 0,
-                        "[user] 0,1 = cubedsphere; 2 = latlong [0]");
-
-    fclaw_options_add_double_array(opt, 0, "latitude", &user->latitude_string,
-                                   "-50 50", &user->latitude, 2,
-                                   "[user] Latitude range (degrees) [-50 50]");
-
-    fclaw_options_add_double_array(opt, 0, "longitude", &user->longitude_string,
-                                   "0 360", &user->longitude, 2,
-                                   "[user] Longitude range (degrees) [0 360]");
-
-    user->is_registered = 1;
-    return NULL;
-}
-
-static fclaw_exit_type_t
-options_postprocess_user (fclaw_app_t * a, void *package, void *registered)
-{
-    user_options_t* user = (user_options_t*) package;
-
-    if (user->example == 0)
-    {
-        fclaw_options_convert_double_array (user->latitude_string, &user->latitude,2);
-        fclaw_options_convert_double_array (user->longitude_string, &user->longitude,2);
-    }
-    return FCLAW_NOEXIT;
-}
-
-static fclaw_exit_type_t
-options_check_user (fclaw_app_t * app, void *package, void *registered)
-{
-    user_options_t* user = (user_options_t*) package;
-    if (user->example < 0 || user->example > 2) {
-        fclaw_global_essentialf ("Option --user:example must be 0, 1, 2, 3 or 4\n");
-        return FCLAW_EXIT_QUIET;
-    }
-    return FCLAW_NOEXIT;
-}
-
-static void
-options_destroy_user (fclaw_app_t * a, void *package, void *registered)
-{
-    user_options_t* user = (user_options_t*) package;
-    /* Destroy arrays used in options  */
-    if (user->example == 0)
-    {
-        fclaw_options_destroy_array((void*) user->latitude);
-        fclaw_options_destroy_array((void*) user->longitude);
-    }
-}
-
-
-static const
-fclaw_app_options_vtable_t options_vtable_user =
-{
-    options_register_user,
-    options_postprocess_user,
-    options_check_user,
-    options_destroy_user
-};
 
 static
-void register_user_options (fclaw_app_t * app,
-                            const char *configfile,
-                            user_options_t* user)
+void create_domain(fclaw2d_global_t *glob)
 {
-    FCLAW_ASSERT (app != NULL);
-
-    /* sneaking the version string into the package pointer */
-    /* when there are more parameters to pass, create a structure to pass */
-    fclaw_app_options_register (app,"user", configfile, &options_vtable_user,
-                                user);
-}
-
-static
-void run_program(fclaw_app_t* app)
-{
-    sc_MPI_Comm            mpicomm;
+    const fclaw_options_t* fclaw_opt = fclaw2d_get_options(glob);
+    double rotate[2];
+    rotate[0] = fclaw_opt->phi;
+    rotate[1] = fclaw_opt->theta;
+    int mi = fclaw_opt->mi;
+    int mj = fclaw_opt->mj;
+    int a = fclaw_opt->periodic_x;
+    int b = fclaw_opt->periodic_y;
 
     /* Mapped, multi-block domain */
-    p4est_connectivity_t     *conn = NULL;
-    fclaw_domain_t	     *domain;
-    fclaw_map_context_t    *cont = NULL, *brick = NULL;
+    fclaw2d_domain_t *domain;
+    fclaw2d_map_context_t  *cont = NULL, *brick=NULL;
 
-    fclaw_options_t   *gparms;
-    user_options_t  *user;
+    const fclaw2d_clawpatch_options_t *clawpatch_opt = 
+        fclaw2d_clawpatch_get_options(glob);
 
-    /* Used locally */
-    int mi, mj, a,b;
-    double pi = M_PI;
-    double rotate[2];
+#if 0
+    /* Create brick domain with periodicity */
+    fclaw2d_domain_t *domain =     
+        fclaw2d_domain_new_brick(glob->mpicomm, mi, mj, a, b,
+                                 fclaw_opt->minlevel);
 
-    mpicomm = fclaw_app_get_mpi_size_rank (app, NULL, NULL);
+    /* Create brick mapping */
+    fclaw2d_map_context_t *brick =
+        fclaw2d_map_new_brick(domain, mi, mj, a, b);
 
-    gparms = fclaw_forestclaw_get_options(app);
-    user = (user_options_t*) fclaw_app_get_user(app);
+    /* Create latlong mapping based on brick */
+    const user_options_t  *user = latlong_get_options(glob);
+    fclaw2d_map_context_t *cont =
+        fclaw2d_map_new_latlong(brick,fclaw_opt->scale,
+                                rotate,
+                                user->latitude, 
+                                user->longitude,
+                                a,b);
 
-    /* ---------------------------------------------------------------
-       Mapping geometry
-       --------------------------------------------------------------- */
-    mi = gparms->mi;
-    mj = gparms->mj;
-    a = gparms->periodic_x;
-    b = gparms->periodic_y;
-    rotate[0] = pi*gparms->theta/180.0;
-    rotate[1] = pi*gparms->phi/180.0;
+#endif
 
-    switch (user->example)
+    const user_options_t *user_opt = sphere_get_options(glob);
+    switch (user_opt->mapping) 
     {
-    case 0:
     case 1:
-        /* Cubed sphere */
-        conn = p4est_connectivity_new_cubed();
-        cont = fclaw2d_map_new_cubedsphere(gparms->scale,gparms->shift,rotate);
+        if (clawpatch_opt->mx*pow_int(2,fclaw_opt->minlevel) < 32)
+        {
+            fclaw_global_essentialf("The cubed-sphere mapping requires mx*2^minlevel >= 32\n");
+            exit(0);
+        }
+
+        domain =
+            fclaw2d_domain_new_cubedsphere(glob->mpicomm,
+                                            fclaw_opt->minlevel);
+
+        cont = fclaw2d_map_new_cubedsphere(fclaw_opt->scale, rotate);
         break;
     case 2:
-        /* latlong */
-        conn = p4est_connectivity_new_brick(mi,mj,a,b);
-        brick = fclaw2d_map_new_brick_conn (conn,mi,mj);
-        cont = fclaw2d_map_new_latlong(brick,gparms->scale,
-                                       user->latitude,user->longitude,a,b);
+        /* Create brick domain with periodicity */
+        domain =     
+            fclaw2d_domain_new_brick(glob->mpicomm, mi, mj, a, b,
+                                     fclaw_opt->minlevel);
+
+        /* Create brick mapping */
+        brick =
+            fclaw2d_map_new_brick(domain, mi, mj, a, b);
+
+        /* Create latlong mapping based on brick */
+        cont = fclaw2d_map_new_latlong(brick,fclaw_opt->scale,
+                                       rotate,
+                                       user_opt->latitude, 
+                                       user_opt->longitude,
+                                       a,b);
+        break;
+    case 3:
+        domain = fclaw2d_domain_new_twosphere(glob->mpicomm, 
+                                              fclaw_opt->minlevel);
+
+        cont = fclaw2d_map_new_pillowsphere (fclaw_opt->scale, rotate);
         break;
     default:
         SC_ABORT_NOT_REACHED ();
     }
 
-    domain = fclaw2d_domain_new_conn_map (mpicomm, gparms->minlevel, conn, cont);
+    /* Store the domain in the glob */
+    fclaw2d_global_store_domain(glob, domain);
 
-    fclaw_domain_list_levels(domain, FCLAW_VERBOSITY_ESSENTIAL);
-    fclaw_domain_list_neighbors(domain, FCLAW_VERBOSITY_DEBUG);
+    /* Store mapping in the glob */
+    fclaw2d_global_store_map (glob, cont);            
 
+    /* print out some info */
+    fclaw2d_domain_list_levels(domain, FCLAW_VERBOSITY_ESSENTIAL);
+    fclaw2d_domain_list_neighbors(domain, FCLAW_VERBOSITY_DEBUG);  
+}
+
+
+#if 0
+static
+void run_program(fclaw_app_t* app)
+{
     /* ---------------------------------------------------------------
        Set domain data.
        --------------------------------------------------------------- */
@@ -199,7 +138,44 @@ void run_program(fclaw_app_t* app)
     fclaw_run(&domain);
     fclaw_finalize(&domain);
 }
+#endif
 
+static
+void run_program(fclaw2d_global_t* glob)
+{
+    /* ---------------------------------------------------------------
+       Set domain data.
+       --------------------------------------------------------------- */
+    fclaw2d_domain_data_new(glob->domain);
+
+    const user_options_t *user_opt = sphere_get_options(glob);
+
+    /* Initialize virtual table for ForestClaw */
+    fclaw2d_vtables_initialize(glob);
+
+    /* Initialize virtual tables for solvers */
+    if (user_opt->claw_version == 4)
+    {
+        fc2d_clawpack46_solver_initialize(glob);
+    }
+    else if (user_opt->claw_version == 5)
+    {
+        fc2d_clawpack5_solver_initialize(glob);
+    }
+
+    sphere_link_solvers(glob);
+
+    /* ---------------------------------------------------------------
+       Run
+       --------------------------------------------------------------- */
+
+    fclaw2d_initialize(glob);
+    fclaw2d_run(glob);
+    fclaw2d_finalize(glob);
+}
+
+
+#if 0
 int
 main (int argc, char **argv)
 {
@@ -233,6 +209,62 @@ main (int argc, char **argv)
     }
 
     fclaw_forestclaw_destroy(app);
+    fclaw_app_destroy (app);
+
+    return 0;
+}
+#endif
+
+
+int
+main (int argc, char **argv)
+{
+    fclaw_app_t *app = fclaw_app_new (&argc, &argv, NULL);
+
+    /* Options */
+    user_options_t              *user_opt;
+    fclaw_options_t             *fclaw_opt;
+    fclaw2d_clawpatch_options_t *clawpatch_opt;
+    fc2d_clawpack46_options_t   *claw46_opt;
+    fc2d_clawpack5_options_t    *claw5_opt;
+
+    /* Create new options packages */
+    fclaw_opt =                   fclaw_options_register(app,  NULL,        "fclaw_options.ini");
+    clawpatch_opt =   fclaw2d_clawpatch_options_register(app, "clawpatch",  "fclaw_options.ini");
+    claw46_opt =        fc2d_clawpack46_options_register(app, "clawpack46", "fclaw_options.ini");
+    claw5_opt =          fc2d_clawpack5_options_register(app, "clawpack5",  "fclaw_options.ini");
+    user_opt =                sphere_options_register(app,               "fclaw_options.ini");
+
+    /* Read configuration file(s) and command line, and process options */
+    int first_arg;
+    fclaw_exit_type_t vexit = 
+        fclaw_app_options_parse (app, &first_arg,"fclaw_options.ini.used");
+
+    /* Run the program */
+    if (vexit < 2)
+    {
+        /* Options have been checked and are valid */
+
+        /* Create global structure which stores the domain, timers, etc */
+        int size, rank;
+        sc_MPI_Comm mpicomm = fclaw_app_get_mpi_size_rank (app, &size, &rank);
+        fclaw2d_global_t *glob = fclaw2d_global_new_comm (mpicomm, size, rank);
+
+        /* Store option packages in glob */
+        fclaw2d_options_store           (glob, fclaw_opt);
+        fclaw2d_clawpatch_options_store (glob, clawpatch_opt);
+        fc2d_clawpack46_options_store   (glob, claw46_opt);
+        fc2d_clawpack5_options_store    (glob, claw5_opt);
+        sphere_options_store         (glob, user_opt);
+
+        /* Create domain and store domain in glob */
+        create_domain(glob);
+
+        run_program(glob);
+
+        fclaw2d_global_destroy(glob);
+    }
+
     fclaw_app_destroy (app);
 
     return 0;

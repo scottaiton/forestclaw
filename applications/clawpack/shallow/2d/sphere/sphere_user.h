@@ -31,19 +31,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef __cplusplus
 extern "C"
 {
-#if 0
-}
-#endif
 #endif
 
-#define SETAUX_SPHERE FCLAW_F77_FUNC(setaux_sphere,SETAUX_SPHERE)
-void SETAUX_SPHERE(const int* mx, const int* my,const int* mbc,
+#if 0
+/* For syntax highlighting */
+#endif
+
+typedef struct user_options
+{
+    int example;
+    double gravity;
+    int mapping;
+
+    int init_cond;
+
+    const char* omega_string;
+    double *omega;
+
+    double r0;
+    double hin;
+    double hout;
+
+    const char* latitude_string;
+    double *latitude;
+
+    const char* longitude_string;
+    double *longitude;
+
+    int claw_version;
+
+    int is_registered;
+
+} user_options_t;
+
+
+user_options_t* sphere_options_register (fclaw_app_t * app,
+                                          const char *configfile);
+
+void sphere_options_store (fclaw2d_global_t* glob, user_options_t* user);
+user_options_t* sphere_get_options(fclaw2d_global_t* glob);
+
+
+#define SPHERE_SETAUX FCLAW_F77_FUNC(sphere_setaux,SPHERE_SETAUX)
+void SPHERE_SETAUX(const int* mx, const int* my,const int* mbc,
                    const double* xlower, const double* ylower,
                    const double* dx, const double* dy,
-                   const int* maux, double aux[],
+                   double area[],
                    double xnormals[], double ynormals[],
                    double xtangents[], double ytangents[],
-                   double surnormals[]);
+                   double surnormals[],double aux[],int* maux);
 
 void sphere_link_solvers(fclaw_domain_t *domain);
 
@@ -69,12 +105,11 @@ fclaw_map_context_t *
 fclaw_map_context_t * fclaw2d_map_new_cubedsphere (const double scale[],
                                                      const double shift[],
                                                      const double rotate[]);
+#endif
+
 
 
 #ifdef __cplusplus
-#if 0
-{
-#endif
 }
 #endif
 

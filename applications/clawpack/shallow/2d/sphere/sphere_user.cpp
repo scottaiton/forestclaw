@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012 Carsten Burstedde, Donna Calhoun
+Copyright (c) 2012-2023 Carsten Burstedde, Donna Calhoun
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -26,44 +26,113 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "sphere_user.h"
 #include <fclaw_forestclaw.h>
 
-#include <fc2d_clawpack46.h>
+#include <fclaw2d_clawpatch_pillow.h>
+
+#if 0
+// Fix syntax highlighting
+#endif
 
 
-static fc2d_clawpack46_vtable_t classic_claw;
-
-static fclaw_vtable_t vt;
-
-void sphere_link_solvers(fclaw_domain_t *domain)
+static
+void sphere_problem_setup(fclaw2d_global_t* glob)
 {
-    fclaw2d_init_vtable(&vt);
-    fc2d_clawpack46_init_vtable(&classic_claw);
+    const user_options_t* user = sphere_get_options(glob);
 
-    vt.problem_setup = &fc2d_clawpack46_setprob;
-    classic_claw.setprob = &SETPROB;
+    if (glob->mpirank == 0)
+    {
+        FILE *f = fopen("setprob.data","w");
+        fprintf(f,  "%-24d   %s",user->example,"\% example\n");
+        fprintf(f,  "%-24.16f   %s",user->gravity,"\% gravity\n");
+        fprintf(f,  "%-24d   %s",user->mapping,"\% mapping\n");
+        fprintf(f,  "%-24d   %s",user->init_cond,"\% initial_condition\n");
+        fprintf(f,  "%-24.16f   %s",user->omega[0],"\% omega[0]\n");
+        fprintf(f,  "%-24.16f   %s",user->omega[1],"\% omega[1]\n");
+        fprintf(f,  "%-24.16f   %s",user->omega[2],"\% omega[2]\n");
+        fprintf(f,  "%-24.16f   %s",user->r0,"\% r0\n");
+        fprintf(f,  "%-24.16f   %s",user->hin,"\% hin\n");
+        fprintf(f,  "%-24.16f   %s",user->hout,"\% hout\n");
+        fprintf(f,  "%-24.16f   %s",user->latitude[0],"\% latitude\n");
+        fprintf(f,  "%-24.16f   %s",user->latitude[1],"\% latitude\n");
+        fprintf(f,  "%-24.16f   %s",user->longitude[0],"\% longitude\n");
+        fprintf(f,  "%-24.16f   %s",user->longitude[1],"\% longitude\n");
+        fclose(f);
+    }
+    fclaw2d_domain_barrier (glob->domain);
+    SETPROB();
+}
 
-    vt.patch_setup = &sphere_patch_manifold_setup;
-    /* classic_claw.setaux = &SETAUX_SPHERE; */
+static
+void sphere_patch_setup_manifold(fclaw2d_global_t *glob,
+                                 fclaw2d_patch_t *patch,
+                                 int blockno,
+                                 int patchno)
+{
+    //const user_options_t *user = sphere_get_options(glob);
 
-    vt.patch_initialize = &fc2d_clawpack46_qinit;
-    classic_claw.qinit = &QINIT;
+    int mx, my, mbc;
+    double xlower, ylower, dx,dy;
+    fclaw2d_clawpatch_grid_data(glob,patch,&mx,&my,&mbc,
+                                &xlower,&ylower,&dx,&dy);
 
-    vt.patch_physical_bc = &fc2d_clawpack46_bc2;     /* Needed for lat-long grid */
+    int maux;
+    double *aux;
+    fclaw2d_clawpatch_aux_data(glob,patch,&aux,&maux);
 
-    vt.metric_compute_area = &fclaw2d_metric_compute_area;
+    double *xd,*yd,*zd,*area;
+    double *xp,*yp,*zp;
+    fclaw2d_clawpatch_metric_data(glob,patch,&xp,&yp,&zp,
+                                  &xd,&yd,&zd,&area);
 
-    vt.patch_single_step_update = &fc2d_clawpack46_update;  /* Includes b4step2 and src2 */
-    classic_claw.b4step2 = &B4STEP2;
-    classic_claw.rpn2 = &RPN2;
-    classic_claw.rpt2 = &RPT2;
+    double *xnormals, *ynormals,*xtangents,*ytangents;
+    double *surfnormals, *edgelengths, *curvature;
+    fclaw2d_clawpatch_metric_data2(glob,patch,
+                                   &xnormals,&ynormals,
+                                   &xtangents,&ytangents,
+                                   &surfnormals,
+                                   &edgelengths,&curvature);
 
-
-    fclaw2d_set_vtable(domain,&vt);
-    fc2d_clawpack46_set_vtable(&classic_claw);
+    SPHERE_SETAUX(&mx,&my,&mbc,&xlower,&ylower,
+                  &dx,&dy,area,xnormals,ynormals,
+                  xtangents,ytangents,surfnormals, aux, &maux);
 
 }
 
-void sphere_patch_manifold_setup(fclaw_domain_t *domain,
-                                fclaw_patch_t *this_patch,
+
+void sphere_link_solvers(fclaw2d_global_t *glob)
+{
+    /* ForestClaw core functions */
+    fclaw2d_vtable_t *vt = fclaw2d_vt(glob);
+    vt->problem_setup = &sphere_problem_setup;  /* Version-independent */
+
+    fclaw2d_patch_vtable_t *patch_vt = fclaw2d_patch_vt(glob);
+    patch_vt->setup   = &sphere_patch_setup_manifold;
+
+    const user_options_t* user_opt = sphere_get_options(glob);
+    if (user_opt->mapping == 1)
+        fclaw2d_clawpatch_use_pillowsphere(glob);
+
+    if (user_opt->claw_version == 4)
+    {
+        fc2d_clawpack46_vtable_t  *clawpack46_vt = fc2d_clawpack46_vt(glob);
+        // clawpack46_vt->b4step2        = sphere_b4step2;
+        clawpack46_vt->fort_qinit     = CLAWPACK46_QINIT;
+        clawpack46_vt->fort_rpn2    = &CLAWPACK46_RPN2;
+        clawpack46_vt->fort_rpt2    = &CLAWPACK46_RPT2;
+        // clawpack46_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
+
+        /* Clawpatch functions */    
+        // fclaw2d_clawpatch_vtable_t *clawpatch_vt = fclaw2d_clawpatch_vt(glob);
+
+    }
+    else
+    {
+        printf("Clawpack 5 not yet implemented\n");
+    }
+ }
+
+#if 0
+void sphere_patch_manifold_setup(fclaw2d_domain_t *domain,
+                                fclaw2d_patch_t *this_patch,
                                 int this_block_idx,
                                 int this_patch_idx)
 {
@@ -90,3 +159,34 @@ void sphere_patch_manifold_setup(fclaw_domain_t *domain,
 
     fc2d_clawpack46_set_capacity(domain,this_patch,this_block_idx,this_patch_idx);
 }
+#endif
+
+#if 0
+void sphere_link_solvers(fclaw_global_t *glob)
+{
+    fc2d_clawpack46_init_vtable(&classic_claw);
+
+    vt.problem_setup = &fc2d_clawpack46_setprob;
+    classic_claw.setprob = &SETPROB;
+
+    vt.patch_setup = &sphere_patch_manifold_setup;
+    /* classic_claw.setaux = &SETAUX_SPHERE; */
+
+    vt.patch_initialize = &fc2d_clawpack46_qinit;
+    classic_claw.qinit = &QINIT;
+
+    vt.patch_physical_bc = &fc2d_clawpack46_bc2;     /* Needed for lat-long grid */
+
+    vt.metric_compute_area = &fclaw2d_metric_compute_area;
+
+    vt.patch_single_step_update = &fc2d_clawpack46_update;  /* Includes b4step2 and src2 */
+    classic_claw.b4step2 = &B4STEP2;
+    classic_claw.rpn2 = &RPN2;
+    classic_claw.rpt2 = &RPT2;
+
+
+    fclaw2d_set_vtable(domain,&vt);
+    fc2d_clawpack46_set_vtable(&classic_claw);
+
+}
+#endif
