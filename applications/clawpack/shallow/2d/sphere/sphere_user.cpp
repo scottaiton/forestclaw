@@ -45,14 +45,24 @@ void sphere_problem_setup(fclaw2d_global_t* glob)
         fprintf(f,  "%-24.16f   %s",user->gravity,"\% gravity\n");
         fprintf(f,  "%-24d   %s",user->mapping,"\% mapping\n");
         fprintf(f,  "%-24d   %s",user->init_cond,"\% initial_condition\n");
-        fprintf(f,  "%-24.16f   %s",user->hmax,"\% hmax\n");
+        
+        //fprintf(f,  "%-24.16f   %s",user->hmax,"\% hmax\n");
+
         fprintf(f,  "%-24.16f   %s",user->amp,"\% amp\n");
-        fprintf(f,  "%-24.16f   %s",user->omega[0],"\% omega[0]\n");
-        fprintf(f,  "%-24.16f   %s",user->omega[1],"\% omega[1]\n");
-        fprintf(f,  "%-24.16f   %s",user->omega[2],"\% omega[2]\n");
-        fprintf(f,  "%-24.16f   %s",user->r0,"\% r0\n");
+
+        //fprintf(f,  "%-24.16f   %s",user->omega[0],"\% omega[0]\n");
+        //fprintf(f,  "%-24.16f   %s",user->omega[1],"\% omega[1]\n");
+        //fprintf(f,  "%-24.16f   %s",user->omega[2],"\% omega[2]\n");
+        //fprintf(f,  "%-24.16f   %s",user->r0,"\% r0\n");
+
         fprintf(f,  "%-24.16f   %s",user->hin,"\% hin\n");
         fprintf(f,  "%-24.16f   %s",user->hout,"\% hout\n");
+
+        fprintf(f,  "%-24.16f   %s",user->disk_diameter,"\% disk_diameter\n");
+
+        fprintf(f,  "%-24.16f   %s",user->ring_inner,"\% ring-inner\n");
+        fprintf(f,  "%-24.16f   %s",user->ring_outer,"\% ring-outer\n");
+
         fprintf(f,  "%-24.16f   %s",user->latitude[0],"\% latitude\n");
         fprintf(f,  "%-24.16f   %s",user->latitude[1],"\% latitude\n");
         fprintf(f,  "%-24.16f   %s",user->longitude[0],"\% longitude\n");

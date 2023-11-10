@@ -2,6 +2,7 @@ set(maps ${PROJECT_SOURCE_DIR}/clawpack/advection/2d/all)
 
 add_library(sphere_swe_f OBJECT
 	setprob.f90
+	fdisc.f90
 	user_4.6/sphere_qinit.f90
 	user_4.6/sphere_gaussian.f90
 	user_4.6/sphere_setaux.f90

@@ -44,17 +44,25 @@ typedef struct user_options
     int mapping;
 
     int init_cond;
-    
-    // Gaussian
-    double hmax;
-    double amp;
 
-    const char* omega_string;
-    double *omega;
-
-    double r0;
+    // In and out values
     double hin;
     double hout;
+
+
+    //const char* omega_string;
+    //double *omega;
+    
+    // Gaussian (initial condition 0)
+    double amp;
+
+    // Disk
+    double disk_diameter;
+
+    // Ring
+    double ring_inner;
+    double ring_outer;
+
 
     const char* latitude_string;
     double *latitude;

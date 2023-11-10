@@ -32,28 +32,39 @@ options_register_user (fclaw_app_t * app, void *package, sc_options_t * opt)
 
     /* [user] User options */
     sc_options_add_int (opt, 0, "example", &user->example, 0,
-                        "[user] 0,1 = cubedsphere; 2 = latlong [0]");
+                        "[user] Example number [0]");
 
     /* [user] User options */
     sc_options_add_int (opt, 0, "mapping", &user->mapping, 1,
                         "[user] 1 = cubedsphere; 2 = latlong; 3=pillow [2]");
 
     /* [user] User options */
-    sc_options_add_int (opt, 0, "initial_condition", &user->init_cond, 0,
+    sc_options_add_int (opt, 0, "initial-condition", &user->init_cond, 0,
                         "[user] Initial condition [0]");
 
-
     sc_options_add_double (opt, 0, "gravity", &user->gravity, 1.0, "[user] gravity [1.0]");
-    sc_options_add_double (opt, 0, "hmax", &user->hmax, 1, "[user] hmax (Gaussian) [1.0]");
+    //sc_options_add_double (opt, 0, "hmax", &user->hmax, 1, "[user] hmax (Gaussian) [1.0]");
     sc_options_add_double (opt, 0, "amp", &user->amp, 5.0, "[user] a (Gaussian) [1.0]");
 
-    sc_options_add_double (opt, 0, "r0", &user->r0, 1.0, "[user] r0 [0.2]");
     sc_options_add_double (opt, 0, "hin", &user->hin, 1.0, "[user] hin [2.0]");
     sc_options_add_double (opt, 0, "hout", &user->hout, 1.0, "[user] hout [1.0]");
 
+    sc_options_add_double (opt, 0, "disk-diameter", &user->disk_diameter, 
+                           0.1, "[user] Disk diameter (example 1) [0.1]");
+
+    sc_options_add_double (opt, 0, "ring-inner", &user->ring_inner, 
+                           10, "[user] Inner ring angle (example 2) [10 deg]");
+
+    sc_options_add_double (opt, 0, "ring-outer", &user->ring_outer, 
+                           40, "[user] Outer ring angle (example 2) [40 deg]");
+
+
+    // Don't need this
+#if 0
     fclaw_options_add_double_array(opt, 0, "omega", &user->omega_string,
                                    "0 0 0", &user->omega, 3,
                                    "[user] Axis of rotation [0 0 0]");
+#endif                                   
 
     fclaw_options_add_double_array(opt, 0, "latitude", &user->latitude_string,
                                    "-50 50", &user->latitude, 2,
@@ -77,7 +88,7 @@ options_postprocess_user (fclaw_app_t * a, void *package, void *registered)
 
     fclaw_options_convert_double_array (user->latitude_string, &user->latitude,2);
     fclaw_options_convert_double_array (user->longitude_string, &user->longitude,2);
-    fclaw_options_convert_double_array (user->omega_string, &user->omega,3);
+    //fclaw_options_convert_double_array (user->omega_string, &user->omega,3);
     return FCLAW_NOEXIT;
 }
 
@@ -101,7 +112,7 @@ options_destroy_user (fclaw_app_t * a, void *package, void *registered)
     {
         fclaw_options_destroy_array((void*) user->latitude);
         fclaw_options_destroy_array((void*) user->longitude);
-        fclaw_options_destroy_array((void*) user->omega);
+        //fclaw_options_destroy_array((void*) user->omega);
     }
 }
 

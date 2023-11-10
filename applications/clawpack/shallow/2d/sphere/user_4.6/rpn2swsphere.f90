@@ -28,7 +28,7 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     integer icom, jcom, ioff, m, mw, i
 
     double precision grav
-    common /swe_parms/  grav
+    common /swe_model_parms/  grav
 
     !!common /comroe/ u, v, a, h
 

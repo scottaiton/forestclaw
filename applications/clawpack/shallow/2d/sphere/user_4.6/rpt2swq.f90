@@ -30,7 +30,7 @@ subroutine clawpack46_rpt2(ixy,maxm,meqn,mwaves,mbc,mx, &
     double precision, dimension(1-mbc:maxm+mbc) :: gamma
 
     double precision grav
-    common /swe_parms/  grav
+    common /swe_model_parms/  grav
 
     double precision dtcom, dxcom, dycom, tcom
     integer icom,jcom

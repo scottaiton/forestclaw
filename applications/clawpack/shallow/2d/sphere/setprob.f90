@@ -13,14 +13,20 @@ subroutine setprob()
     integer init_cond
     common /swe_initcond/ init_cond
 
-    double precision hmax, amp, omega(3)
-    common /swe_initcond_parms/ hmax,amp, omega
+    double precision amp
+    common /swe_initcond_parms0/ amp
+
+    double precision disk_diameter
+    common /swe_initcond_parms1/ disk_diameter
+
+    double precision ring_inner, ring_outer
+    common /swe_initcond_parms2/ ring_inner, ring_outer
+
+    double precision hin, hout
+    common /swe_initcond_parms4/  hin,hout
 
     double precision gravity
-    common /swe_parms/  gravity
-
-    double precision r0, hin, hout
-    common /swe_init_parms/  r0, hin,hout
+    common /swe_model_parms/  gravity
 
     pi = 4.d0*atan(1.d0)
     pi2 = 2*pi
@@ -30,14 +36,12 @@ subroutine setprob()
     read(10,*) gravity
     read(10,*) mapping
     read(10,*) init_cond
-    read(10,*) hmax
     read(10,*) amp
-    read(10,*) omega(1)
-    read(10,*) omega(2)
-    read(10,*) omega(3)
-    read(10,*) r0
     read(10,*) hin
     read(10,*) hout
+    read(10,*) disk_diameter
+    read(10,*) ring_inner
+    read(10,*) ring_outer
     close(10)
 
 end

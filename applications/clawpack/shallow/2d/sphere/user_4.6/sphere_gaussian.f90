@@ -4,11 +4,14 @@ double precision function gaussian_sphere(x,y,z)
    double precision x,y,z,q
    double precision get_gc_distance, d
 
-   double precision hmax, amp, omega(3)
-   common /swe_initcond_parms/ hmax,amp, omega
+   double precision amp
+   common /swe_initcond_parms0/ amp
 
-   d = get_gc_distance(x,y,z,omega)
-   q = hmax*exp(-amp*d**2)
+!!   double precision hmax, amp, omega(3)
+!!   common /swe_initcond_parms0/ hmax,amp, omega
+
+   d = get_gc_distance(x,y,z)
+   q = exp(-amp*d**2)
 
    gaussian_sphere = q
 
@@ -17,13 +20,18 @@ end
 !! ------------------------------------------------
 !! # Great circle distance on sphere
 !! ------------------------------------------------
-double precision function get_gc_distance(x,y,z,w)
+double precision function get_gc_distance(x,y,z)
    implicit none
 
    double precision x,y,z,w(3)
    double precision p(3), pn, wn, ca, th
    double precision rsphere, get_scale
    integer m
+
+   !! Rotate grid mapping to get center in different place
+   w(1) = 1  !! point at equator at (1,0,0)
+   w(2) = 0
+   w(3) = 0
 
    rsphere = 1.d0
 
