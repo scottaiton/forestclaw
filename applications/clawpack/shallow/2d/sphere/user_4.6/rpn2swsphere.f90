@@ -27,6 +27,7 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     double precision amn, erx, ery, erz, apn
     integer icom, jcom, ioff, m, mw, i
 
+
     double precision grav
     common /swe_model_parms/  grav
 
@@ -35,17 +36,10 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     double precision dtcom, dxcom, dycom, tcom
     common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
 
-!!     common /dmetric/ dmetric(1-2:800+2, 1-2:400+2,7)
-    double precision xlow, ylow
-    common /xlyl/ xlow,ylow
+    !!double precision xlow, ylow
+    !!common /xlyl/ xlow,ylow
 
     data efix /.false./    !# use entropy fix for transonic rarefactions
-
-
-!!    if (-1.gt.1-mbc .or. maxm2 .lt. maxm+mbc) then
-!!        write(6,*) 'need to increase maxm2 in rpA'
-!!        stop
-!!    endif
 
 
     if(ixy.eq.1) then

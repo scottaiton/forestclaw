@@ -16,8 +16,8 @@ add_executable(sphere_swe
 	sphere_user.cpp
 	sphere_options.c
 	${maps}/fclaw2d_map_latlong.c
-	${maps}/fclaw2d_map_cubedsphere.c
 	${maps}/fclaw2d_map_pillowsphere.c
+	${maps}/fclaw2d_map_cubedsphere.c
 	$<TARGET_OBJECTS:sphere_swe_f>
 )
 
