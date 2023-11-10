@@ -10,14 +10,14 @@ subroutine setprob()
     integer mapping
     common /swe_mapping_int/ mapping
 
-    double precision omega(3)
-    common /swe_mapping_float/ omega
-
     integer init_cond
-    common /swe_init_cond/ init_cond
+    common /swe_initcond/ init_cond
 
-    double precision grav
-    common /swe_parms/  grav
+    double precision hmax, amp, omega(3)
+    common /swe_initcond_parms/ hmax,amp, omega
+
+    double precision gravity
+    common /swe_parms/  gravity
 
     double precision r0, hin, hout
     common /swe_init_parms/  r0, hin,hout
@@ -26,11 +26,12 @@ subroutine setprob()
     pi2 = 2*pi
 
     open(10,file='setprob.data')
-
     read(10,*) example
-    read(10,*) grav
+    read(10,*) gravity
     read(10,*) mapping
     read(10,*) init_cond
+    read(10,*) hmax
+    read(10,*) amp
     read(10,*) omega(1)
     read(10,*) omega(2)
     read(10,*) omega(3)

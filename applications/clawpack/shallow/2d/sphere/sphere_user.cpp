@@ -45,6 +45,8 @@ void sphere_problem_setup(fclaw2d_global_t* glob)
         fprintf(f,  "%-24.16f   %s",user->gravity,"\% gravity\n");
         fprintf(f,  "%-24d   %s",user->mapping,"\% mapping\n");
         fprintf(f,  "%-24d   %s",user->init_cond,"\% initial_condition\n");
+        fprintf(f,  "%-24.16f   %s",user->hmax,"\% hmax\n");
+        fprintf(f,  "%-24.16f   %s",user->amp,"\% amp\n");
         fprintf(f,  "%-24.16f   %s",user->omega[0],"\% omega[0]\n");
         fprintf(f,  "%-24.16f   %s",user->omega[1],"\% omega[1]\n");
         fprintf(f,  "%-24.16f   %s",user->omega[2],"\% omega[2]\n");
@@ -129,64 +131,3 @@ void sphere_link_solvers(fclaw2d_global_t *glob)
         printf("Clawpack 5 not yet implemented\n");
     }
  }
-
-#if 0
-void sphere_patch_manifold_setup(fclaw2d_domain_t *domain,
-                                fclaw2d_patch_t *this_patch,
-                                int this_block_idx,
-                                int this_patch_idx)
-{
-    int mx,my,mbc,maux;
-    double xlower,ylower,dx,dy;
-    double *aux;
-    double *xnormals, *ynormals,*xtangents;
-    double *ytangents,*surfnormals;
-    double *edgelengths, *curvature;
-
-    fc2d_clawpack46_define_auxarray(domain,this_patch);
-
-    fclaw_clawpatch_2d_grid_data(domain,this_patch,&mx,&my,&mbc,
-                                &xlower,&ylower,&dx,&dy);
-
-    fc2d_clawpack46_aux_data(domain,this_patch,&aux,&maux);
-    fclaw_clawpatch_2d_metric_data2(domain,this_patch,&xnormals,&ynormals,
-                                   &xtangents,&ytangents,&surfnormals,
-                                   &edgelengths,&curvature);
-
-    SETAUX_SPHERE(&mx,&my,&mbc,&xlower,&ylower,
-                  &dx,&dy,&maux,aux,xnormals,ynormals,
-                  xtangents,ytangents,surfnormals);
-
-    fc2d_clawpack46_set_capacity(domain,this_patch,this_block_idx,this_patch_idx);
-}
-#endif
-
-#if 0
-void sphere_link_solvers(fclaw_global_t *glob)
-{
-    fc2d_clawpack46_init_vtable(&classic_claw);
-
-    vt.problem_setup = &fc2d_clawpack46_setprob;
-    classic_claw.setprob = &SETPROB;
-
-    vt.patch_setup = &sphere_patch_manifold_setup;
-    /* classic_claw.setaux = &SETAUX_SPHERE; */
-
-    vt.patch_initialize = &fc2d_clawpack46_qinit;
-    classic_claw.qinit = &QINIT;
-
-    vt.patch_physical_bc = &fc2d_clawpack46_bc2;     /* Needed for lat-long grid */
-
-    vt.metric_compute_area = &fclaw2d_metric_compute_area;
-
-    vt.patch_single_step_update = &fc2d_clawpack46_update;  /* Includes b4step2 and src2 */
-    classic_claw.b4step2 = &B4STEP2;
-    classic_claw.rpn2 = &RPN2;
-    classic_claw.rpt2 = &RPT2;
-
-
-    fclaw2d_set_vtable(domain,&vt);
-    fc2d_clawpack46_set_vtable(&classic_claw);
-
-}
-#endif

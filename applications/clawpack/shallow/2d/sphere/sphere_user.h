@@ -44,6 +44,10 @@ typedef struct user_options
     int mapping;
 
     int init_cond;
+    
+    // Gaussian
+    double hmax;
+    double amp;
 
     const char* omega_string;
     double *omega;

@@ -25,6 +25,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "sphere_user.h"
 
+#include <fclaw2d_clawpatch_options.h>
+#include <fclaw2d_clawpatch.h>
+
+#include <fc2d_clawpack46_options.h>
+#include <fc2d_clawpack5_options.h>
+
+#include <fc2d_clawpack46.h>
+#include <fc2d_clawpack5.h>
+
 
 static
 void create_domain(fclaw2d_global_t *glob)
@@ -38,6 +47,7 @@ void create_domain(fclaw2d_global_t *glob)
     int a = fclaw_opt->periodic_x;
     int b = fclaw_opt->periodic_y;
 
+
     /* Mapped, multi-block domain */
     fclaw2d_domain_t *domain;
     fclaw2d_map_context_t  *cont = NULL, *brick=NULL;
@@ -45,28 +55,7 @@ void create_domain(fclaw2d_global_t *glob)
     const fclaw2d_clawpatch_options_t *clawpatch_opt = 
         fclaw2d_clawpatch_get_options(glob);
 
-#if 0
-    /* Create brick domain with periodicity */
-    fclaw2d_domain_t *domain =     
-        fclaw2d_domain_new_brick(glob->mpicomm, mi, mj, a, b,
-                                 fclaw_opt->minlevel);
-
-    /* Create brick mapping */
-    fclaw2d_map_context_t *brick =
-        fclaw2d_map_new_brick(domain, mi, mj, a, b);
-
-    /* Create latlong mapping based on brick */
-    const user_options_t  *user = latlong_get_options(glob);
-    fclaw2d_map_context_t *cont =
-        fclaw2d_map_new_latlong(brick,fclaw_opt->scale,
-                                rotate,
-                                user->latitude, 
-                                user->longitude,
-                                a,b);
-
-#endif
-
-    const user_options_t *user_opt = sphere_get_options(glob);
+    user_options_t *user_opt = sphere_get_options(glob);
     switch (user_opt->mapping) 
     {
     case 1:
@@ -84,6 +73,13 @@ void create_domain(fclaw2d_global_t *glob)
         break;
     case 2:
         /* Create brick domain with periodicity */
+        if (a != 0)
+        {
+            // Domain is periodic in x
+            user_opt->longitude[0] = 0;
+            user_opt->longitude[1] = 360;
+        }
+
         domain =     
             fclaw2d_domain_new_brick(glob->mpicomm, mi, mj, a, b,
                                      fclaw_opt->minlevel);

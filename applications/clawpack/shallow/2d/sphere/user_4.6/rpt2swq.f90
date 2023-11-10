@@ -15,21 +15,19 @@ subroutine clawpack46_rpt2(ixy,maxm,meqn,mwaves,mbc,mx, &
 
     integer ixy,maxm,meqn,mwaves,mbc,mx, imp
 
-    double precision     ql(1-mbc:maxm+mbc, meqn)
-    double precision     qr(1-mbc:maxm+mbc, meqn)
-    double precision   asdq(1-mbc:maxm+mbc, meqn)
-    double precision bmasdq(1-mbc:maxm+mbc, meqn)
-    double precision bpasdq(1-mbc:maxm+mbc, meqn)
+    double precision, dimension(1-mbc:maxm+mbc,meqn) :: ql,qr
+    double precision, dimension(1-mbc:maxm+mbc,meqn) :: asdq, bmasdq, bpasdq
     double precision   aux1(1-mbc:maxm+mbc, *)
     double precision   aux2(1-mbc:maxm+mbc, *)
     double precision   aux3(1-mbc:maxm+mbc, *)
 
-    double precision u(-1:maxm),v(-1:maxm),a(-1:maxm),h(-1:maxm)
-    double precision wave(-1:maxm, 4, 3)
-    double precision    s(-1:maxm, 3)
-    double precision enx(-1:maxm), eny(-1:maxm), enz(-1:maxm)
-    double precision etx(-1:maxm), ety(-1:maxm), etz(-1:maxm)
-    double precision gamma(-1:maxm)
+    !! Dummy arguments
+    double precision wave(1-mbc:maxm+mbc, meqn, mwaves)
+    double precision    s(1-mbc:maxm+mbc, mwaves)
+    double precision, dimension(1-mbc:maxm+mbc) :: u,v,a,h
+    double precision, dimension(1-mbc:maxm+mbc) :: enx, eny, enz
+    double precision, dimension(1-mbc:maxm+mbc) :: etx, ety, etz
+    double precision, dimension(1-mbc:maxm+mbc) :: gamma
 
     double precision grav
     common /swe_parms/  grav

@@ -15,14 +15,12 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     
     !!     local arrays -- common block comroe is passed to rpt2
     !! ------------
-    integer maxm2
-    parameter (maxm2 = 1002)   !# assumes at most 1000x1000 grid with mbc=2
     double precision delta(3)
     logical efix
 
-    double precision g
-    double precision u(-1:maxm2),v(-1:maxm2),a(-1:maxm2),h(-1:maxm2)
-    double precision dtcom, dxcom, dycom, tcom, xlow, ylow
+    !! dummy arrays
+    double precision u(1-mbc:maxm+mbc),v(1-mbc:maxm+mbc)
+    double precision a(1-mbc:maxm+mbc),h(1-mbc:maxm+mbc)
     double precision dx, dy, enx, eny, enz, etx, ety, etz
     double precision gamma, hunl, hunr, hutl, hutr, hl, hr
     double precision hsqr, hsql, sk, hsl, hsq, hsr, a1, a2, a3
@@ -32,18 +30,22 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     double precision grav
     common /swe_parms/  grav
 
-    common /comroe/ u, v, a, h
+    !!common /comroe/ u, v, a, h
+
+    double precision dtcom, dxcom, dycom, tcom
     common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
+
 !!     common /dmetric/ dmetric(1-2:800+2, 1-2:400+2,7)
+    double precision xlow, ylow
     common /xlyl/ xlow,ylow
 
     data efix /.false./    !# use entropy fix for transonic rarefactions
 
 
-    if (-1.gt.1-mbc .or. maxm2 .lt. maxm+mbc) then
-        write(6,*) 'need to increase maxm2 in rpA'
-        stop
-    endif
+!!    if (-1.gt.1-mbc .or. maxm2 .lt. maxm+mbc) then
+!!        write(6,*) 'need to increase maxm2 in rpA'
+!!        stop
+!!    endif
 
 
     if(ixy.eq.1) then

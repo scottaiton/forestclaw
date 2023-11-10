@@ -1,12 +1,14 @@
-double precision function gaussian_sphere(x,y,z,w,a,hmax)
+double precision function gaussian_sphere(x,y,z)
    implicit none
 
-   double precision x,y,z,w(3),a,q, hmax
-
+   double precision x,y,z,q
    double precision get_gc_distance, d
 
-   d = get_gc_distance(x,y,z,w)
-   q = hmax*exp(-a*d**2)
+   double precision hmax, amp, omega(3)
+   common /swe_initcond_parms/ hmax,amp, omega
+
+   d = get_gc_distance(x,y,z,omega)
+   q = hmax*exp(-amp*d**2)
 
    gaussian_sphere = q
 
