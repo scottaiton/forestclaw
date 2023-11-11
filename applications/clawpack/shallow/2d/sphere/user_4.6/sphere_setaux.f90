@@ -24,7 +24,7 @@
 
 subroutine sphere_setaux(mx,my,mbc,xlower,ylower, & 
    dx,dy,area,xnormals,ynormals, & 
-   xtangents,ytangents,surfnormals,aux,maux)
+   xtangents,ytangents,surfnormals,edgelengths,aux,maux)
       
    implicit none
 
@@ -65,6 +65,8 @@ subroutine sphere_setaux(mx,my,mbc,xlower,ylower, &
             !! (14-16) surface normal at cell centers
             aux(i,j,13+m) = surfnormals(i,j,m)
          enddo
+         aux(i,j,17) = edgelengths(i,j,1)/dy         
+         aux(i,j,18) = edgelengths(i,j,2)/dx  
       enddo
    enddo
 

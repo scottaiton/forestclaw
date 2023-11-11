@@ -21,11 +21,11 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     !! dummy arrays
     double precision u(1-mbc:maxm+mbc),v(1-mbc:maxm+mbc)
     double precision a(1-mbc:maxm+mbc),h(1-mbc:maxm+mbc)
-    double precision dx, dy, enx, eny, enz, etx, ety, etz
+    double precision enx, eny, enz, etx, ety, etz
     double precision gamma, hunl, hunr, hutl, hutr, hl, hr
-    double precision hsqr, hsql, sk, hsl, hsq, hsr, a1, a2, a3
+    double precision hsqr, hsql, sk, hsq, a1, a2, a3
     double precision amn, erx, ery, erz, apn
-    integer icom, jcom, ioff, m, mw, i
+    integer ioff, m, mw, i
 
 
     double precision grav
@@ -33,8 +33,9 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
 
     !!common /comroe/ u, v, a, h
 
-    double precision dtcom, dxcom, dycom, tcom
-    common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
+    !!double precision dtcom, dxcom, dycom, tcom
+    !!integer icom,jcom
+    !!common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
 
     !!double precision xlow, ylow
     !!common /xlyl/ xlow,ylow
@@ -42,13 +43,13 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     data efix /.false./    !# use entropy fix for transonic rarefactions
 
 
-    if(ixy.eq.1) then
-        dy = dycom
-        dx = dxcom
-    else
-        dx = dycom
-        dy = dxcom
-    endif
+    !!if(ixy.eq.1) then
+    !!    dy = dycom
+    !!    dx = dxcom
+    !!else
+    !!    dx = dycom
+    !!    dy = dxcom
+    !!endif
 
     !! The aux array has the following elements:
     !! 1  kappa = ratio of cell area to dxc*dyc
@@ -84,7 +85,9 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
         etx =   auxl(i,ioff+4)
         ety =   auxl(i,ioff+5)
         etz =   auxl(i,ioff+6)
+        !!gamma = auxl(i,17+ixy-1)
         gamma = dsqrt(etx**2 + ety**2 + etz**2)
+        write(6,*) gamma
         etx =   etx / gamma
         ety =   ety / gamma
         etz =   etz / gamma
@@ -133,7 +136,7 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
         !! # Compute the waves.  Rotate waves back into 
         !! # computational space.
 
-        sk = gamma/dy
+        sk = gamma
         wave(i,1,1) = a1
         wave(i,2,1) = (a1*(u(i)-a(i))*enx + a1*v(i)*etx)
         wave(i,3,1) = (a1*(u(i)-a(i))*eny + a1*v(i)*ety)

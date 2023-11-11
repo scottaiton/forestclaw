@@ -97,7 +97,8 @@ void sphere_patch_setup_manifold(fclaw2d_global_t *glob,
 
     SPHERE_SETAUX(&mx,&my,&mbc,&xlower,&ylower,
                   &dx,&dy,area,xnormals,ynormals,
-                  xtangents,ytangents,surfnormals, aux, &maux);
+                  xtangents,ytangents,surfnormals, edgelengths,
+                  aux, &maux);
 
 }
 

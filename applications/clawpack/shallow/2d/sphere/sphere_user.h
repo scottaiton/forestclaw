@@ -91,7 +91,8 @@ void SPHERE_SETAUX(const int* mx, const int* my,const int* mbc,
                    double area[],
                    double xnormals[], double ynormals[],
                    double xtangents[], double ytangents[],
-                   double surnormals[],double aux[],int* maux);
+                   double surnormals[],double edgelengths[],
+                   double aux[],int* maux);
 
 void sphere_link_solvers(fclaw_domain_t *domain);
 

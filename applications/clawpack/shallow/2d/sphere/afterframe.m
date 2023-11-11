@@ -1,5 +1,7 @@
 setviews;
 
+parms = read_vars();
+
 
 fprintf('%10s : %12.4e\n','qmin',qmin);
 fprintf('%10s : %12.4e\n','qmax',qmax);
@@ -14,6 +16,7 @@ showpatchborders(1:10);
 
 axis off
 daspect([1,1,1]);
+s = 0.2
 axis([-1-s,1+s,-1-s,1+s,-1-s,1+s])
 view(([84.86,1.15]))
 
