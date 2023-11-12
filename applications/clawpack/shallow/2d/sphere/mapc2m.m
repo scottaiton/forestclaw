@@ -1,7 +1,5 @@
 function [xp,yp,zp] = mapc2m(xc,yc)
 
-global map isflat;
-
 R = 1;
 r = 0.4;
 
@@ -25,10 +23,6 @@ switch map
         yc2 = lat(1) + (lat(2) - lat(1))*yc1;
         [xp,yp,zp] = mapc2m_latlong(xc2,yc2);
 
-end
-
-if (isflat)
-    zp = zeros(size(xp));
 end
 
 end

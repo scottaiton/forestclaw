@@ -27,15 +27,17 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     double precision amn, erx, ery, erz, apn
     integer ioff, m, mw, i
 
+    double precision dx, dy
+
 
     double precision grav
     common /swe_model_parms/  grav
 
     !!common /comroe/ u, v, a, h
 
-    !!double precision dtcom, dxcom, dycom, tcom
-    !!integer icom,jcom
-    !!common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
+    double precision dtcom, dxcom, dycom, tcom
+    integer icom,jcom
+    common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
 
     !!double precision xlow, ylow
     !!common /xlyl/ xlow,ylow
@@ -43,13 +45,13 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     data efix /.false./    !# use entropy fix for transonic rarefactions
 
 
-    !!if(ixy.eq.1) then
-    !!    dy = dycom
-    !!    dx = dxcom
-    !!else
-    !!    dx = dycom
-    !!    dy = dxcom
-    !!endif
+    if(ixy.eq.1) then
+        dy = dycom
+        dx = dxcom
+    else
+        dx = dycom
+        dy = dxcom
+    endif
 
     !! The aux array has the following elements:
     !! 1  kappa = ratio of cell area to dxc*dyc
@@ -87,7 +89,6 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
         etz =   auxl(i,ioff+6)
         !!gamma = auxl(i,17+ixy-1)
         gamma = dsqrt(etx**2 + ety**2 + etz**2)
-        write(6,*) gamma
         etx =   etx / gamma
         ety =   ety / gamma
         etz =   etz / gamma
@@ -136,7 +137,7 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
         !! # Compute the waves.  Rotate waves back into 
         !! # computational space.
 
-        sk = gamma
+        sk = gamma/dx
         wave(i,1,1) = a1
         wave(i,2,1) = (a1*(u(i)-a(i))*enx + a1*v(i)*etx)
         wave(i,3,1) = (a1*(u(i)-a(i))*eny + a1*v(i)*ety)
@@ -194,7 +195,7 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
 
     !! # project momentum components of amdq and apdq onto tangent plane:
 
-    goto 900
+    !!goto 900
 
     !! # Do projection in b4step2
     do i=2-mbc,mx+mbc

@@ -94,7 +94,16 @@ void SPHERE_SETAUX(const int* mx, const int* my,const int* mbc,
                    double surnormals[],double edgelengths[],
                    double aux[],int* maux);
 
-void sphere_link_solvers(fclaw_domain_t *domain);
+
+#define RPN2CONS_UPDATE FCLAW_F77_FUNC(rpn2cons_update, \
+                                       RPN2CONS_UPDATE)
+
+void RPN2CONS_UPDATE(const int* meqn, const int* maux, 
+                     const int* idir, const int* iface,
+                     double q[], double aux_center[], 
+                     double aux_edge[], double flux[]);
+
+void sphere_link_solvers(fclaw2d_global_t *glob);
 
 void sphere_patch_manifold_setup(fclaw_domain_t *domain,
                                   fclaw_patch_t *this_patch,

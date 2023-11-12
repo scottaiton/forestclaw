@@ -16,9 +16,6 @@ subroutine setprob()
     double precision amp
     common /swe_initcond_parms0/ amp
 
-    double precision disk_diameter
-    common /swe_initcond_parms1/ disk_diameter
-
     double precision ring_inner, ring_outer
     common /swe_initcond_parms2/ ring_inner, ring_outer
 
@@ -39,7 +36,6 @@ subroutine setprob()
     read(10,*) amp
     read(10,*) hin
     read(10,*) hout
-    read(10,*) disk_diameter
     read(10,*) ring_inner
     read(10,*) ring_outer
     close(10)

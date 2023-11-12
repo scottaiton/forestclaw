@@ -44,11 +44,20 @@ subroutine sphere_setaux(mx,my,mbc,xlower,ylower, &
    double precision surfnormals(-mbc:mx+mbc+1,-mbc:my+mbc+1,3)
 
    integer i,j,m
-   double precision dxdy
+   double precision dxdy, xc, yc, xp, yp,zp, rp
+
+   integer blockno, fc2d_clawpack46_get_block
+   integer*8 cont, fclaw_map_get_context
+
+   cont = fclaw_map_get_context()
+
+   blockno = fc2d_clawpack46_get_block()
 
    dxdy = dx*dy
    do i = 1-mbc,mx+mbc
       do j = 1-mbc,my+mbc
+         xc = xlower + (i-0.5)*dx
+         yc = ylower + (j-0.5)*dy
 
          !! (1) Capacity
          aux(i,j,1) = area(i,j)/dxdy
@@ -64,6 +73,13 @@ subroutine sphere_setaux(mx,my,mbc,xlower,ylower, &
 
             !! (14-16) surface normal at cell centers
             aux(i,j,13+m) = surfnormals(i,j,m)
+
+            !! Get points on the sphere
+            !!call fclaw2d_map_c2m(cont,blockno,xc,yc,xp,yp,zp)
+            !!rp = sqrt(xp**2 + yp**2 + zp**2)
+            !!aux(i,j,14) = xp/rp
+            !!aux(i,j,15) = yp/rp
+            !!aux(i,j,16) = zp/rp
          enddo
          aux(i,j,17) = edgelengths(i,j,1)/dy         
          aux(i,j,18) = edgelengths(i,j,2)/dx  

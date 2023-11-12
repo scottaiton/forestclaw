@@ -10,9 +10,6 @@ double precision function fdisc(blockno,xc,yc)
     integer init_cond
     common /swe_initcond/ init_cond
 
-    double precision disk_diameter
-    common /swe_initcond_parms1/ disk_diameter
-
     double precision ring_inner, ring_outer
     common /swe_initcond_parms2/ ring_inner, ring_outer
 
@@ -34,21 +31,16 @@ double precision function fdisc(blockno,xc,yc)
 
     deg2rad = pi/180
     if (init_cond .eq. 1) then
-        !! Disk
-        ri = 0.d0
-        ro = disk_diameter/rp
-    else if (init_cond .eq. 2) then
         ri = ring_inner*deg2rad            
         ro = ring_outer*deg2rad
     else
-        write(6,*) "fdisc.f90 : Should never be never be"
+        write(6,*) "fdisc.f90 : Should never be never be here"
         stop
     endif
     phi = acos(xp/rp)  
     a = (ro - ri)/2.0   !! Half-width of the ring
     m = (ro + ri)/2.0   !! Midpoint of the ring
     fdisc = abs(phi-m) - a
-    !!write(6,*) ri, ro, phi
 end
 
 

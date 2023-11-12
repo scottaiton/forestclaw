@@ -32,20 +32,21 @@ subroutine clawpack46_rpt2(ixy,maxm,meqn,mwaves,mbc,mx, &
     double precision grav
     common /swe_model_parms/  grav
 
-    !!double precision dtcom, dxcom, dycom, tcom
-    !!integer icom,jcom
-    !!common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
+    double precision dtcom, dxcom, dycom, tcom
+    integer icom,jcom
+    common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
 
     double precision delta(4)
     double precision a1, a2, a3, dx, dy, bn
     double precision erx, ery, erz 
     integer i, j, m, i1, mw, ioff, ix1, ixm1
 
-    !!if (ixy .eq. 1) then
-    !!    dx = dxcom
-    !!else
-    !!    dx = dycom
-    !!endif
+
+    if (ixy .eq. 1) then
+        dx = dxcom
+    else
+        dx = dycom
+    endif
 
 
     if (ixy .eq. 1) then
@@ -95,9 +96,9 @@ subroutine clawpack46_rpt2(ixy,maxm,meqn,mwaves,mbc,mx, &
 
         gamma(i) = dsqrt(etx(i)**2 + ety(i)**2 + etz(i)**2)
         !!gamma(i) = aux3(i1,17+(3-ixy)-1)
-        !! etx(i) =   etx(i) / gamma(i)
-        !! ety(i) =   ety(i) / gamma(i)
-        !! etz(i) =   etz(i) / gamma(i)
+        etx(i) =   etx(i) / gamma(i)
+        ety(i) =   ety(i) / gamma(i)
+        etz(i) =   etz(i) / gamma(i)
 
         h(i) = ql(i1,1)
         u(i) = (enx(i)*ql(i1,2)+eny(i)*ql(i1,3)+enz(i)*ql(i1,4)) & 
@@ -126,19 +127,19 @@ subroutine clawpack46_rpt2(ixy,maxm,meqn,mwaves,mbc,mx, &
         wave(i,2,1) = enx(i)*a1*(u(i)-a(i)) + etx(i)*a1*v(i)
         wave(i,3,1) = eny(i)*a1*(u(i)-a(i)) + ety(i)*a1*v(i)
         wave(i,4,1) = enz(i)*a1*(u(i)-a(i)) + etz(i)*a1*v(i)
-        s(i,1) = (u(i)-a(i))*gamma(i)
+        s(i,1) = (u(i)-a(i))*gamma(i)/dx
 
         wave(i,1,2) = 0.0d0
         wave(i,2,2) = etx(i)*a2
         wave(i,3,2) = ety(i)*a2
         wave(i,4,2) = etz(i)*a2
-        s(i,2) = u(i) * gamma(i)
+        s(i,2) = u(i) * gamma(i)/dx
 
         wave(i,1,3) = a3
         wave(i,2,3) = enx(i)*a3*(u(i)+a(i)) + etx(i)*a3*v(i)
         wave(i,3,3) = eny(i)*a3*(u(i)+a(i)) + ety(i)*a3*v(i)
         wave(i,4,3) = enz(i)*a3*(u(i)+a(i)) + etz(i)*a3*v(i)
-        s(i,3) = (u(i)+a(i)) * gamma(i)
+        s(i,3) = (u(i)+a(i)) * gamma(i)/dx
     end do
 
     !! --------------------------------
@@ -198,9 +199,9 @@ subroutine clawpack46_rpt2(ixy,maxm,meqn,mwaves,mbc,mx, &
         etz(i) =   aux2(i1,ioff+6)
         gamma(i) = dsqrt(etx(i)**2 + ety(i)**2 + etz(i)**2)
         !!gamma(i) = aux3(i1,17+(3-ixy)-1)
-        !! etx(i) =   etx(i) / gamma(i)
-        !! ety(i) =   ety(i) / gamma(i)
-        !! etz(i) =   etz(i) / gamma(i)
+        etx(i) =   etx(i) / gamma(i)
+        ety(i) =   ety(i) / gamma(i)
+        etz(i) =   etz(i) / gamma(i)
         u(i) = (enx(i)*ql(i1,2)+eny(i)*ql(i1,3)+enz(i)*ql(i1,4)) & 
                  / h(i)
         v(i) = (etx(i)*ql(i1,2)+ety(i)*ql(i1,3)+etz(i)*ql(i1,4)) &
@@ -227,19 +228,19 @@ subroutine clawpack46_rpt2(ixy,maxm,meqn,mwaves,mbc,mx, &
         wave(i,2,1) = enx(i)*a1*(u(i)-a(i)) + etx(i)*a1*v(i)
         wave(i,3,1) = eny(i)*a1*(u(i)-a(i)) + ety(i)*a1*v(i)
         wave(i,4,1) = enz(i)*a1*(u(i)-a(i)) + etz(i)*a1*v(i)
-        s(i,1) = (u(i)-a(i)) * gamma(i)
+        s(i,1) = (u(i)-a(i)) * gamma(i)/dx
 
         wave(i,1,2) = 0.0
         wave(i,2,2) = etx(i)*a2
         wave(i,3,2) = ety(i)*a2
         wave(i,4,2) = etz(i)*a2
-        s(i,2) = u(i) * gamma(i)
+        s(i,2) = u(i) * gamma(i)/dx
 
         wave(i,1,3) = a3
         wave(i,2,3) = enx(i)*a3*(u(i)+a(i)) + etx(i)*a3*v(i)
         wave(i,3,3) = eny(i)*a3*(u(i)+a(i)) + ety(i)*a3*v(i)
         wave(i,4,3) = enz(i)*a3*(u(i)+a(i)) + etz(i)*a3*v(i)
-        s(i,3) = (u(i)+a(i)) * gamma(i)
+        s(i,3) = (u(i)+a(i)) * gamma(i)/dx
     end do
 
 
