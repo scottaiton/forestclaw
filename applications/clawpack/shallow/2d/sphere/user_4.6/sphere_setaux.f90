@@ -24,7 +24,8 @@
 
 subroutine sphere_setaux(mx,my,mbc,xlower,ylower, & 
    dx,dy,area,xnormals,ynormals, & 
-   xtangents,ytangents,surfnormals,edgelengths,aux,maux)
+   xtangents,ytangents,surfnormals,curvature, & 
+   edgelengths,aux,maux)
       
    implicit none
 
@@ -41,6 +42,7 @@ subroutine sphere_setaux(mx,my,mbc,xlower,ylower, &
 
    !! Cell centered quantities
    double precision        area(-mbc:mx+mbc+1,-mbc:my+mbc+1)
+   double precision   curvature(-mbc:mx+mbc+2,-mbc:my+mbc+1)
    double precision surfnormals(-mbc:mx+mbc+1,-mbc:my+mbc+1,3)
 
    integer i,j,m
@@ -74,15 +76,8 @@ subroutine sphere_setaux(mx,my,mbc,xlower,ylower, &
             !! (14-16) surface normal at cell centers
             aux(i,j,13+m) = surfnormals(i,j,m)
 
-            !! Get points on the sphere
-            !!call fclaw2d_map_c2m(cont,blockno,xc,yc,xp,yp,zp)
-            !!rp = sqrt(xp**2 + yp**2 + zp**2)
-            !!aux(i,j,14) = xp/rp
-            !!aux(i,j,15) = yp/rp
-            !!aux(i,j,16) = zp/rp
          enddo
-         aux(i,j,17) = edgelengths(i,j,1)/dy         
-         aux(i,j,18) = edgelengths(i,j,2)/dx  
+         aux(i,j,17) = curvature(i,j)
       enddo
    enddo
 

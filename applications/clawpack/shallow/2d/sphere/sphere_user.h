@@ -92,6 +92,7 @@ void SPHERE_SETAUX(const int* mx, const int* my,const int* mbc,
                    double xnormals[], double ynormals[],
                    double xtangents[], double ytangents[],
                    double surnormals[],double edgelengths[],
+                   double curvature[],
                    double aux[],int* maux);
 
 
