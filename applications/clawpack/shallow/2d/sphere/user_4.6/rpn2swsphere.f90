@@ -27,7 +27,7 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     double precision amn, erx, ery, erz, apn
     integer ioff, m, mw, i
 
-    double precision dx, dy
+    double precision dx, dy, qn
 
 
     double precision grav
@@ -87,23 +87,22 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
         etx =   auxl(i,ioff+4)
         ety =   auxl(i,ioff+5)
         etz =   auxl(i,ioff+6)
-        !!gamma = auxl(i,17+ixy-1)
         gamma = dsqrt(etx**2 + ety**2 + etz**2)
         etx =   etx / gamma
         ety =   ety / gamma
         etz =   etz / gamma
 
         !! # projection to the sphere  (already done in src2)
-!!       erx = auxl(i,14)
-!!       ery = auxl(i,15)
-!!       erz = auxl(i,16)
-!!       qn = erx*ql(i,2) + ery*ql(i,3) + erz*ql(i,4)
-!!       ql(i,2) = ql(i,2) - qn*erx
-!!       ql(i,3) = ql(i,3) - qn*ery
-!!       ql(i,4) = ql(i,4) - qn*erz
-!!       qr(i,2) = ql(i,2)
-!!       qr(i,3) = ql(i,3)
-!!       qr(i,4) = ql(i,4)
+        erx = auxl(i,14)
+        ery = auxl(i,15)
+        erz = auxl(i,16)
+        qn = erx*ql(i,2) + ery*ql(i,3) + erz*ql(i,4)
+        ql(i,2) = ql(i,2) - qn*erx
+        ql(i,3) = ql(i,3) - qn*ery
+        ql(i,4) = ql(i,4) - qn*erz
+        qr(i,2) = ql(i,2)
+        qr(i,3) = ql(i,3)
+        qr(i,4) = ql(i,4)
 
     !! # compute normal and tangential momentum at cell edge:
         hunl = enx*ql(i,2) + eny*ql(i,3) + enz*ql(i,4)
@@ -118,12 +117,12 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
         hl = ql(i,1)
         hr = qr(i-1,1)
         h(i) = (hl+hr)*0.50d0
-        hsqr = dsqrt(hr)
-        hsql = dsqrt(hl)
+        hsqr = sqrt(hr)
+        hsql = sqrt(hl)
         hsq = hsqr + hsql
         u(i) = (hunr/hsqr + hunl/hsql) / hsq
         v(i) = (hutr/hsqr + hutl/hsql) / hsq
-        a(i) = dsqrt(grav*h(i))
+        a(i) = sqrt(grav*h(i))
 
         !! # Split the jump in q at each interface into waves
         delta(1) = hl - hr

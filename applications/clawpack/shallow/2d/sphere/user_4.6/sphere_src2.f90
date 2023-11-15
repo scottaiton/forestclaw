@@ -13,8 +13,6 @@ subroutine clawpack46_src2(maxmx,maxmy,meqn,mbc,mx,my, &
     double precision ns(3), qv(meqn), qn, gt, c
     integer i,j,m
 
-    !! # dummy source routine... does nothing
-
     do i=1-mbc,mx+mbc        
         do j=1-mbc,my+mbc
 
@@ -25,10 +23,10 @@ subroutine clawpack46_src2(maxmx,maxmy,meqn,mbc,mx,my, &
             do m = 1,meqn
                 qv(m) = q(i,j,m)
             end do
-            !!qn = qv(2)*ns(1) + qv(3)*ns(2) + qv(4)*ns(3)
-            !!qv(2) = qv(2) - qn*ns(1)
-            !!qv(3) = qv(3) - qn*ns(2)
-            !!qv(4) = qv(4) - qn*ns(3)
+            qn = qv(2)*ns(1) + qv(3)*ns(2) + qv(4)*ns(3)
+            qv(2) = qv(2) - qn*ns(1)
+            qv(3) = qv(3) - qn*ns(2)
+            qv(4) = qv(4) - qn*ns(3)
 
 
             c = aux(i,j,17)
