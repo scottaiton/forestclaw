@@ -25,11 +25,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "sphere_user.h"
 
-static void *
-options_register_user (fclaw_app_t * app, void *package, sc_options_t * opt)
-{
-    user_options_t* user = (user_options_t*) package;
 
+#define SPHERE_UNITS_RADIANS 0
+#define SPHERE_UNITS_DEGREES 1
+#define SPHERE_UNITS_METERS 2
+
+
+static sc_keyvalue_t *
+kv_ring_units_new()
+{
+    sc_keyvalue_t *kv = sc_keyvalue_new ();
+    sc_keyvalue_set_int (kv, "radians", SPHERE_UNITS_RADIANS);
+    sc_keyvalue_set_int (kv, "degrees", SPHERE_UNITS_DEGREES);
+    sc_keyvalue_set_int (kv, "meters",  SPHERE_UNITS_METERS);
+
+    return kv;
+}
+
+static void *
+sphere_register (user_options_t* user , sc_options_t * opt)
+{
     /* [user] User options */
     sc_options_add_int (opt, 0, "example", &user->example, 0,
                         "[user] Example number [0]");
@@ -43,14 +58,9 @@ options_register_user (fclaw_app_t * app, void *package, sc_options_t * opt)
                         "[user] Initial condition [0]");
 
     sc_options_add_double (opt, 0, "gravity", &user->gravity, 1.0, "[user] gravity [1.0]");
-    //sc_options_add_double (opt, 0, "hmax", &user->hmax, 1, "[user] hmax (Gaussian) [1.0]");
-    sc_options_add_double (opt, 0, "amp", &user->amp, 5.0, "[user] a (Gaussian) [1.0]");
 
     sc_options_add_double (opt, 0, "hin", &user->hin, 1.0, "[user] hin [2.0]");
     sc_options_add_double (opt, 0, "hout", &user->hout, 1.0, "[user] hout [1.0]");
-
-    sc_options_add_double (opt, 0, "disk-diameter", &user->disk_diameter, 
-                           0.1, "[user] Disk diameter (example 1) [0.1]");
 
     sc_options_add_double (opt, 0, "ring-inner", &user->ring_inner, 
                            10, "[user] Inner ring angle (example 2) [10 deg]");
@@ -58,13 +68,12 @@ options_register_user (fclaw_app_t * app, void *package, sc_options_t * opt)
     sc_options_add_double (opt, 0, "ring-outer", &user->ring_outer, 
                            40, "[user] Outer ring angle (example 2) [40 deg]");
 
+    /* Set verbosity level for reporting timing */
+    sc_keyvalue_t *kv = user->kv_ring_units = kv_ring_units_new();
+    sc_options_add_keyvalue (opt, 0, "ring-units", 
+                             &user->ring_units, "degrees",
+                             kv, "Ring units (degrees, radians, length) [meters]");
 
-    // Don't need this
-#if 0
-    fclaw_options_add_double_array(opt, 0, "omega", &user->omega_string,
-                                   "0 0 0", &user->omega, 3,
-                                   "[user] Axis of rotation [0 0 0]");
-#endif                                   
 
     fclaw_options_add_double_array(opt, 0, "latitude", &user->latitude_string,
                                    "-50 50", &user->latitude, 2,
@@ -82,20 +91,16 @@ options_register_user (fclaw_app_t * app, void *package, sc_options_t * opt)
 }
 
 static fclaw_exit_type_t
-options_postprocess_user (fclaw_app_t * a, void *package, void *registered)
+sphere_postprocess (user_options_t *user)
 {
-    user_options_t* user = (user_options_t*) package;
-
     fclaw_options_convert_double_array (user->latitude_string, &user->latitude,2);
     fclaw_options_convert_double_array (user->longitude_string, &user->longitude,2);
-    //fclaw_options_convert_double_array (user->omega_string, &user->omega,3);
     return FCLAW_NOEXIT;
 }
 
 static fclaw_exit_type_t
-options_check_user (fclaw_app_t * app, void *package, void *registered)
+sphere_check (user_options_t* user)
 {
-    user_options_t* user = (user_options_t*) package;
     if (user->example < 0 || user->example > 2) {
         fclaw_global_essentialf ("Option --user:example must be 0, 1, 2, 3 or 4\n");
         return FCLAW_EXIT_QUIET;
@@ -104,26 +109,89 @@ options_check_user (fclaw_app_t * app, void *package, void *registered)
 }
 
 static void
-options_destroy_user (fclaw_app_t * a, void *package, void *registered)
+sphere_destroy(user_options_t* user)
 {
-    user_options_t* user = (user_options_t*) package;
+
     /* Destroy arrays used in options  */
-    if (user->example == 0)
-    {
-        fclaw_options_destroy_array((void*) user->latitude);
-        fclaw_options_destroy_array((void*) user->longitude);
-        //fclaw_options_destroy_array((void*) user->omega);
-    }
+    fclaw_options_destroy_array((void*) user->latitude);
+    fclaw_options_destroy_array((void*) user->longitude);
+
+    FCLAW_ASSERT (user->kv_ring_units != NULL);
+    sc_keyvalue_destroy (user->kv_ring_units);
 }
 
+/* ------- Generic option handling routines that call above routines ----- */
+
+static void*
+options_register (fclaw_app_t * app, void *package, sc_options_t * opt)
+{
+    user_options_t *user_opt;
+
+    FCLAW_ASSERT (app != NULL);
+    FCLAW_ASSERT (package != NULL);
+    FCLAW_ASSERT (opt != NULL);
+
+    user_opt = (user_options_t*) package;
+
+    return sphere_register(user_opt,opt);
+}
+
+static fclaw_exit_type_t
+options_postprocess (fclaw_app_t * a, void *package, void *registered)
+{
+    FCLAW_ASSERT (a != NULL);
+    FCLAW_ASSERT (package != NULL);
+    FCLAW_ASSERT (registered == NULL);
+
+    /* errors from the key-value options would have showed up in parsing */
+    user_options_t *user = (user_options_t *) package;
+
+    /* post-process this package */
+    FCLAW_ASSERT(user->is_registered);
+
+    /* Convert strings to arrays */
+    return sphere_postprocess (user);
+}
+
+static fclaw_exit_type_t
+options_check(fclaw_app_t *app, void *package,void *registered)
+{
+    user_options_t           *user;
+
+    FCLAW_ASSERT (app != NULL);
+    FCLAW_ASSERT (package != NULL);
+    FCLAW_ASSERT(registered == NULL);
+
+    user = (user_options_t*) package;
+
+    return sphere_check(user);
+}
+
+
+static void
+options_destroy (fclaw_app_t * app, void *package, void *registered)
+{
+    user_options_t *user;
+
+    FCLAW_ASSERT (app != NULL);
+    FCLAW_ASSERT (package != NULL);
+    FCLAW_ASSERT (registered == NULL);
+
+    user = (user_options_t*) package;
+    FCLAW_ASSERT (user->is_registered);
+
+    sphere_destroy (user);
+
+    FCLAW_FREE (user);
+}
 
 static const
 fclaw_app_options_vtable_t options_vtable_user =
 {
-    options_register_user,
-    options_postprocess_user,
-    options_check_user,
-    options_destroy_user
+    options_register,
+    options_postprocess,
+    options_check,
+    options_destroy
 };
 
 #if 0

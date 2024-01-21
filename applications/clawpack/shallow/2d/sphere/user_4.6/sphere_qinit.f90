@@ -66,5 +66,8 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
       enddo
    enddo
 
+   !! write(6,*) 'Stopping in qinit'
+   !! stop
+
    return
 end

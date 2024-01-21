@@ -13,11 +13,11 @@ subroutine setprob()
     integer init_cond
     common /swe_initcond/ init_cond
 
-    double precision amp
-    common /swe_initcond_parms0/ amp
-
     double precision ring_inner, ring_outer
     common /swe_initcond_parms2/ ring_inner, ring_outer
+
+    integer ring_units
+    common /swe_initcond_parms3/ ring_units
 
     double precision hin, hout
     common /swe_initcond_parms4/  hin,hout
@@ -33,11 +33,11 @@ subroutine setprob()
     read(10,*) gravity
     read(10,*) mapping
     read(10,*) init_cond
-    read(10,*) amp
     read(10,*) hin
     read(10,*) hout
     read(10,*) ring_inner
     read(10,*) ring_outer
+    read(10,*) ring_units
     close(10)
 
 end

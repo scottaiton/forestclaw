@@ -171,47 +171,6 @@ void run_program(fclaw2d_global_t* glob)
 }
 
 
-#if 0
-int
-main (int argc, char **argv)
-{
-    fclaw_app_t *app;
-    int first_arg;
-    fclaw_exit_type_t vexit;
-
-    /* Options */
-    user_options_t    suser_options, *user = &suser_options;
-
-    /* Initialize application */
-    app = fclaw_app_new (&argc, &argv, user);
-
-    /* Register packages */
-    fclaw_forestclaw_register(app,"fclaw_options_ini");
-    fc2d_clawpack46_register(app,"fclaw_options.ini");
-
-    /* User defined options (defined above) */
-    register_user_options (app, "fclaw_options.ini", user);
-
-    /* Read configuration file(s) */
-    vexit =  fclaw_app_options_parse (app, &first_arg,"fclaw_options.ini.used");
-
-    /* Link packages to patches */
-
-    fclaw2d_clawpatch_link_app(app);
-
-    if (!vexit)
-    {
-        run_program(app);
-    }
-
-    fclaw_forestclaw_destroy(app);
-    fclaw_app_destroy (app);
-
-    return 0;
-}
-#endif
-
-
 int
 main (int argc, char **argv)
 {
@@ -229,7 +188,7 @@ main (int argc, char **argv)
     clawpatch_opt =   fclaw2d_clawpatch_options_register(app, "clawpatch",  "fclaw_options.ini");
     claw46_opt =        fc2d_clawpack46_options_register(app, "clawpack46", "fclaw_options.ini");
     claw5_opt =          fc2d_clawpack5_options_register(app, "clawpack5",  "fclaw_options.ini");
-    user_opt =                sphere_options_register(app,               "fclaw_options.ini");
+    user_opt =                sphere_options_register(app,"fclaw_options.ini");
 
     /* Read configuration file(s) and command line, and process options */
     int first_arg;
@@ -251,7 +210,7 @@ main (int argc, char **argv)
         fclaw2d_clawpatch_options_store (glob, clawpatch_opt);
         fc2d_clawpack46_options_store   (glob, claw46_opt);
         fc2d_clawpack5_options_store    (glob, claw5_opt);
-        sphere_options_store         (glob, user_opt);
+        sphere_options_store            (glob, user_opt);
 
         /* Create domain and store domain in glob */
         create_domain(glob);

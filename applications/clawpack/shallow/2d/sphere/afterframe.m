@@ -30,26 +30,32 @@ if (PlotType  == 4)
     axis([0,pi,qmin,qmax])
     set(gca,'fontsize',16)
 
+    ylim([-0.1,2])
+    h = getlegendinfo();
+    legend(h);
 else
 
     if (PlotParallelPartitions == 0)
-        clim([0.4,2.1]);
+        d = parms.hin - parms.hout;
+        clim([parms.hout-d/10, parms.hin+d/10]);
     end
-
     colorbar;
     
-   
+    lv = linspace(0.5,1.5,30);
+    drawcontourlines(lv)
     showpatchborders(1:10);
+    setpatchborderprops('linewidth',1)
     
-    axis off
     daspect([1,1,1]);
     s = 0.2;
     axis([-1-s,1+s,-1-s,1+s,-1-s,1+s])
-    view(([84.86,1.15]))
+    view([32,24])
+    set(gca,'clipping','off')
 end
 
 NoQuery = 0;
 prt = false;
+MaxFrames = 81;
 if (prt)
   filename = framename(Frame,'sphere0000','png');
   print('-dpng',filename);

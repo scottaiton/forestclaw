@@ -45,13 +45,13 @@ void sphere_problem_setup(fclaw2d_global_t* glob)
         fprintf(f,  "%-24.16f   %s",user->gravity,"\% gravity\n");
         fprintf(f,  "%-24d   %s",user->mapping,"\% mapping\n");
         fprintf(f,  "%-24d   %s",user->init_cond,"\% initial_condition\n");        
-        fprintf(f,  "%-24.16f   %s",user->amp,"\% amp\n");
 
         fprintf(f,  "%-24.16f   %s",user->hin,"\% hin\n");
         fprintf(f,  "%-24.16f   %s",user->hout,"\% hout\n");
 
         fprintf(f,  "%-24.16f   %s",user->ring_inner,"\% ring-inner\n");
         fprintf(f,  "%-24.16f   %s",user->ring_outer,"\% ring-outer\n");
+        fprintf(f,  "%-24d   %s",user->ring_units,"\% ring_units\n");
 
         fprintf(f,  "%-24.16f   %s",user->latitude[0],"\% latitude\n");
         fprintf(f,  "%-24.16f   %s",user->latitude[1],"\% latitude\n");
@@ -122,7 +122,7 @@ void sphere_link_solvers(fclaw2d_global_t *glob)
         clawpack46_vt->fort_qinit     = CLAWPACK46_QINIT;
         clawpack46_vt->fort_rpn2    = &CLAWPACK46_RPN2;
         clawpack46_vt->fort_rpt2    = &CLAWPACK46_RPT2;
-        // clawpack46_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
+        //clawpack46_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
 
         /* Clawpatch functions */    
         // fclaw2d_clawpatch_vtable_t *clawpatch_vt = fclaw2d_clawpatch_vt(glob);

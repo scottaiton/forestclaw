@@ -37,6 +37,7 @@ extern "C"
 /* For syntax highlighting */
 #endif
 
+
 typedef struct user_options
 {
     int example;
@@ -49,20 +50,12 @@ typedef struct user_options
     double hin;
     double hout;
 
-
-    //const char* omega_string;
-    //double *omega;
-    
-    // Gaussian (initial condition 0)
-    double amp;
-
-    // Disk
-    double disk_diameter;
-
     // Ring
     double ring_inner;
     double ring_outer;
 
+    int ring_units; /**< ring units : degrees, radians, meters */
+    sc_keyvalue_t *kv_ring_units; /**< The refinement criteria */
 
     const char* latitude_string;
     double *latitude;

@@ -194,7 +194,7 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
 
     !! # project momentum components of amdq and apdq onto tangent plane:
 
-    goto 900
+    !!goto 900
 
     !! # Do projection in b4step2
     do i=2-mbc,mx+mbc

@@ -13,10 +13,13 @@ double precision function fdisc(blockno,xc,yc)
     double precision ring_inner, ring_outer
     common /swe_initcond_parms2/ ring_inner, ring_outer
 
+    integer ring_units
+    common /swe_initcond_parms3/ ring_units
+
     integer*8 cont, fclaw_map_get_context
 
-    double precision xp, yp, zp, rp, m, a,ri, ro
-    double precision phi, deg2rad
+    double precision xp, yp, zp, rp, m, a
+    double precision phi, deg2rad, ri, ro
 
 
     cont = fclaw_map_get_context()
@@ -24,17 +27,28 @@ double precision function fdisc(blockno,xc,yc)
     call fclaw2d_map_c2m(cont,blockno,xc,yc,xp,yp,zp)
 
     rp = sqrt(xp**2 + yp**2 + zp**2)
+    !! write(6,*) xp,yp,zp,rp
     !!call map2spherical(xp,yp,zp,theta,phi)
 
-
-    !! Dot and Normalize with unit vector on x axis : (1,0,0)
-
     deg2rad = pi/180
-    if (init_cond .eq. 1) then
-        ri = ring_inner*deg2rad            
-        ro = ring_outer*deg2rad
-    else
-        write(6,*) "fdisc.f90 : Should never be never be here"
+
+    ri = ring_inner
+    ro = ring_outer
+    if (ring_units .gt. 0) then
+        if (ring_units .eq. 1) then
+            !! Convert degrees to radians
+            ri = ri*deg2rad
+            ro = ro*deg2rad
+        elseif (ring_units .eq. 2) then
+            !! Compute Gaussian distance to radians
+            ri = ri/rp
+            ro = ro/rp
+        endif
+    endif
+
+    !! The ring is centered at (1,0,0).  
+    if (abs(xp/rp) > 1) then
+        write(6,*) 'fdisc : problem taking acos()'
         stop
     endif
     phi = acos(xp/rp)  
