@@ -76,6 +76,8 @@ user_options_t* sphere_options_register (fclaw_app_t * app,
 void sphere_options_store (fclaw2d_global_t* glob, user_options_t* user);
 user_options_t* sphere_get_options(fclaw2d_global_t* glob);
 
+void sphere_link_solvers(fclaw2d_global_t *glob);
+
 
 #define SPHERE_SETAUX FCLAW_F77_FUNC(sphere_setaux,SPHERE_SETAUX)
 void SPHERE_SETAUX(const int* mx, const int* my,const int* mbc,
@@ -97,7 +99,26 @@ void RPN2CONS_UPDATE(const int* meqn, const int* maux,
                      double q[], double aux_center[], 
                      double aux_edge[], double flux[]);
 
-void sphere_link_solvers(fclaw2d_global_t *glob);
+
+
+#define USER_EXCEEDS_THRESHOLD \
+                  FCLAW_F77_FUNC(user_exceeds_threshold, \
+                                  USER_EXCEEDS_THRESHOLD)
+int USER_EXCEEDS_THRESHOLD(const int *blockno,
+                                        const int* meqn, 
+                                        const double *qval, 
+                                        const double *qmin, 
+                                        const double *qmax,
+                                        const double quad[], 
+                                        const double *dx, 
+                                        const double *dy, 
+                                        const double *xc, 
+                                        const double *yc, 
+                                        const int* ivar_threshold,
+                                        const double *tag_threshold,
+                                        const int *init_flag,
+                                        const int *is_ghost);
+
 
 void sphere_patch_manifold_setup(fclaw_domain_t *domain,
                                   fclaw_patch_t *this_patch,

@@ -3,8 +3,8 @@ OutputDir = './';            % Default (reassign them here anyway)
 
 ForestClaw = 1;     % Plot using ForestClaw preferences.
 
-PlotType = 1;                % type of plot to produce:
-		     % 1 = pseudo-color (pcolor)
+PlotType = 1;    % type of plot to produce:
+		         % 1 = pseudo-color (pcolor)
 			     % 2 = contour
 			     % 3 = Schlieren
 			     % 4 = scatter plot of q vs. r
@@ -36,5 +36,5 @@ PlotParallelPartitions=0;
 
 x0 = 1;
 y0 = 0;
-ScatterStyle = {'r.','bo','g*'};
+ScatterStyle = {'r.','b.','g*','c*','r*'};
 UserMap1d = 1;

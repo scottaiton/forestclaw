@@ -55,7 +55,7 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
          elseif (initchoice .eq. 2) then
             !! RJL initial conditions
             phi = acos(min(xp,1.0))
-            phi0 = deg2rad*(ring_inner+ring_outer)/2.0
+            phi0 = deg2rad*20
             width = deg2rad*5
             qval = exp(-((phi-phi0)/width)**2) 
          endif 

@@ -4,6 +4,7 @@ add_library(sphere_swe_f OBJECT
 	setprob.f90
 	fdisc.f90
 	rpn2cons_update.f90 
+	sphere_exceeds_threshold.f90
 	user_4.6/sphere_src2.f90
 	user_4.6/sphere_qinit.f90
 	user_4.6/sphere_gaussian.f90

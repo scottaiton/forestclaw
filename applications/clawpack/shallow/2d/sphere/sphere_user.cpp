@@ -37,6 +37,7 @@ static
 void sphere_problem_setup(fclaw2d_global_t* glob)
 {
     const user_options_t* user = sphere_get_options(glob);
+    const fclaw_options_t* fclaw_opt = fclaw2d_get_options(glob);
 
     if (glob->mpirank == 0)
     {
@@ -57,6 +58,10 @@ void sphere_problem_setup(fclaw2d_global_t* glob)
         fprintf(f,  "%-24.16f   %s",user->latitude[1],"\% latitude\n");
         fprintf(f,  "%-24.16f   %s",user->longitude[0],"\% longitude\n");
         fprintf(f,  "%-24.16f   %s",user->longitude[1],"\% longitude\n");
+
+        fprintf(f,  "%-24.16f   %s",fclaw_opt->refine_threshold,"\% refine_threshold\n");
+        fprintf(f,  "%-24.16f   %s",fclaw_opt->coarsen_threshold,"\% coarsen_threshold\n");
+
         fclose(f);
     }
     fclaw2d_domain_barrier (glob->domain);
@@ -98,7 +103,6 @@ void sphere_patch_setup_manifold(fclaw2d_global_t *glob,
                   xtangents,ytangents,surfnormals, curvature,
                   edgelengths,
                   aux, &maux);
-
 }
 
 
@@ -125,7 +129,8 @@ void sphere_link_solvers(fclaw2d_global_t *glob)
         //clawpack46_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
 
         /* Clawpatch functions */    
-        // fclaw2d_clawpatch_vtable_t *clawpatch_vt = fclaw2d_clawpatch_vt(glob);
+        fclaw2d_clawpatch_vtable_t *clawpatch_vt = fclaw2d_clawpatch_vt(glob);
+        clawpatch_vt->fort_user_exceeds_threshold = &USER_EXCEEDS_THRESHOLD;
 
     }
     else
