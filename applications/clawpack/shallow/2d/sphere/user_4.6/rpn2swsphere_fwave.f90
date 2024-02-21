@@ -1,7 +1,6 @@
 ! =====================================================
 SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves,maux, &
     mbc, mx,ql,qr,auxl,auxr,fwave,s,amdq,apdq)
-use lambwave_module, only : gravity
 ! =====================================================
 
 ! Roe-solver for the 2D shallow water equations
@@ -58,7 +57,7 @@ use lambwave_module, only : gravity
 
     implicit none
 
-    integer :: ixy, maxm,meqn,mwaves,mbc,mx
+    integer :: ixy, maxm,meqn,mwaves,mbc,mx, maux
     double precision  :: fwave(1-mbc:maxm+mbc,meqn,mwaves)
     double precision  ::    s(1-mbc:maxm+mbc,mwaves)
     double precision  ::   ql(1-mbc:maxm+mbc,meqn)
@@ -70,7 +69,7 @@ use lambwave_module, only : gravity
 
     !! # local arrays
     !! # -----------
-    !! # double precisi!on :: delta(3)
+    !! # double precision :: delta(3)
     logical :: efix
 
 !
@@ -84,7 +83,8 @@ use lambwave_module, only : gravity
     integer :: icom, jcom
     common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
 
-    DOUBLE PRECISION :: grav
+    double precision grav
+    common /swe_model_parms/  grav
 
 
     integer :: i, m, mw, mq, ioff
@@ -115,7 +115,6 @@ use lambwave_module, only : gravity
         dy = dxcom
     endif
 
-    grav = gravity
     !! The aux array has the following elements:
     !!  1  kappa = ratio of cell area to dxc*dyc
     !!  2  enx = x-component of normal vector to left edge in tangent plane
@@ -381,23 +380,23 @@ use lambwave_module, only : gravity
     END DO
 
     return
-END SUBROUTINE clawpack46_rpn2_manifold_fwave
+END SUBROUTINE clawpack46_rpn2_fwave
 
 
 SUBROUTINE simple_riemann(hr,ur,vr, hl,ul,vl, uhat,chat,bl, br, &
                  phir,phil,s,fwave)
-    USE lambwave_module, only : gravity
     IMPLICIT NONE
 
     DOUBLE PRECISION :: hr,ur,vr, hl,ul,vl, uhat, chat, phir, &
                phil,s(3), fwave(3,3), bl, bR
 
-    DOUBLE PRECISION :: fluxdiff(3),beta(3), hbar, grav
+    double precision grav
+    common /swe_model_parms/  grav
+
+    DOUBLE PRECISION :: fluxdiff(3),beta(3), hbar
 
     fwave = 0
     s = 0
-
-    grav = gravity
 
     hbar = 0.5 * (hr + hl)
 

@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fc2d_clawpack46.h> 
 #include <fc2d_clawpack46_fort.h>
+#include <fc2d_clawpack46_options.h>
 #include <clawpack46_user_fort.h>
 
 
@@ -136,7 +137,7 @@ void sphere_link_solvers(fclaw_global_t *glob)
         // clawpack46_vt->b4step2        = sphere_b4step2;
         clawpack46_vt->fort_qinit     = CLAWPACK46_QINIT;
 
-        fc2d_clawpack46_options_t = *clawpack46_opt = fc2d_clawpack46_get_options(glob);
+        fc2d_clawpack46_options_t *clawpack46_opt = fc2d_clawpack46_get_options(glob);
 
         if (clawpack46_opt->use_fwaves)
         {
