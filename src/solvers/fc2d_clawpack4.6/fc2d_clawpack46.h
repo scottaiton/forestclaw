@@ -120,11 +120,12 @@ typedef void (*clawpack46_fort_rpt2_t)(const int* ixy, const int* maxm, const in
 
 
 typedef void (*clawpack46_fort_rpn2fw_t)(const int* ixy,const int* maxm, const int* meqn,
-                                         const int* mwaves, const int* mbc,const int* mx,
+                                         const int* mwaves, const int* maux,
+                                         const int* mbc,const int* mx,
                                          double ql[], double qr[], double auxl[], 
                                          double auxr[],
-                                         double wave[], double s[],double amdq[], 
-                                         double apdq[],const int *maux);
+                                         double fwave[], double s[],double amdq[], 
+                                         double apdq[]);
 
 
 typedef void (*clawpack46_fort_rpt2fw_t)(const int* ixy, const int* maxm, const int* meqn,
