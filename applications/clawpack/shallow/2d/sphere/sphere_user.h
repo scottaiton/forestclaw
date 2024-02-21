@@ -27,6 +27,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SPHERE_USER_H
 
 #include <fclaw_clawpatch.h>
+#include <fclaw_global.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -73,10 +74,10 @@ typedef struct user_options
 user_options_t* sphere_options_register (fclaw_app_t * app,
                                           const char *configfile);
 
-void sphere_options_store (fclaw2d_global_t* glob, user_options_t* user);
-user_options_t* sphere_get_options(fclaw2d_global_t* glob);
+void sphere_options_store (fclaw_global_t* glob, user_options_t* user);
+user_options_t* sphere_get_options(fclaw_global_t* glob);
 
-void sphere_link_solvers(fclaw2d_global_t *glob);
+void sphere_link_solvers(fclaw_global_t *glob);
 
 
 #define SPHERE_SETAUX FCLAW_F77_FUNC(sphere_setaux,SPHERE_SETAUX)
@@ -132,6 +133,7 @@ double sphere_patch_update(fclaw_domain_t *domain,
                             double t,
                             double dt);
 
+#if 0
 fclaw_map_context_t *
     fclaw2d_map_new_latlong (fclaw_map_context_t* brick,
                              const double scale[],
@@ -142,9 +144,7 @@ fclaw_map_context_t *
 fclaw_map_context_t * fclaw2d_map_new_cubedsphere (const double scale[],
                                                      const double shift[],
                                                      const double rotate[]);
-#endif
-
-
+#endif                                                     
 
 #ifdef __cplusplus
 }

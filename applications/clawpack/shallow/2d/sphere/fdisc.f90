@@ -24,7 +24,7 @@ double precision function fdisc(blockno,xc,yc)
 
     cont = fclaw_map_get_context()
 
-    call fclaw2d_map_c2m(cont,blockno,xc,yc,xp,yp,zp)
+    call fclaw_map_2d_c2m(cont,blockno,xc,yc,xp,yp,zp)
 
     rp = sqrt(xp**2 + yp**2 + zp**2)
     !! write(6,*) xp,yp,zp,rp

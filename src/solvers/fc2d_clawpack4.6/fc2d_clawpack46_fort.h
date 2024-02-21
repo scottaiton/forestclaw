@@ -26,6 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FC2D_CLAWPACK_FORT_H
 #define FC2D_CLAWPACK_FORT_H
 
+#include "fc2d_clawpack46.h"
+
 #ifdef __cplusplus
 extern "C"
 {

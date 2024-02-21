@@ -42,7 +42,7 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
          xlow = xlower + (i-1)*dx
 
          !! Get points on the sphere
-         call fclaw2d_map_c2m(cont,blockno,xc,yc,xp,yp,zp)
+         call fclaw_map_2d_c2m(cont,blockno,xc,yc,xp,yp,zp)
 
          qval = 0
          if (initchoice .eq. 0) then
