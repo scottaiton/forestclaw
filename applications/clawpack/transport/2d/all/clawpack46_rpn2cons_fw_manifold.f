@@ -1,6 +1,6 @@
       subroutine clawpack46_rpn2cons_fw_manifold(ixy,maxm,
-     &         meqn,mwaves,mbc, mx,ql,qr,auxl,auxr,wave,s,
-     &         amdq,apdq,maux)
+     &         meqn,mwaves,maux, mbc, mx,ql,qr,
+     &         auxl,auxr,wave,s,amdq,apdq)
       implicit none
 
       integer maxm, mbc,mwaves,meqn,mx, maux
