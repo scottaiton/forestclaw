@@ -181,6 +181,7 @@ if(BUILD_TESTING)
       fclaw_options.h.TEST.cpp
       fclaw_patch.h.TEST.cpp
       fclaw_vtable.h.TEST.cpp
+      fclaw_regrid.h.TEST.cpp
   )
 
   target_link_libraries(forestclaw.TEST testutils forestclaw)

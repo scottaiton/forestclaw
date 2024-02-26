@@ -194,7 +194,8 @@ src_forestclaw_TEST_SOURCES = \
 	src/fclaw_global.h.TEST.cpp \
 	src/fclaw_options.h.TEST.cpp \
 	src/fclaw_patch.h.TEST.cpp \
-	src/fclaw_vtable.h.TEST.cpp 
+	src/fclaw_vtable.h.TEST.cpp \
+	src/fclaw_regrid.h.TEST.cpp 
 
 src_forestclaw_TEST_CPPFLAGS = \
 	$(test_libtestutils_la_CPPFLAGS) \
