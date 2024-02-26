@@ -243,6 +243,25 @@ void cb_fclaw_regrid_repopulate(fclaw_domain_t * old_domain,
     fclaw_patch_neighbors_reset(new_patch);
 }
 
+static void
+count_samesize_transfers(fclaw_domain_t * old_domain,
+                         fclaw_patch_t * old_patch,
+                         fclaw_domain_t * new_domain,
+                         fclaw_patch_t * new_patch,
+                         fclaw_patch_relation_t newsize,
+                         int blockno,
+                         int old_patchno, int new_patchno,
+                         void *user)
+{
+    int *num_transfered = (int*) user;
+    if(newsize == FCLAW_PATCH_SAMESIZE)
+    {
+        (*num_transfered)++;
+    }
+}
+
+
+
 /* ----------------------------------------------------------------
    Public interface
    -------------------------------------------------------------- */
@@ -302,7 +321,17 @@ void fclaw_regrid(fclaw_global_t *glob)
 
         if (have_new_refinement)
         {
-            has_been_refined = 1;
+            int num_samesize = 0;
+            fclaw_domain_iterate_adapted(*domain, new_domain,
+                                      count_samesize_transfers, &num_samesize);
+            int all_patches_samesize = num_samesize != (*domain)->local_num_patches;
+            int all_patches_samesize_global;
+            sc_MPI_Allreduce(&all_patches_samesize, &all_patches_samesize_global, 1, sc_MPI_INT, sc_MPI_LOR, (*domain)->mpicomm);
+            if(all_patches_samesize_global)
+            {
+                has_been_refined = 1;
+            }
+
             /* allocate memory for user patch data and user domain data in the new
                domain;  copy data from the old to new the domain. */
             fclaw_domain_setup(glob, new_domain);
