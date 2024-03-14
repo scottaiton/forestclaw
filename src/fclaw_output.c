@@ -24,6 +24,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <fclaw_output.h>
+#include <fclaw_restart.h>
 #include <fclaw_global.h>
 #include <fclaw_options.h>
 #include <fclaw_vtable.h>
@@ -68,6 +69,15 @@ fclaw_output_frame (fclaw_global_t * glob, int iframe)
     if (fclaw_opt->tikz_out)
     {
         fclaw2d_output_frame_tikz(glob,iframe);
+    }
+
+    if(fclaw_opt->restart_out)
+    {
+        fclaw_timer_start (&glob->timers[FCLAW_TIMER_OUTPUT]);
+
+        fclaw_restart_output_frame(glob,iframe);
+
+        fclaw_timer_stop (&glob->timers[FCLAW_TIMER_OUTPUT]);
     }
 }
 

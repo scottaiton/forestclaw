@@ -27,6 +27,7 @@ add_library(forestclaw_c OBJECT
   fclaw_physical_bc.c
   fclaw_ghost_fill.c
   fclaw_output.c
+  fclaw_restart.c
   fclaw_run.c
   fclaw_diagnostics.c
   fclaw_rays.c
@@ -112,6 +113,7 @@ install(FILES
 	fclaw_patch.h
 	fclaw_vtable.h
 	fclaw_output.h
+	fclaw_restart.h
 	fclaw_time_sync.h
 	fclaw_update_single_step.h
 	fclaw_physical_bc.h

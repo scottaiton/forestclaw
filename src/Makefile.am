@@ -30,6 +30,7 @@ libforestclaw_installed_headers = \
 	src/fclaw_patch.h \
 	src/fclaw_vtable.h \
 	src/fclaw_output.h \
+	src/fclaw_restart.h \
 	src/fclaw_time_sync.h \
 	src/fclaw_update_single_step.h \
 	src/fclaw_physical_bc.h \
@@ -92,6 +93,7 @@ libforestclaw_compiled_sources = \
 	src/fclaw_rays.c \
 	src/fclaw_ghost_fill.c \
 	src/fclaw_output.c \
+	src/fclaw_restart.c \
 	src/fclaw_run.c \
 	src/fclaw_diagnostics.c \
 	src/fclaw_update_single_step.c \
