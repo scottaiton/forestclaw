@@ -149,7 +149,7 @@ TEST_CASE("2d fclaw_clawpatch_options packing/unpacking")
 	CHECK_EQ(output_opts->is_registered,opts->is_registered);
 
 	vt->destroy(output_opts);
-	FCLAW_FREE(opts);
+	fclaw_clawpatch_options_destroy(opts);
 }
 
 TEST_CASE("3d fclaw_clawpatch_options packing/unpacking")
@@ -196,5 +196,5 @@ TEST_CASE("3d fclaw_clawpatch_options packing/unpacking")
 	CHECK_EQ(output_opts->is_registered,opts->is_registered);
 
 	vt->destroy(output_opts);
-	FCLAW_FREE(opts);
+	fclaw_clawpatch_options_destroy(opts);
 }

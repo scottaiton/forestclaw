@@ -36,15 +36,19 @@ TEST_CASE("fc2d_clawpack46_options can store options in two seperate globs")
 
 	fc2d_clawpack46_options_t* opts1 = FCLAW_ALLOC_ZERO(fc2d_clawpack46_options_t,1);
 	fc2d_clawpack46_options_t* opts2 = FCLAW_ALLOC_ZERO(fc2d_clawpack46_options_t,1);
+	fclaw_options_t* fopts2 = FCLAW_ALLOC_ZERO(fclaw_options_t,1);
 
 	fc2d_clawpack46_options_store(glob1, opts1);
 	/* glob1 has one package glob2 has two */
-	fclaw_options_store(glob2, FCLAW_ALLOC_ZERO(fclaw_options_t,1));
+	fclaw_options_store(glob2, fopts2);
 	fc2d_clawpack46_options_store(glob2, opts2);
 
 	CHECK_EQ(fc2d_clawpack46_get_options(glob1), opts1);
 	CHECK_EQ(fc2d_clawpack46_get_options(glob2), opts2);
 
+	FCLAW_FREE(opts1);
+	FCLAW_FREE(opts2);
+	FCLAW_FREE(fopts2);
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
 }

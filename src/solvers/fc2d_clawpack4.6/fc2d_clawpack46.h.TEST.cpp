@@ -45,8 +45,10 @@ TEST_CASE("fc2d_clawpack46_solver_initialize stores two seperate vtables in two 
 	fclaw_clawpatch_options_store(glob1, clawpatch_opts);
 	fclaw_clawpatch_options_store(glob2, clawpatch_opts);
 
-	fc2d_clawpack46_options_store(glob1, FCLAW_ALLOC_ZERO(fc2d_clawpack46_options_t,1));
-	fc2d_clawpack46_options_store(glob2, FCLAW_ALLOC_ZERO(fc2d_clawpack46_options_t,1));
+	fc2d_clawpack46_options_t *opts1 = FCLAW_ALLOC_ZERO(fc2d_clawpack46_options_t,1);
+	fc2d_clawpack46_options_t *opts2 = FCLAW_ALLOC_ZERO(fc2d_clawpack46_options_t,1);
+	fc2d_clawpack46_options_store(glob1, opts1);
+	fc2d_clawpack46_options_store(glob2, opts2);
 
 	fclaw_vtables_initialize(glob1);
 	fc2d_clawpack46_solver_initialize(glob1);
@@ -59,6 +61,9 @@ TEST_CASE("fc2d_clawpack46_solver_initialize stores two seperate vtables in two 
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
+	fclaw_clawpatch_options_destroy(clawpatch_opts);
+	FCLAW_FREE(opts1);
+	FCLAW_FREE(opts2);
 }
 
 TEST_CASE("fc2d_clawpack46_solver_initialize sets is_set flag")
@@ -70,7 +75,9 @@ TEST_CASE("fc2d_clawpack46_solver_initialize sets is_set flag")
 	/* create some empty options structures */
 	fclaw_clawpatch_options_t* clawpatch_opts = fclaw_clawpatch_options_new(2);
 	fclaw_clawpatch_options_store(glob, clawpatch_opts);
-	fc2d_clawpack46_options_store(glob, FCLAW_ALLOC_ZERO(fc2d_clawpack46_options_t,1));
+
+	fc2d_clawpack46_options_t *opts = FCLAW_ALLOC_ZERO(fc2d_clawpack46_options_t,1);
+	fc2d_clawpack46_options_store(glob, opts);
 
 	fclaw_vtables_initialize(glob);
 	fc2d_clawpack46_solver_initialize(glob);
@@ -80,6 +87,8 @@ TEST_CASE("fc2d_clawpack46_solver_initialize sets is_set flag")
 
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob);
+	fclaw_clawpatch_options_destroy(clawpatch_opts);
+	FCLAW_FREE(opts);
 }
 
 #ifdef FCLAW_ENABLE_DEBUG
@@ -130,6 +139,7 @@ TEST_CASE("fc2d_clawpack46_vtable_initialize fails if called twice on a glob")
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
+	fclaw_clawpatch_options_destroy(clawpatch_opts);
 }
 
 #endif

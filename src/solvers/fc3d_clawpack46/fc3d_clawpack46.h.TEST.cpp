@@ -43,12 +43,14 @@ TEST_CASE("fc3d_clawpack46_solver_initialize stores two seperate vtables in two 
 	fclaw_clawpatch_options_t* opts1 = fclaw_clawpatch_options_new(3);
 	fclaw_clawpatch_options_t* opts2 = fclaw_clawpatch_options_new(3);
 
+	fc3d_clawpack46_options_t* clawpack_opts1 = FCLAW_ALLOC_ZERO(fc3d_clawpack46_options_t,1);
+	fc3d_clawpack46_options_t* clawpack_opts2 = FCLAW_ALLOC_ZERO(fc3d_clawpack46_options_t,1);
 	/* create some empty options structures */
 	fclaw_clawpatch_options_store(glob1, opts1);
-	fc3d_clawpack46_options_store(glob1, FCLAW_ALLOC_ZERO(fc3d_clawpack46_options_t,1));
+	fc3d_clawpack46_options_store(glob1, clawpack_opts1);
 
 	fclaw_clawpatch_options_store(glob2, opts2);
-	fc3d_clawpack46_options_store(glob2, FCLAW_ALLOC_ZERO(fc3d_clawpack46_options_t,1));
+	fc3d_clawpack46_options_store(glob2, clawpack_opts2);
 
 	fclaw_vtables_initialize(glob1);
 	fc3d_clawpack46_solver_initialize(glob1);
@@ -63,6 +65,8 @@ TEST_CASE("fc3d_clawpack46_solver_initialize stores two seperate vtables in two 
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
+	FCLAW_FREE(clawpack_opts1);
+	FCLAW_FREE(clawpack_opts2);
 }
 
 TEST_CASE("fc3d_clawpack46_solver_initialize sets is_set flag")
@@ -72,10 +76,11 @@ TEST_CASE("fc3d_clawpack46_solver_initialize sets is_set flag")
 	fclaw_global_store_domain(glob, domain);
 
 	fclaw_clawpatch_options_t* opts = fclaw_clawpatch_options_new(3);
+	fc3d_clawpack46_options_t* clawpack_opts = FCLAW_ALLOC_ZERO(fc3d_clawpack46_options_t,1);
 
 	/* create some empty options structures */
 	fclaw_clawpatch_options_store(glob, opts);
-	fc3d_clawpack46_options_store(glob, FCLAW_ALLOC_ZERO(fc3d_clawpack46_options_t,1));
+	fc3d_clawpack46_options_store(glob, clawpack_opts);
 
 	fclaw_vtables_initialize(glob);
 	fc3d_clawpack46_solver_initialize(glob);
@@ -86,6 +91,7 @@ TEST_CASE("fc3d_clawpack46_solver_initialize sets is_set flag")
 	fclaw_clawpatch_options_destroy(opts);
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob);
+	FCLAW_FREE(clawpack_opts);
 }
 
 #ifdef FCLAW_ENABLE_DEBUG

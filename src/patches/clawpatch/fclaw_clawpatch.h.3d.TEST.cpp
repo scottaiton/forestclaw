@@ -99,7 +99,7 @@ struct SinglePatchDomain {
         fclaw_vtables_initialize(glob);
         fclaw_clawpatch_vtable_initialize(glob, 4);
 
-            }
+    }
     void setup(){
         fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
         fclaw_patch_build(glob, &domain->blocks[0].patches[0], 0, 0, &build_mode);
@@ -107,8 +107,8 @@ struct SinglePatchDomain {
     ~SinglePatchDomain(){
         fclaw_patch_data_delete(glob, &domain->blocks[0].patches[0]);
         fclaw_clawpatch_options_destroy(opts);
-        fclaw_domain_destroy(domain);
-        //fclaw2d_map_destroy(map);
+        fclaw_domain_reset(glob);
+        fclaw_map_destroy(glob->cont);
         fclaw_global_destroy(glob);
     }
 };
@@ -167,8 +167,8 @@ struct OctDomain {
             fclaw_patch_data_delete(glob, &domain->blocks[0].patches[i]);
         }
         fclaw_clawpatch_options_destroy(opts);
-        fclaw_domain_destroy(domain);
-        //fclaw3d_map_destroy(map);
+        fclaw_domain_reset(glob);
+        fclaw_map_destroy(glob->cont);
         fclaw_global_destroy(glob);
     }
 };
@@ -243,6 +243,7 @@ TEST_CASE("3d fclaw_clawpatch_vtable_initialize")
     //ghost filling
     CHECK(patch_vt->copy_edge                != NULL);
 
+    fclaw_clawpatch_options_destroy(opts);
     fclaw_domain_destroy(domain);
     fclaw_global_destroy(glob);
 }
@@ -353,6 +354,7 @@ TEST_CASE("3d fclaw_clawpatch patch_build")
         }
 
         fclaw_patch_data_delete(glob, &domain->blocks[0].patches[0]);
+        fclaw_clawpatch_options_destroy(opts);
         fclaw_domain_destroy(domain);
         fclaw_map_destroy(map);
         fclaw_global_destroy(glob);

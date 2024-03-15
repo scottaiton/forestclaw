@@ -123,6 +123,12 @@ fclaw_global_t* fclaw_global_new (void);
 fclaw_global_t* fclaw_global_new_comm (sc_MPI_Comm mpicomm,
                                            int mpisize, int mpirank);
 
+/**
+ * @brief Destroy a global structure.
+ * This will not destroy the domain or map.
+ * 
+ * @param glob the global structure
+ */
 void fclaw_global_destroy (fclaw_global_t * glob);
 
 void fclaw_global_store_domain (fclaw_global_t* glob,
