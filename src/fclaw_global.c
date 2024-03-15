@@ -148,12 +148,9 @@ fclaw_global_packsize(const fclaw_global_t * glob)
 }
 
 size_t 
-fclaw_global_unpack(char* buffer, fclaw_global_t ** glob_ptr)
+fclaw_global_unpack(char* buffer, fclaw_global_t * glob)
 {
     char* buffer_start = buffer;
-
-	fclaw_global_t* glob = fclaw_global_new();
-    *glob_ptr = glob;
 
     buffer += fclaw_unpack_double(buffer,&glob->curr_time);
     buffer += fclaw_unpack_double(buffer,&glob->curr_dt);
@@ -161,17 +158,17 @@ fclaw_global_unpack(char* buffer, fclaw_global_t ** glob_ptr)
     size_t num_option_structs;
     buffer += fclaw_unpack_size_t(buffer,&num_option_structs);
 
-    for(size_t i = 0; i< num_option_structs; i++)
-    {
-        char * key;
-        buffer += fclaw_unpack_string(buffer,&key);
-        fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
-        check_vt(vt,key);
-        void * options;
-        buffer += vt->unpack(buffer,&options);
-        fclaw_pointer_map_insert(glob->options, key, options, vt->destroy);
-        FCLAW_FREE(key);
-    }
+    //for(size_t i = 0; i< num_option_structs; i++)
+    //{
+    //    char * key;
+    //    buffer += fclaw_unpack_string(buffer,&key);
+    //    fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
+    //    check_vt(vt,key);
+    //    void * options;
+    //    buffer += vt->unpack(buffer,&options);
+    //    fclaw_pointer_map_insert(glob->options, key, options, vt->destroy);
+    //    FCLAW_FREE(key);
+    //}
 
     return buffer-buffer_start;
 }

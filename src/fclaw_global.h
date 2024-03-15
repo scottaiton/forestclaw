@@ -157,10 +157,10 @@ size_t fclaw_global_packsize(const fclaw_global_t * glob);
  * @brief Unpack global structure from buffer
  * 
  * @param buffer the buffer to read from
- * @param glob newly create global structure
+ * @param glob glob structure to write to
  * @return size_t number of bytes read
  */
-size_t fclaw_global_unpack(char* buffer, fclaw_global_t** glob);
+size_t fclaw_global_unpack(char* buffer, fclaw_global_t* glob);
 
 void fclaw_global_iterate_level (fclaw_global_t * glob, int level,
                                    fclaw_patch_callback_t pcb, void *user);
