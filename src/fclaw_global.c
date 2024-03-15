@@ -296,13 +296,28 @@ fclaw_global_attribute_store (fclaw_global_t * glob,
                               const char * packing_key, 
                               fclaw_pointer_map_value_destroy_t destroy)
 {
-
+    fclaw_pointer_map_insert(glob->options, key, attribute, destroy);
 }
 
 void * 
 fclaw_global_get_attribute (fclaw_global_t* glob, const char* key)
 {
-    return NULL;
+    return fclaw_pointer_map_get(glob->options, key);
+}
+
+void 
+fclaw_global_vtable_store (fclaw_global_t * glob, 
+                              const char * key, 
+                              void * vtable,
+                              fclaw_pointer_map_value_destroy_t destroy)
+{
+    fclaw_pointer_map_insert(glob->vtables, key, vtable, destroy);
+}
+
+void * 
+fclaw_global_get_vtable (fclaw_global_t* glob, const char* key)
+{
+    return fclaw_pointer_map_get(glob->vtables, key);
 }
 
 void 

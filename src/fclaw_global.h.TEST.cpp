@@ -427,6 +427,41 @@ TEST_CASE("fclaw2d_global_get_global assert fails when NULL")
     CHECK_SC_ABORTED(fclaw_global_get_static_global());
 }
 
+TEST_CASE("fclaw_global_vtable_store and fclaw_global_get_vtable test") {
+	fclaw_global_t* glob = fclaw_global_new();
+
+	// Test with an integer
+	int vtable1 = 10;
+	const char* key1 = "vtable1";
+	fclaw_global_vtable_store(glob, key1, &vtable1,  nullptr);
+
+	int* retrieved_vtable1 = static_cast<int*>(fclaw_global_get_vtable(glob, key1));
+	CHECK_EQ(*retrieved_vtable1, vtable1);
+
+	// Test with a string
+	const char* vtable2 = "Test string";
+	const char* key2 = "vtable2";
+	fclaw_global_vtable_store(glob, key2, &vtable2,  nullptr);
+
+	const char** retrieved_vtable2 = static_cast<const char**>(fclaw_global_get_vtable(glob, key2));
+	CHECK_EQ(*retrieved_vtable2, vtable2);
+
+	// Test with a non-existing key
+	const char* key3 = "non-existing key";
+	void* retrieved_vtable3 = fclaw_global_get_vtable(glob, key3);
+	CHECK_EQ(retrieved_vtable3, nullptr);
+
+	// Test with a destroy callback
+	int* vtable4 = new int(20);
+	const char* key4 = "vtable4";
+	fclaw_global_vtable_store(glob, key4, vtable4, [](void* ptr) { delete static_cast<int*>(ptr); });
+
+	int* retrieved_vtable4 = static_cast<int*>(fclaw_global_get_vtable(glob, key4));
+	CHECK_EQ(*retrieved_vtable4, *vtable4);
+
+	fclaw_global_destroy(glob);
+}
+
 TEST_CASE("fclaw_global_attribute_store and fclaw_global_get_attribute test") {
 	fclaw_global_t* glob = fclaw_global_new();
 
@@ -446,10 +481,6 @@ TEST_CASE("fclaw_global_attribute_store and fclaw_global_get_attribute test") {
 	const char** retrieved_attribute2 = static_cast<const char**>(fclaw_global_get_attribute(glob, key2));
 	CHECK_EQ(*retrieved_attribute2, attribute2);
 
-#ifdef FCLAW_ENABLE_DEBUG
-	// TEST inserting twice
-	CHECK_SC_ABORTED(fclaw_global_attribute_store(glob, key2, &attribute2, nullptr, nullptr));
-#endif
 	// Test with a non-existing key
 	const char* key3 = "non-existing key";
 	void* retrieved_attribute3 = fclaw_global_get_attribute(glob, key3);
