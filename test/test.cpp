@@ -39,6 +39,12 @@ void fclaw_test_clear_expect_abort()
     expect_abort=false;
 }
 
+static bool dirty_memory=false;
+void fclaw_test_set_dirty_memory()
+{
+    dirty_memory = true;
+}
+
 std::jmp_buf& fclaw_test_get_jump_buffer()
 {
     return jump_buffer;
@@ -95,7 +101,11 @@ int main(int argc, char *argv[])
 	    result = context.run();
 
 	    // global clean-up...
-        fclaw_app_destroy (app);
+        // fclaw_app_destroy will fail if there has been an abort
+        if(!dirty_memory)
+        {
+            fclaw_app_destroy (app);
+        }
 
 	    return result;
     } 
