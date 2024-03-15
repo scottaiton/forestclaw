@@ -132,8 +132,9 @@ size_t pack_dummy_options(void* user, char* buffer)
 
 	return buffer-buffer_start;
 };
-size_t unpack_dummy_options(char* buffer, void** user)
+size_t unpack_dummy_options(char* buffer, void* user)
 {
+	dummy_attribute* attribute = (dummy_attribute*) user;
 
 	char* buffer_start = buffer;
 
@@ -145,7 +146,8 @@ size_t unpack_dummy_options(char* buffer, void** user)
 	}
 	buffer += size;
 
-	*user = new dummy_attribute(size,value);
+	attribute->size = size;
+	attribute->value = value;
 
 	return buffer-buffer_start;
 };
@@ -154,7 +156,9 @@ size_t packsize_dummy_attribute(void* user)
 	dummy_attribute* options = (dummy_attribute*) user;
 	return sizeof(size_t) + options->size;
 };
-
+void * new_dummy_attribute(){
+	return new dummy_attribute(0,0);
+}
 void destroy_dummy_attribute(void* user){
 	delete (dummy_attribute*) user;
 }
@@ -164,6 +168,7 @@ fclaw_packing_vtable_t dummy_opts_vt =
 	pack_dummy_options,
 	unpack_dummy_options,
 	packsize_dummy_attribute,
+	new_dummy_attribute,
 	destroy_dummy_attribute
 };
 

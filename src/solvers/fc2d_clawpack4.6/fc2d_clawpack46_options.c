@@ -120,104 +120,6 @@ void clawpack46_destroy (fc2d_clawpack46_options_t * clawopt)
     FCLAW_FREE (clawopt);
 }
 
-static void clawpack46_destroy_void(void* user)
-{
-    fc2d_clawpack46_options_t* clawopt = (fc2d_clawpack46_options_t*) user;
-    clawpack46_destroy(clawopt);
-}
-
-static size_t 
-options_packsize(void* user)
-{
-    fc2d_clawpack46_options_t* opts = (fc2d_clawpack46_options_t*) user;
-
-    size_t size = sizeof(fc2d_clawpack46_options_t);
-    size += fclaw_packsize_string(opts->order_string);
-    size += 2*sizeof(int);  /* order */
-    size += opts->mwaves*sizeof(int);  /* mthlim */
-    size += fclaw_packsize_string(opts->mthlim_string);
-    size += 4*sizeof(int);  /* mthbc */
-    size += fclaw_packsize_string(opts->mthbc_string);
-
-    return size;
-}
-
-static size_t 
-options_pack(void* user, char* buffer)
-{
-    char* buffer_start = buffer;
-
-    fc2d_clawpack46_options_t* opts = (fc2d_clawpack46_options_t*) user;
-
-    //pack entire struct
-    buffer += FCLAW_PACK(*opts, buffer);
-
-    //append arrays to buffer
-    buffer += fclaw_pack_string(opts->order_string,buffer);
-    buffer += fclaw_pack_int(opts->order[0],buffer);
-    buffer += fclaw_pack_int(opts->order[1],buffer);
-    for(size_t i = 0; i < opts->mwaves; i++)
-    {
-        buffer += fclaw_pack_int(opts->mthlim[i],buffer);
-    }
-    buffer += fclaw_pack_string(opts->mthlim_string,buffer);
-    for(size_t i = 0; i < 4; i++)
-    {
-        buffer += fclaw_pack_int(opts->mthbc[i],buffer);
-    }
-    buffer += fclaw_pack_string(opts->mthbc_string,buffer);
-
-    return buffer-buffer_start;
-}
-
-static size_t 
-options_unpack(char* buffer, void** user)
-{
-    char* buffer_start = buffer;
-
-    fc2d_clawpack46_options_t** opts_ptr = (fc2d_clawpack46_options_t**) user;
-    *opts_ptr = FCLAW_ALLOC(fc2d_clawpack46_options_t,1);
-    fc2d_clawpack46_options_t* opts = *opts_ptr;
-
-    buffer += FCLAW_UNPACK(buffer, opts);
-
-    //unpack arrays
-    buffer += fclaw_unpack_string(buffer,(char**) &opts->order_string);
-    opts->order = FCLAW_ALLOC(int,2);
-    buffer += fclaw_unpack_int(buffer,&opts->order[0]);
-    buffer += fclaw_unpack_int(buffer,&opts->order[1]);
-    opts->mthlim = FCLAW_ALLOC(int,opts->mwaves);
-    for(size_t i = 0; i < opts->mwaves; i++)
-    {
-        buffer += fclaw_unpack_int(buffer,&opts->mthlim[i]);
-    }
-    buffer += fclaw_unpack_string(buffer,(char**) &opts->mthlim_string);
-    opts->mthbc = FCLAW_ALLOC(int,4);
-    for(size_t i = 0; i < 4; i++)
-    {
-        buffer += fclaw_unpack_int(buffer,&opts->mthbc[i]);
-    }
-    buffer += fclaw_unpack_string(buffer,(char**) &opts->mthbc_string);
-
-    opts->is_unpacked = 1;
-   
-    return buffer-buffer_start;
-}
-
-static fclaw_packing_vtable_t packing_vt = 
-{
-	options_pack,
-	options_unpack,
-	options_packsize,
-	clawpack46_destroy_void
-};
-
-const fclaw_packing_vtable_t* 
-fc2d_clawpack46_options_get_packing_vtable()
-{
-    return &packing_vt;
-}
-
 /* ------------------------------------------------------
    Generic calls to options handling;  each calls 
    clawpack-specific options call back
@@ -297,8 +199,6 @@ fc2d_clawpack46_options_t*  fc2d_clawpack46_options_register (fclaw_app_t * app,
                                                               const char *section,
                                                               const char *configfile)
 {
-    fclaw_app_register_options_packing_vtable("fc2d_clawpack46", &packing_vt);
-
     fc2d_clawpack46_options_t *clawopt;
 
     FCLAW_ASSERT (app != NULL);

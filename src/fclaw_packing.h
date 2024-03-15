@@ -58,14 +58,19 @@ typedef size_t (*fclaw_packing_pack_t)(void* userdata,
 /**
  * @brief Unpack userdata from buffer 
  * @param buffer buffer to unpack from
- * @return newly create userdata
+ * @return user data to write to
  */
-typedef size_t (*fclaw_packing_unpack_t)(char* buffer,void**);
+typedef size_t (*fclaw_packing_unpack_t)(char* buffer,void*);
 /**
  * @brief Get the size needed to pack userdata
  * @return the size
  */
 typedef size_t (*fclaw_packing_packsize_t)(void* userdata);
+
+/**
+ * @brief create new userdata
+ */
+typedef void * (*fclaw_packing_new_t)();
 
 /**
  * @brief destroy userdata
@@ -80,6 +85,7 @@ typedef struct fclaw_packing_vtable
   fclaw_packing_pack_t pack; /**< function for packing */
   fclaw_packing_unpack_t unpack; /**< function for unpacking*/
   fclaw_packing_packsize_t size; /**< function for packing size */
+  fclaw_packing_new_t new_data; /**< function for creating new data */
   fclaw_packing_destroy_t destroy; /**< function for destroying */
 } fclaw_useradata_vtable_t;
 
