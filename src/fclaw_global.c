@@ -52,6 +52,7 @@ fclaw_global_t* fclaw_global_new (void)
     glob->pkg_container = fclaw_package_container_new ();
     glob->vtables = fclaw_pointer_map_new ();
     glob->options = fclaw_pointer_map_new ();
+    glob->attributes = fclaw_pointer_map_new ();
 
     glob->count_amr_advance = 0;
     glob->count_ghost_exchange = 0;
@@ -209,6 +210,7 @@ fclaw_global_destroy (fclaw_global_t * glob)
     if(glob->pkg_container != NULL) fclaw_package_container_destroy ((fclaw_package_container_t *)glob->pkg_container);
     if(glob->vtables != NULL) fclaw_pointer_map_destroy (glob->vtables);
     if(glob->options != NULL) fclaw_pointer_map_destroy (glob->options);
+    if(glob->attributes != NULL) fclaw_pointer_map_destroy (glob->attributes);
 
 #ifndef P4_TO_P8
     FCLAW_FREE (glob->acc);
@@ -285,6 +287,38 @@ void* fclaw_global_get_options (fclaw_global_t* glob, const char* key)
     void* options = fclaw_pointer_map_get(glob->options, key);
     FCLAW_ASSERT(options != NULL);
     return options;   
+}
+
+void 
+fclaw_global_attribute_store (fclaw_global_t * glob, 
+                              const char * key, 
+                              void* attribute,
+                              const char * packing_key, 
+                              fclaw_pointer_map_value_destroy_t destroy)
+{
+
+}
+
+void * 
+fclaw_global_get_attribute (fclaw_global_t* glob, const char* key)
+{
+    return NULL;
+}
+
+void 
+fclaw_global_register_options_packing_vtable(fclaw_global_t * glob, 
+                                             const char*name, 
+                                             fclaw_packing_vtable_t* vtable,
+                                             fclaw_pointer_map_value_destroy_t destroy)
+{
+    //
+}
+
+fclaw_packing_vtable_t * 
+fclaw_global_get_options_packing_vtable(fclaw_global_t * glob, const char*name)
+{
+    //
+    return NULL;
 }
 
 static fclaw_global_t* fclaw2d_global_glob = NULL;

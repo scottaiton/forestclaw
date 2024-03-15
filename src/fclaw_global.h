@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_map.h>   /* Needed to store the map context */
 
 #include <fclaw_timer.h>   /* Needed to create statically allocated array of timers */
+#include <fclaw_pointer_map.h>  /* Needed to store vtables and options */
 
 #ifdef __cplusplus
 extern "C"
@@ -79,8 +80,10 @@ struct fclaw_global
     /** Solver packages for internal use. */
     struct fclaw_package_container *pkg_container;
 
-    struct fclaw_pointer_map *vtables;    /**< Vtables */
-    struct fclaw_pointer_map *options;    /**< options */
+    fclaw_pointer_map_t *vtables;    /**< Vtables */
+    fclaw_pointer_map_t *options;    /**< options */
+
+    fclaw_pointer_map_t *attributes; /**< attributes */
 
     struct fclaw_map_context* cont;
     struct fclaw_domain *domain;
@@ -200,6 +203,59 @@ void fclaw_global_options_store (fclaw_global_t* glob, const char* key, void* op
  * @return void* the options
  */
 void* fclaw_global_get_options (fclaw_global_t* glob, const char* key);
+
+/**
+ * @brief Store an attribute structure in the glob
+ * 
+ * @param glob the global context
+ * @param key the key to store the attribute under
+ * @param attribute the attribute structure
+ * @param packing_key the key to use for packing the attribute, NULL if not needed
+ * @param destroy the callback to destroy the attribute, NULL if not needed
+ */
+void 
+fclaw_global_attribute_store (fclaw_global_t * glob, 
+                              const char * key, 
+                              void* attribute,
+                              const char * packing_key, 
+                              fclaw_pointer_map_value_destroy_t destroy);
+
+/**
+ * @brief Get an attribute structure from the glob
+ * 
+ * @param glob the global context
+ * @param key the key to retrieve the attribute from
+ * @return void* the attribute
+ */
+void * 
+fclaw_global_get_attribute (fclaw_global_t* glob, const char* key);
+
+
+/**
+ * @brief Register a vtable used for packing attributes
+ *
+ * These should be done alongside the intialization of other vtables
+ * 
+ * @param glob the global context
+ * @param key the key, this should be the same key used in packing_key when storing attributes
+ * @param destroy the callback to destroy the vtable, NULL if not needed
+ * @param vtable the vtable
+ */
+void 
+fclaw_global_register_attribute_packing_vtable(fclaw_global_t * glob, 
+                                               const char * key, 
+                                               fclaw_packing_vtable_t * vtable,
+                                               fclaw_pointer_map_value_destroy_t destroy);
+
+/**
+ * @brief Get an attribute packing vtable
+ * 
+ * @param glob the global context
+ * @param key the key, this should be the same key used in packing_key when storing attributes
+ * @return fclaw_packing_vtable_t* the vtable
+ */
+fclaw_packing_vtable_t * 
+fclaw_global_get_attribute_packing_vtable(fclaw_global_t * glob, const char * key);
 
 /**
  * @brief Store a glob variable in static memory

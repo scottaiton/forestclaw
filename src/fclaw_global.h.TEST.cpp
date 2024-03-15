@@ -56,6 +56,7 @@ TEST_CASE("fclaw_global_new default options")
 
 	CHECK_EQ(fclaw_pointer_map_size(glob->vtables), 0);
 	CHECK_EQ(fclaw_pointer_map_size(glob->options), 0);
+	CHECK_EQ(fclaw_pointer_map_size(glob->attributes), 0);
 	CHECK(glob->cont == nullptr);
 	CHECK(glob->domain == nullptr);
 	CHECK(glob->acc != nullptr);
@@ -424,6 +425,45 @@ TEST_CASE("fclaw2d_global_unset_global assert fails when NULL")
 TEST_CASE("fclaw2d_global_get_global assert fails when NULL")
 {
     CHECK_SC_ABORTED(fclaw_global_get_static_global());
+}
+
+TEST_CASE("fclaw_global_attribute_store and fclaw_global_get_attribute test") {
+	fclaw_global_t* glob = fclaw_global_new();
+
+	// Test with an integer
+	int attribute1 = 10;
+	const char* key1 = "attribute1";
+	fclaw_global_attribute_store(glob, key1, &attribute1, nullptr, nullptr);
+
+	int* retrieved_attribute1 = static_cast<int*>(fclaw_global_get_attribute(glob, key1));
+	CHECK_EQ(*retrieved_attribute1, attribute1);
+
+	// Test with a string
+	const char* attribute2 = "Test string";
+	const char* key2 = "attribute2";
+	fclaw_global_attribute_store(glob, key2, &attribute2, nullptr, nullptr);
+
+	const char** retrieved_attribute2 = static_cast<const char**>(fclaw_global_get_attribute(glob, key2));
+	CHECK_EQ(*retrieved_attribute2, attribute2);
+
+#ifdef FCLAW_ENABLE_DEBUG
+	// TEST inserting twice
+	CHECK_SC_ABORTED(fclaw_global_attribute_store(glob, key2, &attribute2, nullptr, nullptr));
+#endif
+	// Test with a non-existing key
+	const char* key3 = "non-existing key";
+	void* retrieved_attribute3 = fclaw_global_get_attribute(glob, key3);
+	CHECK_EQ(retrieved_attribute3, nullptr);
+
+	// Test with a destroy callback
+	int* attribute4 = new int(20);
+	const char* key4 = "attribute4";
+	fclaw_global_attribute_store(glob, key4, attribute4, nullptr, [](void* ptr) { delete static_cast<int*>(ptr); });
+
+	int* retrieved_attribute4 = static_cast<int*>(fclaw_global_get_attribute(glob, key4));
+	CHECK_EQ(*retrieved_attribute4, *attribute4);
+
+	fclaw_global_destroy(glob);
 }
 
 #endif
