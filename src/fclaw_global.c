@@ -289,20 +289,55 @@ void* fclaw_global_get_options (fclaw_global_t* glob, const char* key)
     return options;   
 }
 
+/*
+ * @brief struct for store attributes and metadata
+ */
+typedef
+struct attribute_entry
+{
+    /* the key to the packing vtable, NULL if not used */
+    const char* packing_vtable_key;
+    /* the attribute */
+    void* attribute;
+    /* the callback to destroy the attribute, NULL if not used*/
+    fclaw_pointer_map_value_destroy_t destroy;
+} attribute_entry_t;
+
+/* callback to destroy attribute entry */
+void attribute_entry_destroy(void* value)
+{
+    attribute_entry_t* entry = (attribute_entry_t*) value;
+    if(entry->destroy != NULL)
+    {
+        entry->destroy(entry->attribute);
+    }
+    FCLAW_FREE(entry);
+}
+
 void 
 fclaw_global_attribute_store (fclaw_global_t * glob, 
                               const char * key, 
                               void* attribute,
-                              const char * packing_key, 
+                              const char * packing_vtable_key, 
                               fclaw_pointer_map_value_destroy_t destroy)
 {
-    fclaw_pointer_map_insert(glob->options, key, attribute, destroy);
+    attribute_entry_t *entry = FCLAW_ALLOC(attribute_entry_t,1);
+    entry->packing_vtable_key = packing_vtable_key;
+    entry->attribute = attribute;
+    entry->destroy = destroy;
+    fclaw_pointer_map_insert(glob->options, key, entry, attribute_entry_destroy);
 }
 
 void * 
 fclaw_global_get_attribute (fclaw_global_t* glob, const char* key)
 {
-    return fclaw_pointer_map_get(glob->options, key);
+    attribute_entry_t *entry = (attribute_entry_t*) fclaw_pointer_map_get(glob->options, key);
+    void * attribute = NULL;
+    if(entry != NULL)
+    {
+        attribute = entry->attribute;
+    }
+    return attribute;
 }
 
 void 
@@ -318,22 +353,6 @@ void *
 fclaw_global_get_vtable (fclaw_global_t* glob, const char* key)
 {
     return fclaw_pointer_map_get(glob->vtables, key);
-}
-
-void 
-fclaw_global_register_options_packing_vtable(fclaw_global_t * glob, 
-                                             const char*name, 
-                                             fclaw_packing_vtable_t* vtable,
-                                             fclaw_pointer_map_value_destroy_t destroy)
-{
-    //
-}
-
-fclaw_packing_vtable_t * 
-fclaw_global_get_options_packing_vtable(fclaw_global_t * glob, const char*name)
-{
-    //
-    return NULL;
 }
 
 static fclaw_global_t* fclaw2d_global_glob = NULL;
