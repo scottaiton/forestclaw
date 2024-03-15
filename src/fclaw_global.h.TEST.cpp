@@ -32,6 +32,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <initializer_list>
 #include <vector>
+TEST_CASE("fclaw_global_new default options")
+{
+    fclaw_global_t* glob = fclaw_global_new();
+
+
+	CHECK_EQ(glob->curr_time, 0.0);
+	CHECK_EQ(glob->curr_dt, 0.0);
+
+	CHECK_EQ(glob->count_amr_advance, 0);
+	CHECK_EQ(glob->count_ghost_exchange, 0);
+	CHECK_EQ(glob->count_amr_regrid, 0);
+	CHECK_EQ(glob->count_amr_new_domain, 0);
+	CHECK_EQ(glob->count_single_step, 0);
+	CHECK_EQ(glob->count_elliptic_grids, 0);
+	CHECK_EQ(glob->count_multiproc_corner, 0);
+	CHECK_EQ(glob->count_grids_per_proc, 0);
+	CHECK_EQ(glob->count_grids_remote_boundary, 0);
+	CHECK_EQ(glob->count_grids_local_boundary, 0);
+
+	CHECK_EQ(glob->mpisize, 0);
+	CHECK_EQ(glob->mpirank, -1);
+
+	CHECK_EQ(fclaw_pointer_map_size(glob->vtables), 0);
+	CHECK_EQ(fclaw_pointer_map_size(glob->options), 0);
+	CHECK(glob->cont == nullptr);
+	CHECK(glob->domain == nullptr);
+	CHECK(glob->acc != nullptr);
+	CHECK(glob->gauge_info == nullptr);
+	CHECK(glob->user == nullptr);
+
+
+	fclaw_global_destroy(glob);
+}
 
 TEST_CASE("fclaw2d_global_pack with no options")
 {
