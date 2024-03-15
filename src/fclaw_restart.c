@@ -28,8 +28,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_options.h>
 #include <fclaw_vtable.h>
 #include <fclaw_patch.h>
+#include <fclaw_domain.h>
+#include <fclaw_exchange.h>
 #include <fclaw3d_file.h>
 #include <fclaw_clawpatch.h>
+#include <fclaw_convenience.h>
+#include <fclaw3d_wrap.h>
 
 typedef struct pack_iter
 {
@@ -47,9 +51,29 @@ get_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int pat
     sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, user_data->curr_index);
     sc_array_init_size (current_arr, user_data->packsize, 1);
     void* buffer = sc_array_index (current_arr, 0);
-    user_data->patch_vt->partition_pack(user_data->glob, patch, blockno, patchno, buffer);
+    fclaw_patch_partition_pack(user_data->glob, patch, blockno, patchno, buffer);
     user_data->curr_index++;
 }
+static void
+set_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int patchno, void *user)
+{
+    pack_iter_t *user_data = (pack_iter_t*)user;
+    sc_array_t *patches = user_data->patches;
+    sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, user_data->curr_index);
+    void* buffer = sc_array_index (current_arr, 0);
+
+    fclaw_patch_partition_unpack(user_data->glob, user_data->glob->domain, patch, blockno, patchno, buffer);
+
+    sc_array_reset(current_arr);
+
+    user_data->curr_index++;
+}
+//TODO move this to header
+void
+fclaw_restart_from_file (fclaw_global_t * glob,
+                         const char* restart_filename,
+                         const char* partition_filename);
+
 /* -----------------------------------------------------------------------
     Public interface
     -------------------------------------------------------------------- */
@@ -60,7 +84,9 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
     fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
 
     char filename[BUFSIZ];
+    char parition_filename[BUFSIZ];
     snprintf(filename, BUFSIZ, "fort_frame_%04d.restart", iframe);
+    snprintf(parition_filename, BUFSIZ, "fort_frame_%04d.partition", iframe);
 
     int errcode;
     fclaw3d_file_context_t *fc 
@@ -89,9 +115,56 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
     sc_array_destroy(patches);
 
     fclaw3d_file_close(fc, &errcode);
+    fclaw3d_file_write_partition (parition_filename,
+                                           "Test partition write",
+                                           glob->domain->d3, &errcode);
+
+    fclaw_restart_from_file(glob, filename, parition_filename);
+
     fclaw_global_productionf("RESTATRTT!!\n");
 }
 
 
+void
+fclaw_restart_from_file (fclaw_global_t * glob,
+                         const char* restart_filename,
+                         const char* partition_filename)
+{
+    fclaw_domain_reset(glob);
+
+    int errcode;
+    fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
+    sc_array_t* partition = sc_array_new(sizeof(p4est_gloidx_t));
+    char user_string[FCLAW3D_FILE_USER_STRING_BYTES];
+    if(partition_filename != NULL)
+    {
+        fclaw3d_file_read_partition(partition_filename, user_string, glob->mpicomm, partition, &errcode);
+
+    }
+    fclaw3d_domain_t * domain_3d;
+    fclaw3d_file_context_t *fc 
+        = fclaw3d_file_open_read (restart_filename, user_string, glob->mpicomm, partition, &domain_3d, &errcode);
+    glob->domain = fclaw_domain_wrap_3d(domain_3d);
+    fclaw_domain_setup(glob, glob->domain);
+    sc_array_destroy(partition);
+
+    size_t packsize = patch_vt->partition_packsize(glob);
+    sc_array_t* patches = sc_array_new(sizeof(sc_array_t));
+
+    fclaw3d_file_read_array(fc, user_string, packsize, patches, &errcode);
+
+    pack_iter_t user;
+    user.glob = glob;
+    user.curr_index = 0;
+    user.patches = patches;
+    user.packsize = packsize;
+    user.patch_vt = patch_vt;
+    fclaw_domain_iterate_patches(glob->domain, set_patches, &user);
+
+    sc_array_destroy(patches);
+
+    fclaw3d_file_close(fc, &errcode);
+    fclaw_exchange_setup(glob,FCLAW_TIMER_OUTPUT);
+}
 
 
