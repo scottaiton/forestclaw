@@ -212,7 +212,7 @@ typedef
 struct attribute_entry
 {
     /* the key to the packing vtable, NULL if not used */
-    const char* packing_vtable_key;
+    char* packing_vtable_key;
     /* the attribute */
     void* attribute;
     /* the callback to destroy the attribute, NULL if not used*/
@@ -220,13 +220,15 @@ struct attribute_entry
 } attribute_entry_t;
 
 /* callback to destroy attribute entry */
-void attribute_entry_destroy(void* value)
+static void 
+attribute_entry_destroy(void* value)
 {
     attribute_entry_t* entry = (attribute_entry_t*) value;
     if(entry->destroy != NULL)
     {
         entry->destroy(entry->attribute);
     }
+    FCLAW_FREE(entry->packing_vtable_key);
     FCLAW_FREE(entry);
 }
 
@@ -238,16 +240,25 @@ fclaw_global_attribute_store (fclaw_global_t * glob,
                               fclaw_pointer_map_value_destroy_t destroy)
 {
     attribute_entry_t *entry = FCLAW_ALLOC(attribute_entry_t,1);
-    entry->packing_vtable_key = packing_vtable_key;
+    if(packing_vtable_key != NULL)
+    {
+        entry->packing_vtable_key = FCLAW_ALLOC(char,strlen(packing_vtable_key)+1);
+        strcpy(entry->packing_vtable_key,packing_vtable_key);
+    }
+    else
+    {
+        entry->packing_vtable_key = NULL;
+    }
     entry->attribute = attribute;
     entry->destroy = destroy;
-    fclaw_pointer_map_insert(glob->options, key, entry, attribute_entry_destroy);
+    fclaw_pointer_map_insert(glob->attributes, key, entry, attribute_entry_destroy);
 }
 
 void * 
 fclaw_global_get_attribute (fclaw_global_t* glob, const char* key)
 {
-    attribute_entry_t *entry = (attribute_entry_t*) fclaw_pointer_map_get(glob->options, key);
+    attribute_entry_t *entry = 
+        (attribute_entry_t*) fclaw_pointer_map_get(glob->attributes, key);
     void * attribute = NULL;
     if(entry != NULL)
     {
@@ -260,81 +271,153 @@ fclaw_global_get_attribute (fclaw_global_t* glob, const char* key)
  *  Packing and unpacking functions
  * ***************************************/
 
-static void check_vt(fclaw_packing_vtable_t* vt, const char* name)
+static void 
+check_vt(fclaw_packing_vtable_t* vt, 
+         const char* name, 
+         const char* vtable_name)
 {
-    char msg[1024];
-    sprintf(msg,"Unregistered options packing vtable for \"%s\"",name);
-    SC_CHECK_ABORT ((vt != NULL), msg);
+    if(vt == NULL)
+    {
+        char msg[BUFSIZ];
+        snprintf(msg, BUFSIZ, "Unregistered attribute packing vtable \"%s\" for attribute \"%s\"",vtable_name,name);
+        SC_CHECK_ABORT ((vt != NULL), msg);
+    }
 }
 
 static void 
-pack_iterator_callback(const char* key, void* value, void* user)
+num_to_pack_cb(const char* key, void* value, void* user)
 {
-    char** buffer_ptr = (char **) user;
+    size_t *num_to_pack = (size_t*) user;
+    attribute_entry_t* entry = (attribute_entry_t*) value;
+    if(entry->packing_vtable_key != NULL)
+    {
+        (*num_to_pack)++;
+    }
+}
+typedef
+struct pack_iter
+{
+    fclaw_global_t* glob;
+    char** buffer_ptr;
+    size_t num_packed;
+} pack_iter_t;
 
-    *buffer_ptr += fclaw_pack_string(key, *buffer_ptr);
-
-    fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
-    check_vt(vt,key);
-
-    // advance buffer pointer
-    *buffer_ptr += vt->pack(value,*buffer_ptr);
+static void 
+pack_attribute_cb(const char* key, void* value, void* user)
+{
+    pack_iter_t *iter = (pack_iter_t*) user;
+    attribute_entry_t* entry = (attribute_entry_t*) value;
+    if(entry->packing_vtable_key != NULL)
+    {
+        fclaw_packing_vtable_t* vt 
+            = (fclaw_packing_vtable_t*) fclaw_global_get_vtable(iter->glob, entry->packing_vtable_key);
+        check_vt(vt, key, entry->packing_vtable_key);
+        // advance buffer pointer
+        *iter->buffer_ptr += fclaw_pack_string(entry->packing_vtable_key, *iter->buffer_ptr);
+        *iter->buffer_ptr += fclaw_pack_string(key, *iter->buffer_ptr);
+        *iter->buffer_ptr += vt->pack(entry->attribute, *iter->buffer_ptr);
+    }
 }
 
 size_t 
-fclaw_global_pack(const fclaw_global_t * glob, char* buffer)
+fclaw_global_pack(fclaw_global_t * glob, char* buffer)
 {
     const char* buffer_start = buffer;
 
     buffer += fclaw_pack_double(glob->curr_time, buffer);
     buffer += fclaw_pack_double(glob->curr_dt, buffer);
 
-    buffer += fclaw_pack_size_t(fclaw_pointer_map_size(glob->options), buffer);
+    size_t num_to_pack  = 0;
+    fclaw_pointer_map_iterate(glob->attributes, num_to_pack_cb, &num_to_pack);
+    buffer += fclaw_pack_size_t(num_to_pack, buffer);
 
-    //fclaw_pointer_map_iterate(glob->options, pack_iterator_callback, &buffer);
+    pack_iter_t iter;
+    iter.glob = glob;
+    iter.buffer_ptr = &buffer;
+    fclaw_pointer_map_iterate(glob->attributes, pack_attribute_cb, &iter);
 
     return (buffer-buffer_start);
 }
 
+typedef
+struct packsize_iter
+{
+    fclaw_global_t* glob;
+    size_t size;
+} packsize_iter_t;
+
 static void 
-packsize_iterator_callback(const char* key, void* value, void* user)
+attribute_packsize_cb(const char* key, void* value, void* user)
 {
-    size_t* options_size = (size_t*) user;
-    fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
-    check_vt(vt,key);
-    (*options_size) += fclaw_packsize_string(key) + vt->size(value);
+    packsize_iter_t* iter = (packsize_iter_t*) user;
+    attribute_entry_t* entry = (attribute_entry_t*) value;
+    if(entry->packing_vtable_key != NULL)
+    {
+        fclaw_packing_vtable_t* vt = 
+            (fclaw_packing_vtable_t*) fclaw_global_get_vtable(iter->glob, entry->packing_vtable_key);
+        check_vt(vt, key, entry->packing_vtable_key);
+        iter->size += 
+            fclaw_packsize_string(entry->packing_vtable_key) 
+            + fclaw_packsize_string(key) 
+            + vt->size(entry->attribute);
+    }
 }
 
 size_t 
-fclaw_global_packsize(const fclaw_global_t * glob)
+fclaw_global_packsize(fclaw_global_t * glob)
 {
-    size_t options_size = sizeof(size_t);
-    //fclaw_pointer_map_iterate(glob->options, packsize_iterator_callback, &options_size);
-    return 2*sizeof(double) + options_size;
+    packsize_iter_t iter;
+    iter.glob = glob;
+    iter.size = sizeof(size_t);
+    fclaw_pointer_map_iterate(glob->attributes, attribute_packsize_cb, &iter);
+    return 2*sizeof(double) + iter.size;
 }
 
 size_t 
-fclaw_global_unpack(char* buffer, fclaw_global_t * glob)
+fclaw_global_unpack(char * buffer, fclaw_global_t * glob)
 {
-    char* buffer_start = buffer;
+    char *buffer_start = buffer;
 
     buffer += fclaw_unpack_double(buffer,&glob->curr_time);
     buffer += fclaw_unpack_double(buffer,&glob->curr_dt);
 
-    size_t num_option_structs;
-    buffer += fclaw_unpack_size_t(buffer,&num_option_structs);
+    size_t num_attributes;
+    buffer += fclaw_unpack_size_t(buffer,&num_attributes);
 
-    //for(size_t i = 0; i< num_option_structs; i++)
-    //{
-    //    char * key;
-    //    buffer += fclaw_unpack_string(buffer,&key);
-    //    fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
-    //    check_vt(vt,key);
-    //    void * options;
-    //    buffer += vt->unpack(buffer,&options);
-    //    fclaw_pointer_map_insert(glob->options, key, options, vt->destroy);
-    //    FCLAW_FREE(key);
-    //}
+    for(size_t i = 0; i< num_attributes; i++)
+    {
+        char *packing_vtable_key;
+        buffer += fclaw_unpack_string(buffer,&packing_vtable_key);
+
+        char *attribute_key;
+        buffer += fclaw_unpack_string(buffer,&attribute_key);
+
+        fclaw_packing_vtable_t *vt = 
+            (fclaw_packing_vtable_t *) fclaw_global_get_vtable(glob, packing_vtable_key);
+
+        check_vt(vt, attribute_key, packing_vtable_key);
+
+        attribute_entry_t *entry 
+            = (attribute_entry_t *) fclaw_pointer_map_get(glob->attributes, attribute_key);
+
+        if(entry == NULL)
+        {
+            entry = FCLAW_ALLOC(attribute_entry_t,1);
+            entry->packing_vtable_key = packing_vtable_key;
+            entry->attribute = vt->new_data();
+            entry->destroy = vt->destroy;
+            fclaw_pointer_map_insert(glob->attributes, attribute_key, entry, attribute_entry_destroy);
+        }
+        else
+        {
+            FCLAW_ASSERT(strcmp(entry->packing_vtable_key,packing_vtable_key) == 0);
+            FCLAW_FREE(packing_vtable_key);
+        }
+
+        buffer += vt->unpack(buffer,entry->attribute);
+
+        FCLAW_FREE(attribute_key);
+    }
 
     return buffer-buffer_start;
 }

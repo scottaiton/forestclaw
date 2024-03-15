@@ -67,43 +67,6 @@ TEST_CASE("fclaw_global_new default options")
 	fclaw_global_destroy(glob);
 }
 
-TEST_CASE("fclaw2d_global_pack with no options")
-{
-
-	for(double curr_time : {1.0, 1.2})
-	for(double curr_dt : {1.0, 1.2})
-	{
-		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
-		glob1->curr_time                    = curr_time;
-		glob1->curr_dt                      = curr_dt;
-
-		size_t packsize = fclaw_global_packsize(glob1);
-
-		REQUIRE_GT(packsize, 0);
-
-		char buffer[packsize];
-
-		size_t bytes_written = fclaw_global_pack(glob1, buffer);
-
-		REQUIRE_EQ(bytes_written, packsize);
-
-		fclaw_global_t* glob2 = fclaw_global_new();
-		size_t bytes_read = fclaw_global_unpack(buffer, glob2);
-
-		REQUIRE_EQ(bytes_read, packsize);
-
-		CHECK_EQ(glob1->curr_time, glob2->curr_time);
-		CHECK_EQ(glob1->curr_dt,   glob2->curr_dt);
-
-		CHECK_EQ(fclaw_pointer_map_size(glob2->options), 0);
-
-
-		fclaw_global_destroy(glob1);
-		fclaw_global_destroy(glob2);
-	}
-}
-
 namespace
 {
 
@@ -173,8 +136,9 @@ fclaw_packing_vtable_t dummy_opts_vt =
 };
 
 }
-TEST_CASE("fclaw_global_pack with no attribute")
+TEST_CASE("fclaw_global_pack with no packed attributes")
 {
+	for(bool extra_non_packed_attribute : {true, false})
 	for(double curr_time : {1.0, 1.2})
 	for(double curr_dt : {1.0, 1.2})
 	{
@@ -182,6 +146,12 @@ TEST_CASE("fclaw_global_pack with no attribute")
     	glob1 = fclaw_global_new();
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
+
+		if(extra_non_packed_attribute)
+		{
+			dummy_attribute* attribute = new dummy_attribute(40, 'b');
+			fclaw_global_attribute_store(glob1, "dummy_not_packed", attribute, NULL, destroy_dummy_attribute);
+		}
 
 		size_t packsize = fclaw_global_packsize(glob1);
 		REQUIRE_GT(packsize, 0);
@@ -206,9 +176,10 @@ TEST_CASE("fclaw_global_pack with no attribute")
 		fclaw_global_destroy(glob2);
 	}
 }
-TEST_CASE("fclaw_global_pack with a single attribute")
+TEST_CASE("fclaw_global_pack with a single packed attribute")
 {
 
+	for(bool extra_non_packed_attribute : {true, false})
 	for(bool already_stored_attribute : {true, false})
 	for(double curr_time : {1.0, 1.2})
 	for(double curr_dt : {1.0, 1.2})
@@ -218,12 +189,19 @@ TEST_CASE("fclaw_global_pack with a single attribute")
 		//fclaw_app_t* app = fclaw_app_new_on_comm(sc_MPI_COMM_WORLD,&argc,&argv,NULL);
 		fclaw_global_t* glob1;
     	glob1 = fclaw_global_new();
+		fclaw_global_vtable_store(glob1, "dummy1_vtable",  &dummy_opts_vt, NULL);
+
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
 		dummy_attribute* attribute1 = new dummy_attribute(20, 'a');
-		fclaw_global_vtable_store(glob1, "dummy1",  &dummy_opts_vt, NULL);
-		fclaw_global_attribute_store(glob1, "dummy1", attribute1, "dummy1", destroy_dummy_attribute);
+		fclaw_global_attribute_store(glob1, "dummy1", attribute1, "dummy1_vtable", destroy_dummy_attribute);
+
+		if(extra_non_packed_attribute)
+		{
+			dummy_attribute* attribute = new dummy_attribute(40, 'b');
+			fclaw_global_attribute_store(glob1, "dummy_not_packed", attribute, NULL, destroy_dummy_attribute);
+		}
 
 		size_t packsize = fclaw_global_packsize(glob1);
 		REQUIRE_GT(packsize, 0);
@@ -235,12 +213,22 @@ TEST_CASE("fclaw_global_pack with a single attribute")
 		REQUIRE_EQ(bytes_written, packsize);
 
 		fclaw_global_t* glob2 = fclaw_global_new();
-		dummy_attribute* attribute2 = new dummy_attribute(99, 'z');
+		fclaw_global_vtable_store(glob2, "dummy1_vtable",  &dummy_opts_vt, NULL);
+
+		dummy_attribute* attribute2 = NULL;
 		if(already_stored_attribute)
 		{
-			fclaw_global_attribute_store(glob2, "dummy1", attribute2, "dummy1", destroy_dummy_attribute);
+			attribute2 = new dummy_attribute(99, 'z');
+			fclaw_global_attribute_store(glob2, "dummy1", attribute2, "dummy1_vtable", destroy_dummy_attribute);
 		}
+
 		size_t bytes_read = fclaw_global_unpack(buffer, glob2);
+
+		if(!already_stored_attribute)
+		{
+			attribute2 = (dummy_attribute*)(fclaw_global_get_attribute(glob2, "dummy1"));
+			REQUIRE_NE(attribute2, nullptr);
+		}
 
 		REQUIRE_EQ(bytes_read, packsize);
 
@@ -256,9 +244,10 @@ TEST_CASE("fclaw_global_pack with a single attribute")
 		fclaw_global_destroy(glob2);
 	}
 }
-TEST_CASE("fclaw_global_pack with two attribute structures")
+TEST_CASE("fclaw_global_pack with two packed attributes")
 {
 
+	for(bool extra_non_packed_attribute : {true, false})
 	for(bool already_stored_attribute_1 : {true, false})
 	for(bool already_stored_attribute_2 : {true, false})
 	for(double curr_time : {1.0, 1.2})
@@ -266,16 +255,22 @@ TEST_CASE("fclaw_global_pack with two attribute structures")
 	{
 		fclaw_global_t* glob1;
     	glob1 = fclaw_global_new();
+		fclaw_global_vtable_store(glob1, "dummy1",  &dummy_opts_vt, NULL);
+		fclaw_global_vtable_store(glob1, "dummy2",  &dummy_opts_vt, NULL);
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
 		dummy_attribute* attribute1_1 = new dummy_attribute(20, 'a');
 		dummy_attribute* attribute1_2 = new dummy_attribute(40, 'b');
 
-		fclaw_global_vtable_store(glob1, "dummy1",  &dummy_opts_vt, NULL);
 		fclaw_global_attribute_store(glob1, "dummy1", attribute1_1, "dummy1", destroy_dummy_attribute);
-		fclaw_global_vtable_store(glob1, "dummy2",  &dummy_opts_vt, NULL);
 		fclaw_global_attribute_store(glob1, "dummy2", attribute1_2, "dummy2", destroy_dummy_attribute);
+
+		if(extra_non_packed_attribute)
+		{
+			dummy_attribute* attribute = new dummy_attribute(40, 'b');
+			fclaw_global_attribute_store(glob1, "dummy_not_packed", attribute, NULL, destroy_dummy_attribute);
+		}
 
 		size_t packsize = fclaw_global_packsize(glob1);
 		REQUIRE_GT(packsize, 0);
@@ -287,21 +282,34 @@ TEST_CASE("fclaw_global_pack with two attribute structures")
 		REQUIRE_EQ(bytes_written, packsize);
 
 		fclaw_global_t* glob2 = fclaw_global_new();
-		dummy_attribute* attribute2_1 = new dummy_attribute(99, 'z');
-		dummy_attribute* attribute2_2 = new dummy_attribute(99, 'z');
+		fclaw_global_vtable_store(glob2, "dummy1",  &dummy_opts_vt, NULL);
+		fclaw_global_vtable_store(glob2, "dummy2",  &dummy_opts_vt, NULL);
 
-		fclaw_global_vtable_store(glob1, "dummy1",  &dummy_opts_vt, NULL);
+		dummy_attribute* attribute2_1 = NULL;
+		dummy_attribute* attribute2_2 = NULL;
 		if(already_stored_attribute_1)
 		{
+			attribute2_1 = new dummy_attribute(99, 'z');
 			fclaw_global_attribute_store(glob2, "dummy1", attribute2_1, "dummy1", destroy_dummy_attribute);
 		}
-		fclaw_global_vtable_store(glob1, "dummy2",  &dummy_opts_vt, NULL);
 		if(already_stored_attribute_2)
 		{
+			attribute2_2 = new dummy_attribute(99, 'z');
 			fclaw_global_attribute_store(glob2, "dummy2", attribute2_2, "dummy2", destroy_dummy_attribute);
 		}
 
 		size_t bytes_read = fclaw_global_unpack(buffer, glob2);
+
+		if(!already_stored_attribute_1)
+		{
+			attribute2_1 = (dummy_attribute*)(fclaw_global_get_attribute(glob2, "dummy1"));
+			REQUIRE_NE(attribute2_1, nullptr);
+		}
+		if(!already_stored_attribute_2)
+		{
+			attribute2_2 = (dummy_attribute*)(fclaw_global_get_attribute(glob2, "dummy2"));
+			REQUIRE_NE(attribute2_2, nullptr);
+		}
 
 		REQUIRE_EQ(bytes_read, packsize);
 
@@ -330,10 +338,10 @@ TEST_CASE("fclaw_global_pack aborts with unregistered vtable")
 	dummy_attribute* attribute = new dummy_attribute(20, 'a');
 	fclaw_global_attribute_store(glob1, "dummy1", attribute, "pack_dummy1", destroy_dummy_attribute);
 
-	char buffer[100];
+	char buffer[BUFSIZ];
 	CHECK_SC_ABORTED(fclaw_global_pack(glob1, buffer));
 }
-TEST_CASE("fclaw2d_global_packsize aborts with unregistered vtable")
+TEST_CASE("fclaw_global_packsize aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
    	glob1 = fclaw_global_new();
@@ -345,7 +353,7 @@ TEST_CASE("fclaw2d_global_packsize aborts with unregistered vtable")
 
 	CHECK_SC_ABORTED(fclaw_global_packsize(glob1));
 }
-TEST_CASE("fclaw_global_unppack aborts with unregistered vtable")
+TEST_CASE("fclaw_global_unpack aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
    	glob1 = fclaw_global_new();
@@ -405,7 +413,7 @@ TEST_CASE("fclaw_global_options_store and fclaw_global_get_options test") {
     fclaw_global_destroy(glob);
 }
 
-TEST_CASE("fclaw2d_global_set_global")
+TEST_CASE("fclaw_global_set_global")
 {
     fclaw_global_t* glob = (fclaw_global_t*)123;
     fclaw_global_set_static(glob);
@@ -427,7 +435,7 @@ TEST_CASE("fclaw_global_clear_static")
 
 #ifdef FCLAW_ENABLE_DEBUG
 
-TEST_CASE("fclaw2d_global_set_global twice fails")
+TEST_CASE("fclaw_global_set_global twice fails")
 {
     fclaw_global_t* glob = (fclaw_global_t*)123;
     fclaw_global_set_static(glob);
@@ -435,12 +443,12 @@ TEST_CASE("fclaw2d_global_set_global twice fails")
     fclaw_global_clear_static();
 }
 
-TEST_CASE("fclaw2d_global_unset_global assert fails when NULL")
+TEST_CASE("fclaw_global_unset_global assert fails when NULL")
 {
     CHECK_SC_ABORTED(fclaw_global_clear_static());
 }
 
-TEST_CASE("fclaw2d_global_get_global assert fails when NULL")
+TEST_CASE("fclaw_global_get_global assert fails when NULL")
 {
     CHECK_SC_ABORTED(fclaw_global_get_static_global());
 }
