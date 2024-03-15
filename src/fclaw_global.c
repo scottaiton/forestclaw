@@ -92,90 +92,6 @@ fclaw_global_t* fclaw_global_new_comm (sc_MPI_Comm mpicomm,
     return glob;
 }
 
-#ifndef P4_TO_P8
-// packing unpacking functions only 2d for now
-
-static void check_vt(fclaw_packing_vtable_t* vt, const char* name)
-{
-    char msg[1024];
-    sprintf(msg,"Unregistered options packing vtable for \"%s\"",name);
-    SC_CHECK_ABORT ((vt != NULL), msg);
-}
-
-static void 
-pack_iterator_callback(const char* key, void* value, void* user)
-{
-    char** buffer_ptr = (char **) user;
-
-    *buffer_ptr += fclaw_pack_string(key, *buffer_ptr);
-
-    fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
-    check_vt(vt,key);
-
-    // advance buffer pointer
-    *buffer_ptr += vt->pack(value,*buffer_ptr);
-}
-
-size_t 
-fclaw_global_pack(const fclaw_global_t * glob, char* buffer)
-{
-    const char* buffer_start = buffer;
-
-    buffer += fclaw_pack_double(glob->curr_time, buffer);
-    buffer += fclaw_pack_double(glob->curr_dt, buffer);
-
-    buffer += fclaw_pack_size_t(fclaw_pointer_map_size(glob->options), buffer);
-
-    //fclaw_pointer_map_iterate(glob->options, pack_iterator_callback, &buffer);
-
-    return (buffer-buffer_start);
-}
-
-static void 
-packsize_iterator_callback(const char* key, void* value, void* user)
-{
-    size_t* options_size = (size_t*) user;
-    fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
-    check_vt(vt,key);
-    (*options_size) += fclaw_packsize_string(key) + vt->size(value);
-}
-
-size_t 
-fclaw_global_packsize(const fclaw_global_t * glob)
-{
-    size_t options_size = sizeof(size_t);
-    //fclaw_pointer_map_iterate(glob->options, packsize_iterator_callback, &options_size);
-    return 2*sizeof(double) + options_size;
-}
-
-size_t 
-fclaw_global_unpack(char* buffer, fclaw_global_t * glob)
-{
-    char* buffer_start = buffer;
-
-    buffer += fclaw_unpack_double(buffer,&glob->curr_time);
-    buffer += fclaw_unpack_double(buffer,&glob->curr_dt);
-
-    size_t num_option_structs;
-    buffer += fclaw_unpack_size_t(buffer,&num_option_structs);
-
-    //for(size_t i = 0; i< num_option_structs; i++)
-    //{
-    //    char * key;
-    //    buffer += fclaw_unpack_string(buffer,&key);
-    //    fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
-    //    check_vt(vt,key);
-    //    void * options;
-    //    buffer += vt->unpack(buffer,&options);
-    //    fclaw_pointer_map_insert(glob->options, key, options, vt->destroy);
-    //    FCLAW_FREE(key);
-    //}
-
-    return buffer-buffer_start;
-}
-
-#endif
-
 void
 fclaw_global_store_domain (fclaw_global_t* glob, fclaw_domain_t* domain)
 {
@@ -340,6 +256,88 @@ fclaw_global_get_attribute (fclaw_global_t* glob, const char* key)
     return attribute;
 }
 
+/* ***************************************
+ *  Packing and unpacking functions
+ * ***************************************/
+
+static void check_vt(fclaw_packing_vtable_t* vt, const char* name)
+{
+    char msg[1024];
+    sprintf(msg,"Unregistered options packing vtable for \"%s\"",name);
+    SC_CHECK_ABORT ((vt != NULL), msg);
+}
+
+static void 
+pack_iterator_callback(const char* key, void* value, void* user)
+{
+    char** buffer_ptr = (char **) user;
+
+    *buffer_ptr += fclaw_pack_string(key, *buffer_ptr);
+
+    fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
+    check_vt(vt,key);
+
+    // advance buffer pointer
+    *buffer_ptr += vt->pack(value,*buffer_ptr);
+}
+
+size_t 
+fclaw_global_pack(const fclaw_global_t * glob, char* buffer)
+{
+    const char* buffer_start = buffer;
+
+    buffer += fclaw_pack_double(glob->curr_time, buffer);
+    buffer += fclaw_pack_double(glob->curr_dt, buffer);
+
+    buffer += fclaw_pack_size_t(fclaw_pointer_map_size(glob->options), buffer);
+
+    //fclaw_pointer_map_iterate(glob->options, pack_iterator_callback, &buffer);
+
+    return (buffer-buffer_start);
+}
+
+static void 
+packsize_iterator_callback(const char* key, void* value, void* user)
+{
+    size_t* options_size = (size_t*) user;
+    fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
+    check_vt(vt,key);
+    (*options_size) += fclaw_packsize_string(key) + vt->size(value);
+}
+
+size_t 
+fclaw_global_packsize(const fclaw_global_t * glob)
+{
+    size_t options_size = sizeof(size_t);
+    //fclaw_pointer_map_iterate(glob->options, packsize_iterator_callback, &options_size);
+    return 2*sizeof(double) + options_size;
+}
+
+size_t 
+fclaw_global_unpack(char* buffer, fclaw_global_t * glob)
+{
+    char* buffer_start = buffer;
+
+    buffer += fclaw_unpack_double(buffer,&glob->curr_time);
+    buffer += fclaw_unpack_double(buffer,&glob->curr_dt);
+
+    size_t num_option_structs;
+    buffer += fclaw_unpack_size_t(buffer,&num_option_structs);
+
+    //for(size_t i = 0; i< num_option_structs; i++)
+    //{
+    //    char * key;
+    //    buffer += fclaw_unpack_string(buffer,&key);
+    //    fclaw_packing_vtable_t* vt = fclaw_app_get_options_packing_vtable(key);
+    //    check_vt(vt,key);
+    //    void * options;
+    //    buffer += vt->unpack(buffer,&options);
+    //    fclaw_pointer_map_insert(glob->options, key, options, vt->destroy);
+    //    FCLAW_FREE(key);
+    //}
+
+    return buffer-buffer_start;
+}
 void 
 fclaw_global_vtable_store (fclaw_global_t * glob, 
                               const char * key, 
