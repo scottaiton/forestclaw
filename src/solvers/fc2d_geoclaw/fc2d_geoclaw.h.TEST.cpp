@@ -46,11 +46,15 @@ TEST_CASE("fc2d_geoclaw_solver_initialize stores two seperate vtables in two sep
 	fclaw_clawpatch_options_store(glob2, clawpatch_opt);
 
 	/* create some empty options structures */
-	fclaw_options_store(glob1, FCLAW_ALLOC_ZERO(fclaw_options_t,1));
-	fc2d_geoclaw_options_store(glob1, FCLAW_ALLOC_ZERO(fc2d_geoclaw_options_t,1));
+	fclaw_options_t *fclaw_opt1 = FCLAW_ALLOC_ZERO(fclaw_options_t,1);
+	fc2d_geoclaw_options_t *geoclaw_opt1 = FCLAW_ALLOC_ZERO(fc2d_geoclaw_options_t,1);
+	fclaw_options_store(glob1, fclaw_opt1);
+	fc2d_geoclaw_options_store(glob1, geoclaw_opt1);
 
-	fclaw_options_store(glob2, FCLAW_ALLOC_ZERO(fclaw_options_t,1));
-	fc2d_geoclaw_options_store(glob2, FCLAW_ALLOC_ZERO(fc2d_geoclaw_options_t,1));
+	fclaw_options_t *fclaw_opt2 = FCLAW_ALLOC_ZERO(fclaw_options_t,1);
+	fc2d_geoclaw_options_t *geoclaw_opt2 = FCLAW_ALLOC_ZERO(fc2d_geoclaw_options_t,1);
+	fclaw_options_store(glob2, fclaw_opt2);
+	fc2d_geoclaw_options_store(glob2, geoclaw_opt2);
 
 	fclaw_vtables_initialize(glob1);
 	fc2d_geoclaw_solver_initialize(glob1);
@@ -63,6 +67,11 @@ TEST_CASE("fc2d_geoclaw_solver_initialize stores two seperate vtables in two sep
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
+	FCLAW_FREE(fclaw_opt1);
+	FCLAW_FREE(geoclaw_opt1);
+	FCLAW_FREE(fclaw_opt2);
+	FCLAW_FREE(geoclaw_opt2);
+	fclaw_clawpatch_options_destroy(clawpatch_opt);
 }
 
 TEST_CASE("fc2d_geoclaw_solver_initialize sets is_set flag")
@@ -75,8 +84,10 @@ TEST_CASE("fc2d_geoclaw_solver_initialize sets is_set flag")
 	fclaw_clawpatch_options_store(glob, clawpatch_opt);
 
 	/* create some empty options structures */
-	fclaw_options_store(glob, FCLAW_ALLOC_ZERO(fclaw_options_t,1));
-	fc2d_geoclaw_options_store(glob, FCLAW_ALLOC_ZERO(fc2d_geoclaw_options_t,1));
+	fclaw_options_t *fclaw_opt = FCLAW_ALLOC_ZERO(fclaw_options_t,1);
+	fc2d_geoclaw_options_t *geoclaw_opt = FCLAW_ALLOC_ZERO(fc2d_geoclaw_options_t,1);
+	fclaw_options_store(glob, fclaw_opt);
+	fc2d_geoclaw_options_store(glob, geoclaw_opt);
 
 	fclaw_vtables_initialize(glob);
 	fc2d_geoclaw_solver_initialize(glob);
@@ -86,6 +97,9 @@ TEST_CASE("fc2d_geoclaw_solver_initialize sets is_set flag")
 
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob);
+	FCLAW_FREE(fclaw_opt);
+	FCLAW_FREE(geoclaw_opt);
+	fclaw_clawpatch_options_destroy(clawpatch_opt);
 }
 
 #ifdef FCLAW_ENABLE_DEBUG

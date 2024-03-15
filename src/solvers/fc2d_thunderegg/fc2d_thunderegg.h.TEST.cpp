@@ -54,6 +54,7 @@ TEST_CASE("fc2d_thunderegg_solver_initialize stores two seperate vtables in two 
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
+	fclaw_clawpatch_options_destroy(clawpatch_opt);
 }
 
 TEST_CASE("fc2d_thunderegg_solver_initialize sets is_set flag")
@@ -74,6 +75,7 @@ TEST_CASE("fc2d_thunderegg_solver_initialize sets is_set flag")
 
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob);
+	fclaw_clawpatch_options_destroy(clawpatch_opt);
 }
 
 #ifdef FCLAW_ENABLE_DEBUG
@@ -102,6 +104,7 @@ TEST_CASE("fc2d_thunderegg_vtable_initialize fails if called twice on a glob")
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
+	fclaw_clawpatch_options_destroy(clawpatch_opt);
 }
 
 #endif

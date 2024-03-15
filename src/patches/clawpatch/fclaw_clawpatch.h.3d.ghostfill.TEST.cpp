@@ -74,6 +74,7 @@ struct TestData {
         fopts.compute_error = true;
         fopts.subcycle = true;
         fopts.init_ghostcell = false;
+        fopts.regression_check = "";
         fclaw_options_store(glob, &fopts);
 
         opts->mx   = 5;
@@ -112,11 +113,9 @@ struct TestData {
         fclaw_initialize(glob);
     }
     ~TestData(){
-        fclaw_clawpatch_options_destroy(opts);
-        fclaw_domain_reset(glob);
-        //fclaw_domain_destroy(glob->domain);
-        //fclaw3d_map_destroy(map);
+        fclaw_finalize(glob);
         fclaw_global_destroy(glob);
+        fclaw_clawpatch_options_destroy(opts);
     }
 };
 
@@ -519,7 +518,8 @@ TEST_CASE("3d clawpatch ghost fill on uniform cube")
         //create output domain with bigger size, so that we can see ghost cells
         //in the vtk output
         fclaw_domain_t* domain_out = fclaw_domain_new_unitcube(sc_MPI_COMM_WORLD, minlevel);
-        TestData test_data_out(domain_out, map, minlevel, maxlevel);
+        fclaw_map_context_t* map_out = fclaw_map_new_nomap();
+        TestData test_data_out(domain_out, map_out, minlevel, maxlevel);
 
         test_data_out.opts->mx   = mx+2*mbc;
         test_data_out.opts->my   = my+2*mbc;
@@ -614,12 +614,12 @@ TEST_CASE("3d clawpatch ghost fill on cube with refinement")
         CHECK_EQ(test_data.glob->domain->global_num_patches, 64);
         test_data.setup();
         CHECK_EQ(test_data.glob->domain->global_num_patches, 127);
-        domain = fclaw_domain_new_unitcube(sc_MPI_COMM_WORLD, minlevel);
 
         //create output domain with bigger size, so that we can see ghost cells
         //in the vtk output
         fclaw_domain_t* domain_out = fclaw_domain_new_unitcube(sc_MPI_COMM_WORLD, minlevel);
-        TestData test_data_out(domain_out, map, minlevel, maxlevel);
+        fclaw_map_context_t* map_out = fclaw_map_new_nomap();
+        TestData test_data_out(domain_out, map_out, minlevel, maxlevel);
 
         test_data_out.opts->mx   = mx+2*mbc;
         test_data_out.opts->my   = my+2*mbc;
@@ -725,7 +725,8 @@ TEST_CASE("3d clawpatch ghost fill on cube with refinement coarse interior")
         //create output domain with bigger size, so that we can see ghost cells
         //in the vtk output
         fclaw_domain_t* domain_out = fclaw_domain_new_unitcube(sc_MPI_COMM_WORLD, minlevel);
-        TestData test_data_out(domain_out, map, minlevel, maxlevel);
+        fclaw_map_context_t* map_out = fclaw_map_new_nomap();
+        TestData test_data_out(domain_out, map_out, minlevel, maxlevel);
 
         test_data_out.opts->mx   = mx+2*mbc;
         test_data_out.opts->my   = my+2*mbc;
@@ -786,7 +787,9 @@ TEST_CASE("3d clawpatch ghost fill on uniform brick")
         //create output domain with bigger size, so that we can see ghost cells
         //in the vtk output
         fclaw_domain_t* domain_out = fclaw_domain_new_3d_brick(sc_MPI_COMM_WORLD, mi, mj, mk, 0, 0, 0, minlevel);
-        TestData test_data_out(domain_out, map, minlevel, maxlevel);
+        fclaw_map_context_t* brick_out = fclaw_map_new_3d_brick(domain_out, mi, mj, mk, 0, 0, 0);
+        fclaw_map_context_t* map_out = fclaw_map_new_nomap_brick(brick_out);
+        TestData test_data_out(domain_out, map_out, minlevel, maxlevel);
 
         test_data_out.fopts.mi = mi;
         test_data_out.fopts.mj = mj;
@@ -882,12 +885,13 @@ TEST_CASE("3d clawpatch ghost fill on 2x2x2 brick with refinement on one block")
         CHECK_EQ(test_data.glob->domain->global_num_patches, (8*8));
         test_data.setup();
         CHECK_EQ(test_data.glob->domain->global_num_patches, (8*7 + 8*8));
-        domain = fclaw_domain_new_unitcube(sc_MPI_COMM_WORLD, minlevel);
 
         //create output domain with bigger size, so that we can see ghost cells
         //in the vtk output
         fclaw_domain_t* domain_out = fclaw_domain_new_3d_brick(sc_MPI_COMM_WORLD, 2, 2, 2, 0, 0, 0, minlevel);
-        TestData test_data_out(domain_out, map, minlevel, maxlevel);
+        fclaw_map_context_t* brick_out = fclaw_map_new_3d_brick(domain_out, 2, 2, 2, 0, 0, 0);
+        fclaw_map_context_t* map_out = fclaw_map_new_nomap_brick(brick_out);
+        TestData test_data_out(domain_out, map_out, minlevel, maxlevel);
 
         test_data_out.fopts.mi = 2;
         test_data_out.fopts.mj = 2;
@@ -992,12 +996,13 @@ TEST_CASE("3d clawpatch ghost fill on 2x2x2 brick with refinement on all but one
         CHECK_EQ(test_data.glob->domain->global_num_patches, 8*8);
         test_data.setup();
         CHECK_EQ(test_data.glob->domain->global_num_patches, 8*1 + 8*8*7);
-        domain = fclaw_domain_new_unitcube(sc_MPI_COMM_WORLD, minlevel);
 
         //create output domain with bigger size, so that we can see ghost cells
         //in the vtk output
         fclaw_domain_t* domain_out = fclaw_domain_new_3d_brick(sc_MPI_COMM_WORLD, 2, 2, 2, 0, 0, 0, minlevel);
-        TestData test_data_out(domain_out, map, minlevel, maxlevel);
+        fclaw_map_context_t* brick_out = fclaw_map_new_3d_brick(domain_out, 2, 2, 2, 0, 0, 0);
+        fclaw_map_context_t* map_out = fclaw_map_new_nomap_brick(brick_out);
+        TestData test_data_out(domain_out, map_out, minlevel, maxlevel);
 
         test_data_out.fopts.mi = 2;
         test_data_out.fopts.mj = 2;
@@ -1107,12 +1112,13 @@ TEST_CASE("3d clawpatch ghost fill on 2x2x2 brick with refinement coarse interio
         CHECK_EQ(test_data.glob->domain->global_num_patches, 8*8);
         test_data.setup();
         CHECK_EQ(test_data.glob->domain->global_num_patches, 505);
-        domain = fclaw_domain_new_unitcube(sc_MPI_COMM_WORLD, minlevel);
 
         //create output domain with bigger size, so that we can see ghost cells
         //in the vtk output
         fclaw_domain_t* domain_out = fclaw_domain_new_3d_brick(sc_MPI_COMM_WORLD, 2, 2, 2, 0, 0, 0, minlevel);
-        TestData test_data_out(domain_out, map, minlevel, maxlevel);
+        fclaw_map_context_t* brick_out = fclaw_map_new_3d_brick(domain_out, 2, 2, 2, 0, 0, 0);
+        fclaw_map_context_t* map_out = fclaw_map_new_nomap_brick(brick_out);
+        TestData test_data_out(domain_out, map_out, minlevel, maxlevel);
 
         test_data_out.fopts.mi = 2;
         test_data_out.fopts.mj = 2;
@@ -1222,12 +1228,13 @@ TEST_CASE("3d clawpatch ghost fill on 2x2x2 brick with refinement 2")
         CHECK_EQ(test_data.glob->domain->global_num_patches, 8*8);
         test_data.setup();
         CHECK_EQ(test_data.glob->domain->global_num_patches, 113);
-        domain = fclaw_domain_new_unitcube(sc_MPI_COMM_WORLD, minlevel);
 
         //create output domain with bigger size, so that we can see ghost cells
         //in the vtk output
         fclaw_domain_t* domain_out = fclaw_domain_new_3d_brick(sc_MPI_COMM_WORLD, 2, 2, 2, 0, 0, 0, minlevel);
-        TestData test_data_out(domain_out, map, minlevel, maxlevel);
+        fclaw_map_context_t* brick_out = fclaw_map_new_3d_brick(domain_out, 2, 2, 2, 0, 0, 0);
+        fclaw_map_context_t* map_out = fclaw_map_new_nomap_brick(brick_out);
+        TestData test_data_out(domain_out, map_out, minlevel, maxlevel);
 
         test_data_out.fopts.mi = 2;
         test_data_out.fopts.mj = 2;
