@@ -1,5 +1,6 @@
 #include <atomic>
 #include <fclaw_mpi.h>
+#include <fclaw_forestclaw.h>
 
 #define DOCTEST_CONFIG_IMPLEMENT
 #include <test.hpp>
@@ -88,13 +89,13 @@ int main(int argc, char *argv[])
         }
     } else {
 	    // global setup...
-	    fclaw_mpi_init(nullptr, nullptr, sc_MPI_COMM_WORLD, SC_LP_PRODUCTION);
+        fclaw_app_t * app = fclaw_app_new(&argc, &argv, nullptr);
 
         sc_set_abort_handler(throw_exception);
 	    result = context.run();
 
 	    // global clean-up...
-	    //fclaw_mpi_finalize();
+        fclaw_app_destroy (app);
 
 	    return result;
     } 
