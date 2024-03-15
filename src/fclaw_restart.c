@@ -92,6 +92,20 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
     fclaw3d_file_context_t *fc 
         = fclaw3d_file_open_write (filename, "ForestClaw data file",
                                     glob->domain->d3, &errcode);
+    
+    size_t glob_packsize = fclaw_global_packsize(glob);
+
+    sc_array_t globsize;
+    sc_array_init_size(&globsize, sizeof(size_t), 1);
+    *((size_t*) sc_array_index(&globsize, 0)) = glob_packsize;
+    fclaw3d_file_write_block(fc, "glob_size", sizeof(size_t), &globsize, &errcode);
+    sc_array_reset(&globsize);
+
+    sc_array_t glob_buffer;
+    sc_array_init_size(&glob_buffer, glob_packsize, 1);
+    fclaw_global_pack(glob,(char *) sc_array_index(&glob_buffer, 0));
+    fclaw3d_file_write_block(fc, "glob", glob_packsize, &glob_buffer, &errcode);
+    sc_array_reset(&glob_buffer);
 
     size_t packsize = patch_vt->partition_packsize(glob);
     sc_array_t *patches = sc_array_new_count(sizeof(sc_array_t), glob->domain->local_num_patches);
@@ -147,6 +161,18 @@ fclaw_restart_from_file (fclaw_global_t * glob,
     glob->domain = fclaw_domain_wrap_3d(domain_3d);
     fclaw_domain_setup(glob, glob->domain);
     sc_array_destroy(partition);
+
+    sc_array_t globsize;
+    sc_array_init_size(&globsize, sizeof(size_t), 1);
+    fclaw3d_file_read_block(fc, user_string, sizeof(size_t), &globsize, &errcode);
+    size_t glob_packsize = *((size_t*) sc_array_index(&globsize, 0));
+    sc_array_reset(&globsize);
+
+    sc_array_t glob_buffer;
+    sc_array_init_size(&glob_buffer, glob_packsize, 1);
+    fclaw3d_file_read_block(fc, user_string, glob_packsize, &glob_buffer, &errcode);
+    sc_array_reset(&glob_buffer);
+
 
     size_t packsize = patch_vt->partition_packsize(glob);
     sc_array_t* patches = sc_array_new(sizeof(sc_array_t));

@@ -143,7 +143,7 @@ struct fclaw_map_context* fclaw_map_get(fclaw_global_t* glob);
  * @param buffer the buffer to write to
  * @return size_t number of bytes written
  */
-size_t fclaw2d_global_pack(const fclaw_global_t * glob, char* buffer);
+size_t fclaw_global_pack(const fclaw_global_t * glob, char* buffer);
 
 /**
  * @brief Get the number of bytes needed to pack the global structure
@@ -151,7 +151,7 @@ size_t fclaw2d_global_pack(const fclaw_global_t * glob, char* buffer);
  * @param glob the structure
  * @return size_t the number of bytes needed to store structure
  */
-size_t fclaw2d_global_packsize(const fclaw_global_t * glob);
+size_t fclaw_global_packsize(const fclaw_global_t * glob);
 
 /**
  * @brief Unpack global structure from buffer
@@ -160,7 +160,7 @@ size_t fclaw2d_global_packsize(const fclaw_global_t * glob);
  * @param glob newly create global structure
  * @return size_t number of bytes read
  */
-size_t fclaw2d_global_unpack(char* buffer, fclaw_global_t** glob);
+size_t fclaw_global_unpack(char* buffer, fclaw_global_t** glob);
 
 void fclaw_global_iterate_level (fclaw_global_t * glob, int level,
                                    fclaw_patch_callback_t pcb, void *user);

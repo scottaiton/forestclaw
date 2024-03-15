@@ -44,18 +44,18 @@ TEST_CASE("fclaw2d_global_pack with no options")
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
-		size_t packsize = fclaw2d_global_packsize(glob1);
+		size_t packsize = fclaw_global_packsize(glob1);
 
 		REQUIRE_GT(packsize, 0);
 
 		char buffer[packsize];
 
-		size_t bytes_written = fclaw2d_global_pack(glob1, buffer);
+		size_t bytes_written = fclaw_global_pack(glob1, buffer);
 
 		REQUIRE_EQ(bytes_written, packsize);
 
 		fclaw_global_t* glob2;
-		size_t bytes_read = fclaw2d_global_unpack(buffer, &glob2);
+		size_t bytes_read = fclaw_global_unpack(buffer, &glob2);
 
 		REQUIRE_EQ(bytes_read, packsize);
 
@@ -145,17 +145,17 @@ TEST_CASE("fclaw_global_pack with no options structure")
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
-		size_t packsize = fclaw2d_global_packsize(glob1);
+		size_t packsize = fclaw_global_packsize(glob1);
 		REQUIRE_GT(packsize, 0);
 
 		char buffer[packsize];
 
-		size_t bytes_written = fclaw2d_global_pack(glob1, buffer);
+		size_t bytes_written = fclaw_global_pack(glob1, buffer);
 
 		REQUIRE_EQ(bytes_written, packsize);
 
 		fclaw_global_t* glob2;
-		size_t bytes_read = fclaw2d_global_unpack(buffer, &glob2);
+		size_t bytes_read = fclaw_global_unpack(buffer, &glob2);
 
 		REQUIRE_EQ(bytes_read, packsize);
 
@@ -188,17 +188,17 @@ TEST_CASE("fclaw_global_pack with a single options structure")
 		fclaw_app_register_options_packing_vtable("dummy1",  &dummy_opts_vt);
 		fclaw_pointer_map_insert(glob1->options, "dummy1", options, destroy_dummy_options);
 
-		size_t packsize = fclaw2d_global_packsize(glob1);
+		size_t packsize = fclaw_global_packsize(glob1);
 		REQUIRE_GT(packsize, 0);
 
 		char buffer[packsize];
 
-		size_t bytes_written = fclaw2d_global_pack(glob1, buffer);
+		size_t bytes_written = fclaw_global_pack(glob1, buffer);
 
 		REQUIRE_EQ(bytes_written, packsize);
 
 		fclaw_global_t* glob2;
-		size_t bytes_read = fclaw2d_global_unpack(buffer, &glob2);
+		size_t bytes_read = fclaw_global_unpack(buffer, &glob2);
 
 		REQUIRE_EQ(bytes_read, packsize);
 
@@ -237,17 +237,17 @@ TEST_CASE("fclaw_global_pack with two options structure")
 		fclaw_app_register_options_packing_vtable("dummy2",  &dummy_opts_vt);
 		fclaw_pointer_map_insert(glob1->options, "dummy2", options2, destroy_dummy_options);
 
-		size_t packsize = fclaw2d_global_packsize(glob1);
+		size_t packsize = fclaw_global_packsize(glob1);
 		REQUIRE_GT(packsize, 0);
 
 		char buffer[packsize];
 
-		size_t bytes_written = fclaw2d_global_pack(glob1, buffer);
+		size_t bytes_written = fclaw_global_pack(glob1, buffer);
 
 		REQUIRE_EQ(bytes_written, packsize);
 
 		fclaw_global_t* glob2;
-		size_t bytes_read = fclaw2d_global_unpack(buffer, &glob2);
+		size_t bytes_read = fclaw_global_unpack(buffer, &glob2);
 
 		REQUIRE_EQ(bytes_read, packsize);
 
@@ -282,7 +282,7 @@ TEST_CASE("fclaw_global_pack aborts with unregistered vtable")
 	fclaw_pointer_map_insert(glob1->options, "dummy1", options, destroy_dummy_options);
 
 	char buffer[100];
-	CHECK_SC_ABORTED(fclaw2d_global_pack(glob1, buffer));
+	CHECK_SC_ABORTED(fclaw_global_pack(glob1, buffer));
 }
 TEST_CASE("fclaw2d_global_packsize aborts with unregistered vtable")
 {
@@ -294,7 +294,7 @@ TEST_CASE("fclaw2d_global_packsize aborts with unregistered vtable")
 	dummy_options* options = new dummy_options(20, 'a');
 	fclaw_pointer_map_insert(glob1->options, "dummy1", options, destroy_dummy_options);
 
-	CHECK_SC_ABORTED(fclaw2d_global_packsize(glob1));
+	CHECK_SC_ABORTED(fclaw_global_packsize(glob1));
 }
 TEST_CASE("fclaw_global_unppack aborts with unregistered vtable")
 {
@@ -307,18 +307,18 @@ TEST_CASE("fclaw_global_unppack aborts with unregistered vtable")
 	fclaw_app_register_options_packing_vtable("dummy1",  &dummy_opts_vt);
 	fclaw_pointer_map_insert(glob1->options, "dummy1", options, destroy_dummy_options);
 
-	size_t packsize = fclaw2d_global_packsize(glob1);
+	size_t packsize = fclaw_global_packsize(glob1);
 	REQUIRE_GT(packsize, 0);
 
 	char buffer[packsize];
 
-	size_t bytes_written = fclaw2d_global_pack(glob1, buffer);
+	size_t bytes_written = fclaw_global_pack(glob1, buffer);
 
 	REQUIRE_EQ(bytes_written, packsize);
 
 	fclaw_global_t* glob2=nullptr;
 	fclaw_app_register_options_packing_vtable("dummy1",  nullptr);
-	CHECK_SC_ABORTED(fclaw2d_global_unpack(buffer, &glob2));
+	CHECK_SC_ABORTED(fclaw_global_unpack(buffer, &glob2));
 }
 TEST_CASE("fclaw_global_options_store and fclaw_global_get_options test") {
     fclaw_global_t* glob = fclaw_global_new();

@@ -116,7 +116,7 @@ pack_iterator_callback(const char* key, void* value, void* user)
 }
 
 size_t 
-fclaw2d_global_pack(const fclaw_global_t * glob, char* buffer)
+fclaw_global_pack(const fclaw_global_t * glob, char* buffer)
 {
     const char* buffer_start = buffer;
 
@@ -125,7 +125,7 @@ fclaw2d_global_pack(const fclaw_global_t * glob, char* buffer)
 
     buffer += fclaw_pack_size_t(fclaw_pointer_map_size(glob->options), buffer);
 
-    fclaw_pointer_map_iterate(glob->options, pack_iterator_callback, &buffer);
+    //fclaw_pointer_map_iterate(glob->options, pack_iterator_callback, &buffer);
 
     return (buffer-buffer_start);
 }
@@ -140,15 +140,15 @@ packsize_iterator_callback(const char* key, void* value, void* user)
 }
 
 size_t 
-fclaw2d_global_packsize(const fclaw_global_t * glob)
+fclaw_global_packsize(const fclaw_global_t * glob)
 {
     size_t options_size = sizeof(size_t);
-    fclaw_pointer_map_iterate(glob->options, packsize_iterator_callback, &options_size);
+    //fclaw_pointer_map_iterate(glob->options, packsize_iterator_callback, &options_size);
     return 2*sizeof(double) + options_size;
 }
 
 size_t 
-fclaw2d_global_unpack(char* buffer, fclaw_global_t ** glob_ptr)
+fclaw_global_unpack(char* buffer, fclaw_global_t ** glob_ptr)
 {
     char* buffer_start = buffer;
 
