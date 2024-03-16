@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_patch.h>
 #include <fclaw_domain.h>
 #include <fclaw_exchange.h>
-#include <fclaw3d_file.h>
+#include <fclaw_file.h>
 #include <fclaw_clawpatch.h>
 #include <fclaw_convenience.h>
 #include <fclaw_regrid.h>
