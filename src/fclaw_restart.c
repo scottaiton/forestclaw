@@ -76,6 +76,7 @@ void restart (fclaw_global_t * glob,
               const char* partition_filename,
               int timer)
 {
+    int refine_dim = glob->domain->refine_dim;
     fclaw_domain_reset(glob);
 
     int errcode;
@@ -84,25 +85,36 @@ void restart (fclaw_global_t * glob,
     char user_string[FCLAW3D_FILE_USER_STRING_BYTES];
     if(partition_filename != NULL)
     {
-        fclaw3d_file_read_partition(partition_filename, user_string, glob->mpicomm, partition, &errcode);
-
+        fclaw_file_read_partition(refine_dim, 
+                                  partition_filename, 
+                                  user_string, 
+                                  glob->mpicomm, 
+                                  partition, 
+                                  &errcode);
     }
-    fclaw3d_domain_t * domain_3d;
-    fclaw3d_file_context_t *fc 
-        = fclaw3d_file_open_read (restart_filename, user_string, glob->mpicomm, partition, &domain_3d, &errcode);
-    glob->domain = fclaw_domain_wrap_3d(domain_3d);
+
+    fclaw_file_context_t *fc 
+        = fclaw_file_open_read (refine_dim,
+                                restart_filename, 
+                                user_string, 
+                                glob->mpicomm, 
+                                partition, 
+                                &glob->domain, 
+                                &errcode);
+
     fclaw_domain_setup(glob, glob->domain);
+
     sc_array_destroy(partition);
 
     sc_array_t globsize;
     sc_array_init_size(&globsize, sizeof(size_t), 1);
-    fclaw3d_file_read_block(fc, user_string, sizeof(size_t), &globsize, &errcode);
+    fclaw_file_read_block(fc, user_string, sizeof(size_t), &globsize, &errcode);
     size_t glob_packsize = *((size_t*) sc_array_index(&globsize, 0));
     sc_array_reset(&globsize);
 
     sc_array_t glob_buffer;
     sc_array_init_size(&glob_buffer, glob_packsize, 1);
-    fclaw3d_file_read_block(fc, user_string, glob_packsize, &glob_buffer, &errcode);
+    fclaw_file_read_block(fc, user_string, glob_packsize, &glob_buffer, &errcode);
 
     fclaw_global_unpack((char *) sc_array_index(&glob_buffer, 0), glob);
 
@@ -112,7 +124,7 @@ void restart (fclaw_global_t * glob,
     size_t packsize = patch_vt->partition_packsize(glob);
     sc_array_t* patches = sc_array_new(sizeof(sc_array_t));
 
-    fclaw3d_file_read_array(fc, user_string, packsize, patches, &errcode);
+    fclaw_file_read_array(fc, user_string, packsize, patches, &errcode);
 
     pack_iter_t user;
     user.glob = glob;
@@ -124,7 +136,7 @@ void restart (fclaw_global_t * glob,
 
     sc_array_destroy(patches);
 
-    fclaw3d_file_close(fc, &errcode);
+    fclaw_file_close(fc, &errcode);
 
     fclaw_exchange_setup(glob,timer);
     fclaw_regrid_set_neighbor_types(glob);
@@ -144,22 +156,22 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
     snprintf(parition_filename, BUFSIZ, "fort_frame_%04d.partition", iframe);
 
     int errcode;
-    fclaw3d_file_context_t *fc 
-        = fclaw3d_file_open_write (filename, "ForestClaw data file",
-                                    glob->domain->d3, &errcode);
+    fclaw_file_context_t *fc 
+        = fclaw_file_open_write (filename, "ForestClaw data file",
+                                 glob->domain, &errcode);
     
     size_t glob_packsize = fclaw_global_packsize(glob);
 
     sc_array_t globsize;
     sc_array_init_size(&globsize, sizeof(size_t), 1);
     *((size_t*) sc_array_index(&globsize, 0)) = glob_packsize;
-    fclaw3d_file_write_block(fc, "glob_size", sizeof(size_t), &globsize, &errcode);
+    fclaw_file_write_block(fc, "glob_size", sizeof(size_t), &globsize, &errcode);
     sc_array_reset(&globsize);
 
     sc_array_t glob_buffer;
     sc_array_init_size(&glob_buffer, glob_packsize, 1);
     fclaw_global_pack(glob,(char *) sc_array_index(&glob_buffer, 0));
-    fclaw3d_file_write_block(fc, "glob", glob_packsize, &glob_buffer, &errcode);
+    fclaw_file_write_block(fc, "glob", glob_packsize, &glob_buffer, &errcode);
     sc_array_reset(&glob_buffer);
 
     size_t packsize = patch_vt->partition_packsize(glob);
@@ -173,7 +185,7 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
     fclaw_domain_iterate_patches(glob->domain, get_patches, &user);
 
     
-    fclaw3d_file_write_array(fc, "meqn", packsize, patches, &errcode);
+    fclaw_file_write_array(fc, "meqn", packsize, patches, &errcode);
 
     for(int i = 0; i < glob->domain->local_num_patches; i++)
     {
@@ -183,10 +195,10 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
 
     sc_array_destroy(patches);
 
-    fclaw3d_file_close(fc, &errcode);
-    fclaw3d_file_write_partition (parition_filename,
-                                           "Test partition write",
-                                           glob->domain->d3, &errcode);
+    fclaw_file_close(fc, &errcode);
+    fclaw_file_write_partition (parition_filename,
+                                "Test partition write",
+                                glob->domain, &errcode);
 
     //fclaw_restart_test_from_file(glob, filename, parition_filename);
 
