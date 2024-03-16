@@ -38,6 +38,37 @@ struct fclaw_global;  /* This is a hack !! */
 
 void fclaw_restart_output_frame(struct fclaw_global * glob, int iframe);
 
+/**
+ * @brief Restarts the forestclaw simulation from a restart file.
+ *
+ * This function is responsible for restarting the simulation from a previously saved state.
+ * This is meant to be called fclaw_initalize()
+ *
+ * @param glob The global context
+ * @param restart_filename The filename of the restart file.
+ * @param partition_filename The filename of the partition file.
+ */
+void
+fclaw_restart_from_file (struct fclaw_global * glob,
+                         const char* restart_filename,
+                         const char* partition_filename);
+
+/**
+ * @brief Tests the restart functionality by reading data from a restart file.
+ *
+ * This function is used to do an "in memory" restart test.
+ * It deletes the current domain and creates a new domain from the restart file,
+ * and overwrites the values in glob with the values from the restart file.
+ *
+ * @param glob The pointer to the global context
+ * @param restart_filename The filename of the restart file to read from.
+ * @param partition_filename The filename of the partition file to read from.
+ */
+void
+fclaw_restart_test_from_file (struct fclaw_global * glob,
+                              const char* restart_filename,
+                              const char* partition_filename);
+
 #ifdef __cplusplus
 #if 0
 {

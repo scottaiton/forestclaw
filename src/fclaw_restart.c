@@ -33,6 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw3d_file.h>
 #include <fclaw_clawpatch.h>
 #include <fclaw_convenience.h>
+#include <fclaw_regrid.h>
 #include <fclaw3d_wrap.h>
 
 typedef struct pack_iter
@@ -68,11 +69,6 @@ set_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int pat
 
     user_data->curr_index++;
 }
-//TODO move this to header
-void
-fclaw_restart_from_file (fclaw_global_t * glob,
-                         const char* restart_filename,
-                         const char* partition_filename);
 
 /* -----------------------------------------------------------------------
     Public interface
@@ -133,16 +129,16 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
                                            "Test partition write",
                                            glob->domain->d3, &errcode);
 
-    fclaw_restart_from_file(glob, filename, parition_filename);
+    //fclaw_restart_test_from_file(glob, filename, parition_filename);
 
     fclaw_global_productionf("RESTATRTT!!\n");
 }
 
 
 void
-fclaw_restart_from_file (fclaw_global_t * glob,
-                         const char* restart_filename,
-                         const char* partition_filename)
+fclaw_restart_test_from_file (fclaw_global_t * glob,
+                              const char* restart_filename,
+                              const char* partition_filename)
 {
     fclaw_domain_reset(glob);
 
@@ -190,7 +186,9 @@ fclaw_restart_from_file (fclaw_global_t * glob,
     sc_array_destroy(patches);
 
     fclaw3d_file_close(fc, &errcode);
-    fclaw_exchange_setup(glob,FCLAW_TIMER_OUTPUT);
+
+    fclaw_exchange_setup(glob,FCLAW_TIMER_INIT);
+    fclaw_regrid_set_neighbor_types(glob);
 }
 
 
