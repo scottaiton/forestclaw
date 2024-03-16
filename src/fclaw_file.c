@@ -37,7 +37,7 @@ struct fclaw_file_context
 static fclaw_file_context_t *wrap_file_2d(fclaw2d_file_context_t *d2)
 {
     fclaw_file_context_t *fc = FCLAW_ALLOC (fclaw_file_context_t, 1);
-    fc->refine_dim = 0;
+    fc->refine_dim = 2;
     fc->d2 = d2;
     fc->d3 = NULL;
     return fc;
@@ -46,7 +46,7 @@ static fclaw_file_context_t *wrap_file_2d(fclaw2d_file_context_t *d2)
 static fclaw_file_context_t *wrap_file_3d(fclaw3d_file_context_t *d3)
 {
     fclaw_file_context_t *fc = FCLAW_ALLOC (fclaw_file_context_t, 1);
-    fc->refine_dim = 1;
+    fc->refine_dim = 3;
     fc->d2 = NULL;
     fc->d3 = d3;
     return fc;
@@ -99,12 +99,12 @@ fclaw_file_context_t *fclaw_file_write_block (fclaw_file_context_t *
                                               sc_array_t * block_data,
                                               int *errcode)
 {
-    if(fc->refine_dim == 0)
+    if(fc->refine_dim == 2)
     {
         return wrap_file_2d(fclaw2d_file_write_block (fc->d2, user_string,
                                                       block_size, block_data, errcode));
     }
-    else if(fc->refine_dim == 1)
+    else if(fc->refine_dim == 3)
     {
         return wrap_file_3d(fclaw3d_file_write_block (fc->d3, user_string,
                                                       block_size, block_data, errcode));
@@ -121,12 +121,12 @@ fclaw_file_context_t *fclaw_file_write_array (fclaw_file_context_t *
                                               sc_array_t * patch_data,
                                               int *errcode)
 {
-    if(fc->refine_dim == 0)
+    if(fc->refine_dim == 2)
     {
         return wrap_file_2d(fclaw2d_file_write_array (fc->d2, user_string,
                                                       patch_size, patch_data, errcode));
     }
-    else if(fc->refine_dim == 1)
+    else if(fc->refine_dim == 3)
     {
         return wrap_file_3d(fclaw3d_file_write_array (fc->d3, user_string,
                                                       patch_size, patch_data, errcode));
@@ -193,7 +193,7 @@ fclaw_file_context_t *fclaw_file_read_block (fclaw_file_context_t *
                                              sc_array_t * block_data,
                                              int *errcode)
 {
-    if(fc->refine_dim == 0)
+    if(fc->refine_dim == 2)
     {
         fclaw2d_file_context_t* retval;
         retval = fclaw2d_file_read_block (fc->d2, user_string,
@@ -208,7 +208,7 @@ fclaw_file_context_t *fclaw_file_read_block (fclaw_file_context_t *
             return fc;
         }
     }
-    else if(fc->refine_dim == 1)
+    else if(fc->refine_dim == 3)
     {
         fclaw3d_file_context_t* retval;
         retval = fclaw3d_file_read_block (fc->d3, user_string,
@@ -236,7 +236,7 @@ fclaw_file_context_t *fclaw_file_read_array (fclaw_file_context_t *
                                              sc_array_t * patch_data,
                                              int *errcode)
 {
-    if(fc->refine_dim == 0)
+    if(fc->refine_dim == 2)
     {
         fclaw2d_file_context_t* retval;
         retval = fclaw2d_file_read_array (fc->d2, user_string,
@@ -251,7 +251,7 @@ fclaw_file_context_t *fclaw_file_read_array (fclaw_file_context_t *
             return fc;
         }
     }
-    else if(fc->refine_dim == 1)
+    else if(fc->refine_dim == 3)
     {
         fclaw3d_file_context_t* retval;
         retval = fclaw3d_file_read_array (fc->d3, user_string,
@@ -275,11 +275,11 @@ fclaw_file_context_t *fclaw_file_read_array (fclaw_file_context_t *
 int fclaw_file_close (fclaw_file_context_t * fc, int *errcode)
 {
     int retval;
-    if(fc->refine_dim == 0)
+    if(fc->refine_dim == 2)
     {
         retval = fclaw2d_file_close (fc->d2, errcode);
     }
-    else if(fc->refine_dim == 1)
+    else if(fc->refine_dim == 3)
     {
         retval = fclaw3d_file_close (fc->d3, errcode);
     }
