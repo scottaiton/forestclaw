@@ -36,6 +36,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_regrid.h>
 #include <fclaw3d_wrap.h>
 
+#define CHECK_ERROR_CODE(refine_dim, errcode, str) \
+do { \
+    int reslen, retval; \
+    char err_str[sc_MPI_MAX_ERROR_STRING]; \
+    if (errcode != FCLAW_FILE_ERR_SUCCESS) \
+    { \
+        retval = fclaw_file_error_string (refine_dim, errcode, err_str, &reslen); \
+        SC_CHECK_ABORTF (!retval, "%s: error string function not successful", str); \
+        SC_ABORTF ("%s: %*.*s", str, reslen, reslen, err_str); \
+    } \
+} while(0)
+
 typedef struct pack_iter
 {
     fclaw_global_t * glob;
@@ -91,6 +103,7 @@ void restart (fclaw_global_t * glob,
                                   glob->mpicomm, 
                                   partition, 
                                   &errcode);
+        CHECK_ERROR_CODE(refine_dim, errcode, "restart read_partition");
     }
 
     fclaw_file_context_t *fc 
@@ -101,6 +114,7 @@ void restart (fclaw_global_t * glob,
                                 partition, 
                                 &glob->domain, 
                                 &errcode);
+    CHECK_ERROR_CODE(refine_dim, errcode, "restart open_file");
 
     fclaw_domain_setup(glob, glob->domain);
 
@@ -108,13 +122,18 @@ void restart (fclaw_global_t * glob,
 
     sc_array_t globsize;
     sc_array_init_size(&globsize, sizeof(size_t), 1);
-    fclaw_file_read_block(fc, user_string, sizeof(size_t), &globsize, &errcode);
+
+    fc = fclaw_file_read_block(fc, user_string, sizeof(size_t), &globsize, &errcode);
+    CHECK_ERROR_CODE(refine_dim, errcode, "restart read globsize");
+
     size_t glob_packsize = *((size_t*) sc_array_index(&globsize, 0));
     sc_array_reset(&globsize);
 
     sc_array_t glob_buffer;
     sc_array_init_size(&glob_buffer, glob_packsize, 1);
-    fclaw_file_read_block(fc, user_string, glob_packsize, &glob_buffer, &errcode);
+
+    fc = fclaw_file_read_block(fc, user_string, glob_packsize, &glob_buffer, &errcode);
+    CHECK_ERROR_CODE(refine_dim, errcode, "restart read glob buffer");
 
     fclaw_global_unpack((char *) sc_array_index(&glob_buffer, 0), glob);
 
@@ -124,7 +143,8 @@ void restart (fclaw_global_t * glob,
     size_t packsize = patch_vt->partition_packsize(glob);
     sc_array_t* patches = sc_array_new(sizeof(sc_array_t));
 
-    fclaw_file_read_array(fc, user_string, packsize, patches, &errcode);
+    fc = fclaw_file_read_array(fc, user_string, packsize, patches, &errcode);
+    CHECK_ERROR_CODE(refine_dim, errcode, "restart read patches");
 
     pack_iter_t user;
     user.glob = glob;
@@ -137,6 +157,7 @@ void restart (fclaw_global_t * glob,
     sc_array_destroy(patches);
 
     fclaw_file_close(fc, &errcode);
+    CHECK_ERROR_CODE(refine_dim, errcode, "restart close file");
 
     fclaw_exchange_setup(glob,timer);
     fclaw_regrid_set_neighbor_types(glob);
@@ -148,6 +169,7 @@ void restart (fclaw_global_t * glob,
 void
 fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
 {
+    int refine_dim = glob->domain->refine_dim;
     fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
 
     char filename[BUFSIZ];
@@ -159,19 +181,26 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
     fclaw_file_context_t *fc 
         = fclaw_file_open_write (filename, "ForestClaw data file",
                                  glob->domain, &errcode);
+    CHECK_ERROR_CODE(refine_dim , errcode, "restart open file");
     
     size_t glob_packsize = fclaw_global_packsize(glob);
 
     sc_array_t globsize;
     sc_array_init_size(&globsize, sizeof(size_t), 1);
     *((size_t*) sc_array_index(&globsize, 0)) = glob_packsize;
-    fclaw_file_write_block(fc, "glob_size", sizeof(size_t), &globsize, &errcode);
+
+    fc = fclaw_file_write_block(fc, "glob_size", sizeof(size_t), &globsize, &errcode);
+    CHECK_ERROR_CODE(refine_dim , errcode, "write globsize");
+
     sc_array_reset(&globsize);
 
     sc_array_t glob_buffer;
     sc_array_init_size(&glob_buffer, glob_packsize, 1);
     fclaw_global_pack(glob,(char *) sc_array_index(&glob_buffer, 0));
-    fclaw_file_write_block(fc, "glob", glob_packsize, &glob_buffer, &errcode);
+
+    fc = fclaw_file_write_block(fc, "glob", glob_packsize, &glob_buffer, &errcode);
+    CHECK_ERROR_CODE(refine_dim , errcode, "write glob buffer");
+
     sc_array_reset(&glob_buffer);
 
     size_t packsize = patch_vt->partition_packsize(glob);
@@ -185,7 +214,8 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
     fclaw_domain_iterate_patches(glob->domain, get_patches, &user);
 
     
-    fclaw_file_write_array(fc, "meqn", packsize, patches, &errcode);
+    fc = fclaw_file_write_array(fc, "meqn", packsize, patches, &errcode);
+    CHECK_ERROR_CODE(refine_dim , errcode, "write glob buffer");
 
     for(int i = 0; i < glob->domain->local_num_patches; i++)
     {
@@ -199,10 +229,9 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
     fclaw_file_write_partition (parition_filename,
                                 "Test partition write",
                                 glob->domain, &errcode);
+    CHECK_ERROR_CODE(refine_dim , errcode, "close file");
 
     //fclaw_restart_test_from_file(glob, filename, parition_filename);
-
-    fclaw_global_productionf("RESTATRTT!!\n");
 }
 
 
