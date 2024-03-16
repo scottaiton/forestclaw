@@ -360,6 +360,17 @@ fclaw_register (fclaw_options_t* fclaw_opt, sc_options_t * opt)
     sc_options_add_double(opt, 0, "max-refinement-ratio",
                           &fclaw_opt->max_refinement_ratio, 1.0,
                           "Ratio of patches to refine before paritioning and continuing refinement. [1.0]");
+
+    sc_options_add_string(opt, 0, "restart-file",
+                          &fclaw_opt->restart_file, 
+                          "","Filename of restart file. "
+                          " If defined, a restart will be performed frome the specified file. [""]");
+
+    sc_options_add_string(opt, 0, "partition-file",
+                          &fclaw_opt->partition_file, 
+                          "","Partition file associated with restart file. "
+                          " This should be specified if a restart file is specified. [""]");
+
     fclaw_opt->is_registered = 1;
     fclaw_opt->is_unpacked = 0;
 
