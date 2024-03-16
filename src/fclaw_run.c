@@ -118,6 +118,7 @@ struct outstyle1_ctx
     int initalized;
     int iframe;
     int n;
+    int n_inner;
     double dt_minlevel;
 } outstyle1_ctx_t;
 
@@ -129,6 +130,7 @@ size_t packsize_outstyle1_ctx(void *user)
     size += sizeof(ctx->initalized);
     size += sizeof(ctx->iframe);
     size += sizeof(ctx->n);
+    size += sizeof(ctx->n_inner);
     size += sizeof(ctx->dt_minlevel);
     return size;
 }
@@ -141,6 +143,7 @@ size_t pack_outstyle1_ctx(void *user, char *buffer)
     buffer += fclaw_pack_int(ctx->initalized,buffer);
     buffer += fclaw_pack_int(ctx->iframe,buffer);
     buffer += fclaw_pack_int(ctx->n,buffer);
+    buffer += fclaw_pack_int(ctx->n_inner,buffer);
     buffer += fclaw_pack_double(ctx->dt_minlevel,buffer);
     return buffer - buffer_start;
 }
@@ -153,6 +156,7 @@ size_t unpack_outstyle1_ctx(char* buffer , void *user)
     buffer += fclaw_unpack_int(buffer,&ctx->initalized);
     buffer += fclaw_unpack_int(buffer,&ctx->iframe);
     buffer += fclaw_unpack_int(buffer,&ctx->n);
+    buffer += fclaw_unpack_int(buffer,&ctx->n_inner);
     buffer += fclaw_unpack_double(buffer,&ctx->dt_minlevel);
     return buffer - buffer_start;
 }
@@ -191,9 +195,12 @@ fclaw_packing_vtable_t outstyle1_ctx_vt =
 static
 void outstyle_1(fclaw_global_t *glob)
 {
+    const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
     outstyle1_ctx_t* ctx = (outstyle1_ctx_t*) fclaw_global_get_attribute(glob, OUTSTYLE1_CTX_ATTRIBUTE_KEY);  
     if(ctx == NULL)
     {
+        FCLAW_ASSERT(strcmp(fclaw_opt->restart_file,"") == 0);
+
         ctx = (outstyle1_ctx_t*) outstyle1_ctx_new();
         fclaw_global_attribute_store(glob, 
                                      OUTSTYLE1_CTX_ATTRIBUTE_KEY, 
@@ -214,7 +221,6 @@ void outstyle_1(fclaw_global_t *glob)
         fclaw_output_frame(glob,ctx->iframe);
     }
 
-    const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
 
     double final_time = fclaw_opt->tfinal;
     int nout = fclaw_opt->nout;
@@ -229,10 +235,10 @@ void outstyle_1(fclaw_global_t *glob)
 
     double dt_outer = (final_time-t0)/((double) nout);
     double t_curr = glob->curr_time;
-    int n_inner = 0;
 
     if(!ctx->initalized)
     {
+        ctx->n_inner = 0;
         ctx->n = 0;
     }
     ctx->initalized = 1;
@@ -306,7 +312,7 @@ void outstyle_1(fclaw_global_t *glob)
                                      fclaw_opt->minlevel,
                                      (*domain)->global_minlevel,
                                      (*domain)->global_maxlevel,
-                                     n_inner+1,dt_step,
+                                     ctx->n_inner+1,dt_step,
                                      maxcfl_step, tc);
 
             if ((maxcfl_step > fclaw_opt->max_cfl) & fclaw_opt->reduce_cfl)
@@ -328,7 +334,7 @@ void outstyle_1(fclaw_global_t *glob)
             }
 
             /* We are happy with this step */
-            n_inner++;
+            ctx->n_inner++;
             t_curr += dt_step;
 
 
@@ -372,7 +378,7 @@ void outstyle_1(fclaw_global_t *glob)
 
             if (fclaw_opt->regrid_interval > 0)
             {
-                if (n_inner % fclaw_opt->regrid_interval == 0)
+                if (ctx->n_inner % fclaw_opt->regrid_interval == 0)
                 {
                     fclaw_global_infof("regridding at step %d\n",ctx->n);
                     fclaw_regrid(glob);
