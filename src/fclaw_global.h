@@ -93,11 +93,6 @@ struct fclaw_global
            object that does not need to be known to this file? */
     struct fclaw_diagnostics_accumulator *acc;
 
-    /* CB: this is application specific.
-           Would it not be cleaner to add the gauges in a way to global
-           that this file does not need to know about gauges at all? */
-    struct fclaw_gauge_info* gauge_info;
-
     void *user;
 };
 
