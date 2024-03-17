@@ -82,7 +82,7 @@ struct dummy_attribute
 	}
 };
 
-size_t pack_dummy_options(void* user, char* buffer)
+size_t pack_dummy_options(fclaw_global_t *glob, void *user, char *buffer)
 {
 	dummy_attribute* options = (dummy_attribute*) user;
 
@@ -95,7 +95,7 @@ size_t pack_dummy_options(void* user, char* buffer)
 
 	return buffer-buffer_start;
 };
-size_t unpack_dummy_options(char* buffer, void* user)
+size_t unpack_dummy_options(fclaw_global_t *glob, char* buffer, void* user)
 {
 	dummy_attribute* attribute = (dummy_attribute*) user;
 
@@ -114,12 +114,12 @@ size_t unpack_dummy_options(char* buffer, void* user)
 
 	return buffer-buffer_start;
 };
-size_t packsize_dummy_attribute(void* user)
+size_t packsize_dummy_attribute(fclaw_global_t *glob, void* user)
 {
 	dummy_attribute* options = (dummy_attribute*) user;
 	return sizeof(size_t) + options->size;
 };
-void * new_dummy_attribute(){
+void * new_dummy_attribute(fclaw_global_t *glob){
 	return new dummy_attribute(0,0);
 }
 void destroy_dummy_attribute(void* user){

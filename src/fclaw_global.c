@@ -315,7 +315,7 @@ pack_attribute_cb(const char* key, void* value, void* user)
         // advance buffer pointer
         *iter->buffer_ptr += fclaw_pack_string(entry->packing_vtable_key, *iter->buffer_ptr);
         *iter->buffer_ptr += fclaw_pack_string(key, *iter->buffer_ptr);
-        *iter->buffer_ptr += vt->pack(entry->attribute, *iter->buffer_ptr);
+        *iter->buffer_ptr += vt->pack(iter->glob, entry->attribute, *iter->buffer_ptr);
     }
 }
 
@@ -359,7 +359,7 @@ attribute_packsize_cb(const char* key, void* value, void* user)
         iter->size += 
             fclaw_packsize_string(entry->packing_vtable_key) 
             + fclaw_packsize_string(key) 
-            + vt->size(entry->attribute);
+            + vt->size(iter->glob, entry->attribute);
     }
 }
 
@@ -404,7 +404,7 @@ fclaw_global_unpack(char * buffer, fclaw_global_t * glob)
         {
             entry = FCLAW_ALLOC(attribute_entry_t,1);
             entry->packing_vtable_key = packing_vtable_key;
-            entry->attribute = vt->new_data();
+            entry->attribute = vt->new_data(glob);
             entry->destroy = vt->destroy;
             fclaw_pointer_map_insert(glob->attributes, attribute_key, entry, attribute_entry_destroy);
         }
@@ -414,7 +414,7 @@ fclaw_global_unpack(char * buffer, fclaw_global_t * glob)
             FCLAW_FREE(packing_vtable_key);
         }
 
-        buffer += vt->unpack(buffer,entry->attribute);
+        buffer += vt->unpack(glob, buffer, entry->attribute);
 
         FCLAW_FREE(attribute_key);
     }

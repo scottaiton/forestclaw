@@ -216,7 +216,8 @@ void* fclaw_global_get_options (fclaw_global_t* glob, const char* key);
  * @param glob the global context
  * @param key the key to store the attribute under
  * @param attribute the attribute structure
- * @param packing_vtable_key the key to the packing vtable, NULL if not needed
+ * @param packing_vtable_key The key to the packing vtable, NULL if not needed
+ *                           The packing vtable is expected to be of type fclaw_packing_vtable_t
  * @param destroy the callback to destroy the attribute, NULL if not needed
  */
 void 

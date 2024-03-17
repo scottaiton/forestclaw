@@ -123,7 +123,8 @@ struct outstyle1_ctx
 } outstyle1_ctx_t;
 
 static 
-size_t packsize_outstyle1_ctx(void *user)
+size_t packsize_outstyle1_ctx(fclaw_global_t *glob, 
+                              void *user)
 {
     outstyle1_ctx_t *ctx = (outstyle1_ctx_t*) user;
     size_t size = 0;
@@ -136,7 +137,9 @@ size_t packsize_outstyle1_ctx(void *user)
 }
 
 static
-size_t pack_outstyle1_ctx(void *user, char *buffer)
+size_t pack_outstyle1_ctx(fclaw_global_t *glob, 
+                          void *user, 
+                          char *buffer)
 {
     outstyle1_ctx_t *ctx = (outstyle1_ctx_t*) user;
     char* buffer_start = buffer;
@@ -149,7 +152,9 @@ size_t pack_outstyle1_ctx(void *user, char *buffer)
 }
 
 static
-size_t unpack_outstyle1_ctx(char* buffer , void *user)
+size_t unpack_outstyle1_ctx(fclaw_global_t *glob, 
+                            char *buffer, 
+                            void *user)
 {
     outstyle1_ctx_t *ctx = (outstyle1_ctx_t*) user;
     char* buffer_start = buffer;
@@ -162,7 +167,7 @@ size_t unpack_outstyle1_ctx(char* buffer , void *user)
 }
 
 static
-void *outstyle1_ctx_new()
+void *outstyle1_ctx_new(fclaw_global_t *glob)
 {
     outstyle1_ctx_t *ctx = FCLAW_ALLOC_ZERO(outstyle1_ctx_t,1);
     return (void*) ctx;
@@ -201,7 +206,7 @@ void outstyle_1(fclaw_global_t *glob)
     {
         FCLAW_ASSERT(strcmp(fclaw_opt->restart_file,"") == 0);
 
-        ctx = (outstyle1_ctx_t*) outstyle1_ctx_new();
+        ctx = (outstyle1_ctx_t*) outstyle1_ctx_new(glob);
         fclaw_global_attribute_store(glob, 
                                      OUTSTYLE1_CTX_ATTRIBUTE_KEY, 
                                      ctx, 
