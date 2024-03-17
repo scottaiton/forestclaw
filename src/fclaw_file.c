@@ -36,6 +36,10 @@ struct fclaw_file_context
 
 static fclaw_file_context_t *wrap_file_2d(fclaw2d_file_context_t *d2)
 {
+    if(d2 == NULL)
+    {
+        return NULL;
+    }
     fclaw_file_context_t *fc = FCLAW_ALLOC (fclaw_file_context_t, 1);
     fc->refine_dim = 2;
     fc->d2 = d2;
@@ -45,6 +49,10 @@ static fclaw_file_context_t *wrap_file_2d(fclaw2d_file_context_t *d2)
 
 static fclaw_file_context_t *wrap_file_3d(fclaw3d_file_context_t *d3)
 {
+    if(d3 == NULL)
+    {
+        return NULL;
+    }
     fclaw_file_context_t *fc = FCLAW_ALLOC (fclaw_file_context_t, 1);
     fc->refine_dim = 3;
     fc->d2 = NULL;
@@ -187,6 +195,21 @@ fclaw_file_context_t *fclaw_file_open_read (int refine_dim,
     }
 }
 
+/* handle the return when the returned file context is NULL */
+static 
+fclaw_file_context_t* handle_return_value(fclaw_file_context_t * fc)
+{
+    if(fc->d2 == NULL && fc->d3 == NULL)
+    {
+        FCLAW_FREE(fc);
+        return NULL;
+    }
+    else
+    {
+        return fc;
+    }
+}
+
 fclaw_file_context_t *fclaw_file_read_block (fclaw_file_context_t *
                                              fc, char *user_string,
                                              size_t block_size,
@@ -195,39 +218,19 @@ fclaw_file_context_t *fclaw_file_read_block (fclaw_file_context_t *
 {
     if(fc->refine_dim == 2)
     {
-        fclaw2d_file_context_t* retval;
-        retval = fclaw2d_file_read_block (fc->d2, user_string,
+        fc->d2 = fclaw2d_file_read_block (fc->d2, user_string,
                                           block_size, block_data, errcode);
-        if(retval == NULL)
-        {
-            return NULL;
-        }
-        else
-        {
-            FCLAW_ASSERT(fc->d2 == retval);
-            return fc;
-        }
     }
     else if(fc->refine_dim == 3)
     {
-        fclaw3d_file_context_t* retval;
-        retval = fclaw3d_file_read_block (fc->d3, user_string,
+        fc->d3 = fclaw3d_file_read_block (fc->d3, user_string,
                                           block_size, block_data, errcode);
-        if(retval == NULL)
-        {
-            return NULL;
-        }
-        else
-        {
-            FCLAW_ASSERT(fc->d3 == retval);
-            return fc;
-        }
     }
     else
     {
         SC_ABORT_NOT_REACHED ();
     }
-
+    return handle_return_value(fc);
 }
 
 fclaw_file_context_t *fclaw_file_read_array (fclaw_file_context_t *
@@ -238,38 +241,19 @@ fclaw_file_context_t *fclaw_file_read_array (fclaw_file_context_t *
 {
     if(fc->refine_dim == 2)
     {
-        fclaw2d_file_context_t* retval;
-        retval = fclaw2d_file_read_array (fc->d2, user_string,
+        fc->d2 = fclaw2d_file_read_array (fc->d2, user_string,
                                           patch_size, patch_data, errcode);
-        if(retval == NULL)
-        {
-            return NULL;
-        }
-        else
-        {
-            FCLAW_ASSERT(fc->d2 == retval);
-            return fc;
-        }
     }
     else if(fc->refine_dim == 3)
     {
-        fclaw3d_file_context_t* retval;
-        retval = fclaw3d_file_read_array (fc->d3, user_string,
+        fc->d3 = fclaw3d_file_read_array (fc->d3, user_string,
                                           patch_size, patch_data, errcode);
-        if(retval == NULL)
-        {
-            return NULL;
-        }
-        else
-        {
-            FCLAW_ASSERT(fc->d3 == retval);
-            return fc;
-        }
     }
     else
     {
         SC_ABORT_NOT_REACHED ();
     }
+    return handle_return_value(fc);
 }
 
 int fclaw_file_close (fclaw_file_context_t * fc, int *errcode)
