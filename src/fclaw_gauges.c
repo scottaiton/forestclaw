@@ -283,8 +283,8 @@ void fclaw_locate_gauges(fclaw_global_t *glob)
     int i,index,num;
     fclaw_gauge_t *g;
 
-    fclaw_gauge_acc_t* gauge_acc = 
-              (fclaw_gauge_acc_t*) glob->acc->gauge_accumulator;
+    fclaw_diagnostics_accumulator_t *acc = fclaw_diagnostics_get_acc(glob);
+    fclaw_gauge_acc_t* gauge_acc =  (fclaw_gauge_acc_t*) acc->gauge_accumulator;
     //fclaw_gauge_info_t* gauge_info = glob->gauge_info;
 
     /* Locate each gauge in the new mesh */

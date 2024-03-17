@@ -67,11 +67,6 @@ fclaw_global_t* fclaw_global_new (void)
     glob->curr_time = 0;
     glob->cont = NULL;
 
-#ifndef P4_TO_P8
-    /* think about how this can work independent of dimension */
-    glob->acc = FCLAW_ALLOC (fclaw_diagnostics_accumulator_t, 1);
-#endif /* P4_TO_P8 */
-
     return glob;
 }
 
@@ -128,9 +123,6 @@ fclaw_global_destroy (fclaw_global_t * glob)
     if(glob->options != NULL) fclaw_pointer_map_destroy (glob->options);
     if(glob->attributes != NULL) fclaw_pointer_map_destroy (glob->attributes);
 
-#ifndef P4_TO_P8
-    FCLAW_FREE (glob->acc);
-#endif
     FCLAW_FREE (glob);
 }
 

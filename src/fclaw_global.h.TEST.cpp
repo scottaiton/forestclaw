@@ -59,8 +59,6 @@ TEST_CASE("fclaw_global_new default options")
 	CHECK_EQ(fclaw_pointer_map_size(glob->attributes), 0);
 	CHECK(glob->cont == nullptr);
 	CHECK(glob->domain == nullptr);
-	CHECK(glob->acc != nullptr);
-	CHECK(glob->gauge_info == nullptr);
 	CHECK(glob->user == nullptr);
 
 
