@@ -31,10 +31,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_domain.h>
 #include <fclaw_exchange.h>
 #include <fclaw_file.h>
-#include <fclaw_clawpatch.h>
 #include <fclaw_convenience.h>
 #include <fclaw_regrid.h>
-#include <fclaw3d_wrap.h>
+#include <fclaw_partition.h>
+#include <fclaw_forestclaw.h>
 
 #define CHECK_ERROR_CODE(refine_dim, errcode, str) \
 do { \
@@ -52,32 +52,28 @@ typedef struct pack_iter
 {
     fclaw_global_t * glob;
     int curr_index;
-    size_t packsize;
+    size_t size;
     sc_array_t* patches;
-    fclaw_patch_vtable_t *patch_vt;
+    int pointerno;
+    int reading;
 }pack_iter_t;
 static void
-get_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int patchno, void *user)
+get_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int patchno,  void *user)
 {
     pack_iter_t *user_data = (pack_iter_t*)user;
     sc_array_t *patches = user_data->patches;
     sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, user_data->curr_index);
-    sc_array_init_size (current_arr, user_data->packsize, 1);
-    void* buffer = sc_array_index (current_arr, 0);
-    fclaw_patch_partition_pack(user_data->glob, patch, blockno, patchno, buffer);
-    user_data->curr_index++;
-}
-static void
-set_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int patchno, void *user)
-{
-    pack_iter_t *user_data = (pack_iter_t*)user;
-    sc_array_t *patches = user_data->patches;
-    sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, user_data->curr_index);
-    void* buffer = sc_array_index (current_arr, 0);
 
-    fclaw_patch_partition_unpack(user_data->glob, user_data->glob->domain, patch, blockno, patchno, buffer);
+    if(user_data->reading && user_data->pointerno == 0)
+    {
+        fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
 
-    sc_array_reset(current_arr);
+	    fclaw_patch_build(user_data->glob, patch, blockno, patchno,(void*) &build_mode);
+    }
+
+    void* data = fclaw_patch_restart_get_pointer(user_data->glob, patch, blockno, patchno, user_data->pointerno);
+
+    sc_array_init_data(current_arr, data, user_data->size, 1);
 
     user_data->curr_index++;
 }
@@ -92,11 +88,11 @@ void restart (fclaw_global_t * glob,
     fclaw_domain_reset(glob);
 
     int errcode;
-    fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
-    sc_array_t* partition = sc_array_new(sizeof(p4est_gloidx_t));
+    sc_array_t* partition = NULL;
     char user_string[FCLAW3D_FILE_USER_STRING_BYTES];
     if(partition_filename != NULL)
     {
+        partition = sc_array_new(sizeof(p4est_gloidx_t));
         fclaw_file_read_partition(refine_dim, 
                                   partition_filename, 
                                   user_string, 
@@ -118,7 +114,10 @@ void restart (fclaw_global_t * glob,
 
     fclaw_domain_setup(glob, glob->domain);
 
-    sc_array_destroy(partition);
+    if(partition != NULL)
+    {
+        sc_array_destroy(partition);
+    }
 
     sc_array_t globsize;
     sc_array_init_size(&globsize, sizeof(size_t), 1);
@@ -139,26 +138,42 @@ void restart (fclaw_global_t * glob,
 
     sc_array_reset(&glob_buffer);
 
+    int num_pointers = fclaw_patch_restart_num_pointers(glob);
+    size_t sizes[num_pointers];
+    fclaw_patch_restart_pointer_sizes(glob, sizes);
+    const char* names[num_pointers];
+    fclaw_patch_restart_names(glob, names);
+    for(int i = 0; i < 1; i++)
+    {
+        sc_array_t *patches = sc_array_new_count(sizeof(sc_array_t), glob->domain->local_num_patches);
+        pack_iter_t user;
+        user.glob = glob;
+        user.curr_index = 0;
+        user.patches = patches;
+        user.size = sizes[i];
+        user.pointerno = i;
+        user.reading = 1;
+        fclaw_domain_iterate_patches(glob->domain, get_patches, &user);
 
-    size_t packsize = patch_vt->partition_packsize(glob);
-    sc_array_t* patches = sc_array_new(sizeof(sc_array_t));
+        fc = fclaw_file_read_array(fc, user_string, sizes[i], patches, &errcode);
+        if(strncmp(user_string, names[i], strlen(names[i])) != 0)
+        {
+            fclaw_abortf("User string mismatch: %s != %s\n", user_string, names[i]);
+        }
+        CHECK_ERROR_CODE(refine_dim, errcode, "restart read patches");
 
-    fc = fclaw_file_read_array(fc, user_string, packsize, patches, &errcode);
-    CHECK_ERROR_CODE(refine_dim, errcode, "restart read patches");
-
-    pack_iter_t user;
-    user.glob = glob;
-    user.curr_index = 0;
-    user.patches = patches;
-    user.packsize = packsize;
-    user.patch_vt = patch_vt;
-    fclaw_domain_iterate_patches(glob->domain, set_patches, &user);
-
-    sc_array_destroy(patches);
+        for(int i = 0; i < glob->domain->local_num_patches; i++)
+        {
+            sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, i);
+            sc_array_reset(current_arr);
+        }
+        sc_array_destroy(patches);
+    }
 
     fclaw_file_close(fc, &errcode);
     CHECK_ERROR_CODE(refine_dim, errcode, "restart close file");
 
+    fclaw_initialize_domain_flags(glob);
     fclaw_exchange_setup(glob,timer);
     fclaw_regrid_set_neighbor_types(glob);
 }
@@ -170,7 +185,6 @@ void
 fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
 {
     int refine_dim = glob->domain->refine_dim;
-    fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
 
     char filename[BUFSIZ];
     char parition_filename[BUFSIZ];
@@ -203,27 +217,36 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
 
     sc_array_reset(&glob_buffer);
 
-    size_t packsize = patch_vt->partition_packsize(glob);
-    sc_array_t *patches = sc_array_new_count(sizeof(sc_array_t), glob->domain->local_num_patches);
-    pack_iter_t user;
-    user.glob = glob;
-    user.curr_index = 0;
-    user.patches = patches;
-    user.packsize = packsize;
-    user.patch_vt = patch_vt;
-    fclaw_domain_iterate_patches(glob->domain, get_patches, &user);
+
+    int num_pointers = fclaw_patch_restart_num_pointers(glob);
+    size_t sizes[num_pointers];
+    fclaw_patch_restart_pointer_sizes(glob, sizes);
+    const char* names[num_pointers];
+    fclaw_patch_restart_names(glob, names);
+    for(int i = 0; i < 1; i++)
+    {
+        sc_array_t *patches = sc_array_new_count(sizeof(sc_array_t), glob->domain->local_num_patches);
+        pack_iter_t user;
+        user.glob = glob;
+        user.curr_index = 0;
+        user.patches = patches;
+        user.size = sizes[i];
+        user.pointerno = i;
+        user.reading = 0;
+        fclaw_domain_iterate_patches(glob->domain, get_patches, &user);
 
     
-    fc = fclaw_file_write_array(fc, "meqn", packsize, patches, &errcode);
-    CHECK_ERROR_CODE(refine_dim , errcode, "write glob buffer");
+        fc = fclaw_file_write_array(fc, names[i], sizes[i], patches, &errcode);
+        CHECK_ERROR_CODE(refine_dim , errcode, "write patches");
 
-    for(int i = 0; i < glob->domain->local_num_patches; i++)
-    {
-        sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, i);
-        sc_array_reset(current_arr);
+        for(int i = 0; i < glob->domain->local_num_patches; i++)
+        {
+            sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, i);
+            sc_array_reset(current_arr);
+        }
+        sc_array_destroy(patches);
     }
 
-    sc_array_destroy(patches);
 
     fclaw_file_close(fc, &errcode);
     fclaw_file_write_partition (parition_filename,

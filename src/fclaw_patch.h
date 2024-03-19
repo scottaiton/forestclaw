@@ -830,6 +830,41 @@ void fclaw_patch_partition_unpack(struct fclaw_global *glob,
  */
 size_t fclaw_patch_partition_packsize(struct fclaw_global* glob);
 
+///@}
+/* ------------------------------------------------------------------------------------ */
+///                          @name Restart
+/* ------------------------------------------------------------------------------------ */
+///@{
+
+/**
+ * @brief Get the number of restart pointers
+ * 
+ * @param glob the global context
+ * @return int the number of restart pointers
+ */
+int fclaw_patch_restart_num_pointers(struct fclaw_global* glob);
+
+/**
+ * @brief Get the sizes of the restart data
+ * 
+ * @param[in]  glob the global context
+ * @param[out] restart_sizes an array of length ::fclaw_patch_restart_num_pointers 
+ *                           with the sizes of the restart data
+ */
+void fclaw_patch_restart_pointer_sizes(struct fclaw_global* glob, size_t restart_sizes[]);
+/**
+ * @brief Get the names of the restart data.
+ * 
+ * @param glob the global context 
+ * @return sc_array_t* an array of strings
+ */
+void fclaw_patch_restart_names(struct fclaw_global* glob, const char *names[]);
+
+void *fclaw_patch_restart_get_pointer(struct fclaw_global* glob,
+                                      struct fclaw_patch* this_patch,
+                                      int blockno,
+                                      int patchno,
+                                      int pointerno);
 
 ///@}
 /* ------------------------------------------------------------------------------------ */
@@ -1714,6 +1749,21 @@ struct fclaw_patch_vtable
     /** @copybrief ::fclaw_patch_partition_packsize_t */
     fclaw_patch_partition_packsize_t     partition_packsize;
 
+    /** @} */
+
+    /** @{ @name Restart Functions */
+
+    int (*restart_num_pointers)(struct fclaw_global *glob);
+
+    void (*restart_pointer_sizes)(struct fclaw_global *glob, size_t sizes[]);
+
+    void (*restart_names)(struct fclaw_global *glob, const char *restart_names[]);
+
+    void *(*restart_get_pointer)(struct fclaw_global* glob,
+                                 struct fclaw_patch* this_patch,
+                                 int blockno,
+                                 int patchno,
+                                 int pointerno);
     /** @} */
 
     /** True if vtable has been set */

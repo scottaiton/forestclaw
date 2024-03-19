@@ -1550,6 +1550,57 @@ void clawpatch_partition_unpack(fclaw_global_t *glob,
     cp->griddata.copyFromMemory((double*)unpack_data_from_here);
 }
 
+/* ---------------------------- Restart ----------------------------------------------- */
+
+static
+int restart_num_pointers(fclaw_global_t *glob)
+{
+    return 1;
+}
+
+static
+void restart_pointer_sizes(fclaw_global_t *glob,
+                           size_t sizes[])
+{
+    fclaw_clawpatch_options_t* opts = fclaw_clawpatch_get_options(glob);
+    sizes[0] = sizeof(double)*opts->meqn;
+    if(opts->patch_dim == 2)
+    {
+        sizes[0] *= (opts->mx+2*opts->mbc)*(opts->my+2*opts->mbc);
+    }
+    else if(opts->patch_dim == 3 && glob->domain->refine_dim == 2)
+    {
+        sizes[0] *= (opts->mx+2*opts->mbc)*(opts->my+2*opts->mbc)*opts->mz;
+    }
+    else
+    {
+        sizes[0] *= (opts->mx+2*opts->mbc)*(opts->my+2*opts->mbc)*(opts->mz+2*opts->mbc);
+    }
+}
+static 
+void restart_names(fclaw_global_t *glob,
+                   const char *names[])
+{
+    names[0] = "q";
+}
+
+static
+void *get_pointer(fclaw_global_t *glob,
+                  fclaw_patch_t *patch,
+                  int blockno,
+                  int patchno,
+                  int pointerno)
+{
+    if (pointerno == 0)
+    {
+        return fclaw_clawpatch_get_q(glob,patch);
+    }
+    else
+    {
+        SC_ABORT_NOT_REACHED();
+    }
+}
+
 /* ------------------------------------ Virtual table  -------------------------------- */
 
 static
@@ -1849,6 +1900,12 @@ void fclaw_clawpatch_vtable_initialize(fclaw_global_t* glob,
     patch_vt->partition_packsize   = clawpatch_partition_packsize;
     patch_vt->partition_pack       = clawpatch_partition_pack;
     patch_vt->partition_unpack     = clawpatch_partition_unpack;
+
+    /* restart */
+    patch_vt->restart_num_pointers = restart_num_pointers;
+    patch_vt->restart_pointer_sizes = restart_pointer_sizes;
+    patch_vt->restart_names        = restart_names;
+    patch_vt->restart_get_pointer  = get_pointer;
 
     /* output functions */
     clawpatch_vt->time_header_ascii  = fclaw_clawpatch_time_header_ascii;

@@ -73,6 +73,7 @@ void cb_initialize (fclaw_domain_t *domain,
 static
 void build_initial_domain(fclaw_global_t *glob)
 {
+    fclaw_initialize_domain_flags(glob);
 	fclaw_domain_t** domain = &glob->domain;
 
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
@@ -207,6 +208,19 @@ void build_initial_domain(fclaw_global_t *glob)
     }
 }
 
+void fclaw_initialize_domain_flags(fclaw_global_t *glob)
+{
+    const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
+
+    /* set specific refinement strategy */
+    fclaw_domain_set_refinement
+        (glob->domain, fclaw_opt->smooth_refine, fclaw_opt->smooth_level,
+         fclaw_opt->coarsen_delay);
+
+    /* set partitioning */
+    fclaw_domain_set_partitioning(glob->domain,  fclaw_opt->partition_for_coarsening);
+}
+
 /* -----------------------------------------------------------------
    Public interface
    ----------------------------------------------------------------- */
@@ -215,9 +229,6 @@ void fclaw_initialize(fclaw_global_t *glob)
 	fclaw_domain_t** domain = &glob->domain;
 
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
-
-    /* set partitioning */
-    fclaw_domain_set_partitioning(*domain,  fclaw_opt->partition_for_coarsening);
 
 	/* This mapping context is needed by fortran mapping functions */
 	fclaw_map_context_t *cont = glob->cont;
@@ -245,11 +256,6 @@ void fclaw_initialize(fclaw_global_t *glob)
 
     /* User defined problem setup */
     fclaw_problem_setup(glob);
-
-    /* set specific refinement strategy */
-    fclaw_domain_set_refinement
-        (*domain, fclaw_opt->smooth_refine, fclaw_opt->smooth_level,
-         fclaw_opt->coarsen_delay);
 
     if(strcmp(fclaw_opt->restart_file,"") == 0)
     {

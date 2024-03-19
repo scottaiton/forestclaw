@@ -38,6 +38,12 @@ struct fclaw_global;
 
 void fclaw_problem_setup(struct fclaw_global *glob);
 void fclaw_vtables_initialize(struct fclaw_global *glob);
+/**
+ * @brief Intialize flags in the domain
+ * 
+ * @param glob the global context
+ */
+void fclaw_initialize_domain_flags(struct fclaw_global *glob);
 void fclaw_run_vtables_initialize(struct fclaw_global *glob);
 
 void fclaw_initialize (struct fclaw_global *glob);
