@@ -1568,10 +1568,6 @@ void restart_pointer_sizes(fclaw_global_t *glob,
     {
         sizes[0] *= (opts->mx+2*opts->mbc)*(opts->my+2*opts->mbc);
     }
-    else if(opts->patch_dim == 3 && glob->domain->refine_dim == 2)
-    {
-        sizes[0] *= (opts->mx+2*opts->mbc)*(opts->my+2*opts->mbc)*opts->mz;
-    }
     else
     {
         sizes[0] *= (opts->mx+2*opts->mbc)*(opts->my+2*opts->mbc)*(opts->mz+2*opts->mbc);
