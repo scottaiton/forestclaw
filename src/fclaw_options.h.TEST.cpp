@@ -33,8 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 TEST_CASE("fclaw_options can store options in two seperate globs")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_options_t* opts1 = FCLAW_ALLOC_ZERO(fclaw_options_t,1);
 	fclaw_options_t* opts2 = FCLAW_ALLOC_ZERO(fclaw_options_t,1);
@@ -57,8 +57,8 @@ TEST_CASE("fclaw_options can store options in two seperate globs")
 
 TEST_CASE("fclaw_get_options fails if not intialized")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	CHECK_SC_ABORTED(fclaw_get_options(glob1));
 
@@ -70,8 +70,8 @@ TEST_CASE("fclaw_get_options fails if not intialized")
 
 TEST_CASE("fclaw_options_store fails if called twice on a glob")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_options_store(glob1, FCLAW_ALLOC_ZERO(fclaw_options_t,1));
 	CHECK_SC_ABORTED(fclaw_options_store(glob1, FCLAW_ALLOC_ZERO(fclaw_options_t,1)));

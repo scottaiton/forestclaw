@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 TEST_CASE("fclaw_global_new default options")
 {
-    fclaw_global_t* glob = fclaw_global_new();
+    fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 
 	CHECK_EQ(glob->curr_time, 0.0);
@@ -141,7 +141,7 @@ TEST_CASE("fclaw_global_pack with no packed attributes")
 	for(double curr_dt : {1.0, 1.2})
 	{
 		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
+    	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
@@ -160,7 +160,7 @@ TEST_CASE("fclaw_global_pack with no packed attributes")
 
 		REQUIRE_EQ(bytes_written, packsize);
 
-		fclaw_global_t* glob2 = fclaw_global_new();
+		fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 		size_t bytes_read = fclaw_global_unpack(buffer, glob2);
 
 		REQUIRE_EQ(bytes_read, packsize);
@@ -186,7 +186,7 @@ TEST_CASE("fclaw_global_pack with a single packed attribute")
 		std::vector<char*> args = {dummy};
 		//fclaw_app_t* app = fclaw_app_new_on_comm(sc_MPI_COMM_WORLD,&argc,&argv,NULL);
 		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
+    	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 		fclaw_global_vtable_store(glob1, "dummy1_vtable",  &dummy_opts_vt, NULL);
 
 		glob1->curr_time                    = curr_time;
@@ -210,7 +210,7 @@ TEST_CASE("fclaw_global_pack with a single packed attribute")
 
 		REQUIRE_EQ(bytes_written, packsize);
 
-		fclaw_global_t* glob2 = fclaw_global_new();
+		fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 		fclaw_global_vtable_store(glob2, "dummy1_vtable",  &dummy_opts_vt, NULL);
 
 		dummy_attribute* attribute2 = NULL;
@@ -252,7 +252,7 @@ TEST_CASE("fclaw_global_pack with two packed attributes")
 	for(double curr_dt : {1.0, 1.2})
 	{
 		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
+    	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 		fclaw_global_vtable_store(glob1, "dummy1",  &dummy_opts_vt, NULL);
 		fclaw_global_vtable_store(glob1, "dummy2",  &dummy_opts_vt, NULL);
 		glob1->curr_time                    = curr_time;
@@ -279,7 +279,7 @@ TEST_CASE("fclaw_global_pack with two packed attributes")
 
 		REQUIRE_EQ(bytes_written, packsize);
 
-		fclaw_global_t* glob2 = fclaw_global_new();
+		fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 		fclaw_global_vtable_store(glob2, "dummy1",  &dummy_opts_vt, NULL);
 		fclaw_global_vtable_store(glob2, "dummy2",  &dummy_opts_vt, NULL);
 
@@ -329,7 +329,7 @@ TEST_CASE("fclaw_global_pack with two packed attributes")
 TEST_CASE("fclaw_global_pack aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
-   	glob1 = fclaw_global_new();
+   	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	glob1->curr_time                    = 100;
 	glob1->curr_dt                      = 200;
 
@@ -342,7 +342,7 @@ TEST_CASE("fclaw_global_pack aborts with unregistered vtable")
 TEST_CASE("fclaw_global_packsize aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
-   	glob1 = fclaw_global_new();
+   	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	glob1->curr_time                    = 100;
 	glob1->curr_dt                      = 200;
 
@@ -354,7 +354,7 @@ TEST_CASE("fclaw_global_packsize aborts with unregistered vtable")
 TEST_CASE("fclaw_global_unpack aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
-   	glob1 = fclaw_global_new();
+   	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	glob1->curr_time                    = 1;
 	glob1->curr_dt                      = 1;
 
@@ -371,13 +371,13 @@ TEST_CASE("fclaw_global_unpack aborts with unregistered vtable")
 
 	REQUIRE_EQ(bytes_written, packsize);
 
-	fclaw_global_t* glob2=fclaw_global_new();
+	fclaw_global_t* glob2=fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	//no vtables in glob2
 	CHECK_SC_ABORTED(fclaw_global_unpack(buffer, glob2));
 }
 
 TEST_CASE("fclaw_global_options_store and fclaw_global_get_options test") {
-    fclaw_global_t* glob = fclaw_global_new();
+    fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
     // Test with an integer
     int option1 = 10;
@@ -454,7 +454,7 @@ TEST_CASE("fclaw_global_get_global assert fails when NULL")
 #endif
 
 TEST_CASE("fclaw_global_vtable_store and fclaw_global_get_vtable test") {
-	fclaw_global_t* glob = fclaw_global_new();
+	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	// Test with an integer
 	int vtable1 = 10;
@@ -489,7 +489,7 @@ TEST_CASE("fclaw_global_vtable_store and fclaw_global_get_vtable test") {
 }
 
 TEST_CASE("fclaw_global_attribute_store and fclaw_global_get_attribute test") {
-	fclaw_global_t* glob = fclaw_global_new();
+	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	// Test with an integer
 	int attribute1 = 10;

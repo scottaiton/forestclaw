@@ -58,7 +58,7 @@ struct TestData {
     fclaw_clawpatch_vtable_t * clawpatch_vt;
 
     TestData(fclaw_domain_t* domain, fclaw_map_context_t* map, int minlevel, int maxlevel){
-        glob = fclaw_global_new();
+        glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
         opts = fclaw_clawpatch_options_new(3);
         memset(&fopts, 0, sizeof(fopts));
         fopts.mi=1;

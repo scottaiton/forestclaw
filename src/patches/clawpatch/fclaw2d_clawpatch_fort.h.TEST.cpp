@@ -64,7 +64,7 @@ TEST_CASE("FCLAW2D_CLAWPATCH_EXCEEDS_THRESHOLD calls user function")
     exceeds_test_parameters& params = global_exceeds_test_parameters;
 
     fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 1);
-	fclaw_global_t* glob = fclaw_global_new();
+	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
     fclaw_global_store_domain(glob, domain);
 
     fclaw_clawpatch_options_t* clawpatch_opts = fclaw_clawpatch_options_new(2);
@@ -136,7 +136,7 @@ TEST_CASE("FCLAW3DX_CLAWPATCH_EXCEEDS_THRESHOLD calls user function")
     exceeds_test_parameters& params = global_exceeds_test_parameters;
 
     fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 1);
-	fclaw_global_t* glob = fclaw_global_new();
+	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
     fclaw_global_store_domain(glob, domain);
 
 	fclaw_clawpatch_options_t* opts = fclaw_clawpatch_options_new(3);
