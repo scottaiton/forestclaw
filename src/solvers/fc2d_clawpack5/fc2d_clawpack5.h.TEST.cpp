@@ -33,8 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 TEST_CASE("fc2d_clawpack5_solver_initialize stores two seperate vtables in two seperate globs")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 0);
 	fclaw_global_store_domain(glob1, domain);
@@ -63,7 +63,7 @@ TEST_CASE("fc2d_clawpack5_solver_initialize stores two seperate vtables in two s
 
 TEST_CASE("fc2d_clawpack5_solver_initialize sets is_set flag")
 {
-	fclaw_global_t* glob = fclaw_global_new();
+	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 0);
 	fclaw_global_store_domain(glob, domain);
@@ -88,8 +88,8 @@ TEST_CASE("fc2d_clawpack5_solver_initialize sets is_set flag")
 
 TEST_CASE("fc2d_clawpack5_vt fails if not intialized")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 0);
 	fclaw_global_store_domain(glob1, domain);
@@ -106,8 +106,8 @@ TEST_CASE("fc2d_clawpack5_vt fails if not intialized")
 
 TEST_CASE("fc2d_clawpack5_vtable_initialize fails if called twice on a glob")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 0);
 	fclaw_global_store_domain(glob1, domain);

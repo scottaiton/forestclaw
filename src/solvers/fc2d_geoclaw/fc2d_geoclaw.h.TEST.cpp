@@ -34,8 +34,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 TEST_CASE("fc2d_geoclaw_solver_initialize stores two seperate vtables in two seperate globs")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 1);
 	fclaw_global_store_domain(glob1, domain);
@@ -68,7 +68,7 @@ TEST_CASE("fc2d_geoclaw_solver_initialize stores two seperate vtables in two sep
 TEST_CASE("fc2d_geoclaw_solver_initialize sets is_set flag")
 {
 	fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 1);
-	fclaw_global_t* glob = fclaw_global_new();
+	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	fclaw_global_store_domain(glob, domain);
 
 	fclaw_clawpatch_options_t* clawpatch_opt = fclaw_clawpatch_options_new(2);
@@ -92,8 +92,8 @@ TEST_CASE("fc2d_geoclaw_solver_initialize sets is_set flag")
 
 TEST_CASE("fc2d_geoclaw_vt fails if not intialized")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 1);
 	fclaw_global_store_domain(glob1, domain);
@@ -110,8 +110,8 @@ TEST_CASE("fc2d_geoclaw_vt fails if not intialized")
 
 TEST_CASE("fc2d_geoclaw_vtable_initialize fails if called twice on a glob")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 1);
 	fclaw_global_store_domain(glob1, domain);

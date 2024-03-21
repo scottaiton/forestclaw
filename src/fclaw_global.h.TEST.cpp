@@ -40,7 +40,7 @@ TEST_CASE("fclaw2d_global_pack with no options")
 	for(double curr_dt : {1.0, 1.2})
 	{
 		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
+    	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
@@ -141,7 +141,7 @@ TEST_CASE("fclaw_global_pack with no options structure")
 	for(double curr_dt : {1.0, 1.2})
 	{
 		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
+    	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
@@ -180,7 +180,7 @@ TEST_CASE("fclaw_global_pack with a single options structure")
 		int argc = 1;
 		//fclaw_app_t* app = fclaw_app_new_on_comm(sc_MPI_COMM_WORLD,&argc,&argv,NULL);
 		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
+    	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
@@ -226,7 +226,7 @@ TEST_CASE("fclaw_global_pack with two options structure")
 	for(double curr_dt : {1.0, 1.2})
 	{
 		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
+    	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
@@ -274,7 +274,7 @@ TEST_CASE("fclaw_global_pack with two options structure")
 TEST_CASE("fclaw_global_pack aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
-   	glob1 = fclaw_global_new();
+   	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	glob1->curr_time                    = 100;
 	glob1->curr_dt                      = 200;
 
@@ -287,7 +287,7 @@ TEST_CASE("fclaw_global_pack aborts with unregistered vtable")
 TEST_CASE("fclaw2d_global_packsize aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
-   	glob1 = fclaw_global_new();
+   	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	glob1->curr_time                    = 100;
 	glob1->curr_dt                      = 200;
 
@@ -299,7 +299,7 @@ TEST_CASE("fclaw2d_global_packsize aborts with unregistered vtable")
 TEST_CASE("fclaw_global_unppack aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
-   	glob1 = fclaw_global_new();
+   	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	glob1->curr_time                    = 1;
 	glob1->curr_dt                      = 1;
 
@@ -321,7 +321,7 @@ TEST_CASE("fclaw_global_unppack aborts with unregistered vtable")
 	CHECK_SC_ABORTED(fclaw2d_global_unpack(buffer, &glob2));
 }
 TEST_CASE("fclaw_global_options_store and fclaw_global_get_options test") {
-    fclaw_global_t* glob = fclaw_global_new();
+    fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
     // Test with an integer
     int option1 = 10;
