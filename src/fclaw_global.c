@@ -38,7 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_diagnostics.h>
 #include <fclaw_map.h>
 
-fclaw_global_t* fclaw_global_new (void)
+static
+fclaw_global_t* global_new (void)
 {
     fclaw_global_t *glob;
 
@@ -70,10 +71,26 @@ fclaw_global_t* fclaw_global_new (void)
     return glob;
 }
 
+fclaw_global_t* fclaw_global_new (fclaw_app_t * app)
+{
+    fclaw_global_t *glob = global_new ();
+
+    glob->mpicomm = fclaw_app_get_mpi_size_rank(app, &glob->mpisize, &glob->mpirank);
+
+    sc_options_t *sc_options = fclaw_app_get_options(app);
+    fclaw_global_attribute_store(glob,
+                                 "fclaw_options",
+                                 sc_options,
+                                 NULL, NULL);
+
+
+    return glob;
+}
+
 fclaw_global_t* fclaw_global_new_comm (sc_MPI_Comm mpicomm,
                                            int mpisize, int mpirank)
 {
-    fclaw_global_t *glob = fclaw_global_new ();
+    fclaw_global_t *glob = global_new ();
 
     /*
      * Set the communicator.

@@ -205,9 +205,7 @@ main (int argc, char **argv)
     if (!vexit)
     {
         /* Options have been checked and are valid */
-        int size, rank;
-        sc_MPI_Comm mpicomm = fclaw_app_get_mpi_size_rank (app, &size, &rank);
-        fclaw_global_t *glob = fclaw_global_new_comm (mpicomm, size, rank);
+        fclaw_global_t *glob = fclaw_global_new(app);
 
         /* Store option packages in glob */
         fclaw_options_store           (glob, fclaw_opt);

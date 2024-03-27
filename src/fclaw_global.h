@@ -108,7 +108,7 @@ struct fclaw_package_container;
 struct fclaw_diagnostics_accumulator;
 
 /** Allocate a new global structure. */
-fclaw_global_t* fclaw_global_new (void);
+fclaw_global_t* fclaw_global_new (fclaw_app_t * app);
 
 fclaw_global_t* fclaw_global_new_comm (sc_MPI_Comm mpicomm,
                                            int mpisize, int mpirank);
