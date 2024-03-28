@@ -48,6 +48,63 @@ do { \
     } \
 } while(0)
 
+static char*
+get_used_ini(fclaw_global_t * glob)
+{
+    char *buffer = NULL;
+    long length;
+    if(glob->mpirank == 0)
+    {
+        sc_options_t * options = fclaw_global_get_attribute(glob, "fclaw_options");
+        int retval = sc_options_save (fclaw_get_package_id (),
+                                      FCLAW_VERBOSITY_ERROR, 
+                                      options, 
+                                      "fclaw_options.ini.used");
+
+        // read the entire file into a string
+        FILE *file = fopen("fclaw_options.ini.used", "r");
+        if (file == NULL)
+        {
+            printf("Cannot open file\n");
+            return NULL;
+        }
+
+        fseek(file, 0, SEEK_END);
+        length = ftell(file);
+        fseek(file, 0, SEEK_SET);
+
+        buffer = FCLAW_ALLOC(char, length + 1);
+        if (buffer)
+        {
+            fread(buffer, 1, length, file);
+        }
+        fclose(file);
+
+        buffer[length] = '\0';
+    }
+    //broadcast the lenth
+    sc_MPI_Bcast(&length, 1, sc_MPI_LONG, 0, glob->mpicomm);
+    //allocate the buffer on other ranks
+    if(glob->mpirank != 0)
+    {
+        buffer = FCLAW_ALLOC(char, length + 1);
+    }
+    FCLAW_ASSERT(buffer != NULL);
+    //broadcast the string
+    sc_MPI_Bcast(buffer, length+1, sc_MPI_CHAR, 0, glob->mpicomm);
+
+    return buffer;
+    
+
+}
+
+static void
+free_used_ini(void* data)
+{
+    char* buffer = (char*) data;
+    FCLAW_FREE(buffer);
+}
+
 typedef struct pack_iter
 {
     fclaw_global_t * glob;
@@ -136,7 +193,7 @@ void restart (fclaw_global_t * glob,
         sc_array_destroy(partition);
     }
 
-    sc_array_t globsize;
+        sc_array_t globsize;
     sc_array_init_size(&globsize, sizeof(size_t), 1);
 
     fc = fclaw_file_read_block(fc, user_string, sizeof(size_t), &globsize, &errcode);
@@ -209,7 +266,29 @@ fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
         = fclaw_file_open_write (filename, "ForestClaw data file",
                                  glob->domain, &errcode);
     CHECK_ERROR_CODE(refine_dim , errcode, "restart open file");
-    
+
+    char* used_ini = fclaw_global_get_attribute(glob, "fclaw_used_ini");
+    if(used_ini == NULL)
+    {
+        used_ini = get_used_ini(glob);
+        fclaw_global_attribute_store(glob, 
+                                     "fclaw_used_ini", 
+                                     used_ini, 
+                                     NULL, 
+                                     free_used_ini);
+    }
+
+    size_t used_ini_length = strlen(used_ini);
+    sc_array_t array;
+    sc_array_init_data(&array, &used_ini_length, sizeof(size_t), 1);
+
+    fc = fclaw_file_write_block(fc, "used_ini_length", sizeof(size_t), &array, &errcode);
+    CHECK_ERROR_CODE(refine_dim , errcode, "write used_ini_length");
+
+    sc_array_init_data(&array, used_ini, used_ini_length, 1);
+    fc = fclaw_file_write_block(fc, "used_ini", used_ini_length, &array, &errcode);
+    CHECK_ERROR_CODE(refine_dim , errcode, "write used_ini");
+
     size_t glob_packsize = fclaw_global_packsize(glob);
 
     sc_array_t globsize;
