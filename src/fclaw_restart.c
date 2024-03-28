@@ -57,6 +57,7 @@ typedef struct pack_iter
     int pointerno;
     int reading;
 }pack_iter_t;
+
 static void
 get_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int patchno,  void *user)
 {
@@ -64,16 +65,32 @@ get_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int pat
     sc_array_t *patches = user_data->patches;
     sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, user_data->curr_index);
 
-    if(user_data->reading && user_data->pointerno == 0)
-    {
-        fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
+    void* data = fclaw_patch_restart_get_pointer(user_data->glob, patch, blockno, patchno, user_data->pointerno);
 
+    sc_array_init_data(current_arr, data, user_data->size, 1);
+
+    user_data->curr_index++;
+}
+
+static void
+set_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int patchno,  void *user)
+{
+    pack_iter_t *user_data = (pack_iter_t*)user;
+    sc_array_t *patches = user_data->patches;
+    sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, user_data->curr_index);
+
+    fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
+
+    if(user_data->pointerno == 0)
+    {
 	    fclaw_patch_build(user_data->glob, patch, blockno, patchno,(void*) &build_mode);
     }
 
     void* data = fclaw_patch_restart_get_pointer(user_data->glob, patch, blockno, patchno, user_data->pointerno);
 
-    sc_array_init_data(current_arr, data, user_data->size, 1);
+    memcpy(data, sc_array_index(current_arr, 0), user_data->size);
+
+    sc_array_reset(current_arr);
 
     user_data->curr_index++;
 }
@@ -153,7 +170,6 @@ void restart (fclaw_global_t * glob,
         user.size = sizes[i];
         user.pointerno = i;
         user.reading = 1;
-        fclaw_domain_iterate_patches(glob->domain, get_patches, &user);
 
         fc = fclaw_file_read_array(fc, user_string, sizes[i], patches, &errcode);
         if(strncmp(user_string, names[i], strlen(names[i])) != 0)
@@ -162,11 +178,8 @@ void restart (fclaw_global_t * glob,
         }
         CHECK_ERROR_CODE(refine_dim, errcode, "restart read patches");
 
-        for(int i = 0; i < glob->domain->local_num_patches; i++)
-        {
-            sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, i);
-            sc_array_reset(current_arr);
-        }
+        fclaw_domain_iterate_patches(glob->domain, set_patches, &user);
+
         sc_array_destroy(patches);
     }
 
