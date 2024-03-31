@@ -89,15 +89,15 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves,maux, &
 
     integer :: i, m, mw, mq, ioff
     double precision :: enx, eny, enz, etx,ety,etz
-    double precision :: hunl, hunr, hutl, hutr
+    double precision :: hunl, hunr, hutl, hutr, hubl, hubr
 !!    double precision :: hsqr,hsql,hsq
 !!    double precision :: a1,a2,a3, 
-    double precision :: gamma, amn, apn, df, dy
+    double precision :: gamma, amn, apn, df, dy, qn
     double precision :: erx, ery, erz, h1, h3, hi, him1, hu1, hu3
     double precision :: s0, s03, s1, s3, sfract
 
-    double precision :: hL, hR, huL, huR, bL, bR, hvL, hvR
-    double precision :: uL, vL, uR, vR, phiR, phiL, sL, sR
+    double precision :: hL, hR, huL, huR, bL, bR, hvL, hvR, hwL, hwR
+    double precision :: uL, vL, wL, uR, vR, wR, phiR, phiL, sL, sR
     double precision :: uhat, chat
     double precision :: sw(mwaves), fw(meqn,mwaves)
     double precision szm(3), szp(3), z
@@ -159,12 +159,29 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves,maux, &
         ety =   ety / gamma
         etz =   etz / gamma
 
+        !! # projection to the sphere  (already done in src2)
+        erx = auxl(i,14)
+        ery = auxl(i,15)
+        erz = auxl(i,16)
+        qn = erx*ql(i,2) + ery*ql(i,3) + erz*ql(i,4)
+        ql(i,2) = ql(i,2) - qn*erx
+        ql(i,3) = ql(i,3) - qn*ery
+        ql(i,4) = ql(i,4) - qn*erz
+        qr(i,2) = ql(i,2)
+        qr(i,3) = ql(i,3)
+        qr(i,4) = ql(i,4)
+
+
         !!  # compute normal and tangential momentum at cell edge:
         hunl = enx*ql(i,2)   + eny*ql(i,3)   + enz*ql(i,4)
         hunr = enx*qr(i-1,2) + eny*qr(i-1,3) + enz*qr(i-1,4)
 
         hutl = etx*ql(i,2)   + ety*ql(i,3)   + etz*ql(i,4)
         hutr = etx*qr(i-1,2) + ety*qr(i-1,3) + etz*qr(i-1,4)
+
+        hubl = erx*ql(i,2)   + ery*ql(i,3)   + erz*ql(i,4)
+        hubr = erx*qr(i-1,2) + ery*qr(i-1,3) + erz*qr(i-1,4)
+
 
         !! Get Riemann variables Riemann problem variables
         hL  = qr(i-1,1)
@@ -173,19 +190,27 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves,maux, &
         huL = hunr
         huR = hunL
 
-        bL  = auxr(i-1,mbathy)
-        bR  = auxl(i,mbathy)
-
         hvL = hutR
         hvR = hutL
 
+        hwL = hubR
+        hwR = hubL
+
         uR = huR/hR
         vR = hvR/hR
+        wR = hwR/hR
         phiR = 0.5d0*grav*hR**2 + huR**2/hR
 
         uL = huL/hL
         vL = hvL/hL
+        wL = hwL/hL
         phiL = 0.5d0*grav*hL**2 + huL**2/hL
+
+!!        bL  = auxr(i-1,mbathy)
+!!        bR  = auxl(i,mbathy)
+        bL = 0
+        bR = 0
+
 
 
         !! Start new code
@@ -195,7 +220,7 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves,maux, &
         uhat = (SQRT(grav*hL)*uL + SQRT(grav*hR)*uR)/(SQRT(grav*hR) + SQRT(grav*hL)) 
         chat = SQRT(grav*0.5d0*(hR + hL)) 
 
-        CALL  simple_riemann(hR,uR,vR, hL,uL,vl, uhat,chat,bL, bR, &
+        CALL  simple_riemann(hR,uR,vR, wR, hL,uL,vl, wL, uhat,chat,bL, bR, &
                              phiR,phiL,sw,fw)
 
       DO mw = 1,mwaves
@@ -356,7 +381,7 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves,maux, &
 
     !! if you don't want to project out momentum in direction
     !! of surface normals, you can 
-    !! return
+    return
 
     !! Project out momentum in direction normal to the surface
     do i=2-mbc,mx+mbc
@@ -383,12 +408,12 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves,maux, &
 END SUBROUTINE clawpack46_rpn2_fwave
 
 
-SUBROUTINE simple_riemann(hr,ur,vr, hl,ul,vl, uhat,chat,bl, br, &
+SUBROUTINE simple_riemann(hr,ur,vr, wr, hl,ul,vl, wl, uhat,chat,bl, br, &
                  phir,phil,s,fwave)
     IMPLICIT NONE
 
-    DOUBLE PRECISION :: hr,ur,vr, hl,ul,vl, uhat, chat, phir, &
-               phil,s(3), fwave(3,3), bl, bR
+    DOUBLE PRECISION :: hr,ur,vr, wr, hl,ul,vl, wl, uhat, chat, phir, &
+               phil,s(3), fwave(4,3), bl, bR
 
     double precision grav
     common /swe_model_parms/  grav
@@ -411,9 +436,14 @@ SUBROUTINE simple_riemann(hr,ur,vr, hl,ul,vl, uhat,chat,bl, br, &
     s(2) = 0.5d0 * (s(1) + s(3))
         
     !! Wave strengths
-    beta(1) = -(fluxdiff(2) - s(3) * fluxdiff(1)) / (s(3) - s(1))
-    beta(3) =  (fluxdiff(2) - s(1) * fluxdiff(1)) / (s(3) - s(1))
-    beta(2) =   fluxdiff(3) - beta(1)*vl - beta(3)*vr
+!!    beta(1) = -(fluxdiff(2) - s(3) * fluxdiff(1)) / (s(3) - s(1))
+!!    beta(3) =  (fluxdiff(2) - s(1) * fluxdiff(1)) / (s(3) - s(1))
+!!    beta(2) =   fluxdiff(3) - beta(1)*vl - beta(3)*vr
+
+    beta(1) =  (s(3)*fluxdiff(1) - fluxdiff(2)) / (s(3) - s(1))
+    beta(3) = (-s(1)*fluxdiff(1) + fluxdiff(2)) / (s(3) - s(1))
+    beta(2) =  - (vl+vr)*beta(1)/2 + fluxdiff(3) 
+
 
     !! # Flux waves = beta*R
     fwave(1,1) = beta(1)
