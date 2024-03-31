@@ -360,6 +360,7 @@ double clawpack46_step2(fclaw_global_t *glob,
 	}
 
 	/* NOTE: qold will be overwritten in this step */
+	//printf("here ... 1\n");
 	CLAWPACK46_SET_BLOCK(&blockno);
 	CLAWPACK46_STEP2_WRAP(&maxm, &meqn, &maux, &mbc, clawpack_options->method,
 						  clawpack_options->mthlim, &clawpack_options->mcapa,
@@ -370,6 +371,8 @@ double clawpack46_step2(fclaw_global_t *glob,
 						  claw46_vt->flux2,
 						  block_corner_count, &ierror, &clawpack_options->use_fwaves);
 	CLAWPACK46_UNSET_BLOCK();
+	///printf("here ... 2\n");
+
 
 	FCLAW_ASSERT(ierror == 0);
 
