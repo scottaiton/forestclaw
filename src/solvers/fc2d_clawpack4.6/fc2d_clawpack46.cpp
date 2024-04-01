@@ -273,9 +273,9 @@ double clawpack46_step2(fclaw_global_t *glob,
 
 	if (clawpack_options->use_fwaves)
 	{
-		FCLAW_ASSERT(claw46_vt->fort_rpn2fw != NULL);
+		FCLAW_ASSERT(claw46_vt->fort_rpn2 != NULL);
 		if (clawpack_options->order[1] > 0)
-			FCLAW_ASSERT(claw46_vt->fort_rpt2fw != NULL);
+			FCLAW_ASSERT(claw46_vt->fort_rpt2 != NULL);
 	}
 	else
 	{
@@ -355,8 +355,11 @@ double clawpack46_step2(fclaw_global_t *glob,
 
 	if (claw46_vt->flux2 == NULL)
 	{
+#if 0		
 		claw46_vt->flux2 = (clawpack_options->use_fwaves != 0) ? &CLAWPACK46_FLUX2FW : 
 		                       &CLAWPACK46_FLUX2;	
+#endif		                       
+		claw46_vt->flux2 = &CLAWPACK46_FLUX2;
 	}
 
 	/* NOTE: qold will be overwritten in this step */

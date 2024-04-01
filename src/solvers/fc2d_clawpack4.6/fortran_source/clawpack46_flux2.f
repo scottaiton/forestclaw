@@ -4,7 +4,7 @@ c     =====================================================
       subroutine clawpack46_flux2(ixy,maxm,meqn,maux,mbc,mx,
      &      q1d,dtdx1d,aux1,aux2,aux3, faddm,faddp,gaddm,gaddp,
      &      cfl1d,wave,s,amdq,apdq,cqxx,bmasdq,bpasdq,
-     &      rpn2,rpt2,mwaves,mcapa,method,mthlim)
+     &      rpn2,rpt2,mwaves,mcapa,method,mthlim,ierror, use_fwaves)
 c     =====================================================
 c
 c     # clawpack routine ...  modified for AMRCLAW
@@ -56,7 +56,7 @@ c
 c
       implicit none
 
-      integer ixy, maxm, meqn, mbc, mx, maux
+      integer ixy, maxm, meqn, mbc, mx, maux, use_fwaves, ierror
       integer mwaves, mcapa, method(7), mthlim(mwaves)
 
       external rpn2, rpt2
@@ -84,7 +84,7 @@ c
 
 
       integer ilr, mw, jside, m, i
-      double precision cfl1d, gupdate,dtdxave
+      double precision cfl1d, gupdate,dtdxave, abs_sign
       logical limit
 
 c
@@ -158,9 +158,14 @@ c             dtdx1d(i-1) = 0.5d0 * (dtdx1d(i-1) + dtdx1d(i))
               do m = 1,meqn
                   cqxx(i,m) = 0.d0
                   do mw = 1,mwaves
+                     if (use_fwaves .ne. 0) then
+                        abs_sign = dsign(1.d0,s(i,mw))
+                     else
+                        abs_sign = dabs(s(i,mw))
+                     endif
 
 c                     # second order corrections:
-                      cqxx(i,m) = cqxx(i,m) + dabs(s(i,mw))
+                      cqxx(i,m) = cqxx(i,m) + abs_sign
      &                 * (1.d0 - dabs(s(i,mw))*dtdxave) * wave(i,m,mw)
                   end do
                   faddm(i,m) = faddm(i,m) + 0.5d0 * cqxx(i,m)
