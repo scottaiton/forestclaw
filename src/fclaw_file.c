@@ -60,6 +60,21 @@ static fclaw_file_context_t *wrap_file_3d(fclaw3d_file_context_t *d3)
     return fc;
 }
 
+/* handle the return when the returned file context is NULL */
+static 
+fclaw_file_context_t* handle_return_value(fclaw_file_context_t * fc)
+{
+    if(fc->d2 == NULL && fc->d3 == NULL)
+    {
+        FCLAW_FREE(fc);
+        return NULL;
+    }
+    else
+    {
+        return fc;
+    }
+}
+
 fclaw_file_context_t *fclaw_file_open_write (const char *filename,
                                              const char *user_string,
                                              fclaw_domain_t * domain,
@@ -109,18 +124,19 @@ fclaw_file_context_t *fclaw_file_write_block (fclaw_file_context_t *
 {
     if(fc->refine_dim == 2)
     {
-        return wrap_file_2d(fclaw2d_file_write_block (fc->d2, user_string,
-                                                      block_size, block_data, errcode));
+        fc->d2 = fclaw2d_file_write_block (fc->d2, user_string,
+                                           block_size, block_data, errcode);
     }
     else if(fc->refine_dim == 3)
     {
-        return wrap_file_3d(fclaw3d_file_write_block (fc->d3, user_string,
-                                                      block_size, block_data, errcode));
+        fc->d3 = fclaw3d_file_write_block (fc->d3, user_string,
+                                           block_size, block_data, errcode);
     }
     else
     {
         SC_ABORT_NOT_REACHED ();
     }
+    return handle_return_value(fc);
 }
 
 fclaw_file_context_t *fclaw_file_write_array (fclaw_file_context_t *
@@ -131,18 +147,19 @@ fclaw_file_context_t *fclaw_file_write_array (fclaw_file_context_t *
 {
     if(fc->refine_dim == 2)
     {
-        return wrap_file_2d(fclaw2d_file_write_array (fc->d2, user_string,
-                                                      patch_size, patch_data, errcode));
+        fc->d2 = fclaw2d_file_write_array (fc->d2, user_string,
+                                           patch_size, patch_data, errcode);
     }
     else if(fc->refine_dim == 3)
     {
-        return wrap_file_3d(fclaw3d_file_write_array (fc->d3, user_string,
-                                                      patch_size, patch_data, errcode));
+        fc->d3 = fclaw3d_file_write_array (fc->d3, user_string,
+                                           patch_size, patch_data, errcode);
     }
     else
     {
         SC_ABORT_NOT_REACHED ();
     }
+    return handle_return_value(fc);
 }
 
 int fclaw_file_read_partition (int refine_dim,
@@ -192,21 +209,6 @@ fclaw_file_context_t *fclaw_file_open_read (int refine_dim,
     else
     {
         fclaw_abortf("Invalid refine_dim %d\n", refine_dim);
-    }
-}
-
-/* handle the return when the returned file context is NULL */
-static 
-fclaw_file_context_t* handle_return_value(fclaw_file_context_t * fc)
-{
-    if(fc->d2 == NULL && fc->d3 == NULL)
-    {
-        FCLAW_FREE(fc);
-        return NULL;
-    }
-    else
-    {
-        return fc;
     }
 }
 
