@@ -23,9 +23,6 @@ add_subdirectory(clawpack/advection/2d/swirl)
 ## filament  (square, multi-block disk)
 add_subdirectory(clawpack/advection/2d/filament)
 
-## filament_swirl
-add_subdirectory(clawpack/advection/2d/filament_swirl)
-
 ## annulus  (manifold, periodic in one direction)
 add_subdirectory(clawpack/advection/2d/annulus)
 
