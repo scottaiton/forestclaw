@@ -6,3 +6,9 @@
 
 ## swirl restart demonstration
 include applications/demo/2d/swirl_restart/Makefile.am
+
+## swirl ray integration demonstration
+include applications/demo/2d/swirl_rays/Makefile.am
+
+## filament and swirl multisolver with exchange demonstration
+include applications/demo/2d/filament_swirl/Makefile.am

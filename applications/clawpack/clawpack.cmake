@@ -23,9 +23,6 @@ add_subdirectory(clawpack/advection/2d/swirl)
 ## filament  (square, multi-block disk)
 add_subdirectory(clawpack/advection/2d/filament)
 
-## filament_swirl
-add_subdirectory(clawpack/advection/2d/filament_swirl)
-
 ## annulus  (manifold, periodic in one direction)
 add_subdirectory(clawpack/advection/2d/annulus)
 
@@ -79,12 +76,6 @@ add_subdirectory(clawpack/advection/2d/slotted_disk)
 add_subdirectory(clawpack/transport/2d/sphere)
 add_subdirectory(clawpack/transport/2d/torus)
 add_subdirectory(clawpack/transport/2d/square)
-
-## -------------------------------- Rays --------------------------------- 
-## Test example including rays
-## -------------------------------------------------------------------------
-
-add_subdirectory(clawpack/advection/2d/swirl_rays)
 
 ## ----------------------------------------------------------
 ## Other hyperbolic problems (acoustics, Euler, burgers, SWE)
