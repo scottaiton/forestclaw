@@ -5,6 +5,8 @@ ForestClaw = 1;     % Plot using ForestClaw preferences.
 
 PlotType = 1;    % type of plot to produce:
 		         % 1 = pseudo-color (pcolor)
+PlotType = 1;                % type of plot to produce:
+		     % 1 = pseudo-color (pcolor)
 			     % 2 = contour
 			     % 3 = Schlieren
 			     % 4 = scatter plot of q vs. r

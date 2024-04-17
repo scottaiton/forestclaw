@@ -59,6 +59,7 @@ else
         c1 = 0.8;
         c2 = 1.2;
         clim([c1, c2]);
+        clim([0.95,1.05]);
     end
     colorbar;
     
