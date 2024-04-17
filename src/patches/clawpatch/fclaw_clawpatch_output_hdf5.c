@@ -404,7 +404,7 @@ get_patch_blockno(fclaw_global_t *glob, int i, int *blockno, int *patchno)
     *blockno = 0;
     while(*blockno < (glob->domain->num_blocks-1) && glob->domain->blocks[*blockno+1].num_patches_before <= i)
     {
-        blockno++;
+        (*blockno)++;
     }
     *patchno = i - glob->domain->blocks[*blockno].num_patches_before;
 }
