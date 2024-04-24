@@ -120,8 +120,8 @@ def setrun(claw_pkg='geoclaw'):
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
-        clawdata.num_output_times = 4 # 80
-        clawdata.tfinal = 4.0
+        clawdata.num_output_times = 24 # 80
+        clawdata.tfinal = 12.0
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
     elif clawdata.output_style == 2:
@@ -131,8 +131,8 @@ def setrun(claw_pkg='geoclaw'):
 
     elif clawdata.output_style == 3:
         # Output every step_interval timesteps over total_steps timesteps:
-        clawdata.output_step_interval = 10
-        clawdata.total_steps = 100
+        clawdata.output_step_interval = 1
+        clawdata.total_steps = 20
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
 

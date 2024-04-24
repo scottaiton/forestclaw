@@ -11,7 +11,7 @@ add_library(sphere_swe_f OBJECT
 	user_4.6/sphere_setaux.f90
 	user_4.6/sphere_b4step2.f90
 	user_4.6/rpn2swsphere.f90
-	user_4.6/rpn2swsphere_fwave.f90
+	user_4.6/rpn2swe_fwave2.f90
 	user_4.6/rpt2swq.f90
 	user_4.6/rpt2swq_fwave.f90
 )

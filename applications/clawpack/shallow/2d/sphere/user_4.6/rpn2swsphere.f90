@@ -39,9 +39,6 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     integer icom,jcom
     common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
 
-    !!double precision xlow, ylow
-    !!common /xlyl/ xlow,ylow
-
     data efix /.false./    !# use entropy fix for transonic rarefactions
 
 
@@ -78,7 +75,6 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
 
     !! # find a1 thru a3, the coefficients of the 3 eigenvectors:
 
-
     do i = 2-mbc, mx+mbc
 
         enx =   auxl(i,ioff+1)
@@ -97,12 +93,12 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
         ery = auxl(i,15)
         erz = auxl(i,16)
         qn = erx*ql(i,2) + ery*ql(i,3) + erz*ql(i,4)
-        ql(i,2) = ql(i,2) - qn*erx
-        ql(i,3) = ql(i,3) - qn*ery
-        ql(i,4) = ql(i,4) - qn*erz
-        qr(i,2) = ql(i,2)
-        qr(i,3) = ql(i,3)
-        qr(i,4) = ql(i,4)
+!!        ql(i,2) = ql(i,2) - qn*erx
+!!        ql(i,3) = ql(i,3) - qn*ery
+!!        ql(i,4) = ql(i,4) - qn*erz
+!!        qr(i,2) = ql(i,2)
+!!        qr(i,3) = ql(i,3)
+!!        qr(i,4) = ql(i,4)
 
     !! # compute normal and tangential momentum at cell edge:
         hunl = enx*ql(i,2) + eny*ql(i,3) + enz*ql(i,4)
@@ -129,9 +125,9 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
         delta(2) = hunl - hunr
         delta(3) = hutl - hutr
 
-        a1 = ((u(i)+a(i))*delta(1) - delta(2))*(0.50d0/a(i))
-        a2 = -v(i)*delta(1) + delta(3)
+        a1 =  ((u(i)+a(i))*delta(1) - delta(2))*(0.50d0/a(i))
         a3 = (-(u(i)-a(i))*delta(1) + delta(2))*(0.50d0/a(i))
+        a2 = -v(i)*delta(1) + delta(3)
 
         !! # Compute the waves.  Rotate waves back into 
         !! # computational space.
@@ -222,15 +218,6 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     !! 
 
   110    continue
-
-    !! # With entropy fix
-    !! ------------------
-
-    !! # compute flux differences amdq and apdq.
-   !! # First compute amdq as sum of s*wave for left going waves.
-   !! # Incorporate entropy fix by adding a modified fraction of wave
-   !! # if s should change sign.
-
 
   900    continue
          return

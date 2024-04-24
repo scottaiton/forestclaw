@@ -72,6 +72,7 @@ else
     s = 0.2;
     axis([-1-s,1+s,-1-s,1+s,-1-s,1+s])
     view([32,24])
+%     view(vright)
     set(gca,'clipping','off')
 end
 

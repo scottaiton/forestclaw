@@ -1,4 +1,7 @@
-subroutine clawpack46_rpt2_fwave(ixy,maxm,meqn,mwaves,maux,mbc,mx, &
+!!subroutine clawpack46_rpt2_fwave(ixy,maxm,meqn,mwaves,maux,mbc,mx, &
+!!    ql,qr,aux1,aux2,aux3,imp,asdq,bmasdq,bpasdq)
+
+subroutine clawpack46_rpt2_fwave(ixy,maxm,meqn,mwaves,mbc,mx, &
     ql,qr,aux1,aux2,aux3,imp,asdq,bmasdq,bpasdq)
 
     implicit none
@@ -13,13 +16,13 @@ subroutine clawpack46_rpt2_fwave(ixy,maxm,meqn,mwaves,maux,mbc,mx, &
     !! # Uses Roe averages and other quantities which were
     !! # computed in rpn2sh and stored in the common block comroe.
 
-    integer ixy,maxm,meqn,mwaves,mbc,mx, imp,maux
+    integer ixy,maxm,meqn,mwaves,mbc,mx, imp
 
     double precision, dimension(1-mbc:maxm+mbc,meqn) :: ql,qr
     double precision, dimension(1-mbc:maxm+mbc,meqn) :: asdq, bmasdq, bpasdq
-    double precision   aux1(1-mbc:maxm+mbc, maux)
-    double precision   aux2(1-mbc:maxm+mbc, maux)
-    double precision   aux3(1-mbc:maxm+mbc, maux)
+    double precision   aux1(1-mbc:maxm+mbc, *)
+    double precision   aux2(1-mbc:maxm+mbc, *)
+    double precision   aux3(1-mbc:maxm+mbc, *)
 
     !! Dummy arguments
     double precision wave(1-mbc:maxm+mbc, meqn, mwaves)
