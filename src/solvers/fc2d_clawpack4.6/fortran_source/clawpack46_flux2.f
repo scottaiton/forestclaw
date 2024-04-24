@@ -4,7 +4,7 @@ c     =====================================================
       subroutine clawpack46_flux2(ixy,maxm,meqn,maux,mbc,mx,
      &      q1d,dtdx1d,aux1,aux2,aux3, faddm,faddp,gaddm,gaddp,
      &      cfl1d,wave,s,amdq,apdq,cqxx,bmasdq,bpasdq,
-     &      rpn2,rpt2,mwaves,mcapa,method,mthlim,ierror, use_fwaves)
+     &      rpn2,rpt2,mwaves,mcapa,method,mthlim,use_fwaves)
 c     =====================================================
 c
 c     # clawpack routine ...  modified for AMRCLAW
@@ -135,6 +135,7 @@ c             # if s<0 use dtdx1d(i-1) to compute CFL:
      &                          -dtdx1d(i-1)*s(i,mw))
           end do
       end do
+c      write(6,'(A, F24.16)') 'flux2 : ', cfl1d
 c
       if (method(2) .eq. 2) then
 
@@ -159,7 +160,11 @@ c             dtdx1d(i-1) = 0.5d0 * (dtdx1d(i-1) + dtdx1d(i))
                   cqxx(i,m) = 0.d0
                   do mw = 1,mwaves
                      if (use_fwaves .ne. 0) then
-                        abs_sign = dsign(1.d0,s(i,mw))
+                        if (s(i,mw) .eq. 0) then
+                           abs_sign = 0
+                        else
+                           abs_sign = dsign(1.d0,s(i,mw))
+                        endif
                      else
                         abs_sign = dabs(s(i,mw))
                      endif

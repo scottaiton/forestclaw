@@ -6,7 +6,8 @@ c     ==========================================================
      &     mx,my,qold,aux,dx,dy,dt,cflgrid,fm,fp,gm,gp,
      &     faddm,faddp,gaddm,gaddp,q1d,dtdx1d,dtdy1d,
      &     aux1,aux2,aux3,work,mwork,rpn2,rpt2,flux2,
-     &     mwaves,mcapa,method,mthlim, block_corner_count, ierror)
+     &     mwaves,mcapa,method,mthlim, block_corner_count, ierror,
+     &     use_fwaves)
 c     ==========================================================
       implicit none
 
@@ -14,7 +15,7 @@ c     ==========================================================
 
       integer :: maxm, maxmx, maxmy, meqn, maux, mbc, mx, my, mwork
       double precision :: dx, dy, dt, cflgrid
-      integer :: mwaves, mcapa, method(7), mthlim(mwaves)
+      integer :: mwaves, mcapa, method(7), mthlim(mwaves), use_fwaves
       integer :: block_corner_count(0:3)
       integer :: ierror
 
@@ -148,7 +149,7 @@ c        # compute modifications fadd and gadd to fluxes along this slice:
      &        faddm,faddp,gaddm,gaddp,cfl1d,
      &        work(i0wave),work(i0s),work(i0amdq),work(i0apdq),
      &        work(i0cqxx),work(i0bmadq),work(i0bpadq),rpn2,rpt2,
-     &        mwaves,mcapa,method,mthlim)
+     &        mwaves,mcapa,method,mthlim, use_fwaves)
 
          cflgrid = dmax1(cflgrid,cfl1d)
 c     
@@ -217,7 +218,7 @@ c     # compute modifications fadd and gadd to fluxes along this slice:
      &        faddm,faddp,gaddm,gaddp,cfl1d,
      &        work(i0wave),work(i0s),work(i0amdq),work(i0apdq),
      &        work(i0cqxx),work(i0bmadq),work(i0bpadq),rpn2,rpt2,
-     &        mwaves,mcapa,method,mthlim)
+     &        mwaves,mcapa,method,mthlim,use_fwaves)
 
          cflgrid = dmax1(cflgrid,cfl1d)
 c     
