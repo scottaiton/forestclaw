@@ -124,8 +124,8 @@ fclaw_register (fclaw_options_t* fclaw_opt, sc_options_t * opt)
     sc_options_add_bool (opt, 0, "output", &fclaw_opt->output, 0,
                             "Enable output [F]");
 
-    sc_options_add_bool (opt, 0, "restart-out", &fclaw_opt->restart_out, 0,
-                            "Enable restart output [F]");
+    sc_options_add_bool (opt, 0, "checkpoint-out", &fclaw_opt->checkpoint_out, 0,
+                            "Enable checkpoint output [F]");
 
     /* -------------------------------------- Gauges  --------------------------------- */
     /* Gauge options */

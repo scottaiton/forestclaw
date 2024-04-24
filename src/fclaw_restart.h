@@ -36,7 +36,6 @@ extern "C"
 
 struct fclaw_global;  /* This is a hack !! */
 
-void fclaw_restart_output_frame(struct fclaw_global * glob, int iframe);
 
 /**
  * @brief Restarts the forestclaw simulation from a restart file.

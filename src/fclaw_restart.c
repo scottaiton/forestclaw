@@ -357,3 +357,17 @@ fclaw_restart_from_file (fclaw_global_t * glob,
 {
     restart(glob, restart_filename, partition_filename, FCLAW_TIMER_INIT);
 }
+
+void fclaw_output_checkpoint(fclaw_global_t* glob, int iframe)
+{
+    const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
+
+    if(fclaw_opt->checkpoint_out)
+    {
+        fclaw_timer_start (&glob->timers[FCLAW_TIMER_OUTPUT]);
+
+        fclaw_restart_output_frame(glob,iframe);
+
+        fclaw_timer_stop (&glob->timers[FCLAW_TIMER_OUTPUT]);
+    }
+}

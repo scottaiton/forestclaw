@@ -221,7 +221,7 @@ struct fclaw_options
     int verbosity;              /**< TODO: Do we have guidelines here? */
 
     int output;                    
-    int restart_out;                    
+    int checkpoint_out;                    
     int tikz_out;      /* Boolean */
 
     const char *tikz_figsize_string;

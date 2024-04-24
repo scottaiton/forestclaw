@@ -71,16 +71,5 @@ fclaw_output_frame (fclaw_global_t * glob, int iframe)
         fclaw2d_output_frame_tikz(glob,iframe);
     }
 
-    if(fclaw_opt->restart_out)
-    {
-        fclaw_timer_start (&glob->timers[FCLAW_TIMER_OUTPUT]);
-
-        fclaw_restart_output_frame(glob,iframe);
-
-        fclaw_timer_stop (&glob->timers[FCLAW_TIMER_OUTPUT]);
-    }
+    
 }
-
-
-
-
