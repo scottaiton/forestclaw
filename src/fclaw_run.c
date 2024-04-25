@@ -33,6 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_output.h>
 #include <fclaw_diagnostics.h>
 #include <fclaw_vtable.h>
+#include <fclaw_context.h>
 #include <fclaw_packing.h>
 
 #include "fclaw_math.h"
@@ -112,87 +113,6 @@ static void outstyle_0(fclaw_global_t *glob)
 
 }
 
-typedef
-struct outstyle1_ctx
-{
-    int initalized;
-    int iframe;
-    int n;
-    int n_inner;
-    double dt_minlevel;
-} outstyle1_ctx_t;
-
-static 
-size_t packsize_outstyle1_ctx(fclaw_global_t *glob, 
-                              void *user)
-{
-    outstyle1_ctx_t *ctx = (outstyle1_ctx_t*) user;
-    size_t size = 0;
-    size += sizeof(ctx->initalized);
-    size += sizeof(ctx->iframe);
-    size += sizeof(ctx->n);
-    size += sizeof(ctx->n_inner);
-    size += sizeof(ctx->dt_minlevel);
-    return size;
-}
-
-static
-size_t pack_outstyle1_ctx(fclaw_global_t *glob, 
-                          void *user, 
-                          char *buffer)
-{
-    outstyle1_ctx_t *ctx = (outstyle1_ctx_t*) user;
-    char* buffer_start = buffer;
-    buffer += fclaw_pack_int(ctx->initalized,buffer);
-    buffer += fclaw_pack_int(ctx->iframe,buffer);
-    buffer += fclaw_pack_int(ctx->n,buffer);
-    buffer += fclaw_pack_int(ctx->n_inner,buffer);
-    buffer += fclaw_pack_double(ctx->dt_minlevel,buffer);
-    return buffer - buffer_start;
-}
-
-static
-size_t unpack_outstyle1_ctx(fclaw_global_t *glob, 
-                            char *buffer, 
-                            void *user)
-{
-    outstyle1_ctx_t *ctx = (outstyle1_ctx_t*) user;
-    char* buffer_start = buffer;
-    buffer += fclaw_unpack_int(buffer,&ctx->initalized);
-    buffer += fclaw_unpack_int(buffer,&ctx->iframe);
-    buffer += fclaw_unpack_int(buffer,&ctx->n);
-    buffer += fclaw_unpack_int(buffer,&ctx->n_inner);
-    buffer += fclaw_unpack_double(buffer,&ctx->dt_minlevel);
-    return buffer - buffer_start;
-}
-
-static
-void *outstyle1_ctx_new(fclaw_global_t *glob)
-{
-    outstyle1_ctx_t *ctx = FCLAW_ALLOC_ZERO(outstyle1_ctx_t,1);
-    return (void*) ctx;
-}
-
-static
-void outstyle1_ctx_destroy(void *user)
-{
-    FCLAW_FREE(user);
-}
-
-#define OUTSTYLE1_CTX_ATTRIBUTE_KEY "fclaw_run_outstyle1_ctx"
-#define OUTSTYLE1_CTX_VTABLE_KEY "fclaw_run_outstyle1_ctx_vtable"
-
-static
-fclaw_packing_vtable_t outstyle1_ctx_vt = 
-{
-    pack_outstyle1_ctx,
-    unpack_outstyle1_ctx,
-    packsize_outstyle1_ctx,
-    outstyle1_ctx_new,
-    outstyle1_ctx_destroy
-};
-
-
 /* -------------------------------------------------------------------------------
    Output style 1
    Output times are at times [0,dT, 2*dT, 3*dT,...,Tfinal], where dT = tfinal/nout
@@ -200,54 +120,38 @@ fclaw_packing_vtable_t outstyle1_ctx_vt =
 static
 void outstyle_1(fclaw_global_t *glob)
 {
-    const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
-    outstyle1_ctx_t* ctx = (outstyle1_ctx_t*) fclaw_global_get_attribute(glob, OUTSTYLE1_CTX_ATTRIBUTE_KEY);  
-    if(ctx == NULL)
-    {
-        FCLAW_ASSERT(strcmp(fclaw_opt->restart_file,"") == 0);
-
-        ctx = (outstyle1_ctx_t*) outstyle1_ctx_new(glob);
-        fclaw_global_attribute_store(glob, 
-                                     OUTSTYLE1_CTX_ATTRIBUTE_KEY, 
-                                     ctx, 
-                                     OUTSTYLE1_CTX_VTABLE_KEY, 
-                                     outstyle1_ctx_destroy);
-    }
     fclaw_domain_t** domain = &glob->domain;
+    /* get context object from glob, if there is none, a new one will be created */
+    fclaw_context_t *ctx = fclaw_context_get(glob, "fclaw_run_outstyle1_ctx");
 
     /* Set error to 0 */
     int init_flag = 1;  /* Store anything that needs to be stored */
     fclaw_diagnostics_gather(glob,init_flag);
     init_flag = 0;
 
-    if(!ctx->initalized)
-    {
-        ctx->iframe = 0;
-        fclaw_output_frame(glob,ctx->iframe);
-    }
+    int iframe;
+    fclaw_context_get_int(ctx, "iframe", &iframe, 0);
+    fclaw_output_frame(glob,iframe);
 
+    const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
 
     double final_time = fclaw_opt->tfinal;
     int nout = fclaw_opt->nout;
     double initial_dt = fclaw_opt->initial_dt;
     int level_factor = pow_int(2,fclaw_opt->maxlevel - fclaw_opt->minlevel);
-    if(!ctx->initalized)
-    {
-        ctx->dt_minlevel = initial_dt;
-    }
+    double dt_minlevel;
+    fclaw_context_get_double(ctx, "dt_minlevel", &dt_minlevel, initial_dt);
 
     double t0 = 0;
 
     double dt_outer = (final_time-t0)/((double) nout);
-    double t_curr = glob->curr_time;
+    double t_curr = t0;
+    int n_inner;
+    fclaw_context_get_int(ctx, "n_inner", &n_inner, 0);
 
-    if(!ctx->initalized)
-    {
-        ctx->n_inner = 0;
-        ctx->n = 0;
-    }
-    ctx->initalized = 1;
-    for(/* init above */; ctx->n < nout; ctx->n++)
+    int n;
+    fclaw_context_get_int(ctx, "n", &n, 0);
+    for(/* init above */; n < nout; n++)
     {
         double tstart = t_curr;
 
@@ -268,7 +172,7 @@ void outstyle_1(fclaw_global_t *glob)
                the next step.  Of course if 'tend - t_curr > dt_minlevel',
                then dt_minlevel doesn't change. */
 
-            double dt_step = ctx->dt_minlevel;
+            double dt_step = dt_minlevel;
             if (fclaw_opt->advance_one_step)
             {
                 dt_step /= level_factor;
@@ -317,7 +221,7 @@ void outstyle_1(fclaw_global_t *glob)
                                      fclaw_opt->minlevel,
                                      (*domain)->global_minlevel,
                                      (*domain)->global_maxlevel,
-                                     ctx->n_inner+1,dt_step,
+                                     n_inner+1,dt_step,
                                      maxcfl_step, tc);
 
             if ((maxcfl_step > fclaw_opt->max_cfl) & fclaw_opt->reduce_cfl)
@@ -330,7 +234,7 @@ void outstyle_1(fclaw_global_t *glob)
                     restore_time_step(glob);
 
                     /* Modify dt_level0 from step used. */
-                    ctx->dt_minlevel = ctx->dt_minlevel*fclaw_opt->desired_cfl/maxcfl_step;
+                    dt_minlevel = dt_minlevel*fclaw_opt->desired_cfl/maxcfl_step;
 
                     /* Got back to start of loop, without incrementing
                        step counter or time level */
@@ -339,7 +243,7 @@ void outstyle_1(fclaw_global_t *glob)
             }
 
             /* We are happy with this step */
-            ctx->n_inner++;
+            n_inner++;
             t_curr += dt_step;
 
 
@@ -363,10 +267,10 @@ void outstyle_1(fclaw_global_t *glob)
 
                 /* New time step, which should give a cfl close to the
                    desired cfl. */
-                double dt_new = ctx->dt_minlevel*fclaw_opt->desired_cfl/maxcfl_step;
+                double dt_new = dt_minlevel*fclaw_opt->desired_cfl/maxcfl_step;
                 if (!took_small_step)
                 {
-                    ctx->dt_minlevel = dt_new;
+                    dt_minlevel = dt_new;
                 }
                 else
                 {
@@ -383,9 +287,9 @@ void outstyle_1(fclaw_global_t *glob)
 
             if (fclaw_opt->regrid_interval > 0)
             {
-                if (ctx->n_inner % fclaw_opt->regrid_interval == 0)
+                if (n_inner % fclaw_opt->regrid_interval == 0)
                 {
-                    fclaw_global_infof("regridding at step %d\n",ctx->n);
+                    fclaw_global_infof("regridding at step %d\n",n);
                     fclaw_regrid(glob);
                 }
             }
@@ -394,8 +298,13 @@ void outstyle_1(fclaw_global_t *glob)
         /* Output file at every outer loop iteration */
         fclaw_diagnostics_gather(glob, init_flag);
         glob->curr_time = t_curr;
-        ctx->iframe++;
-        fclaw_output_frame(glob,ctx->iframe);
+        iframe++;
+        fclaw_output_frame(glob,iframe);
+
+        /* save context values */
+        fclaw_context_save(ctx);
+        /* output checkpoint */
+        fclaw_output_checkpoint(glob, iframe);
     }
 }
 
@@ -407,25 +316,17 @@ static void outstyle_2(fclaw2d_global_t *glob)
 }
 #endif
 
-typedef struct outstyle3_ctx
-{
-    int iframe;
-    int n;
-    double dt_minlevel;
-} outstyle3_ctx_t;
-
 static
 void outstyle_3(fclaw_global_t *glob)
 {
-    outstyle3_ctx_t* ctx = FCLAW_ALLOC(outstyle3_ctx_t,1);
     fclaw_domain_t** domain = &glob->domain;
 
     int init_flag = 1;
     fclaw_diagnostics_gather(glob,init_flag);
     init_flag = 0;
 
-    ctx->iframe = 0;
-    fclaw_output_frame(glob,ctx->iframe);
+    int iframe = 0;
+    fclaw_output_frame(glob,iframe);
 
 
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
@@ -435,7 +336,7 @@ void outstyle_3(fclaw_global_t *glob)
     //fclaw2d_time_sync_reset(glob,fclaw_opt->minlevel,fclaw_opt->maxlevel,1);
 
     double t0 = 0;
-    ctx->dt_minlevel = initial_dt;
+    double dt_minlevel = initial_dt;
     glob->curr_time = t0;
     int nstep_outer = fclaw_opt->nout;
     int nstep_inner = fclaw_opt->nstep;
@@ -458,11 +359,11 @@ void outstyle_3(fclaw_global_t *glob)
         }
     }
 
-    ctx->n = 0;
-    double t_curr = glob->curr_time;
-    while (ctx->n < nstep_outer)
+    int n = 0;
+    double t_curr = t0;
+    while (n < nstep_outer)
     {
-        double dt_step = ctx->dt_minlevel;
+        double dt_step = dt_minlevel;
         if (!fclaw_opt->subcycle && fclaw_opt->advance_one_step)
         {
             /* if domain->global_maxlevel < fclaw_opt->maxlevel, this choice
@@ -500,7 +401,7 @@ void outstyle_3(fclaw_global_t *glob)
                                  level2print,
                                  (*domain)->global_minlevel,
                                  (*domain)->global_maxlevel,
-                                 ctx->n+1,dt_step,maxcfl_step, tc);
+                                 n+1,dt_step,maxcfl_step, tc);
 
         if (fclaw_opt->reduce_cfl & (maxcfl_step > fclaw_opt->max_cfl))
         {
@@ -509,7 +410,7 @@ void outstyle_3(fclaw_global_t *glob)
                 fclaw_global_productionf("   WARNING : Maximum CFL exceeded; retaking time step\n");
                 restore_time_step(glob);
 
-                ctx->dt_minlevel = ctx->dt_minlevel*fclaw_opt->desired_cfl/maxcfl_step;
+                dt_minlevel = dt_minlevel*fclaw_opt->desired_cfl/maxcfl_step;
 
                 /* Go back to start of loop without incrementing step counter or
                    current time. */
@@ -528,16 +429,16 @@ void outstyle_3(fclaw_global_t *glob)
         /* New time step, which should give a cfl close to the desired cfl. */
         if (!fclaw_opt->use_fixed_dt)
         {
-            ctx->dt_minlevel = ctx->dt_minlevel*fclaw_opt->desired_cfl/maxcfl_step;
+            dt_minlevel = dt_minlevel*fclaw_opt->desired_cfl/maxcfl_step;
         }
 
-        ctx->n++;  /* Increment outer counter */
+        n++;  /* Increment outer counter */
 
         if (fclaw_opt->regrid_interval > 0)
         {
-            if (ctx->n % nregrid_interval == 0)
+            if (n % nregrid_interval == 0)
             {
-                fclaw_global_infof("regridding at step %d\n",ctx->n);
+                fclaw_global_infof("regridding at step %d\n",n);
                 fclaw_regrid(glob);
             }
         }
@@ -547,14 +448,13 @@ void outstyle_3(fclaw_global_t *glob)
             //fclaw2d_diagnostics_gather(glob,init_flag);
         }
 
-        if (ctx->n % nstep_inner == 0)
+        if (n % nstep_inner == 0)
         {
-            ctx->iframe++;
+            iframe++;
             fclaw_diagnostics_gather(glob,init_flag);
-            fclaw_output_frame(glob,ctx->iframe);
+            fclaw_output_frame(glob,iframe);
         }
     }
-    FCLAW_FREE(ctx);
 }
 
 
@@ -653,7 +553,7 @@ void fclaw_run(fclaw_global_t *glob)
     }
 }
 
-void fclaw_run_vtables_initialize(fclaw_global_t *glob)
+void fclaw_run_vtables_initialize(struct fclaw_global *glob)
 {
-    fclaw_global_vtable_store(glob, OUTSTYLE1_CTX_VTABLE_KEY, &outstyle1_ctx_vt, NULL);
+
 }
