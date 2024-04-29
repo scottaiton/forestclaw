@@ -81,6 +81,8 @@ typedef struct fclaw_context fclaw_context_t;
  * @brief Get the context object from glob. If the context object does not exist, it is created.
  * 
  * If the context exists, calling the function will reset all pointers associated with the values.
+ *
+ * fclaw_context_save needs to be called before the context object can be retrieved again.
  * 
  * @param glob the global context
  * @return fclaw_context_t* the context object
@@ -90,7 +92,7 @@ fclaw_context_t* fclaw_context_get(fclaw_global_t *glob, const char *name);
 /**
  * @brief Get an integer value from the context object. If the value does not exist, the default value is returned.
  *
- * If this isn't a new context and the value does not exist, an error message is printed and the program aborts.
+ * If the context isn't new and the value does not exist, an error message is printed and the program aborts.
  * 
  * @param context the context object
  * @param name the name of the value
@@ -105,7 +107,7 @@ void fclaw_context_get_int(fclaw_context_t *context,
 /**
  * @brief Get a double value from the context object. If the value does not exist, the default value is returned.
  * 
- * If this isn't a new context and the value does not exist, an error message is printed and the program aborts.
+ * If the context isn't new and the value does not exist, an error message is printed and the program aborts.
  * 
  * @param context the context object
  * @param name the name of the value
@@ -122,7 +124,7 @@ void fclaw_context_get_double(fclaw_context_t *context,
  * 
  * This will get the values from the pointers provided in the get functions. 
  *
- * If the context is not new, and all values have not been retrieved,
+ * If the context is not new, and all values have not been retrieved (ie fclaw_context_get_int or fclaw_context_get_double),
  * this function will abort with an error message.
  * 
  * @param context the context object to save to
@@ -130,7 +132,7 @@ void fclaw_context_get_double(fclaw_context_t *context,
 void fclaw_context_save(fclaw_context_t *context);
 
 /**
- * @brief Initializes the vtable need for packing context objects
+ * @brief Initializes the vtable needed for packing context objects
  * 
  * @param glob the global context
  */
