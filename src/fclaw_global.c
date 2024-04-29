@@ -83,6 +83,11 @@ fclaw_global_t* fclaw_global_new (fclaw_app_t * app)
                                  sc_options,
                                  NULL, NULL);
 
+    void *fclaw_opt_sections = fclaw_app_get_attribute(app, "fclaw_opt_sections", NULL);
+    fclaw_global_attribute_store(glob,
+                                 "fclaw_opt_sections",
+                                 fclaw_opt_sections,
+                                 NULL, NULL);
 
     return glob;
 }

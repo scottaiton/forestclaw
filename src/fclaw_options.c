@@ -526,6 +526,14 @@ options_destroy (fclaw_app_t * a, void *package, void *registered)
 
     /* Destroy option arrays created in post-process */
     fclaw_options_destroy (fclaw_opt);
+
+    /* Destroy linked list of section names */
+    sc_keyvalue_t * fclaw_opt_sections = fclaw_app_get_attribute(a, "fclaw_opt_sections", NULL);
+    if(fclaw_opt_sections != NULL)
+    {
+        sc_keyvalue_destroy(fclaw_opt_sections);
+        fclaw_app_set_attribute(a, "fclaw_opt_sections", NULL);
+    }
 }
 
 static const fclaw_app_options_vtable_t options_vtable = {
@@ -561,6 +569,26 @@ fclaw_options_t* fclaw_options_register (fclaw_app_t * a,
                                 configfile,
                                 &options_vtable,
                                 fclaw_opt);
+
+    /* append to list of sections for fclaw_opts */
+    sc_keyvalue_t *fclaw_opt_sections = fclaw_app_get_attribute(a, "fclaw_opt_sections", NULL);
+    if(fclaw_opt_sections == NULL)
+    {
+        fclaw_opt_sections = sc_keyvalue_new();
+        fclaw_app_set_attribute(a, "fclaw_opt_sections", fclaw_opt_sections);
+    }
+    char *key = strdup(section == NULL ? "Options" : section);
+    char* curr_char = key;
+    while(*curr_char != '\0')
+    {
+        *curr_char = tolower(*curr_char);
+        curr_char++;
+    }
+    /* set to 1 for the section, so if checking the section 
+       exists int the keyvalue, the return value is 1 */
+    sc_keyvalue_set_int(fclaw_opt_sections, 
+                        key,
+                        1);
     
     return fclaw_opt;
 }

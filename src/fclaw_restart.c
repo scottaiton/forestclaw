@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_regrid.h>
 #include <fclaw_partition.h>
 #include <fclaw_forestclaw.h>
+#include <iniparser.h>
 
 #define CHECK_ERROR_CODE(refine_dim, errcode, str) \
 do { \
@@ -98,6 +99,126 @@ get_used_ini(fclaw_global_t * glob)
 
 }
 
+static int
+skip_option(sc_keyvalue_t *fclaw_opt_sections, const char* section, const char* key)
+{
+    int skip = 0;
+    if(sc_keyvalue_get_int(fclaw_opt_sections, section, 0))
+    {
+        //skip the section: part of the key
+        const char* key_substr = key + strlen(section) + 1;
+        if(strcmp(key_substr, "restart-file") == 0)
+        {
+            skip = 1;
+        }
+        else if(strcmp(key_substr, "partition-file") == 0)
+        {
+            skip = 1;
+        }
+    }
+    return skip;
+}
+
+static int
+compare_dictionaries(sc_keyvalue_t *fclaw_opt_secitons,
+                     dictionary *expected, 
+                     dictionary *actual)
+{
+    int num_differences = 0;
+    int nsec = iniparser_getnsec(expected);
+    for (int i_sec = 0; i_sec < nsec; i_sec++)
+    {
+        char* section = iniparser_getsecname(expected, i_sec);
+        if(strcmp(section, "arguments") != 0)
+        {
+            if(iniparser_find_entry(actual,section))
+            {
+                int nkey = iniparser_getsecnkeys(expected, section);
+                char** keys = iniparser_getseckeys(expected, section);
+
+                for (int i_key = 0; i_key < nkey; i_key++)
+                {
+                    char* key = keys[i_key];
+                    if(skip_option(fclaw_opt_secitons, section, key))
+                    {
+                        continue;
+                    }
+
+                    if(iniparser_find_entry(actual, key))
+                    {
+                        char* expected_value = iniparser_getstring(expected, key, NULL);
+                        char* actual_value = iniparser_getstring(actual, key, NULL);
+                        if(strcmp(expected_value, actual_value) != 0)
+                        {
+                            fclaw_global_productionf("%s has mismatched value for %s: %s != %s.\n", section, key, expected_value, actual_value);
+                            num_differences++;
+                        }
+
+                    }
+                    else
+                    {
+                        //fclaw_global_productionf("%s has unused option %s.\n", filename, keys[i_key]);
+                    }
+                }
+                free (keys);
+            }
+            else
+            {
+                //fclaw_global_productionf("%s has unused section [%s].\n", filename, section);
+            }
+        }
+    }
+    return num_differences;
+}
+
+static void
+check_options(fclaw_global_t * glob, const char* checkpoint_ini)
+{
+    if(glob->mpirank == 0)
+    {
+        fclaw_global_productionf("=========== Comparing with options stored in checkpoint ===========\n");
+        fclaw_global_productionf("\n");
+
+        //save the used ini file
+        sc_options_t * options = fclaw_global_get_attribute(glob, "fclaw_options");
+        int retval = sc_options_save (fclaw_get_package_id (),
+                                      FCLAW_VERBOSITY_ERROR, 
+                                      options, 
+                                      "fclaw_options.ini.used");
+
+        //save the restart ini file to fclaw_options.ini.checkpoint
+        FILE *file = fopen("fclaw_options.ini.checkpoint", "w");
+        if (file == NULL)
+        {
+            printf("Cannot open file\n");
+            return;
+        }
+        fprintf(file, "%s", checkpoint_ini);
+        fclose(file);
+
+        fclaw_global_productionf("Checkpoints options saved to fclaw_options.ini.checkpoint\n");
+        fclaw_global_productionf("\n");
+
+        dictionary *actual = iniparser_load("fclaw_options.ini.used");
+        dictionary *expected = iniparser_load("fclaw_options.ini.checkpoint");
+
+        sc_keyvalue_t *fclaw_opt_sections 
+            = fclaw_global_get_attribute(glob, "fclaw_opt_sections");
+        int num_differences = compare_dictionaries(fclaw_opt_sections, expected, actual);
+        
+        iniparser_freedict(actual);
+        iniparser_freedict(expected);
+
+        if(num_differences == 0)
+        {
+            fclaw_global_productionf("No differences found.\n");
+        }
+
+        fclaw_global_productionf("\n");
+        fclaw_global_productionf("===================================================================\n");
+    }
+}
+
 static void
 free_used_ini(void* data)
 {
@@ -153,6 +274,14 @@ set_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int pat
 }
 
 static
+void check_user_string(const char* expected, const char* actual)
+{
+    if(strncmp(expected, actual, strlen(expected)) != 0)
+    {
+        fclaw_abortf("User string mismatch: %s != %s\n", expected, actual);
+    }
+}
+static
 void restart (fclaw_global_t * glob,
               const char* restart_filename,
               const char* partition_filename,
@@ -192,8 +321,25 @@ void restart (fclaw_global_t * glob,
     {
         sc_array_destroy(partition);
     }
+    sc_array_t array;
+    sc_array_init_size(&array, sizeof(size_t), 1);
+    fc = fclaw_file_read_block(fc, user_string, sizeof(size_t), &array, &errcode);
+    CHECK_ERROR_CODE(refine_dim, errcode, "restart read used_ini_length");
+    check_user_string("used_ini_length", user_string);
 
-        sc_array_t globsize;
+    size_t ini_length = *((size_t*) sc_array_index(&array, 0));
+    sc_array_reset(&array);
+
+    sc_array_init_size(&array, ini_length, 1);
+    fc = fclaw_file_read_block(fc, user_string, ini_length, &array, &errcode);
+    const char* used_ini = (const char*) sc_array_index(&array, 0);
+    check_options(glob, used_ini);
+
+    
+    CHECK_ERROR_CODE(refine_dim, errcode, "restart read used_ini");
+    sc_array_reset(&array);
+
+    sc_array_t globsize;
     sc_array_init_size(&globsize, sizeof(size_t), 1);
 
     fc = fclaw_file_read_block(fc, user_string, sizeof(size_t), &globsize, &errcode);
