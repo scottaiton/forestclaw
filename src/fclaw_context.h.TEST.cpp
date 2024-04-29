@@ -45,11 +45,22 @@ TEST_CASE("fclaw_context_get two new contexts")
 	fclaw_global_destroy(glob);
 }
 
+TEST_CASE("fclaw_context_get existing context without saving")
+{
+	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
+	fclaw_context_t *context1 = fclaw_context_get(glob, "test");
+	CHECK_NE(context1, nullptr);
+	//should fail since it wasnn't saved
+	CHECK_SC_ABORTED(fclaw_context_get(glob, "test"));
+	fclaw_global_destroy(glob);
+}
+
 TEST_CASE("fclaw_context_get existing context")
 {
 	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
 	fclaw_context_t *context1 = fclaw_context_get(glob, "test");
 	CHECK_NE(context1, nullptr);
+	fclaw_context_save(context1);
 	fclaw_context_t *context2 = fclaw_context_get(glob, "test");
 	CHECK_EQ(context1, context2);
 	fclaw_global_destroy(glob);
@@ -63,6 +74,8 @@ TEST_CASE("fclaw_context_get two existing contexts")
 	CHECK_NE(context1, nullptr);
 	CHECK_NE(context2, nullptr);
 	CHECK_NE(context1, context2);
+	fclaw_context_save(context1);
+	fclaw_context_save(context2);
 	fclaw_context_t *context3 = fclaw_context_get(glob, "test1");
 	fclaw_context_t *context4 = fclaw_context_get(glob, "test2");
 	CHECK_EQ(context1, context3);
@@ -173,6 +186,7 @@ TEST_CASE("fclaw_context_get_int called for non-existing value")
 {
 	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
 	fclaw_context_t *context = fclaw_context_get(glob, "test");
+	fclaw_context_save(context);
 
 	// second get call, since we didn't get_int in first, should fail
 	context = fclaw_context_get(glob, "test");
@@ -187,6 +201,7 @@ TEST_CASE("fclaw_context_get_int called for non-exising value other value")
 	fclaw_context_t *context = fclaw_context_get(glob, "test");
 	int value;
 	fclaw_context_get_int(context, "test", &value, 0);
+	fclaw_context_save(context);
 
 	context = fclaw_context_get(glob, "test");
 	CHECK_SC_ABORTED(fclaw_context_get_int(context, "test-does-not-exist", &value, 0));
@@ -199,6 +214,7 @@ TEST_CASE("fclaw_context_get_int save without getting all variables")
 	fclaw_context_t *context = fclaw_context_get(glob, "test");
 	int value;
 	fclaw_context_get_int(context, "test", &value, 0);
+	fclaw_context_save(context);
 
 	// second get call, since we don't get_int, should fail
 	context = fclaw_context_get(glob, "test");
@@ -311,6 +327,7 @@ TEST_CASE("fclaw_context_get_double called for non-existing value")
 {
 	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
 	fclaw_context_t *context = fclaw_context_get(glob, "test");
+	fclaw_context_save(context);
 
 	// second get call, since we didn't get_double in first, should fail
 	context = fclaw_context_get(glob, "test");
@@ -325,6 +342,7 @@ TEST_CASE("fclaw_context_get_double called for non-exising value other value")
 	fclaw_context_t *context = fclaw_context_get(glob, "test");
 	double value;
 	fclaw_context_get_double(context, "test", &value, 0);
+	fclaw_context_save(context);
 
 	context = fclaw_context_get(glob, "test");
 	CHECK_SC_ABORTED(fclaw_context_get_double(context, "test-does-not-exist", &value, 0));
@@ -337,6 +355,7 @@ TEST_CASE("fclaw_context_get_double save without getting all variables")
 	fclaw_context_t *context = fclaw_context_get(glob, "test");
 	double value;
 	fclaw_context_get_double(context, "test", &value, 0);
+	fclaw_context_save(context);
 
 	// second get call, since we don't get_double, should fail
 	context = fclaw_context_get(glob, "test");
@@ -413,6 +432,7 @@ TEST_CASE("fclaw_context pack/unpack glob int and double without save")
 	for(double default_double : {-100, 0, 42})
 	{
 		fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
+		fclaw_context_vtable_initialize(glob);
 		fclaw_context_t *context = fclaw_context_get(glob, "test");
 
 		int value;
@@ -436,6 +456,7 @@ TEST_CASE("fclaw_context pack/unpack glob int and double")
 	for(double default_double : {-100, 0, 42})
 	{
 		fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
+		fclaw_context_vtable_initialize(glob);
 		fclaw_context_t *context = fclaw_context_get(glob, "test");
 
 		int value;
@@ -452,6 +473,7 @@ TEST_CASE("fclaw_context pack/unpack glob int and double")
 		fclaw_global_pack(glob, buffer);
 
 		fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
+		fclaw_context_vtable_initialize(glob2);
 
 		fclaw_global_unpack(buffer, glob2);
 

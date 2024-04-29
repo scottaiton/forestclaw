@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012-2023 Carsten Burstedde, Donna Calhoun, Scott Aiton
+Copyright (c) 2012-2024 Carsten Burstedde, Donna Calhoun, Scott Aiton
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -128,6 +128,13 @@ void fclaw_context_get_double(fclaw_context_t *context,
  * @param context the context object to save to
  */
 void fclaw_context_save(fclaw_context_t *context);
+
+/**
+ * @brief Initializes the vtable need for packing context objects
+ * 
+ * @param glob the global context
+ */
+void fclaw_context_vtable_initialize(fclaw_global_t *glob);
 
 #ifdef __cplusplus
 #if 0
