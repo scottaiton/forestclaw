@@ -151,7 +151,7 @@ void outstyle_1(fclaw_global_t *glob)
 
     int n;
     fclaw_context_get_int(ctx, "n", &n, 0);
-    for(/* init above */; n < nout; n++)
+    while(n < nout)
     {
         double tstart = t_curr;
 
@@ -300,6 +300,10 @@ void outstyle_1(fclaw_global_t *glob)
         glob->curr_time = t_curr;
         iframe++;
         fclaw_output_frame(glob,iframe);
+
+        /* increment n before checkpoint since we want to start at next
+           iteration when restarting */
+        n++;
 
         /* save context values */
         fclaw_context_save(ctx);
