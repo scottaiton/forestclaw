@@ -113,8 +113,7 @@ fclaw_context_t* fclaw_context_get(fclaw_global_t *glob, const char *name)
 
 void fclaw_context_get_int(fclaw_context_t *context, 
                            const char *name,
-                           int *value,
-                           int default_value)
+                           int *value)
 {
     value_t *v = fclaw_pointer_map_get(context->values, name);
     if(v != NULL)
@@ -129,9 +128,7 @@ void fclaw_context_get_int(fclaw_context_t *context,
     {
         v = FCLAW_ALLOC(value_t, 1);
         v->type = FCLAW_CONTEXT_INT;
-        v->value.i = default_value;
         fclaw_pointer_map_insert(context->values, name, v, value_destroy);
-        *value = default_value;
     }
     else
     {
@@ -143,8 +140,7 @@ void fclaw_context_get_int(fclaw_context_t *context,
 
 void fclaw_context_get_double(fclaw_context_t *context, 
                               const char *name, 
-                              double *value,
-                              double default_value)
+                              double *value)
 {
     value_t *v = fclaw_pointer_map_get(context->values, name);
     if(v != NULL)
@@ -159,9 +155,7 @@ void fclaw_context_get_double(fclaw_context_t *context,
     {
         v = FCLAW_ALLOC(value_t, 1);
         v->type = FCLAW_CONTEXT_DOUBLE;
-        v->value.d = default_value;
         fclaw_pointer_map_insert(context->values, name, v, value_destroy);
-        *value = default_value;
     }
     else
     {

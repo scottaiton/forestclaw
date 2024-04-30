@@ -90,34 +90,32 @@ typedef struct fclaw_context fclaw_context_t;
 fclaw_context_t* fclaw_context_get(fclaw_global_t *glob, const char *name);
 
 /**
- * @brief Get an integer value from the context object. If the value does not exist, the default value is returned.
+ * @brief Get an integer value from the context object.
+ *        If the value does not exist, the current value does not change.
  *
  * If the context isn't new and the value does not exist, an error message is printed and the program aborts.
  * 
  * @param context the context object
  * @param name the name of the value
- * @param value the value
- * @param default_value the default value
+ * @param value a pointer the value, if the value does not exist, the value is not changed
  */
 void fclaw_context_get_int(fclaw_context_t *context, 
                            const char *name,
-                           int *value,
-                           int default_value);
+                           int *value);
 
 /**
- * @brief Get a double value from the context object. If the value does not exist, the default value is returned.
+ * @brief Get a double value from the context object. 
+ *        If the value does not exist, the current value does not change.
  * 
  * If the context isn't new and the value does not exist, an error message is printed and the program aborts.
  * 
  * @param context the context object
  * @param name the name of the value
- * @param value the value
- * @param default_value the default value
+ * @param value a pointer the value, if the value does not exist, the value is not changed
  */
 void fclaw_context_get_double(fclaw_context_t *context, 
                               const char *name, 
-                              double *value,
-                              double default_value);
+                              double *value);
 
 /**
  * @brief Save values to the context object. Should be called right before exit points in a function.
