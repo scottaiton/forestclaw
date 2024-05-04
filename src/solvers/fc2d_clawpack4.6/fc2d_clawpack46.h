@@ -31,10 +31,11 @@
 #ifdef __cplusplus
 extern "C"
 {
+#endif
+
 #if 0
-}
-#endif
-#endif
+/* Fix syntax highlighting */
+#endif    
 
 struct fclaw_global;
 struct fclaw_patch;
@@ -119,6 +120,7 @@ typedef void (*clawpack46_fort_rpt2_t)(const int* ixy, const int* maxm, const in
                                        double bmasdq[], double bpasdq[]);
 
 
+#if 0
 typedef void (*clawpack46_fort_rpn2fw_t)(const int* ixy,const int* maxm, const int* meqn,
                                          const int* mwaves, const int* maux,
                                          const int* mbc,const int* mx,
@@ -135,6 +137,7 @@ typedef void (*clawpack46_fort_rpt2fw_t)(const int* ixy, const int* maxm, const 
                                          double aux1[], double aux2[], double aux3[], 
                                          const int* imp, double dsdq[],
                                          double bmasdq[], double bpasdq[]);
+#endif
 
 
 typedef void (*clawpack46_fort_flux2_t)(const int* ixy,const int* maxm, const int* meqn,
@@ -254,9 +257,6 @@ void fc2d_clawpack46_src2(struct fclaw_global* glob,
 
 
 #ifdef __cplusplus
-#if 0
-{
-#endif
 }
 #endif
 

@@ -99,7 +99,8 @@ void CLAWPACK46_RPN2(const int* ixy,const int* maxm, const int* meqn, const int*
                      double s[], double amdq[], double apdq[]);
 
 #define CLAWPACK46_RPT2    FCLAW_F77_FUNC(clawpack46_rpt2,   CLAWPACK46_RPT2)
-void CLAWPACK46_RPT2(const int* ixy, const int* maxm, const int* meqn, const int* mwaves,
+void CLAWPACK46_RPT2(const int* ixy, const int* maxm, const int* meqn, 
+                     const int* mwaves,
                      const int* mbc, const int* mx, double ql[], double qr[],
                      double aux1[], double aux2[], double aux3[], const int* imp,
                      double dsdq[], double bmasdq[], double bpasdq[]);

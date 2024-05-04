@@ -271,6 +271,11 @@ double clawpack46_step2(fclaw_global_t *glob,
 	clawpack_options = fc2d_clawpack46_get_options(glob);
 
 
+	FCLAW_ASSERT(claw46_vt->fort_rpn2 != NULL);
+	if (clawpack_options->order[1] > 0)
+		FCLAW_ASSERT(claw46_vt->fort_rpt2 != NULL);
+
+#if 0
 	if (clawpack_options->use_fwaves)
 	{
 		FCLAW_ASSERT(claw46_vt->fort_rpn2 != NULL);
@@ -283,7 +288,7 @@ double clawpack46_step2(fclaw_global_t *glob,
 		if (clawpack_options->order[1] > 0)
 			FCLAW_ASSERT(claw46_vt->fort_rpt2 != NULL);
 	}
-
+#endif
 
 
 	int level = patch->level;
@@ -363,7 +368,6 @@ double clawpack46_step2(fclaw_global_t *glob,
 	}
 
 	/* NOTE: qold will be overwritten in this step */
-	//printf("here ... 1\n");
 	CLAWPACK46_SET_BLOCK(&blockno);
 	CLAWPACK46_STEP2_WRAP(&maxm, &meqn, &maux, &mbc, clawpack_options->method,
 						  clawpack_options->mthlim, &clawpack_options->mcapa,
@@ -374,8 +378,6 @@ double clawpack46_step2(fclaw_global_t *glob,
 						  claw46_vt->flux2,
 						  block_corner_count, &ierror, &clawpack_options->use_fwaves);
 	CLAWPACK46_UNSET_BLOCK();
-	///printf("here ... 2\n");
-
 
 	FCLAW_ASSERT(ierror == 0);
 
@@ -394,7 +396,6 @@ double clawpack46_step2(fclaw_global_t *glob,
 		                                      cr->gp[0],cr->gp[1],
 		                                      cr->gm[0],cr->gm[1]);
 	}		
-
 
 	FCLAW_FREE(fp);
 	FCLAW_FREE(fm);

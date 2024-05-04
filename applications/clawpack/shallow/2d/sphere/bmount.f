@@ -2,13 +2,26 @@
       implicit none
 
       double precision xc,yc
-      double precision Rsphere, Omega, Px, Py, Pz
-      double precision theta,thetam
-      double precision pi, xp, yp, zp
 
+      double precision hin, hout
+      common /swe_initcond_parms4/  hin,hout
+
+      double precision Rsphere, omega
       common /comsphere/ Rsphere, Omega
+
+      double precision Px, Py, Pz
       common /comic/ Px,Py,Pz
-      common /compi/ pi
+
+      double precision pi,pi2
+      common /compi/ pi, pi2
+
+      double precision theta,thetam
+      double precision xp, yp, zp
+
+
+      bmount = -hout
+
+      return
 
       bmount = -4.d4
 

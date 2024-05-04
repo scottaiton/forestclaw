@@ -1,68 +1,41 @@
-! =====================================================
-!!SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves,maux, &
-!!    mbc, mx,ql,qr,auxl,auxr,fwave,s,amdq,apdq)
-!!
-
+!! =====================================================
 SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
     mbc, mx,ql,qr,auxl,auxr,fwave,s,amdq,apdq)
+!! =====================================================
 
-! =====================================================
+!! Roe-solver for the 2D shallow water equations
+!!  on the sphere, using 3d Cartesian representation of velocities
+!!
+!! waves: 3
+!! equations: 4
+!! aux fields: 18
 
-! Roe-solver for the 2D shallow water equations
-!  on the sphere, using 3d Cartesian representation of velocities
-
-! waves: 3
-! equations: 4
-! aux fields: 16
-
-! Conserved quantities:
-!       1 depth
-!       2 x_momentum
-!       3 y_momentum
-!       4 z_momentum
-
-! Auxiliary variables:
-!         1  kappa
-!         2  enx
-!         3  eny
-!         4  enz
-!         5  etx
-!         6  ety
-!         7  etz
-!         8  enx
-!         9  eny
-!        10  enz
-!        11  etx
-!        12  ety
-!        13  etz
-!        14  erx
-!        15  ery
-!        16  erz
-
-! solve Riemann problems along one slice of data.
-
-! On input, ql contains the state vector at the left edge of each cell
-!           qr contains the state vector at the right edge of each cell
-
-! This data is along a slice in the x-direction if ixy=1
-!                            or the y-direction if ixy=2.
-! On output, wave contains the waves, s the speeds,
-! and amdq, apdq the decomposition of the flux difference
-!   f(qr(i-1)) - f(ql(i))
-! into leftgoing and rightgoing parts respectively.
-! With the Roe solver we have
-!    amdq  =  A^- \Delta q    and    apdq  =  A^+ \Delta q
-! where A is the Roe matrix.  An entropy fix can also be incorporated
-! into the flux differences.
-
-! Note that the i'th Riemann problem has left state qr(i-1,:)
-!                                    and right state ql(i,:)
-! From the basic clawpack routines, this routine is called with ql = qr
-
+    !! The aux array has the following elements:
+    !!  1  kappa = ratio of cell area to dxc*dyc
+    !!  2  enx = x-component of normal vector to left edge in tangent plane
+    !!  3  eny = y-component of normal vector to left edge in tangent plane
+    !!  4  enz = z-component of normal vector to left edge in tangent plane
+    !!  5  etx = x-component of tangent vector to left edge in tangent plane
+    !!  6  ety = y-component of tangent vector to left edge in tangent plane
+    !!  7  etz = z-component of tangent vector to left edge in tangent plane
+    !!  8  enx = x-component of normal vector to bottom edge in tangent plane
+    !!  9  eny = y-component of normal vector to bottom edge in tangent plane
+    !! 10  enz = z-component of normal vector to bottom edge in tangent plane
+    !! 11  etx = x-component of tangent vector to bottom edge in tangent plane
+    !! 12  ety = y-component of tangent vector to bottom edge in tangent plane
+    !! 13  etz = z-component of tangent vector to bottom edge in tangent plane
+    !! 14  erx = x-component of unit vector in radial direction at cell ctr
+    !! 15  ery = y-component of unit vector in radial direction at cell ctr
+    !! 16  erz = z-component of unit vector in radial direction at cell ctr
+    !!
+    !! # offset to index into aux array for enx, eny, etx, ety, gamma
+    !! #    depends on whether ixy=1 (left edge) or ixy=2 (bottom edge).
+    !!
+    !! Index needed to get to aux array variables.
 
     implicit none
 
-    integer :: ixy, maxm,meqn,mwaves,mbc,mx, maux
+    integer :: ixy, maxm,meqn,mwaves,mbc,mx
     double precision  :: fwave(1-mbc:maxm+mbc,meqn,mwaves)
     double precision  ::    s(1-mbc:maxm+mbc,mwaves)
     double precision  ::   ql(1-mbc:maxm+mbc,meqn)
@@ -77,13 +50,6 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
     !! # double precision :: delta(3)
     logical :: efix
 
-!
-!    integer :: maxm2
-!!    parameter (maxm2 = 1800)
-!!    double precision :: u(1-mbc:maxm+mbc),v(1-mbc:maxm+mbc)
-!!    double precision :: a(1-mbc:maxm+mbc)
-!!    double precision :: h(1-mbc:maxm+mbc)
-
     double precision :: dtcom, dxcom, dycom, tcom
     integer :: icom, jcom
     common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
@@ -95,9 +61,7 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
     integer :: i, m, mw, mq, ioff
     double precision :: enx, eny, enz, etx,ety,etz
     double precision :: hunl, hunr, hutl, hutr
-!!    double precision :: hsqr,hsql,hsq
-!!    double precision :: a1,a2,a3, 
-    double precision :: gamma, amn, apn, df, dy, qn
+    double precision :: gamma, amn, apn, df, dy
     double precision :: erx, ery, erz, h1, h3, hi, him1, hu1, hu3
     double precision :: s0, s03, s1, s3, sfract
 
@@ -137,13 +101,13 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
     !! 14  erx = x-component of unit vector in radial direction at cell ctr
     !! 15  ery = y-component of unit vector in radial direction at cell ctr
     !! 16  erz = z-component of unit vector in radial direction at cell ctr
-
+    !!
     !! # offset to index into aux array for enx, eny, etx, ety, gamma
     !! #    depends on whether ixy=1 (left edge) or ixy=2 (bottom edge).
-
+    !!
     !! Index needed to get to aux array variables.
-    ioff = 6*(ixy-1) + 1
 
+    ioff = 6*(ixy-1) + 1
 
     !! # find a1 thru a3, the coefficients of the 3 eigenvectors:
 
@@ -164,68 +128,67 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
         ety =   ety / gamma
         etz =   etz / gamma
 
-        !! # projection to the sphere  (already done in src2)
-        erx = auxl(i,14)
-        ery = auxl(i,15)
-        erz = auxl(i,16)
-        qn = erx*ql(i,2) + ery*ql(i,3) + erz*ql(i,4)
-        ql(i,2) = ql(i,2) - qn*erx
-        ql(i,3) = ql(i,3) - qn*ery
-        ql(i,4) = ql(i,4) - qn*erz
-        qr(i,2) = ql(i,2)
-        qr(i,3) = ql(i,3)
-        qr(i,4) = ql(i,4)
-
-
         !!  # compute normal and tangential momentum at cell edge:
-        hunl = enx*ql(i,2)   + eny*ql(i,3)   + enz*ql(i,4)
-        hunr = enx*qr(i-1,2) + eny*qr(i-1,3) + enz*qr(i-1,4)
+        !! # Note that l and r have been swapped
+        huR = enx*ql(i,2)   + eny*ql(i,3)   + enz*ql(i,4)
+        huL = enx*qr(i-1,2) + eny*qr(i-1,3) + enz*qr(i-1,4)
 
-        hutl = etx*ql(i,2)   + ety*ql(i,3)   + etz*ql(i,4)
-        hutr = etx*qr(i-1,2) + ety*qr(i-1,3) + etz*qr(i-1,4)
+        hvR = etx*ql(i,2)   + ety*ql(i,3)   + etz*ql(i,4)
+        hvL = etx*qr(i-1,2) + ety*qr(i-1,3) + etz*qr(i-1,4)
 
         !! Get Riemann variables Riemann problem variables
         hL  = qr(i-1,1)
         hR  = ql(i,1)
 
-        huL = hunr
-        huR = hunL
-
-        hvL = hutR
-        hvR = hutL
+!!        huL = hunL
+!!        huR = hunR
+!!
+!!        hvL = hutL
+!!        hvR = hutR
 
         uR = huR/hR
         vR = hvR/hR
+        phiR = 0.5d0*grav*hR**2 + huR**2/hR
 
         uL = huL/hL
         vL = hvL/hL
+        phiL = 0.5d0*grav*hL**2 + huL**2/hL
 
-!!        bL  = auxr(i-1,mbathy)
-!!        bR  = auxl(i,mbathy)
-        bL = 0
-        bR = 0
-
-
+        bL  = auxr(i-1,mbathy)
+        bR  = auxl(i,mbathy)
 
         !! Start new code
-!!        phiR = 0.5d0*grav*hR**2 + huR**2/hR
-!!        phiL = 0.5d0*grav*hL**2 + huL**2/hL
+        sL = uL - SQRT(grav*hL) !! 1 wave speed of left state
+        sR = uR + SQRT(grav*hR) !! 2 wave speed of right state
 
-!!        sL = uL - SQRT(grav*hL) !! 1 wave speed of left state
-!!        sR = uR + SQRT(grav*hR) !! 2 wave speed of right state
-!!
-!!        uhat = (SQRT(grav*hL)*uL + SQRT(grav*hR)*uR)/(SQRT(grav*hR) + SQRT(grav*hL)) 
-!!        chat = SQRT(grav*0.5d0*(hR + hL)) 
+        uhat = (SQRT(grav*hL)*uL + SQRT(grav*hR)*uR)/(SQRT(grav*hR) + SQRT(grav*hL)) 
+        chat = SQRT(grav*0.5d0*(hR + hL)) 
 
-        CALL  simple_riemann(hR,huR,hvR, br, hL,huL,hvl,bL, sw,fw)
+        CALL  simple_riemann(hR,uR,vR, hL,uL,vl, uhat,chat,bL, bR, &
+                             phiR,phiL,sw,fw)
 
-      DO mw = 1,mwaves
+        DO mw = 1,mwaves
             s(i,mw) = gamma*sw(mw)/dy
-            fwave(i,1,mw) = fw(1,mw)
-            fwave(i,2,mw) = fw(2,mw)*enx + fw(3,mw)*etx
-            fwave(i,3,mw) = fw(2,mw)*eny + fw(3,mw)*ety
-            fwave(i,4,mw) = fw(2,mw)*enz + fw(3,mw)*etz
+!!            fwave(i,1,mw) = fw(1,mw)
+!!            fwave(i,2,mw) = fw(2,mw)*enx + fw(3,mw)*etx
+!!            fwave(i,3,mw) = fw(2,mw)*eny + fw(3,mw)*ety
+!!            fwave(i,4,mw) = fw(2,mw)*enz + fw(3,mw)*etz
         ENDDO
+
+        fwave(i,1,1) = fw(1,1)
+        fwave(i,2,1) = fw(2,1)*enx + fw(3,1)*etx
+        fwave(i,3,1) = fw(2,1)*eny + fw(3,1)*ety
+        fwave(i,4,1) = fw(2,1)*enz + fw(3,1)*etz
+
+        fwave(i,1,2) = fw(1,2)
+        fwave(i,2,2) = fw(2,2)*enx + fw(3,2)*etx
+        fwave(i,3,2) = fw(2,2)*eny + fw(3,2)*ety
+        fwave(i,4,2) = fw(2,2)*enz + fw(3,2)*etz
+
+        fwave(i,1,3) = fw(1,3)
+        fwave(i,2,3) = fw(2,3)*enx + fw(3,3)*etx
+        fwave(i,3,3) = fw(2,3)*eny + fw(3,3)*ety
+        fwave(i,4,3) = fw(2,3)*enz + fw(3,3)*etz
     end do
 
     !! # no entropy fix
@@ -246,28 +209,10 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
         !! # amdq = SUM s*wave   over left-going waves
         !! # apdq = SUM s*wave   over right-going waves
 
-!!        do mq = 1,meqn
-!!            amdq(i,mq) =              szm(1)*fwave(i,mq,1)
-!!            amdq(i,mq) = amdq(i,mq) + szm(2)*fwave(i,mq,2)
-!!            amdq(i,mq) = amdq(i,mq) + szm(3)*fwave(i,mq,3)
-!!
-!!            apdq(i,mq) =              szp(1)*fwave(i,mq,1)
-!!            apdq(i,mq) = apdq(i,mq) + szp(2)*fwave(i,mq,2)
-!!            apdq(i,mq) = apdq(i,mq) + szp(3)*fwave(i,mq,3)
-!!        enddo 
-
-        do mq=1,meqn
-            amdq(i,mq) = 0.d0
-            apdq(i,mq) = 0.d0
-            do mw=1,mwaves
-                if (s(i,mw) .lt. 0.d0) then
-                    amdq(i,mq) = amdq(i,mq) + fwave(i,mq,mw)
-                else
-                    apdq(i,mq) = apdq(i,mq) + fwave(i,mq,mw)
-                endif
-            enddo
-        end do
-
+        do mq = 1,meqn
+            amdq(i,mq) = szm(1)*fwave(i,mq,1) + szm(2)*fwave(i,mq,2) + szm(3)*fwave(i,mq,3)
+            apdq(i,mq) = szp(1)*fwave(i,mq,1) + szp(2)*fwave(i,mq,2) + szp(3)*fwave(i,mq,3)
+        enddo 
     end do
 
     !! Continue to section where we project out any momentum in 
@@ -390,7 +335,7 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
 
     !! if you don't want to project out momentum in direction
     !! of surface normals, you can 
-    return
+    !! return
 
     !! Project out momentum in direction normal to the surface
     do i=2-mbc,mx+mbc
@@ -417,100 +362,57 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
 END SUBROUTINE clawpack46_rpn2_fwave
 
 
-SUBROUTINE simple_riemann(hR,huR,hvR, br, hL,huL,hvl,bL, s,fwave)
+SUBROUTINE simple_riemann(hr,ur,vr, hl,ul,vl, uhat,chat,bl, br, &
+                 phir,phil,s,fwave)
     IMPLICIT NONE
 
-    DOUBLE PRECISION :: hr,hur,hvr, br, hl,hul,hvl, bl
-    double precision :: s(3), fwave(4,3)
+    DOUBLE PRECISION :: hr,ur,vr, hl,ul,vl, uhat, chat, phir, &
+               phil,s(3), fwave(3,3), bl, bR, sl, sr
 
     double precision grav
     common /swe_model_parms/  grav
 
-    DOUBLE PRECISION :: fluxdiff(3),beta(3), hbar, fl(3), fr(3)
-    double precision :: psiL, psiR, sL, sR, vhat, ul, vl, ur, vr
-    double precision :: hsq, uhat, chat, phir, phil
+    DOUBLE PRECISION :: fluxdiff(3),beta(3), hbar
 
     fwave = 0
     s = 0
 
-    uR = huR/hR
-    uL = huL/hL
-
-    vR = hvR/hR
-    vL = hvL/hL
-
-    !! Start new code
-!!    sL = uL - SQRT(grav*hL) !! 1 wave speed of left state
-!!    sR = uR + SQRT(grav*hR) !! 2 wave speed of right state
-
-!!    uhat = (SQRT(grav*hL)*uL + SQRT(grav*hR)*uR)/(SQRT(grav*hR) + SQRT(grav*hL)) 
-!!    vhat = (SQRT(grav*hL)*vL + SQRT(grav*hR)*vR)/(SQRT(grav*hR) + SQRT(grav*hL)) 
-!!    chat = SQRT(grav*0.5d0*(hR + hL)) 
-
     hbar = 0.5 * (hr + hl)
 
-
-    hsq = SQRT(hR) + SQRT(hL)
-    uhat = (hul/sqrt(hl) + huR/sqrt(hr))/hsq
-    vhat = (hvl/sqrt(hl) + hvl/sqrt(hl))/hsq 
-    chat = SQRT(grav*hbar) 
-
-!!    phiR = 0.5d0*grav*hR**2 + huR**2/hR
-!!    phiL = 0.5d0*grav*hL**2 + huL**2/hL
-
-    fl(1) = huL
-    fr(1) = huR
-
-    fl(2) = 0.5*grav*hL**2 + huL**2/hL
-    fr(2) = 0.5*grav*hR**2 + huR**2/hR
-
-    fl(3) = huL*vL
-    fr(3) = huR*vR
-
-    psiL = grav*hbar*bL
-    psiR = grav*hbar*bR
-
     !! # Flux differences
-!!    fluxdiff(1) = (hr * ur) - (hl * ul)
-!!    fluxdiff(2) = phir - phil + grav * hbar * (br - bl)
-!!    fluxdiff(3) = hr * ur * vr - hl * ul * vl
+    fluxdiff(1) = (hr * ur) - (hl * ul)
+    fluxdiff(2) = phir - phil + grav * hbar * (br - bl)
+    fluxdiff(3) = hr * ur * vr - hl * ul * vl
 
-    fluxdiff(1) = fr(1) - fl(1)
-    fluxdiff(2) = fr(2) - fl(2)  + psir - psil
-    fluxdiff(3) = fr(3) - fl(3)
+    sL = uL - SQRT(grav*hL) !! 1 wave speed of left state
+    sR = uR + SQRT(grav*hR) !! 2 wave speed of right state
 
     !! # Wave speeds
-!!    s(1) = MIN(ul - SQRT(grav * hl), uhat - chat)
-!!    s(3) = MAX(ur + SQRT(grav * hr), uhat + chat)!!    
-!!    s(2) = 0.5d0 * (s(1) + s(3))
-
-
-    s(1) = uhat - chat
-    s(3) = uhat + chat
-    s(2) = uhat
-
+    s(1) = min(sl,uhat-chat)
+    s(3) = max(sr, uhat+chat)
+    s(2) = 0.5d0 * (s(1) + s(3))
         
     !! Wave strengths
-!!    beta(1) = -(fluxdiff(2) - s(3) * fluxdiff(1)) / (s(3) - s(1))
-!!    beta(3) =  (fluxdiff(2) - s(1) * fluxdiff(1)) / (s(3) - s(1))
-!!    beta(2) =   fluxdiff(3) - beta(1)*vl - beta(3)*vr
+    beta(1) = -(fluxdiff(2) - s(3) * fluxdiff(1)) / (s(3) - s(1))
+    beta(3) =  (fluxdiff(2) - s(1) * fluxdiff(1)) / (s(3) - s(1))
+    beta(2) =   fluxdiff(3) - beta(1)*vl - beta(3)*vr
 
-    beta(1) =  (s(3)*fluxdiff(1) - fluxdiff(2)) / (2*chat)
-    beta(3) = (-s(1)*fluxdiff(1) + fluxdiff(2)) / (2*chat)
-    beta(2) =  - vhat*beta(1) + fluxdiff(3) 
-
-
-    !! # Flux waves = beta*R
-    fwave(1,1) = beta(1)
+    !! # Flux waves = beta*R1
+    !!     R1 = (1,u-c,v)
+    fwave(1,1) = beta(1)*1
     fwave(2,1) = beta(1)*s(1)
-    fwave(3,1) = beta(1)*vhat
+    fwave(3,1) = beta(1)*vl
 
+    !! # Flux waves = beta*R2
+    !!     R2 = (0,0,1)
     fwave(1,2) = 0
     fwave(2,2) = 0
     fwave(3,2) = beta(2)
 
+    !! # Flux waves = beta*R1
+    !!     R3 = (1,u+c,v)
     fwave(1,3) = beta(3)
     fwave(2,3) = beta(3)*s(3)
-    fwave(3,3) = beta(3)*vhat
+    fwave(3,3) = beta(3)*vr
 
 END subroutine simple_riemann  

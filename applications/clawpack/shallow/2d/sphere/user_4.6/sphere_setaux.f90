@@ -47,6 +47,7 @@ subroutine sphere_setaux(mx,my,mbc,xlower,ylower, &
 
    integer i,j,m
    double precision dxdy, xc, yc, xp, yp,zp, rp
+   double precision bmount
 
    integer blockno, fc2d_clawpack46_get_block
    integer*8 cont, fclaw_map_get_context
@@ -78,6 +79,7 @@ subroutine sphere_setaux(mx,my,mbc,xlower,ylower, &
 
          enddo
          aux(i,j,17) = curvature(i,j)
+         aux(i,j,18) = bmount(xc,yc)
       enddo
    enddo
 
