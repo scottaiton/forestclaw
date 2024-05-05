@@ -137,8 +137,8 @@ void square_link_solvers(fclaw_global_t *glob)
         clawpack46_vt->fort_qinit  = &CLAWPACK46_QINIT;
         
         /* Be careful : Signatures for rpn2fw, rpt2fw not the same as rpn2 and rpt2fw. */
-        clawpack46_vt->fort_rpn2fw    = &CLAWPACK46_RPN2CONS_FW_MANIFOLD; 
-        clawpack46_vt->fort_rpt2fw    = &CLAWPACK46_RPT2CONS_MANIFOLD;      
+        clawpack46_vt->fort_rpn2    = &CLAWPACK46_RPN2CONS_FW_MANIFOLD; 
+        clawpack46_vt->fort_rpt2    = &CLAWPACK46_RPT2CONS_MANIFOLD;      
         clawpack46_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
     } 
     else if (user->claw_version == 5)
