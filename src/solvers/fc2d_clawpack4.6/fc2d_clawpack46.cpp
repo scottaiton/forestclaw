@@ -374,7 +374,7 @@ double clawpack46_step2(fclaw_global_t *glob,
 						  &mwaves,&mx, &my, qold, aux, &dx, &dy, &dt, &cflgrid,
 						  work, &mwork, &xlower, &ylower, &level,&t, fp, fm, gp, gm,
 						  claw46_vt->fort_rpn2, claw46_vt->fort_rpt2,
-						  claw46_vt->fort_rpn2fw, claw46_vt->fort_rpt2fw,
+						  claw46_vt->fort_rpn2, claw46_vt->fort_rpt2,
 						  claw46_vt->flux2,
 						  block_corner_count, &ierror, &clawpack_options->use_fwaves);
 	CLAWPACK46_UNSET_BLOCK();

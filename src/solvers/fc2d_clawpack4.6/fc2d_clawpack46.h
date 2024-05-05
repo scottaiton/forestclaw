@@ -182,8 +182,10 @@ struct fc2d_clawpack46_vtable
 	clawpack46_fort_rpn2_cons_t   fort_rpn2_cons;
 
 	// The signatures for rpn2fw and rpt2fw are different for the fwaves
+#if 0    
 	clawpack46_fort_rpn2fw_t      fort_rpn2fw;
 	clawpack46_fort_rpt2fw_t      fort_rpt2fw;
+#endif    
 
     clawpack46_fort_flux2_t       flux2;
 	
