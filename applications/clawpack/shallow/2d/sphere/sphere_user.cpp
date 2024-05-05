@@ -142,7 +142,7 @@ void sphere_link_solvers(fclaw_global_t *glob)
         if (clawpack46_opt->use_fwaves)
         {
             clawpack46_vt->fort_rpn2 = &CLAWPACK46_RPN2_FWAVE; 
-            clawpack46_vt->fort_rpt2 = &CLAWPACK46_RPT2;                  
+            clawpack46_vt->fort_rpt2 = &CLAWPACK46_RPT2_FWAVE;                  
         }
         else
         {
