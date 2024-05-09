@@ -434,7 +434,7 @@ SUBROUTINE simple_riemann(hR,huR,hvR, br, hL,huL,hvl,bL, s,fwave)
 
     beta(1) =  (s(3)*fluxdiff(1) - fluxdiff(2)) / (s(3) - s(1))
     beta(3) = (-s(1)*fluxdiff(1) + fluxdiff(2)) / (s(3) - s(1))
-    beta(2) =  - vhat*beta(1) + fluxdiff(3) 
+    beta(2) =  - vhat*fluxdiff(1) + fluxdiff(3) 
 
     !! # Flux waves = beta*R
     fwave(1,1) = beta(1)
