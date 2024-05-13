@@ -919,6 +919,11 @@ void fclaw3d_domain_iterate_partitioned (fclaw3d_domain_t * old_domain,
                                          fclaw3d_transfer_callback_t tcb,
                                          void *user);
 
+typedef void (*fclaw3d_pack_callback_t) (fclaw3d_domain_t * domain,
+                                         fclaw3d_patch_t * patch, int blockno,
+                                         int patchno, void *pack_data_here,
+                                         void *user);
+
 /** Free buffers that were used in transfering data during partition.
  * \param [in,out] domain       The memory lives inside this domain.
  * \param [in,out] patch_data   Address of an array of void pointers to free.
