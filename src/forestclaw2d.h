@@ -801,6 +801,12 @@ typedef void (*fclaw2d_pack_callback_t) (fclaw2d_domain_t * domain,
                                          int patchno, void *pack_data_here,
                                          void *user);
 
+typedef struct fclaw2d_domain_partition
+{
+    size_t data_size; /**< The number of bytes per patch to send */
+}
+fclaw2d_domain_partition_t;
+
 /** Free buffers that were used in transfering data during partition.
  * \param [in,out] domain       The memory lives inside this domain.
  * \param [in,out] patch_data   Address of an array of void pointers to free.

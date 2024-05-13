@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_match_callback_t        fclaw3d_match_callback_t
 #define fclaw2d_transfer_callback_t     fclaw3d_transfer_callback_t
 #define fclaw2d_pack_callback_t         fclaw3d_pack_callback_t
+#define fclaw2d_domain_partition_t      fclaw3d_domain_partition_t
 #define fclaw2d_domain_exchange_t       fclaw3d_domain_exchange_t
 #define fclaw2d_domain_indirect         fclaw3d_domain_indirect
 #define fclaw2d_domain_indirect_t       fclaw3d_domain_indirect_t
