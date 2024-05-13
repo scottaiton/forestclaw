@@ -930,6 +930,19 @@ typedef struct fclaw3d_domain_partition
 }
 fclaw3d_domain_partition_t;
 
+fclaw3d_domain_partition_t
+    * fclaw3d_domain_iterate_pack (fclaw3d_domain_t * domain,
+                                   fclaw3d_pack_callback_t patch_pack,
+                                   void *user);
+
+void fclaw3d_domain_iterate_transfer (fclaw3d_domain_t * domain,
+                                      fclaw3d_domain_partition_t * p,
+                                      fclaw3d_transfer_callback_t
+                                      patch_transfer, void *user);
+
+void fclaw3d_domain_partition_free (fclaw3d_domain_t * domain,
+                                    fclaw3d_domain_partition_t * p);
+
 /** Free buffers that were used in transfering data during partition.
  * \param [in,out] domain       The memory lives inside this domain.
  * \param [in,out] patch_data   Address of an array of void pointers to free.

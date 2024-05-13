@@ -1700,6 +1700,33 @@ fclaw2d_domain_iterate_partitioned (fclaw2d_domain_t * old_domain,
     }
 }
 
+fclaw2d_domain_partition_t *
+fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain,
+                             fclaw2d_pack_callback_t patch_pack, void *user)
+{
+    fclaw2d_domain_partition_t *p;
+
+    p = FCLAW_ALLOC (fclaw2d_domain_partition_t, 1);
+
+    return p;
+}
+
+void
+fclaw2d_domain_iterate_transfer (fclaw2d_domain_t * domain,
+                                 fclaw2d_domain_partition_t * p,
+                                 fclaw2d_transfer_callback_t patch_transfer,
+                                 void *user)
+{
+
+}
+
+void
+fclaw2d_domain_partition_free (fclaw2d_domain_t * domain,
+                               fclaw2d_domain_partition_t * p)
+{
+    FCLAW_FREE (p);
+}
+
 void
 fclaw2d_domain_free_after_partition (fclaw2d_domain_t * domain,
                                      void ***patch_data)
