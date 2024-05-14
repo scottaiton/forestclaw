@@ -124,8 +124,23 @@ fclaw_register (fclaw_options_t* fclaw_opt, sc_options_t * opt)
     sc_options_add_bool (opt, 0, "output", &fclaw_opt->output, 0,
                             "Enable output [F]");
 
-    sc_options_add_bool (opt, 0, "checkpoint-out", &fclaw_opt->checkpoint_out, 0,
+    sc_options_add_bool (opt, 0, "checkpoint", &fclaw_opt->checkpoint, 0,
                             "Enable checkpoint output [F]");
+
+    /* ------------------------------- Restart options --------------------------------- */
+
+    sc_options_add_bool (opt, 0, "restart", &fclaw_opt->restart, 0,
+                            "Restart from file [F]");
+
+    sc_options_add_string(opt, 0, "restart-file",
+                          &fclaw_opt->restart_file, 
+                          "","Filename of restart file. "
+                          " If defined, a restart will be performed frome the specified file. [""]");
+
+    sc_options_add_string(opt, 0, "partition-file",
+                          &fclaw_opt->partition_file, 
+                          "","Partition file associated with restart file. "
+                          " This should be specified if a restart file is specified. [""]");
 
     /* -------------------------------------- Gauges  --------------------------------- */
     /* Gauge options */
@@ -360,16 +375,6 @@ fclaw_register (fclaw_options_t* fclaw_opt, sc_options_t * opt)
     sc_options_add_double(opt, 0, "max-refinement-ratio",
                           &fclaw_opt->max_refinement_ratio, 1.0,
                           "Ratio of patches to refine before paritioning and continuing refinement. [1.0]");
-
-    sc_options_add_string(opt, 0, "restart-file",
-                          &fclaw_opt->restart_file, 
-                          "","Filename of restart file. "
-                          " If defined, a restart will be performed frome the specified file. [""]");
-
-    sc_options_add_string(opt, 0, "partition-file",
-                          &fclaw_opt->partition_file, 
-                          "","Partition file associated with restart file. "
-                          " This should be specified if a restart file is specified. [""]");
 
     fclaw_opt->is_registered = 1;
     fclaw_opt->is_unpacked = 0;

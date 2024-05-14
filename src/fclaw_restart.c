@@ -508,7 +508,7 @@ void fclaw_output_checkpoint(fclaw_global_t* glob, int iframe)
 {
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
 
-    if(fclaw_opt->checkpoint_out)
+    if(fclaw_opt->checkpoint)
     {
         fclaw_timer_start (&glob->timers[FCLAW_TIMER_OUTPUT]);
 

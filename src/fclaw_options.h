@@ -221,7 +221,12 @@ struct fclaw_options
     int verbosity;              /**< TODO: Do we have guidelines here? */
 
     int output;                    
-    int checkpoint_out;                    
+    int checkpoint;                    
+
+    int restart;                    
+    const char * restart_file; /**< filename of restart file */
+    const char * partition_file; /**< filename of partition file */
+
     int tikz_out;      /* Boolean */
 
     const char *tikz_figsize_string;
@@ -246,9 +251,6 @@ struct fclaw_options
     const char * regression_check; /**< filename of regression check values */
 
     double max_refinement_ratio; /**< Maximum refinment ratio before partitioning and continuing refinement. */
-
-    const char * restart_file; /**< filename of restart file */
-    const char * partition_file; /**< filename of partition file */
 };
 
 struct fclaw_global;
