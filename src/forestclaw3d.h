@@ -926,12 +926,18 @@ typedef void (*fclaw3d_pack_callback_t) (fclaw3d_domain_t * domain,
 
 typedef struct fclaw3d_domain_partition
 {
-    size_t data_size; /**< The number of bytes per patch to send */
+    sc_array_t *src_data; /**< The patch data to send */
+    sc_array_t *dest_data; /**< The patch data to receive */
+    /** Temporary storage required for asynchronous patch data transfer.
+     * It is allocated and freed by the begin/end calls below.
+     */
+    void *async_state;
 }
 fclaw3d_domain_partition_t;
 
 fclaw3d_domain_partition_t
     * fclaw3d_domain_iterate_pack (fclaw3d_domain_t * domain,
+                                   size_t data_size,
                                    fclaw3d_pack_callback_t patch_pack,
                                    void *user);
 
