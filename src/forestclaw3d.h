@@ -924,6 +924,12 @@ typedef void (*fclaw3d_pack_callback_t) (fclaw3d_domain_t * domain,
                                          int patchno, void *pack_data_here,
                                          void *user);
 
+typedef void (*fclaw3d_unpack_callback_t) (fclaw3d_domain_t * domain,
+                                           fclaw3d_patch_t * patch,
+                                           int blockno, int patchno,
+                                           void *unpack_data_from_here,
+                                           void *user);
+
 typedef struct fclaw3d_domain_partition
 {
     sc_array_t *src_data; /**< The patch data to send */
@@ -941,10 +947,10 @@ fclaw3d_domain_partition_t
                                    fclaw3d_pack_callback_t patch_pack,
                                    void *user);
 
-void fclaw3d_domain_iterate_transfer (fclaw3d_domain_t * domain,
-                                      fclaw3d_domain_partition_t * p,
-                                      fclaw3d_transfer_callback_t
-                                      patch_transfer, void *user);
+void fclaw3d_domain_iterate_unpack (fclaw3d_domain_t * domain,
+                                    fclaw3d_domain_partition_t * p,
+                                    fclaw3d_unpack_callback_t patch_unpack,
+                                    void *user);
 
 void fclaw3d_domain_partition_free (fclaw3d_domain_t * domain,
                                     fclaw3d_domain_partition_t * p);

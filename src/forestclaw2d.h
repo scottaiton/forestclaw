@@ -801,6 +801,12 @@ typedef void (*fclaw2d_pack_callback_t) (fclaw2d_domain_t * domain,
                                          int patchno, void *pack_data_here,
                                          void *user);
 
+typedef void (*fclaw2d_unpack_callback_t) (fclaw2d_domain_t * domain,
+                                           fclaw2d_patch_t * patch,
+                                           int blockno, int patchno,
+                                           void *unpack_data_from_here,
+                                           void *user);
+
 typedef struct fclaw2d_domain_partition
 {
     sc_array_t *src_data; /**< The patch data to send */
@@ -818,10 +824,10 @@ fclaw2d_domain_partition_t
                                    fclaw2d_pack_callback_t patch_pack,
                                    void *user);
 
-void fclaw2d_domain_iterate_transfer (fclaw2d_domain_t * domain,
-                                      fclaw2d_domain_partition_t * p,
-                                      fclaw2d_transfer_callback_t
-                                      patch_transfer, void *user);
+void fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
+                                    fclaw2d_domain_partition_t * p,
+                                    fclaw2d_unpack_callback_t patch_transfer,
+                                    void *user);
 
 void fclaw2d_domain_partition_free (fclaw2d_domain_t * domain,
                                     fclaw2d_domain_partition_t * p);
