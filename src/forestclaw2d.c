@@ -1762,13 +1762,67 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
 }
 
 void
+fclaw2d_domain_iterate_transfer (fclaw2d_domain_t * old_domain,
+                                 fclaw2d_domain_t * new_domain,
+                                 fclaw2d_domain_partition_t * p,
+                                 fclaw2d_transfer_callback_t patch_transfer,
+                                 void *user)
+{
+
+}
+
+void
 fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
                                fclaw2d_domain_partition_t * p,
                                fclaw2d_unpack_callback_t patch_unpack,
                                void *user)
 {
+    p4est_wrap_t *wrap = (p4est_wrap_t *) domain->pp;
+    int blockno, patchno;
+    size_t zz;
+    fclaw2d_block_t *block;
+    fclaw2d_patch_t *patch;
+    int dpuf, dpul, bnpb;
+
+    /* this routine should only be called for the new domain of a changed
+     * partition */
+    P4EST_ASSERT (wrap->old_global_first_quadrant != NULL);
+    P4EST_ASSERT (domain->pp_owned);
+
+    /* wait for transfer of patch data to complete */
     p4est_transfer_fixed_end ((p4est_transfer_context_t *) p->async_state);
     p->async_state = NULL;
+
+    /* unpack patches from dest_data array */
+    dpuf = domain->partition_unchanged_first;
+    dpul = domain->partition_unchanged_length;
+
+    for (zz = 0, blockno = 0; blockno < domain->num_blocks; ++blockno)
+    {
+        block = domain->blocks + blockno;
+        bnpb = block->num_patches_before;
+
+        /* iterate over new patches before unchanged section */
+        for (patchno = 0; patchno + bnpb < dpuf; ++zz, ++patchno)
+        {
+            patch = block->patches + patchno;
+            patch_unpack (domain, patch, blockno, patchno,
+                          sc_array_index (p->dest_data, zz), user);
+        }
+
+        /* we skip the local patches for unpacking */
+        zz += dpul;
+
+        /* iterate over new patches after unchanged section */
+        for (patchno = SC_MAX (0, dpuf + dpul - bnpb);
+             patchno < block->num_patches; ++patchno, ++zz)
+        {
+            patch = block->patches + patchno;
+            patch_unpack (domain, patch, blockno, patchno,
+                          sc_array_index (p->dest_data, zz), user);
+        }
+    }
+    FCLAW_ASSERT (zz == (size_t) domain->local_num_patches);
 }
 
 void

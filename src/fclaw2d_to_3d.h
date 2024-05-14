@@ -176,6 +176,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_domain_retrieve_after_partition     fclaw3d_domain_retrieve_after_partition
 #define fclaw2d_domain_iterate_partitioned  fclaw3d_domain_iterate_partitioned
 #define fclaw2d_domain_iterate_pack     fclaw3d_domain_iterate_pack
+#define fclaw2d_domain_iterate_transfer fclaw3d_domain_iterate_transfer
 #define fclaw2d_domain_iterate_unpack   fclaw3d_domain_iterate_unpack
 #define fclaw2d_domain_partition_free   fclaw3d_domain_partition_free
 #define fclaw2d_domain_free_after_partition fclaw3d_domain_free_after_partition
