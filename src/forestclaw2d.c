@@ -1764,7 +1764,6 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
 void
 fclaw2d_domain_iterate_transfer (fclaw2d_domain_t * old_domain,
                                  fclaw2d_domain_t * new_domain,
-                                 fclaw2d_domain_partition_t * p,
                                  fclaw2d_transfer_callback_t patch_transfer,
                                  void *user)
 {

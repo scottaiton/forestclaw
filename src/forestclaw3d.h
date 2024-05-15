@@ -949,7 +949,6 @@ fclaw3d_domain_partition_t
 
 void fclaw3d_domain_iterate_transfer (fclaw3d_domain_t * old_domain,
                                       fclaw3d_domain_t * new_domain,
-                                      fclaw3d_domain_partition_t * p,
                                       fclaw3d_transfer_callback_t
                                       patch_transfer, void *user);
 
