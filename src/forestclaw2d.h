@@ -834,8 +834,7 @@ void fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
                                     fclaw2d_unpack_callback_t patch_transfer,
                                     void *user);
 
-void fclaw2d_domain_partition_free (fclaw2d_domain_t * domain,
-                                    fclaw2d_domain_partition_t * p);
+void fclaw2d_domain_partition_free (fclaw2d_domain_partition_t * p);
 
 /** Free buffers that were used in transfering data during partition.
  * \param [in,out] domain       The memory lives inside this domain.

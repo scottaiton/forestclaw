@@ -1864,8 +1864,7 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
 }
 
 void
-fclaw2d_domain_partition_free (fclaw2d_domain_t * domain,
-                               fclaw2d_domain_partition_t * p)
+fclaw2d_domain_partition_free (fclaw2d_domain_partition_t * p)
 {
     sc_array_destroy (p->src_data);
     sc_array_destroy (p->dest_data);
