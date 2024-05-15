@@ -774,7 +774,8 @@ void fclaw2d_domain_retrieve_after_partition (fclaw2d_domain_t * domain,
  * \param [in] new_patchno      Number of the iterated patch wrt. the new
  *                              domain and partition.
  * \param [in,out] user         Pointer passed to \ref
- *                              fclaw2d_domain_iterate_partitioned.
+ *                              fclaw2d_domain_iterate_partitioned or
+ *                              \ref fclaw2d_domain_iterate_transfer.
  */
 typedef void (*fclaw2d_transfer_callback_t) (fclaw2d_domain_t * old_domain,
                                              fclaw2d_patch_t * old_patch,
@@ -796,17 +797,7 @@ void fclaw2d_domain_iterate_partitioned (fclaw2d_domain_t * old_domain,
                                          fclaw2d_transfer_callback_t tcb,
                                          void *user);
 
-typedef void (*fclaw2d_pack_callback_t) (fclaw2d_domain_t * domain,
-                                         fclaw2d_patch_t * patch, int blockno,
-                                         int patchno, void *pack_data_here,
-                                         void *user);
-
-typedef void (*fclaw2d_unpack_callback_t) (fclaw2d_domain_t * domain,
-                                           fclaw2d_patch_t * patch,
-                                           int blockno, int patchno,
-                                           void *unpack_data_from_here,
-                                           void *user);
-
+/** Data structure for storing allocated data for partition transfer. */
 typedef struct fclaw2d_domain_partition
 {
     sc_array_t *src_data; /**< The patch data to send */
@@ -818,22 +809,102 @@ typedef struct fclaw2d_domain_partition
 }
 fclaw2d_domain_partition_t;
 
+/** Callback to pack patch data after partitioning.
+ * We traverse every local patch in the old partition. If that patch has to be
+ * packed for the new partition, we invoke this callback.
+ * \param [in,out] domain   Domain before partition.
+ * \param [in,out] patch    Patch from the domain. Its user data should be
+                            packed into \b pack_data_here.
+ * \param [in] blockno      Number of the current block.
+ * \param [in] patchno      Number of the patch.
+ * \param [in] pack_data_here Address of storage space for the patch's user data.
+ * \param [in,out] user     Pointer passed to \ref fclaw2d_domain_iterate_pack.
+ */
+typedef void (*fclaw2d_pack_callback_t) (fclaw2d_domain_t * domain,
+                                         fclaw2d_patch_t * patch, int blockno,
+                                         int patchno, void *pack_data_here,
+                                         void *user);
+
+/** Start asynchronous transfer of patch data after partition.
+ * The function iterates over all local patches of old partition and determines
+ * patches that have to be packed by use of \b patch_pack and send to the new
+ * partition.
+ * It must be followed by a call to \ref fclaw2d_domain_iterate_unpack.
+ * \param [in,out] domain       The domain before partitioning.
+ * \param [in] data_size        The number of bytes of user data that has to be
+ *                              packed and send per patch.
+ * \param [in] patch_pack       Callback function to pack patch user data into
+ *                              a provided storage address.
+ * \param [in] user             This pointer is passed to the callback.
+ * \return                      Allocated and initialized structure containing
+ *                              internal information for patch data transfer.
+ */
 fclaw2d_domain_partition_t
     * fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain,
                                    size_t data_size,
                                    fclaw2d_pack_callback_t patch_pack,
                                    void *user);
 
+/** Transfer data of patches still local after partition.
+ * The function iterates over all pairs of local patches in the domain before
+ * and after partitioning and invokes the transfer of their user-data via
+ * \ref patch_transfer.
+ * It may be called before, between or after \ref fclaw2d_domain_iterate_pack
+ * and \ref fclaw2d_domain_iterate_unpack. It is recommended to call it between
+ * packing and unpacking, to overlap communication with computation.
+ * \param [in,out] old_domain   The domain before partitioning.
+ * \param [in,out] new_domain   The domain after partitioning.
+ * \param [in] patch_transfer   Callback function to transfer user data between
+ *                              local old and new patch, e.g. by a copy
+ *                              or reassignment.
+ * \param [in] user             This pointer is passed to the callback.
+ */
 void fclaw2d_domain_iterate_transfer (fclaw2d_domain_t * old_domain,
                                       fclaw2d_domain_t * new_domain,
                                       fclaw2d_transfer_callback_t
                                       patch_transfer, void *user);
 
+/** Callback to unpack patch data after partitioning.
+ * We traverse every local patch, that was not local before partitioning.
+ * \param [in,out] domain   Domain after partition.
+ * \param [in,out] patch    Patch from the domain. Its user data should be
+                            unpacked from \b unpack_data_from_here.
+ * \param [in] blockno      Number of the current block.
+ * \param [in] patchno      Number of the patch.
+ * \param [in] unpack_data_from_here Address of storage space that contains the
+                            packed user data of the patch.
+ * \param [in,out] user     Pointer passed to \ref fclaw2d_domain_iterate_unpack.
+ */
+typedef void (*fclaw2d_unpack_callback_t) (fclaw2d_domain_t * domain,
+                                           fclaw2d_patch_t * patch,
+                                           int blockno, int patchno,
+                                           void *unpack_data_from_here,
+                                           void *user);
+
+/** Complete asynchronous transfer of patch data after partition.
+ * The function iterates over all local patches of new partition and determines
+ * patches that have to be unpacked by use of \b patch_unpack.
+ * It must be preceded by a call to \ref fclaw2d_domain_iterate_unpack and
+ * provided with the corresponding \ref fclaw2d_domain_partition_t \b p.
+ * \param [in,out] domain       The domain after partitioning.
+ * \param [in,out] p            Structure containing internal information for
+ *                              the patch data transfer.
+ * \param [in] patch_pack       Callback function to unpack patch user data from
+ *                              a provided storage address.
+ * \param [in] user             This pointer is passed to the callback.
+ * \return                      Allocated and initialized structure containing
+ *                              internal information for patch data transfer.
+ */
 void fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
                                     fclaw2d_domain_partition_t * p,
-                                    fclaw2d_unpack_callback_t patch_transfer,
+                                    fclaw2d_unpack_callback_t patch_unpack,
                                     void *user);
 
+/** Free buffers used in transfering patch data during partition.
+ * \param [in] p                Structure containing internal information for
+ *                              patch data transfer. Will be deallocated during
+ *                              this function call.
+ */
 void fclaw2d_domain_partition_free (fclaw2d_domain_partition_t * p);
 
 /** Free buffers that were used in transfering data during partition.
