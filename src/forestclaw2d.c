@@ -1768,7 +1768,42 @@ fclaw2d_domain_iterate_transfer (fclaw2d_domain_t * old_domain,
                                  fclaw2d_transfer_callback_t patch_transfer,
                                  void *user)
 {
+    p4est_wrap_t *wrap = (p4est_wrap_t *) new_domain->pp;
+    int blockno, old_patchno, new_patchno;
+    fclaw2d_block_t *old_block, *new_block;
+    fclaw2d_patch_t *old_patch, *new_patch;
+    int dpuf, dpul, bnpb;
 
+    /* this routine should only be called for a changed partition */
+    P4EST_ASSERT (wrap->old_global_first_quadrant != NULL);
+    P4EST_ASSERT (!old_domain->pp_owned);
+    P4EST_ASSERT (new_domain->pp_owned);
+
+    /* unpack patches from dest_data array */
+    dpuf = new_domain->partition_unchanged_first;
+    dpul = new_domain->partition_unchanged_length;
+
+    for (blockno = 0; blockno < new_domain->num_blocks; ++blockno)
+    {
+        old_block = old_domain->blocks + blockno;
+        new_block = new_domain->blocks + blockno;
+        bnpb = new_block->num_patches_before;
+
+        /* iterate over patches that stayed local */
+        for (new_patchno = SC_MAX (dpuf - bnpb, 0);
+             new_patchno < SC_MIN (dpuf + dpul - bnpb,
+                                   new_block->num_patches); ++new_patchno)
+        {
+            new_patch = new_block->patches + new_patchno;
+            old_patchno = new_domain->partition_unchanged_old_first -
+                old_block->num_patches_before + new_patchno - (dpuf - bnpb);
+            old_patch = old_block->patches + old_patchno;
+
+            patch_transfer (old_domain, old_patch, new_domain, new_patch,
+                            blockno, old_patchno, new_patchno, user);
+        }
+
+    }
 }
 
 void
