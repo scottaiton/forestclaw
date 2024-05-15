@@ -1803,7 +1803,8 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
         bnpb = block->num_patches_before;
 
         /* iterate over new patches before unchanged section */
-        for (patchno = 0; patchno + bnpb < dpuf; ++zz, ++patchno)
+        for (patchno = 0; patchno < SC_MIN (dpuf - bnpb, block->num_patches);
+             ++zz, ++patchno)
         {
             patch = block->patches + patchno;
             patch_unpack (domain, patch, blockno, patchno,
@@ -1811,7 +1812,10 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
         }
 
         /* we skip the local patches for unpacking */
-        zz += dpul;
+        if (zz == (size_t) dpuf)
+        {
+            zz += dpul;
+        }
 
         /* iterate over new patches after unchanged section */
         for (patchno = SC_MAX (0, dpuf + dpul - bnpb);
