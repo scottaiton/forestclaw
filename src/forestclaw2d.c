@@ -1768,14 +1768,12 @@ fclaw2d_domain_iterate_transfer (fclaw2d_domain_t * old_domain,
                                  fclaw2d_transfer_callback_t patch_transfer,
                                  void *user)
 {
-    p4est_wrap_t *wrap = (p4est_wrap_t *) new_domain->pp;
     int blockno, old_patchno, new_patchno;
     fclaw2d_block_t *old_block, *new_block;
     fclaw2d_patch_t *old_patch, *new_patch;
     int dpuf, dpul, bnpb;
 
     /* this routine should only be called for a changed partition */
-    P4EST_ASSERT (wrap->old_global_first_quadrant != NULL);
     P4EST_ASSERT (!old_domain->pp_owned);
     P4EST_ASSERT (new_domain->pp_owned);
 
@@ -1812,7 +1810,6 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
                                fclaw2d_unpack_callback_t patch_unpack,
                                void *user)
 {
-    p4est_wrap_t *wrap = (p4est_wrap_t *) domain->pp;
     int blockno, patchno;
     size_t zz;
     fclaw2d_block_t *block;
@@ -1821,7 +1818,6 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
 
     /* this routine should only be called for the new domain of a changed
      * partition */
-    P4EST_ASSERT (wrap->old_global_first_quadrant != NULL);
     P4EST_ASSERT (domain->pp_owned);
     P4EST_ASSERT (p->inside_async);
 
