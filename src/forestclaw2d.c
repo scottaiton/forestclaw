@@ -1757,6 +1757,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
                                     domain->mpicomm, COMM_TAG_FIXED,
                                     p->dest_data->array, p->src_data->array,
                                     data_size);
+    p->inside_async = 1;
 
     return p;
 }
@@ -1822,10 +1823,12 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
      * partition */
     P4EST_ASSERT (wrap->old_global_first_quadrant != NULL);
     P4EST_ASSERT (domain->pp_owned);
+    P4EST_ASSERT (p->inside_async);
 
     /* wait for transfer of patch data to complete */
     p4est_transfer_fixed_end ((p4est_transfer_context_t *) p->async_state);
     p->async_state = NULL;
+    p->inside_async = 0;
 
     /* unpack patches from dest_data array */
     dpuf = domain->partition_unchanged_first;
@@ -1866,6 +1869,7 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
 void
 fclaw2d_domain_partition_free (fclaw2d_domain_partition_t * p)
 {
+    P4EST_ASSERT (!p->inside_async);
     sc_array_destroy (p->src_data);
     sc_array_destroy (p->dest_data);
 

@@ -929,6 +929,7 @@ typedef struct fclaw3d_domain_partition
      * It is allocated and freed by the begin/end calls below.
      */
     void *async_state;
+    int inside_async;           /**< Between asynchronous begin and end? */
 }
 fclaw3d_domain_partition_t;
 

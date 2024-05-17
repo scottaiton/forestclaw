@@ -806,6 +806,7 @@ typedef struct fclaw2d_domain_partition
      * It is allocated and freed by the begin/end calls below.
      */
     void *async_state;
+    int inside_async;           /**< Between asynchronous begin and end? */
 }
 fclaw2d_domain_partition_t;
 
