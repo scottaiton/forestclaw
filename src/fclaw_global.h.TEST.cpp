@@ -51,8 +51,8 @@ TEST_CASE("fclaw_global_new default options")
 	CHECK_EQ(glob->count_grids_remote_boundary, 0);
 	CHECK_EQ(glob->count_grids_local_boundary, 0);
 
-	CHECK_EQ(glob->mpisize, 0);
-	CHECK_EQ(glob->mpirank, -1);
+	CHECK_EQ(glob->mpisize, 1);
+	CHECK_EQ(glob->mpirank, 0);
 
 	CHECK_EQ(fclaw_pointer_map_size(glob->vtables), 0);
 	CHECK_EQ(fclaw_pointer_map_size(glob->options), 0);
