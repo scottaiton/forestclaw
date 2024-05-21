@@ -41,7 +41,9 @@ struct fclaw_global;  /* This is a hack !! */
  * @brief Restarts the forestclaw simulation from a restart file.
  *
  * This function is responsible for restarting the simulation from a previously saved state.
- * This is meant to be called fclaw_initalize()
+ * This is meant to be called from fclaw_initalize()
+ *
+ * This will print an error message and exit for any error.
  *
  * @param glob The global context
  * @param restart_filename The filename of the restart file.

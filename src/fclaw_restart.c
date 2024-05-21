@@ -132,6 +132,14 @@ get_used_ini(fclaw_global_t * glob)
 
 }
 
+/**
+ * @brief Check if option should be skipped for comparison
+ * 
+ * @param fclaw_opt_sections the sections containing the core options
+ * @param section the section name
+ * @param key the key name
+ * @return int true if the option should be skipped, false otherwise
+ */
 static int
 skip_option(sc_keyvalue_t *fclaw_opt_sections, const char* section, const char* key)
 {
@@ -152,6 +160,14 @@ skip_option(sc_keyvalue_t *fclaw_opt_sections, const char* section, const char* 
     return skip;
 }
 
+/**
+ * @brief compare two ini dictionaries
+ * 
+ * @param fclaw_opt_secitons the sections containing the core options
+ * @param expected the expected dictionary
+ * @param actual the actual dictionary
+ * @return int the number of differences found
+ */
 static int
 compare_dictionaries(sc_keyvalue_t *fclaw_opt_secitons,
                      dictionary *expected, 
@@ -204,6 +220,12 @@ compare_dictionaries(sc_keyvalue_t *fclaw_opt_secitons,
     return num_differences;
 }
 
+/**
+ * @brief Compare provided options with the options stored in the checkpoint
+ * 
+ * @param glob the global context
+ * @param checkpoint_ini the ini file from the checkpoint
+ */
 static void
 check_options(fclaw_global_t * glob, const char* checkpoint_ini)
 {
@@ -264,6 +286,15 @@ free_used_ini(void* data)
     FCLAW_FREE(buffer);
 }
 
+static
+void check_user_string(const char* expected, const char* actual)
+{
+    if(strncmp(expected, actual, strlen(expected)) != 0)
+    {
+        fclaw_abortf("User string mismatch: %s != %s\n", expected, actual);
+    }
+}
+
 typedef struct pack_iter
 {
     fclaw_global_t * glob;
@@ -271,23 +302,12 @@ typedef struct pack_iter
     size_t size;
     sc_array_t* patches;
     int pointerno;
-    int reading;
 }pack_iter_t;
 
-static void
-get_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int patchno,  void *user)
-{
-    pack_iter_t *user_data = (pack_iter_t*)user;
-    sc_array_t *patches = user_data->patches;
-    sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, user_data->curr_index);
 
-    void* data = fclaw_patch_restart_get_pointer(user_data->glob, patch, blockno, patchno, user_data->pointerno);
-
-    sc_array_init_data(current_arr, data, user_data->size, 1);
-
-    user_data->curr_index++;
-}
-
+/**
+ * @brief Set patch data from the checkpoint, user data is a pack_iter_t
+ */
 static void
 set_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int patchno,  void *user)
 {
@@ -311,14 +331,6 @@ set_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int pat
     user_data->curr_index++;
 }
 
-static
-void check_user_string(const char* expected, const char* actual)
-{
-    if(strncmp(expected, actual, strlen(expected)) != 0)
-    {
-        fclaw_abortf("User string mismatch: %s != %s\n", expected, actual);
-    }
-}
 static
 void restart (fclaw_global_t * glob,
               const char* restart_filename,
@@ -410,7 +422,6 @@ void restart (fclaw_global_t * glob,
         user.patches = patches;
         user.size = sizes[i];
         user.pointerno = i;
-        user.reading = 1;
 
         fc = fclaw_file_read_array(fc, user_string, sizes[i], patches, &errcode);
         if(strncmp(user_string, names[i], strlen(names[i])) != 0)
@@ -431,9 +442,24 @@ void restart (fclaw_global_t * glob,
     fclaw_exchange_setup(glob,timer);
     fclaw_regrid_set_neighbor_types(glob);
 }
-/* -----------------------------------------------------------------------
-    Public interface
-    -------------------------------------------------------------------- */
+
+/**
+ * @brief Get patch data for the checkpoint, user data is a pack_iter_t
+ */
+static void
+get_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int patchno,  void *user)
+{
+    pack_iter_t *user_data = (pack_iter_t*)user;
+    sc_array_t *patches = user_data->patches;
+    sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, user_data->curr_index);
+
+    void* data = fclaw_patch_restart_get_pointer(user_data->glob, patch, blockno, patchno, user_data->pointerno);
+
+    sc_array_init_data(current_arr, data, user_data->size, 1);
+
+    user_data->curr_index++;
+}
+
 
 static void
 checkpoint_output_frame (fclaw_global_t * glob, int iframe)
@@ -532,7 +558,6 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
         user.patches = patches;
         user.size = sizes[i];
         user.pointerno = i;
-        user.reading = 0;
         fclaw_domain_iterate_patches(glob->domain, get_patches, &user);
 
     
@@ -563,6 +588,9 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
     }
 }
 
+/* -----------------------------------------------------------------------
+    Public interface
+    -------------------------------------------------------------------- */
 
 void
 fclaw_restart_from_file (fclaw_global_t * glob,
