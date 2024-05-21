@@ -43,6 +43,7 @@ include $(GEOLIB)/Makefile.geoclaw_1d_classic
 EXCLUDE_MODULES = \
 
 EXCLUDE_SOURCES = \
+		setprob.f90 \
 
 # ----------------------------------------
 # List of custom sources for this program:
@@ -51,6 +52,7 @@ EXCLUDE_SOURCES = \
 MODULES = \
 
 SOURCES = \
+  ../setprob.f90 \
   qinit.f90 \
 
 

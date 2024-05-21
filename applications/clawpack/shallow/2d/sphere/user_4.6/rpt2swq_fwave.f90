@@ -74,12 +74,6 @@ subroutine clawpack46_rpt2_fwave(ixy,maxm,meqn,mwaves,mbc,mx, &
     !!  --------------
     !!  # up-going:
     !!  --------------
-
-    !! # determine rotation matrix for interface above cell, using
-    !! # aux3
-
-    !! [ alf  beta ]
-    !! [-beta  alf ]
     
     do i = ix1,ixm1
 
@@ -111,9 +105,6 @@ subroutine clawpack46_rpt2_fwave(ixy,maxm,meqn,mwaves,mbc,mx, &
         a(i) = dsqrt(grav*h(i))
     end do
 
-
-
-    !! # now split asdq into waves:
 
     !! # find a1 thru a3, the coefficients of the 3 eigenvectors:
     do  i = ix1,ixm1

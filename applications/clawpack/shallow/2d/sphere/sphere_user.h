@@ -64,6 +64,18 @@ typedef struct user_options
     const char* longitude_string;
     double *longitude;
 
+    /* For ridge */
+    const char* center_string;
+    double *center;
+
+    const char* bathy_string;
+    double *bathy;
+
+    double theta_ridge;
+    double ampl;
+    double alpha; 
+    double speed;
+
     int claw_version;
 
     int is_registered;
@@ -120,6 +132,29 @@ int USER_EXCEEDS_THRESHOLD(const int *blockno,
                                         const int *init_flag,
                                         const int *is_ghost);
 
+
+#define SPHERE_FORT_WRITE_HEADER FCLAW_F77_FUNC(sphere_fort_write_header,\
+                                                      SPHERE_FORT_WRITE_HEADER)
+void SPHERE_FORT_WRITE_HEADER(int* iframe, double* time, int* meqn, 
+                                    int* maux, int* ngrids);
+
+#define SPHERE_FORT_WRITE_FILE FCLAW_F77_FUNC(sphere_fort_write_file, \
+                                                    SPHERE_FORT_WRITE_FILE)
+void SPHERE_FORT_WRITE_FILE(const int* mx, 
+                                  const int* my, 
+                                  const int* meqn, 
+                                  const int* maux, 
+                                  const int* mbc, 
+                                  const double* xlower, 
+                                  const double* ylower, 
+                                  const double* dx, 
+                                  const double* dy,
+                                  double q[], double aux[], 
+                                  const int* iframe, 
+                                  const int* patch_num, 
+                                  const int* level,
+                                  const int* blockno, 
+                                  const int* mpirank);
 
 void sphere_patch_manifold_setup(fclaw_domain_t *domain,
                                   fclaw_patch_t *this_patch,

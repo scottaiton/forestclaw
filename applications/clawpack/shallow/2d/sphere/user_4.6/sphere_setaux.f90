@@ -1,27 +1,3 @@
-!! The aux array has the following elements:
-!! 1  kappa = ratio of cell area to dxc*dyc
-!! 2  enx = x-component of normal vector to left edge in tangent plane
-!! 3  eny = y-component of normal vector to left edge in tangent plane
-!! 4  enz = z-component of normal vector to left edge in tangent plane
-!! 5  etx = x-component of tangent vector to left edge in tangent plane
-!! 6  ety = y-component of tangent vector to left edge in tangent plane
-!! 7  etz = z-component of tangent vector to left edge in tangent plane
-!! 8  enx = x-component of normal vector to bottom edge in tangent plane
-!! 9  eny = y-component of normal vector to bottom edge in tangent plane
-!! 10  enz = z-component of normal vector to bottom edge in tangent plane
-!! 11  etx = x-component of tangent vector to bottom edge in tangent plane
-!! 12  ety = y-component of tangent vector to bottom edge in tangent plane
-!! 13  etz = z-component of tangent vector to bottom edge in tangent plane
-!! 14  erx = x-component of unit vector in radial direction at cell ctr
-!! 15  ery = y-component of unit vector in radial direction at cell ctr
-!! 16  erz = z-component of unit vector in radial direction at cell ctr
-
-!! (not used here)
-!! 17  xc at cell center
-!! 18  yc at cell center
-!! 19  bathymetry - averaged over all possible finer cells
-
-
 subroutine sphere_setaux(mx,my,mbc,xlower,ylower, & 
    dx,dy,area,xnormals,ynormals, & 
    xtangents,ytangents,surfnormals,curvature, & 
@@ -44,6 +20,9 @@ subroutine sphere_setaux(mx,my,mbc,xlower,ylower, &
    double precision        area(-mbc:mx+mbc+1,-mbc:my+mbc+1)
    double precision   curvature(-mbc:mx+mbc+2,-mbc:my+mbc+1)
    double precision surfnormals(-mbc:mx+mbc+1,-mbc:my+mbc+1,3)
+
+    integer example
+    common /swe_example/ example
 
    integer i,j,m
    double precision dxdy, xc, yc, xp, yp,zp, rp
@@ -79,7 +58,10 @@ subroutine sphere_setaux(mx,my,mbc,xlower,ylower, &
 
          enddo
          aux(i,j,17) = curvature(i,j)
-         aux(i,j,18) = bmount(xc,yc)
+
+         !! Set bathymetry
+         !! Ridge bathymetry
+         aux(i,j,18) = bmount(blockno, xc,yc)  
       enddo
    enddo
 

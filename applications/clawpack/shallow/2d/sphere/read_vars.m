@@ -16,7 +16,7 @@ function parms = read_vars()
 % 60.0000000000000000        % longitude
 
 
-data = load('setprob.data');
+data = load('setprob_2d.data');
 
 parms.example = data(1);
 parms.mapping = data(3);
@@ -25,6 +25,14 @@ parms.hin = data(5);
 parms.hout = data(6);
 parms.latitude = data(10:11);
 parms.longitude = data(12:13);
-parms.refine_threshold = data(14);
-parms.coarsen_threshold = data(15);
+parms.Px = data(14);
+parms.Py = data(15);
+parms.Pz = data(16);
+parms.theta_ridge = data(17);
+parms.ampl = data(18);
+parms.alpha = data(19);
+parms.speed = data(20);
+parms.bathy = data(21:22);
+parms.refine_threshold = data(23);
+parms.coarsen_threshold = data(24);
 end

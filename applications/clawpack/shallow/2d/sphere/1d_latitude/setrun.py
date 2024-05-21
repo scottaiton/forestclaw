@@ -59,8 +59,8 @@ def setrun(claw_pkg='geoclaw'):
     # For nonuniform grid, 0 <= xc <= 1 and the file grid.data should
     # define the mapping to the physical domain
 
-    clawdata.lower[0] = -90.          # xlower
-    clawdata.upper[0] = 90.           # xupper
+    clawdata.lower[0] = -90  # -90.          # xlower
+    clawdata.upper[0] = 90   # xupper
 
     # Number of grid cells:
     clawdata.num_cells[0] = 2*1800
@@ -170,7 +170,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.dt_max = 1.e9
 
     # Desired Courant number if variable dt used
-    clawdata.cfl_desired = 0.75
+    clawdata.cfl_desired = 0.8
     # max Courant number to allow without retaking step with a smaller dt:
     clawdata.cfl_max = 1.0
 

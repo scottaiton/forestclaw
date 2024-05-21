@@ -24,12 +24,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "sphere_user.h"
+#include <fclaw_options.h>
+#include <math.h>
 
 
 #define SPHERE_UNITS_RADIANS 0
 #define SPHERE_UNITS_DEGREES 1
 #define SPHERE_UNITS_METERS 2
-
 
 static sc_keyvalue_t *
 kv_ring_units_new()
@@ -83,6 +84,32 @@ sphere_register (user_options_t* user , sc_options_t * opt)
                                    "0 360", &user->longitude, 2,
                                    "[user] Longitude range (degrees) [0 360]");
 
+    /* Center of ridge */
+    fclaw_options_add_double_array(opt, 0, "center", &user->center_string,
+                                   "1 0 0", &user->center, 3,
+                                   "[user] Ridge: (Px,Py,Pz] [(1,0,0)]");
+
+
+    fclaw_options_add_double_array(opt, 0, "bathy", &user->bathy_string,
+                                   "0.05 0.02", &user->bathy, 2,
+                                   "[user] Bathymetry : b0 + b1*f(t) [(0.05,0.02)]");
+
+    /* Location of ridge, measured as angle from center (Px,Py,Pz) */
+    sc_options_add_double(opt, 0, "theta_ridge", &user->theta_ridge, M_PI/6.0,
+                                   "[user] theta_ridge : theta [pi/6]");
+
+    /* Amplitude of the ridge */
+    sc_options_add_double(opt, 0, "ampl", &user->ampl, 0.2,
+                        "[user] Ridge : amplitude [0.2]");
+
+    /* Alpha for exponential in ridge */
+    sc_options_add_double(opt, 0, "alpha", &user->alpha, 10,
+                        "[user] Ridge : alpha [10]");
+
+    /* Sphere (u0) for exponential in ridge */
+    sc_options_add_double(opt, 0, "speed", &user->speed, 1,
+                        "[user] Speed (u0)  [1]");
+
     sc_options_add_int (opt, 0, "claw-version", &user->claw_version, 4,
                         "[user] Clawpack version (4 or 5) [4]");
 
@@ -95,6 +122,8 @@ sphere_postprocess (user_options_t *user)
 {
     fclaw_options_convert_double_array (user->latitude_string, &user->latitude,2);
     fclaw_options_convert_double_array (user->longitude_string, &user->longitude,2);
+    fclaw_options_convert_double_array (user->center_string, &user->center,3);
+    fclaw_options_convert_double_array (user->bathy_string, &user->bathy,2);
     return FCLAW_NOEXIT;
 }
 
@@ -115,6 +144,8 @@ sphere_destroy(user_options_t* user)
     /* Destroy arrays used in options  */
     fclaw_options_destroy_array((void*) user->latitude);
     fclaw_options_destroy_array((void*) user->longitude);
+    fclaw_options_destroy_array((void*) user->center);
+    fclaw_options_destroy_array((void*) user->bathy);
 
     FCLAW_ASSERT (user->kv_ring_units != NULL);
     sc_keyvalue_destroy (user->kv_ring_units);

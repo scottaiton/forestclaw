@@ -27,7 +27,7 @@ double precision function fdisc(blockno,xc,yc)
     call fclaw_map_2d_c2m(cont,blockno,xc,yc,xp,yp,zp)
 
     rp = sqrt(xp**2 + yp**2 + zp**2)
-    !! write(6,*) xp,yp,zp,rp
+    !!write(6,*) xp,yp,zp,rp
     !!call map2spherical(xp,yp,zp,theta,phi)
 
     deg2rad = pi/180
@@ -51,7 +51,7 @@ double precision function fdisc(blockno,xc,yc)
         write(6,*) 'fdisc : problem taking acos()'
         stop
     endif
-    phi = acos(xp/rp)  
+    phi = asin(xp/rp)  
     a = (ro - ri)/2.0   !! Half-width of the ring
     m = (ro + ri)/2.0   !! Midpoint of the ring
     fdisc = abs(phi-m) - a

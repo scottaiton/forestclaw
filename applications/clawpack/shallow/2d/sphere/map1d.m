@@ -50,12 +50,18 @@ function [r,q] = map1d(xgrid,ygrid,qgrid)
 
 [xp,yp,zp] = mapc2m(xgrid,ygrid);
 
+parms = read_vars();
+
 rp = sqrt(xp.^2 + yp.^2 + zp.^2);
 
-phi = acos(xp(:)./rp(:));
+if parms.example == 0
+    d = xp;
+elseif parms.example == 1
+    d = parms.Px*xp + parms.Py*yp + parms.Pz*zp;
+end
 
-R = 1;
-r = R*phi;
+phi = asin(d);
+r = phi(:);
 q = qgrid(:);
 
 end

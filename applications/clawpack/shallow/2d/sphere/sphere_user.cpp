@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw_clawpatch_pillow.h>
 #include <fclaw_clawpatch.h>
+#include <fclaw_clawpatch_options.h>
 
 #include <fclaw2d_clawpatch_fort.h>
 
@@ -53,7 +54,7 @@ void sphere_problem_setup(fclaw_global_t* glob)
 
     if (glob->mpirank == 0)
     {
-        FILE *f = fopen("setprob.data","w");
+        FILE *f = fopen("setprob_2d.data","w");
         fprintf(f,  "%-24d   %s",user->example,"\% example\n");
         fprintf(f,  "%-24.16f   %s",user->gravity,"\% gravity\n");
         fprintf(f,  "%-24d   %s",user->mapping,"\% mapping\n");
@@ -70,6 +71,17 @@ void sphere_problem_setup(fclaw_global_t* glob)
         fprintf(f,  "%-24.16f   %s",user->latitude[1],"\% latitude\n");
         fprintf(f,  "%-24.16f   %s",user->longitude[0],"\% longitude\n");
         fprintf(f,  "%-24.16f   %s",user->longitude[1],"\% longitude\n");
+
+        fprintf(f,  "%-24.16f   %s",user->center[0],"\% center[0]\n");
+        fprintf(f,  "%-24.16f   %s",user->center[1],"\% center[1]\n");
+        fprintf(f,  "%-24.16f   %s",user->center[2],"\% center[2]\n");
+
+        fprintf(f,  "%-24.16f   %s",user->theta_ridge,"\% theta_ridge\n");
+        fprintf(f,  "%-24.16f   %s",user->ampl, "\% ampl\n");
+        fprintf(f,  "%-24.16f   %s",user->alpha,"\% alpha\n");
+        fprintf(f,  "%-24.16f   %s",user->speed,"\% speed\n");
+        fprintf(f,  "%-24.16f   %s",user->bathy[0],"\% bathy[0]\n");
+        fprintf(f,  "%-24.16f   %s",user->bathy[1],"\% bathy[1]\n");
 
         fprintf(f,  "%-24.16f   %s",fclaw_opt->refine_threshold,"\% refine_threshold\n");
         fprintf(f,  "%-24.16f   %s",fclaw_opt->coarsen_threshold,"\% coarsen_threshold\n");
@@ -110,22 +122,75 @@ void sphere_patch_setup_manifold(fclaw_global_t *glob,
                                    &surfnormals,
                                    &edgelengths,&curvature);
 
+
+    CLAWPACK46_SET_BLOCK(&blockno);
     SPHERE_SETAUX(&mx,&my,&mbc,&xlower,&ylower,
                   &dx,&dy,area,xnormals,ynormals,
                   xtangents,ytangents,surfnormals, curvature,
                   edgelengths,
                   aux, &maux);
+    CLAWPACK46_UNSET_BLOCK();
 }
 
+static
+void cb_sphere_output_ascii(fclaw_domain_t *domain,
+                             fclaw_patch_t *patch,
+                             int blockno, int patchno,
+                             void *user)
+{
+    fclaw_global_iterate_t* s = (fclaw_global_iterate_t*) user;
+    fclaw_global_t *glob = (fclaw_global_t*) s->glob;
+
+    int iframe = *((int *) s->user);    
+
+    /* Get info not readily available to user */
+    int local_num, global_num, level;
+    fclaw_patch_get_info(glob->domain,patch,
+                           blockno,patchno,
+                           &global_num, 
+                           &local_num,&level);
+
+    int mx,my,mbc;
+    double xlower,ylower,dx,dy;
+    fclaw_clawpatch_2d_grid_data(glob,patch,&mx,&my,&mbc,
+                                &xlower,&ylower,&dx,&dy);
+
+    double *q;
+    int meqn;
+    fclaw_clawpatch_soln_data(glob,patch,&q,&meqn);
+
+    double *aux;
+    int maux;
+    fclaw_clawpatch_aux_data(glob,patch,&aux,&maux);
+
+    SPHERE_FORT_WRITE_FILE(&mx,&my,&meqn, &maux,&mbc,&xlower,&ylower,
+                                 &dx,&dy,q,aux,&iframe,&global_num,&level,
+                                 &blockno,&glob->mpirank);
+}
+
+static
+void sphere_header_ascii(fclaw_global_t* glob,int iframe)
+{
+    double time = glob->curr_time;
+    int ngrids = glob->domain->global_num_patches;
+
+    const fclaw_clawpatch_options_t *clawpatch_opt = fclaw_clawpatch_get_options(glob);
+    int meqn = clawpatch_opt->meqn;
+    int maux = clawpatch_opt->maux;
+
+    SPHERE_FORT_WRITE_HEADER(&iframe,&time,&meqn,&maux,&ngrids);
+}
 
 void sphere_link_solvers(fclaw_global_t *glob)
 {
     /* ForestClaw core functions */
     fclaw_vtable_t *vt = fclaw_vt(glob);
     vt->problem_setup = &sphere_problem_setup;  /* Version-independent */
+    //vt->output_frame = &sphere_output;
 
     fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
     patch_vt->setup   = &sphere_patch_setup_manifold;
+
 
     const user_options_t* user_opt = sphere_get_options(glob);
     if (user_opt->mapping == 1)
@@ -155,6 +220,9 @@ void sphere_link_solvers(fclaw_global_t *glob)
         /* Clawpatch functions */    
         fclaw_clawpatch_vtable_t *clawpatch_vt = fclaw_clawpatch_vt(glob);
         clawpatch_vt->d2->fort_user_exceeds_threshold = &USER_EXCEEDS_THRESHOLD;
+
+        clawpatch_vt->time_header_ascii = &sphere_header_ascii;
+        clawpatch_vt->cb_output_ascii   = &cb_sphere_output_ascii;
 
     }
     else

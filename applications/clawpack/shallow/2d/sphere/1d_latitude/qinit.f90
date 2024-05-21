@@ -1,4 +1,6 @@
 subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
+    implicit none
+
 
     ! Set initial conditions for the q array.
     ! This default version simply sets eta = max(h + b,0)
@@ -9,9 +11,26 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
 
     !use geoclaw_module, only: dry_tolerance !uncomment if needed
     !use geoclaw_module, only: grav  !uncomment if needed
-    use grid_module, only: xcell
+    !!use grid_module, only: xcell
 
-    implicit none
+    double precision pi, pi2
+    common /compi/ pi, pi2
+
+    integer example
+    common /swe_example/ example
+
+    integer init_cond
+    common /swe_initcond/ init_cond
+
+    double precision ring_inner, ring_outer
+    common /swe_initcond_parms2/ ring_inner, ring_outer
+
+    integer ring_units
+    common /swe_initcond_parms3/ ring_units
+
+    double precision hin, hout, speed
+    common /swe_initcond_parms4/  hin,hout, speed
+
 
     integer, intent(in) :: meqn,mbc,mx,maux
     real(kind=8), intent(in) :: xlower,dx
@@ -20,29 +39,55 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
 
     !locals
     integer :: i
-    real(kind=8) :: x,x0, bathy
+    real(kind=8) :: xe, xc,x0, bathy, qval, deg2rad
+    real(kind=8) :: dxrad
 
-    real(kind=8) :: eta, width
+    real(kind=8) :: eta, width, ri, ro
 
+    deg2rad = pi/180
     width = 5.   ! controls width of Gaussian
     x0 = 70.     ! initial location of Gaussian
     bathy = -1
 
+    ri = ring_inner
+    ro = ring_outer
+
     do i = 1,mx
-        x = xcell(i)  ! latitude in degrees
+        xe = xlower + (i-1)*dx  ! latitude in degrees
+        xc = xlower +  (i-0.5)*dx
+
         !!if (abs(x-20) .lt. 5) then
         !!    eta = 1
         !!else
         !!    eta = 0
         !!endif
 
-        eta = exp(-((x-x0)/width)**2)
+        if (init_cond .eq. 1) then            
+            xe = xe*deg2rad
+            dxrad = deg2rad*dx
+            if (xe .le. ri .and. ri .lt. xe+dxrad) then
+                qval = (xe+dxrad-ri)/dxrad
+            elseif (xe .le. ro .and. ro .lt. xe+dxrad) then
+                qval = (ro-xe)/dxrad
+            elseif (ri .lt. xe .and. xe .lt. ro) then
+                qval = 1
+            else
+                qval = 0
+            endif
+        elseif (init_cond .eq. 2) then
 
-        if (eta < 1d-20) eta = 0.d0
-        !!q(1,i) = max(0.0, eta - aux(1,i))
-        q(1,i) = eta - bathy
+            eta = exp(-((xc-x0)/width)**2)
+
+            if (eta < 1d-20) eta = 0.d0
+            !!q(1,i) = max(0.0, eta - aux(1,i))
+            qval = eta
+        endif
+        q(1,i) = hout + (hin-hout)*qval
         q(2,i) = 0.d0 
+        !!write(6,*) 'qinit : ',q(1,i)
    enddo
+   !!write(6,*) 'Stopping in qinit'
+   !!stop
 
 
 end subroutine qinit

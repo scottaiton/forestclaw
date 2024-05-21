@@ -1,65 +1,19 @@
-! =====================================================
-!!SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves,maux, &
-!!    mbc, mx,ql,qr,auxl,auxr,fwave,s,amdq,apdq)
-!!
-
 SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
     mbc, mx,ql,qr,auxl,auxr,fwave,s,amdq,apdq)
 
-! =====================================================
-
-! Roe-solver for the 2D shallow water equations
-!  on the sphere, using 3d Cartesian representation of velocities
-
-! waves: 3
-! equations: 4
-! aux fields: 16
-
-! Conserved quantities:
-!       1 depth
-!       2 x_momentum
-!       3 y_momentum
-!       4 z_momentum
-
-! Auxiliary variables:
-!         1  kappa
-!         2  enx
-!         3  eny
-!         4  enz
-!         5  etx
-!         6  ety
-!         7  etz
-!         8  enx
-!         9  eny
-!        10  enz
-!        11  etx
-!        12  ety
-!        13  etz
-!        14  erx
-!        15  ery
-!        16  erz
-
-! solve Riemann problems along one slice of data.
-
-! On input, ql contains the state vector at the left edge of each cell
-!           qr contains the state vector at the right edge of each cell
-
-! This data is along a slice in the x-direction if ixy=1
-!                            or the y-direction if ixy=2.
-! On output, wave contains the waves, s the speeds,
-! and amdq, apdq the decomposition of the flux difference
-!   f(qr(i-1)) - f(ql(i))
-! into leftgoing and rightgoing parts respectively.
-! With the Roe solver we have
-!    amdq  =  A^- \Delta q    and    apdq  =  A^+ \Delta q
-! where A is the Roe matrix.  An entropy fix can also be incorporated
-! into the flux differences.
-
-! Note that the i'th Riemann problem has left state qr(i-1,:)
-!                                    and right state ql(i,:)
-! From the basic clawpack routines, this routine is called with ql = qr
-
-
+!! Roe-solver for the 2D shallow water equations
+!!  on the sphere, using 3d Cartesian representation of velocities
+!!
+!! waves: 3
+!! equations: 4
+!! aux fields: 18
+!!
+!! Conserved quantities:
+!!       1 depth
+!!       2 x_momentum
+!!       3 y_momentum
+!!       4 z_momentum
+!!
     implicit none
 
     integer :: ixy, maxm,meqn,mwaves,mbc,mx
@@ -180,16 +134,8 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
         hL  = qr(i-1,1)
         hR  = ql(i,1)
 
-!!        huL = hunr
-!!        huR = hunL
-!!
-!!        hvL = hutR
-!!        hvR = hutL
-
-!!        bL  = auxr(i-1,mbathy)
-!!        bR  = auxl(i,mbathy)
-        bL = 0
-        bR = 0
+        bL  = auxr(i-1,mbathy)
+        bR  = auxl(i,mbathy)
 
         CALL  simple_riemann(hR,huR,hvR, bR, hL,huL,hvL,bL, sw,fw)
 
@@ -423,7 +369,7 @@ SUBROUTINE simple_riemann(hR,huR,hvR, br, hL,huL,hvl,bL, s,fwave)
 !!    fluxdiff(3) = hr * ur * vr - hl * ul * vl
 
     fluxdiff(1) = fr(1) - fl(1)
-    fluxdiff(2) = fr(2) - fl(2)  + psir - psil
+    fluxdiff(2) = fr(2) - fl(2)  + (psir - psil)
     fluxdiff(3) = fr(3) - fl(3)
 
     !! # Wave speeds

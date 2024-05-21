@@ -11,9 +11,9 @@ PlotType = 4;    % type of plot to produce:
 			     % 3 = Schlieren
 			     % 4 = scatter plot of q vs. r
 
-mq = 1;                      % which component of q to plot
+mq = 5;                      % which component of q to plot
 UserVariable = 0;            % set to 1 to specify a user-defined variable
-UserVariableFile = ' ';      % name of m-file mapping data to q
+UserVariableFile = 'surface_eta';      % name of m-file mapping data to q
 MappedGrid = 0;              % set to 1 if mapc2p.m exists for nonuniform grid
 Manifold = 1;
 ReadBlockNumber = 1;
