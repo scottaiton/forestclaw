@@ -291,7 +291,15 @@ void check_user_string(const char* expected, const char* actual)
 {
     if(strncmp(expected, actual, strlen(expected)) != 0)
     {
-        fclaw_abortf("User string mismatch: %s != %s\n", expected, actual);
+        //also check that rest of the string is just spaces
+        for(int i = strlen(expected); i < FCLAW_FILE_USER_STRING_BYTES; i++)
+        {
+            if(actual[i] != ' ')
+            {
+                fclaw_abortf("fclaw_restart.c: User string mismatch: %s != %s\n", expected, actual);
+            }
+        }
+        fclaw_abortf("fclaw_restart.c: User string mismatch: %s != %s\n", expected, actual);
     }
 }
 
@@ -352,6 +360,7 @@ void restart (fclaw_global_t * glob,
                                   glob->mpicomm, 
                                   partition, 
                                   &errcode);
+        check_user_string("Partition", user_string);
         CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read_partition");
     }
 
@@ -363,6 +372,7 @@ void restart (fclaw_global_t * glob,
                                 partition, 
                                 &glob->domain, 
                                 &errcode);
+    check_user_string("ForestClaw checkpoint file", user_string);
     CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart open_file");
 
     fclaw_domain_setup(glob, glob->domain);
@@ -371,48 +381,66 @@ void restart (fclaw_global_t * glob,
     {
         sc_array_destroy(partition);
     }
+
     sc_array_t array;
     sc_array_init_size(&array, sizeof(size_t), 1);
     fc = fclaw_file_read_block(fc, user_string, sizeof(size_t), &array, &errcode);
-    CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read used_ini_length");
+
+    //read the length of the used_ini string
+
     check_user_string("used_ini_length", user_string);
+    CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read used_ini_length");
 
     size_t ini_length = *((size_t*) sc_array_index(&array, 0));
     sc_array_reset(&array);
 
     sc_array_init_size(&array, ini_length, 1);
     fc = fclaw_file_read_block(fc, user_string, ini_length, &array, &errcode);
+
+    //read the used_ini string
+
+    check_user_string(user_string, "used_ini");
+    CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read used_ini");
+
     const char* used_ini = (const char*) sc_array_index(&array, 0);
     check_options(glob, used_ini);
-
     
-    CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read used_ini");
     sc_array_reset(&array);
 
-    sc_array_t globsize;
-    sc_array_init_size(&globsize, sizeof(size_t), 1);
+    //read the length of the glob buffer
 
-    fc = fclaw_file_read_block(fc, user_string, sizeof(size_t), &globsize, &errcode);
+    sc_array_init_size(&array, sizeof(size_t), 1);
+
+    fc = fclaw_file_read_block(fc, user_string, sizeof(size_t), &array, &errcode);
+
+    check_user_string("glob_size", user_string);
     CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read globsize");
 
-    size_t glob_packsize = *((size_t*) sc_array_index(&globsize, 0));
-    sc_array_reset(&globsize);
+    size_t glob_packsize = *((size_t*) sc_array_index(&array, 0));
 
-    sc_array_t glob_buffer;
-    sc_array_init_size(&glob_buffer, glob_packsize, 1);
+    sc_array_reset(&array);
 
-    fc = fclaw_file_read_block(fc, user_string, glob_packsize, &glob_buffer, &errcode);
+    //read the glob buffer
+
+    sc_array_init_size(&array, glob_packsize, 1);
+
+    fc = fclaw_file_read_block(fc, user_string, glob_packsize, &array, &errcode);
+
+    check_user_string("glob", user_string);
     CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read glob buffer");
 
-    fclaw_global_unpack((char *) sc_array_index(&glob_buffer, 0), glob);
+    fclaw_global_unpack((char *) sc_array_index(&array, 0), glob);
 
-    sc_array_reset(&glob_buffer);
+    sc_array_reset(&array);
+
+    //read patch data
 
     int num_pointers = fclaw_patch_restart_num_pointers(glob);
     size_t sizes[num_pointers];
     fclaw_patch_restart_pointer_sizes(glob, sizes);
     const char* names[num_pointers];
     fclaw_patch_restart_names(glob, names);
+
     for(int i = 0; i < num_pointers; i++)
     {
         sc_array_t *patches = sc_array_new_count(sizeof(sc_array_t), glob->domain->local_num_patches);
@@ -424,10 +452,8 @@ void restart (fclaw_global_t * glob,
         user.pointerno = i;
 
         fc = fclaw_file_read_array(fc, user_string, sizes[i], patches, &errcode);
-        if(strncmp(user_string, names[i], strlen(names[i])) != 0)
-        {
-            fclaw_abortf("User string mismatch: %s != %s\n", user_string, names[i]);
-        }
+
+        check_user_string(names[i], user_string);
         CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read patches");
 
         fclaw_domain_iterate_patches(glob->domain, set_patches, &user);
@@ -473,7 +499,7 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
 
     int errcode;
     fclaw_file_context_t *fc 
-        = fclaw_file_open_write (filename, "ForestClaw data file",
+        = fclaw_file_open_write (filename, "ForestClaw checkpoint file",
                                  glob->domain, &errcode);
     CHECK_ERROR_CODE(refine_dim , errcode, "checkpoint open file");
     if(errcode != FCLAW_FILE_ERR_SUCCESS)
@@ -579,7 +605,7 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
 
     fclaw_file_close(fc, &errcode);
     fclaw_file_write_partition (parition_filename,
-                                "Test partition write",
+                                "Paritition",
                                 glob->domain, &errcode);
     CHECK_ERROR_CODE(refine_dim , errcode, "close file");
     if(errcode != FCLAW_FILE_ERR_SUCCESS)
