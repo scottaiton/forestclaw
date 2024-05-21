@@ -37,15 +37,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_forestclaw.h>
 #include <iniparser.h>
 
-#define CHECK_ERROR_CODE(refine_dim, errcode, str) \
+#define CHECK_ERROR_CODE(abort, refine_dim, errcode, str) \
 do { \
     int reslen, retval; \
     char err_str[sc_MPI_MAX_ERROR_STRING]; \
     if (errcode != FCLAW_FILE_ERR_SUCCESS) \
     { \
         retval = fclaw_file_error_string (refine_dim, errcode, err_str, &reslen); \
-        SC_CHECK_ABORTF (!retval, "%s: error string function not successful", str); \
-        SC_ABORTF ("%s: %*.*s", str, reslen, reslen, err_str); \
+        if(abort) \
+        { \
+            SC_CHECK_ABORTF (!retval, "%s: error string function not successful", str); \
+            SC_ABORTF ("%s: %*.*s", str, reslen, reslen, err_str); \
+        } \
+        else \
+        { \
+            fclaw_global_productionf("%s: %s\n", str, err_str); \
+        } \
     } \
 } while(0)
 
@@ -313,7 +320,7 @@ void restart (fclaw_global_t * glob,
                                   glob->mpicomm, 
                                   partition, 
                                   &errcode);
-        CHECK_ERROR_CODE(refine_dim, errcode, "restart read_partition");
+        CHECK_ERROR_CODE(1, refine_dim, errcode, "restart read_partition");
     }
 
     fclaw_file_context_t *fc 
@@ -324,7 +331,7 @@ void restart (fclaw_global_t * glob,
                                 partition, 
                                 &glob->domain, 
                                 &errcode);
-    CHECK_ERROR_CODE(refine_dim, errcode, "restart open_file");
+    CHECK_ERROR_CODE(1, refine_dim, errcode, "restart open_file");
 
     fclaw_domain_setup(glob, glob->domain);
 
@@ -335,7 +342,7 @@ void restart (fclaw_global_t * glob,
     sc_array_t array;
     sc_array_init_size(&array, sizeof(size_t), 1);
     fc = fclaw_file_read_block(fc, user_string, sizeof(size_t), &array, &errcode);
-    CHECK_ERROR_CODE(refine_dim, errcode, "restart read used_ini_length");
+    CHECK_ERROR_CODE(1, refine_dim, errcode, "restart read used_ini_length");
     check_user_string("used_ini_length", user_string);
 
     size_t ini_length = *((size_t*) sc_array_index(&array, 0));
@@ -347,14 +354,14 @@ void restart (fclaw_global_t * glob,
     check_options(glob, used_ini);
 
     
-    CHECK_ERROR_CODE(refine_dim, errcode, "restart read used_ini");
+    CHECK_ERROR_CODE(1, refine_dim, errcode, "restart read used_ini");
     sc_array_reset(&array);
 
     sc_array_t globsize;
     sc_array_init_size(&globsize, sizeof(size_t), 1);
 
     fc = fclaw_file_read_block(fc, user_string, sizeof(size_t), &globsize, &errcode);
-    CHECK_ERROR_CODE(refine_dim, errcode, "restart read globsize");
+    CHECK_ERROR_CODE(1, refine_dim, errcode, "restart read globsize");
 
     size_t glob_packsize = *((size_t*) sc_array_index(&globsize, 0));
     sc_array_reset(&globsize);
@@ -363,7 +370,7 @@ void restart (fclaw_global_t * glob,
     sc_array_init_size(&glob_buffer, glob_packsize, 1);
 
     fc = fclaw_file_read_block(fc, user_string, glob_packsize, &glob_buffer, &errcode);
-    CHECK_ERROR_CODE(refine_dim, errcode, "restart read glob buffer");
+    CHECK_ERROR_CODE(1, refine_dim, errcode, "restart read glob buffer");
 
     fclaw_global_unpack((char *) sc_array_index(&glob_buffer, 0), glob);
 
@@ -390,7 +397,7 @@ void restart (fclaw_global_t * glob,
         {
             fclaw_abortf("User string mismatch: %s != %s\n", user_string, names[i]);
         }
-        CHECK_ERROR_CODE(refine_dim, errcode, "restart read patches");
+        CHECK_ERROR_CODE(1, refine_dim, errcode, "restart read patches");
 
         fclaw_domain_iterate_patches(glob->domain, set_patches, &user);
 
@@ -398,7 +405,7 @@ void restart (fclaw_global_t * glob,
     }
 
     fclaw_file_close(fc, &errcode);
-    CHECK_ERROR_CODE(refine_dim, errcode, "restart close file");
+    CHECK_ERROR_CODE(1, refine_dim, errcode, "restart close file");
 
     fclaw_initialize_domain_flags(glob);
     fclaw_exchange_setup(glob,timer);
@@ -422,12 +429,20 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
     fclaw_file_context_t *fc 
         = fclaw_file_open_write (filename, "ForestClaw data file",
                                  glob->domain, &errcode);
-    CHECK_ERROR_CODE(refine_dim , errcode, "checkpoint open file");
+    CHECK_ERROR_CODE(0, refine_dim , errcode, "checkpoint open file");
+    if(errcode != FCLAW_FILE_ERR_SUCCESS)
+    {
+        return;
+    }
 
     char* used_ini = fclaw_global_get_attribute(glob, "fclaw_used_ini");
     if(used_ini == NULL)
     {
         used_ini = get_used_ini(glob);
+        if(used_ini == NULL)
+        {
+            return;
+        }
         fclaw_global_attribute_store(glob, 
                                      "fclaw_used_ini", 
                                      used_ini, 
@@ -440,11 +455,19 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
     sc_array_init_data(&array, &used_ini_length, sizeof(size_t), 1);
 
     fc = fclaw_file_write_block(fc, "used_ini_length", sizeof(size_t), &array, &errcode);
-    CHECK_ERROR_CODE(refine_dim , errcode, "write used_ini_length");
+    CHECK_ERROR_CODE(0, refine_dim , errcode, "write used_ini_length");
+    if(errcode != FCLAW_FILE_ERR_SUCCESS)
+    {
+        return;
+    }
 
     sc_array_init_data(&array, used_ini, used_ini_length, 1);
     fc = fclaw_file_write_block(fc, "used_ini", used_ini_length, &array, &errcode);
-    CHECK_ERROR_CODE(refine_dim , errcode, "write used_ini");
+    CHECK_ERROR_CODE(0, refine_dim , errcode, "write used_ini");
+    if(errcode != FCLAW_FILE_ERR_SUCCESS)
+    {
+        return;
+    }
 
     size_t glob_packsize = fclaw_global_packsize(glob);
 
@@ -453,7 +476,11 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
     *((size_t*) sc_array_index(&globsize, 0)) = glob_packsize;
 
     fc = fclaw_file_write_block(fc, "glob_size", sizeof(size_t), &globsize, &errcode);
-    CHECK_ERROR_CODE(refine_dim , errcode, "write globsize");
+    CHECK_ERROR_CODE(0, refine_dim , errcode, "write globsize");
+    if(errcode != FCLAW_FILE_ERR_SUCCESS)
+    {
+        return;
+    }
 
     sc_array_reset(&globsize);
 
@@ -462,7 +489,11 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
     fclaw_global_pack(glob,(char *) sc_array_index(&glob_buffer, 0));
 
     fc = fclaw_file_write_block(fc, "glob", glob_packsize, &glob_buffer, &errcode);
-    CHECK_ERROR_CODE(refine_dim , errcode, "write glob buffer");
+    CHECK_ERROR_CODE(0, refine_dim , errcode, "write glob buffer");
+    if(errcode != FCLAW_FILE_ERR_SUCCESS)
+    {
+        return;
+    }
 
     sc_array_reset(&glob_buffer);
 
@@ -486,7 +517,11 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
 
     
         fc = fclaw_file_write_array(fc, names[i], sizes[i], patches, &errcode);
-        CHECK_ERROR_CODE(refine_dim , errcode, "write patches");
+        CHECK_ERROR_CODE(0, refine_dim , errcode, "write patches");
+        if(errcode != FCLAW_FILE_ERR_SUCCESS)
+        {
+            return;
+        }
 
         for(int i = 0; i < glob->domain->local_num_patches; i++)
         {
@@ -501,7 +536,11 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
     fclaw_file_write_partition (parition_filename,
                                 "Test partition write",
                                 glob->domain, &errcode);
-    CHECK_ERROR_CODE(refine_dim , errcode, "close file");
+    CHECK_ERROR_CODE(0, refine_dim , errcode, "close file");
+    if(errcode != FCLAW_FILE_ERR_SUCCESS)
+    {
+        return;
+    }
 
     //fclaw_restart_test_from_file(glob, filename, parition_filename);
 }
