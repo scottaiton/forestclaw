@@ -49,11 +49,17 @@ do { \
     } \
 } while(0)
 
+/**
+ * @brief Get the ini file for the options as a string
+ * 
+ * @param glob the global context
+ * @return char* the ini file as a string, NULL if an error occurs. Needs to be freed by the caller
+ */
 static char*
 get_used_ini(fclaw_global_t * glob)
 {
     char *buffer = NULL;
-    long length;
+    long length = 0;
     if(glob->mpirank == 0)
     {
         sc_options_t * options = fclaw_global_get_attribute(glob, "fclaw_options");
@@ -61,12 +67,17 @@ get_used_ini(fclaw_global_t * glob)
                                       FCLAW_VERBOSITY_ERROR, 
                                       options, 
                                       "fclaw_options.ini.used");
+        if(retval != 0)
+        {
+            fclaw_global_productionf("fclaw_restart.c: Error saving options\n");
+            return NULL;
+        }
 
         // read the entire file into a string
         FILE *file = fopen("fclaw_options.ini.used", "r");
         if (file == NULL)
         {
-            printf("Cannot open file\n");
+            printf("fclaw_restart.c: Cannot open file\n");
             return NULL;
         }
 
@@ -397,21 +408,21 @@ void restart (fclaw_global_t * glob,
     Public interface
     -------------------------------------------------------------------- */
 
-void
-fclaw_restart_output_frame (fclaw_global_t * glob, int iframe)
+static void
+checkpoint_output_frame (fclaw_global_t * glob, int iframe)
 {
     int refine_dim = glob->domain->refine_dim;
 
     char filename[BUFSIZ];
     char parition_filename[BUFSIZ];
-    snprintf(filename, BUFSIZ, "fort_frame_%04d.restart", iframe);
+    snprintf(filename, BUFSIZ, "fort_frame_%04d.checkpoint", iframe);
     snprintf(parition_filename, BUFSIZ, "fort_frame_%04d.partition", iframe);
 
     int errcode;
     fclaw_file_context_t *fc 
         = fclaw_file_open_write (filename, "ForestClaw data file",
                                  glob->domain, &errcode);
-    CHECK_ERROR_CODE(refine_dim , errcode, "restart open file");
+    CHECK_ERROR_CODE(refine_dim , errcode, "checkpoint open file");
 
     char* used_ini = fclaw_global_get_attribute(glob, "fclaw_used_ini");
     if(used_ini == NULL)
@@ -512,7 +523,7 @@ void fclaw_output_checkpoint(fclaw_global_t* glob, int iframe)
     {
         fclaw_timer_start (&glob->timers[FCLAW_TIMER_OUTPUT]);
 
-        fclaw_restart_output_frame(glob,iframe);
+        checkpoint_output_frame(glob,iframe);
 
         fclaw_timer_stop (&glob->timers[FCLAW_TIMER_OUTPUT]);
     }
