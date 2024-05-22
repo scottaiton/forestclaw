@@ -221,14 +221,10 @@ void fclaw_initialize_domain_flags(fclaw_global_t *glob)
     fclaw_domain_set_partitioning(glob->domain,  fclaw_opt->partition_for_coarsening);
 }
 
-/* -----------------------------------------------------------------
-   Public interface
-   ----------------------------------------------------------------- */
-void fclaw_initialize(fclaw_global_t *glob)
+static void
+pre_setup(fclaw_global_t* glob)
 {
 	fclaw_domain_t** domain = &glob->domain;
-
-    const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
 
 	/* This mapping context is needed by fortran mapping functions */
 	fclaw_map_context_t *cont = glob->cont;
@@ -256,26 +252,11 @@ void fclaw_initialize(fclaw_global_t *glob)
 
     /* User defined problem setup */
     fclaw_problem_setup(glob);
+}
 
-    if(strcmp(fclaw_opt->restart_file,"") == 0)
-    {
-        // no restart file
-        build_initial_domain(glob);
-    }
-    else
-    {
-        const char* partition_filename = NULL;
-        if(strcmp(fclaw_opt->partition_file,"") != 0)
-        {
-            partition_filename = fclaw_opt->partition_file;
-        }
-
-        fclaw_restart_from_file(glob, fclaw_opt->restart_file,
-                                partition_filename);
-    }
-
-    
-
+static void
+post_setup(fclaw_global_t* glob)
+{
     fclaw_diagnostics_initialize(glob);
     fclaw_locate_gauges(glob);
 
@@ -283,8 +264,37 @@ void fclaw_initialize(fclaw_global_t *glob)
 
     /* Print global minimum and maximum levels */
     fclaw_global_infof("Global minlevel %d maxlevel %d\n",
-                (*domain)->global_minlevel, (*domain)->global_maxlevel);
+                glob->domain->global_minlevel, glob->domain->global_maxlevel);
 
     /* Stop timer */
     fclaw_timer_stop (&glob->timers[FCLAW_TIMER_INIT]);
+}
+/* -----------------------------------------------------------------
+   Public interface
+   ----------------------------------------------------------------- */
+void fclaw_initialize(fclaw_global_t *glob)
+{
+    pre_setup(glob);
+
+    build_initial_domain(glob);
+
+    post_setup(glob);
+}
+
+void fclaw_restart(fclaw_global_t *glob)
+{
+    pre_setup(glob);
+
+    const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
+
+    const char* partition_filename = NULL;
+    if(strcmp(fclaw_opt->partition_file,"") != 0)
+    {
+        partition_filename = fclaw_opt->partition_file;
+    }
+
+    fclaw_restart_from_file(glob, fclaw_opt->restart_file,
+                            partition_filename);
+
+    post_setup(glob);
 }

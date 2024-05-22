@@ -47,6 +47,12 @@ void fclaw_initialize_domain_flags(struct fclaw_global *glob);
 void fclaw_run_vtables_initialize(struct fclaw_global *glob);
 
 void fclaw_initialize (struct fclaw_global *glob);
+/**
+ * @brief Perform a restart. This will use the settings in fclaw_options 
+ * 
+ * @param glob the global context
+ */
+void fclaw_restart (struct fclaw_global *glob);
 void fclaw_run (struct fclaw_global *glob);
 void fclaw_finalize(struct fclaw_global *glob);
 
