@@ -31,7 +31,7 @@ if (PlotType  == 4)
         end
     
         mq1d = 4;
-        [q1d,xc1d,h1d]  = plotframe1ez(amr1d,mq1d,'b-','surface_eta_1d','');
+        [q1d,xc1d,h1d]  = plotframe1ez(amr1d,mq1d,'b-');
         fprintf('%10s : %12.4e\n','qmin(1d)',min(q1d));
         fprintf('%10s : %12.4e\n','qmax(1d)',max(q1d));
         set(h1d,'linewidth',1)
