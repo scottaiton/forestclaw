@@ -43,11 +43,11 @@ mghost = (abs(xc) > 1) | (abs(yc) > 1);
 
 zp(mghost) = -zp(mghost);          % negate z in lower hemisphere
 
-if (~notpillowsphere)
+% if (~notpillowsphere)
     if (blockno == 1)
         zp = -zp;
     end
-end
+% end
 
 % [xp,yp,zp] = rotate_map(xp,yp,zp);
 
