@@ -235,7 +235,7 @@ def setrun(claw_pkg='geoclaw'):
     #   currently only Manning friction with a single n=friction_coefficient
     #   is supported in 1d.
 
-    geo_data.friction_forcing = True
+    geo_data.friction_forcing = False
     geo_data.manning_coefficient = 0  #.025
 
     geo_data.coordinate_system = 2  # latitude coordinates

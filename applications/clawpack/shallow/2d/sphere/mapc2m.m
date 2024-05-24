@@ -22,6 +22,8 @@ switch map
         xc2 = lng(1) + (lng(2) - lng(1))*xc1;
         yc2 = lat(1) + (lat(2) - lat(1))*yc1;
         [xp,yp,zp] = mapc2m_latlong(xc2,yc2);
+    case 'pillowsphere'
+        [xp,yp,zp] = mapc2m_pillowsphere(xc,yc);
 
 end
 

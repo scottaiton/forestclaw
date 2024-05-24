@@ -76,6 +76,7 @@ void sphere_problem_setup(fclaw_global_t* glob)
         fprintf(f,  "%-24.16f   %s",user->center[1],"\% center[1]\n");
         fprintf(f,  "%-24.16f   %s",user->center[2],"\% center[2]\n");
 
+        fprintf(f,  "%-24.16f   %s",user->theta_wave,"\% theta_wave\n");
         fprintf(f,  "%-24.16f   %s",user->theta_ridge,"\% theta_ridge\n");
         fprintf(f,  "%-24.16f   %s",user->ampl, "\% ampl\n");
         fprintf(f,  "%-24.16f   %s",user->alpha,"\% alpha\n");
@@ -186,7 +187,6 @@ void sphere_link_solvers(fclaw_global_t *glob)
     /* ForestClaw core functions */
     fclaw_vtable_t *vt = fclaw_vt(glob);
     vt->problem_setup = &sphere_problem_setup;  /* Version-independent */
-    //vt->output_frame = &sphere_output;
 
     fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
     patch_vt->setup   = &sphere_patch_setup_manifold;
@@ -215,7 +215,7 @@ void sphere_link_solvers(fclaw_global_t *glob)
             clawpack46_vt->fort_rpt2 = &CLAWPACK46_RPT2;            
         }
 
-        //clawpack46_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
+        clawpack46_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
 
         /* Clawpatch functions */    
         fclaw_clawpatch_vtable_t *clawpatch_vt = fclaw_clawpatch_vt(glob);

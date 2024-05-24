@@ -16,6 +16,7 @@ add_library(sphere_swe_f OBJECT
 	user_4.6/rpt2swq.f90
 	user_4.6/rpt2swq_fwave.f90
 	user_4.6/sphere_output_ascii_fort.f
+	user_4.6/rpn2cons_update_manifold.f
 )
 
 add_executable(sphere_swe

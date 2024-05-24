@@ -20,11 +20,13 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
     double precision ring_inner, ring_outer
     common /swe_initcond_parms2/ ring_inner, ring_outer
 
-    double precision hin, hout, speed
-    common /swe_initcond_parms4/  hin,hout,speed
+    double precision hin, hout
+    common /swe_initcond_parms4/  hin,hout
 
-    double precision Px, Py, Pz, theta_ridge, ampl, alpha, bathy(2)
-    common /comm_ridge/ Px, Py, Pz, theta_ridge, ampl, alpha, bathy
+    double precision Px, Py, Pz, theta_ridge, theta_wave, & 
+                        ampl, alpha, bathy(2), speed
+    common /comm_ridge/ Px, Py, Pz, theta_ridge, theta_wave, & 
+                        ampl, alpha, bathy, speed
 
     !! Local variables
     integer i,j
@@ -86,12 +88,12 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
                 !! For ridge problem
                 !! theta
                 theta = asin((xp*Px + yp*Py + zp*Pz) / Rsphere)
-                q1 = dexp(-alpha*(theta-theta_ridge)**2)
+                q1 = dexp(-alpha*(theta-theta_wave)**2)
                 R = max(sqrt(xp**2 + yp**2), 1.d-10)
                 u0 = speed*ampl*q1 / (Rsphere*R)  !! Not sure about 2d2
                 q(i,j,1) = -aux(i,j,18)
                 !!write(6,*) blockno, q(i,j,1)
-                if (q1 .gt. 1.d-14) then
+                if (q1 .gt. 1.d-20) then
                     q(i,j,1) = q(i,j,1) + ampl*q1
                     q(i,j,2) = u0*xp*zp
                     q(i,j,3) = u0*yp*zp

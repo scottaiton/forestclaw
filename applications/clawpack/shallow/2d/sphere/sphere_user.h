@@ -72,6 +72,7 @@ typedef struct user_options
     double *bathy;
 
     double theta_ridge;
+    double theta_wave;
     double ampl;
     double alpha; 
     double speed;
@@ -155,6 +156,14 @@ void SPHERE_FORT_WRITE_FILE(const int* mx,
                                   const int* level,
                                   const int* blockno, 
                                   const int* mpirank);
+
+#define RPN2CONS_UPDATE_MANIFOLD FCLAW_F77_FUNC(rpn2cons_update_manifold, \
+                                                 RPN2CONS_UPDATE_MANIFOLD)
+
+void RPN2CONS_UPDATE_MANIFOLD(const int* meqn, const int* maux, const int* idir,
+                               const int* iface,
+                               double q[], double aux_center[], double aux_edge[],
+                               double flux[]);
 
 void sphere_patch_manifold_setup(fclaw_domain_t *domain,
                                   fclaw_patch_t *this_patch,

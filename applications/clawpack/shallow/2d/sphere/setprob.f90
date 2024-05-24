@@ -19,14 +19,16 @@ subroutine setprob()
     integer ring_units
     common /swe_initcond_parms3/ ring_units
 
-    double precision hin, hout, speed
-    common /swe_initcond_parms4/  hin,hout, speed
+    double precision hin, hout
+    common /swe_initcond_parms4/  hin,hout
 
     double precision gravity
     common /swe_model_parms/  gravity
 
-    double precision Px, Py, Pz, theta_ridge, ampl, alpha, bathy(2)
-    common /comm_ridge/ Px, Py, Pz, theta_ridge, ampl, alpha, bathy
+    double precision Px, Py, Pz, theta_ridge, theta_wave, & 
+                        ampl, alpha, bathy(2), speed
+    common /comm_ridge/ Px, Py, Pz, theta_ridge, theta_wave, & 
+                        ampl, alpha, bathy, speed
 
     double precision latitude(2), longitude(2)
 
@@ -50,6 +52,7 @@ subroutine setprob()
     read(10,*) Px
     read(10,*) Py
     read(10,*) Pz
+    read(10,*) theta_wave
     read(10,*) theta_ridge
     read(10,*) ampl
     read(10,*) alpha

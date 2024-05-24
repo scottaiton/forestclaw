@@ -7,16 +7,15 @@ double precision function bmount(blockno,xc,yc)
     integer example
     common /swe_example/ example
 
-    !!double precision hin, hout
-    !!common /swe_initcond_parms4/  hin,hout
-
     double precision pi,pi2
     common /compi/ pi, pi2
 
-    double precision Px, Py, Pz, theta_ridge, ampl, alpha, bathy(2)
-    common /comm_ridge/ Px, Py, Pz, theta_ridge, ampl, alpha, bathy
+    double precision Px, Py, Pz, theta_ridge, theta_wave, & 
+                        ampl, alpha, bathy(2), speed
+    common /comm_ridge/ Px, Py, Pz, theta_ridge, theta_wave, & 
+                        ampl, alpha, bathy, speed
 
-    double precision xp, yp, zp, theta, d
+    double precision xp, yp, zp, theta, d, tr
     integer*8 cont, fclaw_map_get_context
 
     double precision :: qb
@@ -41,7 +40,7 @@ double precision function bmount(blockno,xc,yc)
             stop
         endif
         theta = asin(d) !! in [-pi/2, pi/2]
-        qb = exp(-alpha*(theta+theta_ridge)**2)
+        qb = exp(-alpha*(theta-theta_ridge)**2)
         bmount = -bathy(1) + bathy(2)*qb
 100 format(3F24.16)                
     endif

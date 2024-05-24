@@ -98,6 +98,9 @@ sphere_register (user_options_t* user , sc_options_t * opt)
     sc_options_add_double(opt, 0, "theta_ridge", &user->theta_ridge, M_PI/6.0,
                                    "[user] theta_ridge : theta [pi/6]");
 
+    sc_options_add_double(opt, 0, "theta_wave", &user->theta_wave, M_PI/6.0,
+                                   "[user] theta_wave : theta [pi/6]");
+
     /* Amplitude of the ridge */
     sc_options_add_double(opt, 0, "ampl", &user->ampl, 0.2,
                         "[user] Ridge : amplitude [0.2]");
