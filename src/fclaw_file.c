@@ -24,6 +24,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <fclaw_file.h>
+#include <fclaw2d_file.h>
+#include <fclaw3d_file.h>
 #include <fclaw2d_wrap.h>
 #include <fclaw3d_wrap.h>
 
@@ -84,12 +86,14 @@ fclaw_file_context_t *fclaw_file_open_write (const char *filename,
     {
         fclaw2d_file_context_t *d2 = fclaw2d_file_open_write (filename, user_string,
                                                               domain->d2, errcode);
+        *errcode = fclaw2d_file_error_wrap(*errcode);
         return wrap_file_2d(d2);
     }
     else if(domain->refine_dim == 3)
     {
         fclaw3d_file_context_t *d3 = fclaw3d_file_open_write (filename, user_string,
                                                               domain->d3, errcode);
+        *errcode = fclaw3d_file_error_wrap(*errcode);
         return wrap_file_3d(d3);
     }
     else
@@ -104,11 +108,15 @@ int fclaw_file_write_partition (const char *filename,
 {
     if(domain->refine_dim == 2)
     {
-        return fclaw2d_file_write_partition (filename, user_string, domain->d2, errcode);
+        int retval = fclaw2d_file_write_partition (filename, user_string, domain->d2, errcode);
+        *errcode = fclaw2d_file_error_wrap(*errcode);
+        return retval;
     }
     else if(domain->refine_dim == 3)
     {
-        return fclaw3d_file_write_partition (filename, user_string, domain->d3, errcode);
+        int retval = fclaw3d_file_write_partition (filename, user_string, domain->d3, errcode);
+        *errcode = fclaw3d_file_error_wrap(*errcode);
+        return retval;
     }
     else
     {
@@ -126,11 +134,13 @@ fclaw_file_context_t *fclaw_file_write_block (fclaw_file_context_t *
     {
         fc->d2 = fclaw2d_file_write_block (fc->d2, user_string,
                                            block_size, block_data, errcode);
+        *errcode = fclaw2d_file_error_wrap(*errcode);
     }
     else if(fc->refine_dim == 3)
     {
         fc->d3 = fclaw3d_file_write_block (fc->d3, user_string,
                                            block_size, block_data, errcode);
+        *errcode = fclaw3d_file_error_wrap(*errcode);
     }
     else
     {
@@ -149,11 +159,13 @@ fclaw_file_context_t *fclaw_file_write_array (fclaw_file_context_t *
     {
         fc->d2 = fclaw2d_file_write_array (fc->d2, user_string,
                                            patch_size, patch_data, errcode);
+        *errcode = fclaw2d_file_error_wrap(*errcode);
     }
     else if(fc->refine_dim == 3)
     {
         fc->d3 = fclaw3d_file_write_array (fc->d3, user_string,
                                            patch_size, patch_data, errcode);
+        *errcode = fclaw3d_file_error_wrap(*errcode);
     }
     else
     {
@@ -169,11 +181,15 @@ int fclaw_file_read_partition (int refine_dim,
 {
     if(refine_dim == 2)
     {
-        return fclaw2d_file_read_partition (filename, user_string, mpicomm, partition, errcode);
+        int retval = fclaw2d_file_read_partition (filename, user_string, mpicomm, partition, errcode);
+        *errcode = fclaw2d_file_error_wrap(*errcode);
+        return retval;
     }
     else if(refine_dim == 3)
     {
-        return fclaw3d_file_read_partition (filename, user_string, mpicomm, partition, errcode);
+        int retval = fclaw3d_file_read_partition (filename, user_string, mpicomm, partition, errcode);
+        *errcode = fclaw3d_file_error_wrap(*errcode);
+        return retval;
     }
     else
     {
@@ -196,6 +212,7 @@ fclaw_file_context_t *fclaw_file_open_read (int refine_dim,
                                                              mpicomm, partition, &new_domain, errcode);
         
         *domain = fclaw_domain_wrap_2d(new_domain);
+        *errcode = fclaw2d_file_error_wrap(*errcode);
         return wrap_file_2d(d2);
     }
     else if(refine_dim == 3)
@@ -204,6 +221,7 @@ fclaw_file_context_t *fclaw_file_open_read (int refine_dim,
         fclaw3d_file_context_t *d3 = fclaw3d_file_open_read (filename, user_string,
                                                              mpicomm, partition, &new_domain, errcode);
         *domain = fclaw_domain_wrap_3d(new_domain);
+        *errcode = fclaw3d_file_error_wrap(*errcode);
         return wrap_file_3d(d3);
     }
     else
@@ -222,11 +240,13 @@ fclaw_file_context_t *fclaw_file_read_block (fclaw_file_context_t *
     {
         fc->d2 = fclaw2d_file_read_block (fc->d2, user_string,
                                           block_size, block_data, errcode);
+        *errcode = fclaw2d_file_error_wrap(*errcode);
     }
     else if(fc->refine_dim == 3)
     {
         fc->d3 = fclaw3d_file_read_block (fc->d3, user_string,
                                           block_size, block_data, errcode);
+        *errcode = fclaw3d_file_error_wrap(*errcode);
     }
     else
     {
@@ -245,11 +265,13 @@ fclaw_file_context_t *fclaw_file_read_array (fclaw_file_context_t *
     {
         fc->d2 = fclaw2d_file_read_array (fc->d2, user_string,
                                           patch_size, patch_data, errcode);
+        *errcode = fclaw2d_file_error_wrap(*errcode);
     }
     else if(fc->refine_dim == 3)
     {
         fc->d3 = fclaw3d_file_read_array (fc->d3, user_string,
                                           patch_size, patch_data, errcode);
+        *errcode = fclaw3d_file_error_wrap(*errcode);
     }
     else
     {
@@ -264,10 +286,12 @@ int fclaw_file_close (fclaw_file_context_t * fc, int *errcode)
     if(fc->refine_dim == 2)
     {
         retval = fclaw2d_file_close (fc->d2, errcode);
+        *errcode = fclaw2d_file_error_wrap(*errcode);
     }
     else if(fc->refine_dim == 3)
     {
         retval = fclaw3d_file_close (fc->d3, errcode);
+        *errcode = fclaw3d_file_error_wrap(*errcode);
     }
     else
     {

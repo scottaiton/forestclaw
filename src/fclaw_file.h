@@ -34,8 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define FCLAW_FILE_H
 
 #include <forestclaw.h>
-#include <fclaw2d_file.h>
-#include <fclaw3d_file.h>
 
 #ifdef __cplusplus
 extern "C"

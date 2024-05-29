@@ -350,7 +350,7 @@ void restart (fclaw_global_t * glob,
 
     int errcode;
     sc_array_t* partition = NULL;
-    char user_string[FCLAW3D_FILE_USER_STRING_BYTES];
+    char user_string[FCLAW_FILE_USER_STRING_BYTES];
     if(partition_filename != NULL)
     {
         partition = sc_array_new(sizeof(p4est_gloidx_t));

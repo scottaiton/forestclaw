@@ -113,6 +113,8 @@ fclaw2d_interpolate_point_wrap_cb (fclaw2d_domain_t * domain,
                                    int blockno, int patchno,
                                    void *point, void *user);
 
+int fclaw2d_file_error_wrap(int errcode);
+
 #ifdef __cplusplus
 #if 0
 {

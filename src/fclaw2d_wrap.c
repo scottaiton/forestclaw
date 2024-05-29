@@ -24,16 +24,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <forestclaw.h>
+#include <fclaw_file.h>
 
 #ifndef P4_TO_P8
 
 #include <fclaw2d_wrap.h>
 #include <fclaw2d_defs.h>
+#include <fclaw2d_file.h>
 
 #else
 
 #include <fclaw3d_wrap.h>
 #include <fclaw3d_defs.h>
+#include <fclaw3d_file.h>
 
 #endif
 
@@ -321,4 +324,61 @@ fclaw2d_interpolate_point_wrap_cb (fclaw2d_domain_t * domain_2d,
     }
 
     return retval;
+}
+
+int fclaw2d_file_error_wrap(int errcode)
+{
+    switch(errcode)
+    {
+        case FCLAW2D_FILE_ERR_SUCCESS:
+            return FCLAW_FILE_ERR_SUCCESS;
+        case FCLAW2D_FILE_ERR_FILE:
+            return FCLAW_FILE_ERR_FILE;
+        case FCLAW2D_FILE_ERR_NOT_SAME:
+            return FCLAW_FILE_ERR_NOT_SAME;
+        case FCLAW2D_FILE_ERR_AMODE:
+            return FCLAW_FILE_ERR_AMODE;
+        case FCLAW2D_FILE_ERR_NO_SUCH_FILE:
+            return FCLAW_FILE_ERR_NO_SUCH_FILE;
+        case FCLAW2D_FILE_ERR_FILE_EXIST:
+            return FCLAW_FILE_ERR_FILE_EXIST;
+        case FCLAW2D_FILE_ERR_BAD_FILE:
+            return FCLAW_FILE_ERR_BAD_FILE;
+        case FCLAW2D_FILE_ERR_ACCESS:
+            return FCLAW_FILE_ERR_ACCESS;
+        case FCLAW2D_FILE_ERR_NO_SPACE:
+            return FCLAW_FILE_ERR_NO_SPACE;
+        case FCLAW2D_FILE_ERR_QUOTA:
+            return FCLAW_FILE_ERR_QUOTA;
+        case FCLAW2D_FILE_ERR_READ_ONLY:
+            return FCLAW_FILE_ERR_READ_ONLY;
+        case FCLAW2D_FILE_ERR_IN_USE:
+            return FCLAW_FILE_ERR_IN_USE;
+        case FCLAW2D_FILE_ERR_IO:
+            return FCLAW_FILE_ERR_IO;
+        case FCLAW2D_FILE_ERR_FORMAT:
+            return FCLAW_FILE_ERR_FORMAT;
+        case FCLAW2D_FILE_ERR_SECTION_TYPE:
+            return FCLAW_FILE_ERR_SECTION_TYPE;
+        case FCLAW2D_FILE_ERR_CONN:
+            return FCLAW_FILE_ERR_CONN;
+        case FCLAW2D_FILE_ERR_P4EST:
+            return FCLAW_FILE_ERR_P4EST;
+        case FCLAW2D_FILE_ERR_IN_DATA:
+            return FCLAW_FILE_ERR_IN_DATA;
+        case FCLAW2D_FILE_ERR_COUNT:
+            return FCLAW_FILE_ERR_COUNT;
+        case FCLAW2D_FILE_ERR_DIM:
+            return FCLAW_FILE_ERR_DIM;
+        case FCLAW2D_FILE_ERR_UNKNOWN:
+            return FCLAW_FILE_ERR_UNKNOWN;
+        case FCLAW2D_FILE_ERR_PART:
+            return FCLAW_FILE_ERR_PART;
+        case FCLAW2D_FILE_ERR_NOT_IMPLEMENTED:
+            return FCLAW_FILE_ERR_NOT_IMPLEMENTED;
+        case FCLAW2D_FILE_ERR_LASTCODE:
+            return FCLAW_FILE_ERR_LASTCODE;
+        default:
+            SC_ABORT_NOT_REACHED();
+    }
 }
