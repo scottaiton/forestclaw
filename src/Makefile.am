@@ -112,7 +112,7 @@ libforestclaw_compiled_sources = \
 	src/fclaw_face_neighbors.c \
 	src/fclaw_farraybox.cpp \
 	src/fclaw_file.c \
-	src/fclaws_context.c \
+	src/fclaw_context.c \
 	src/fclaw2d_convenience.c \
 	src/fclaw2d_output_tikz.c \
 	src/fclaw2d_file.c \
