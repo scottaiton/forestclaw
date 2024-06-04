@@ -45,8 +45,10 @@ TEST_CASE("fc2d_clawpack5_solver_initialize stores two seperate vtables in two s
 	fclaw_clawpatch_options_store(glob2, clawpatch_opts);
 
 	/* create some empty options structures */
-	fc2d_clawpack5_options_store(glob1, FCLAW_ALLOC_ZERO(fc2d_clawpack5_options_t,1));
-	fc2d_clawpack5_options_store(glob2, FCLAW_ALLOC_ZERO(fc2d_clawpack5_options_t,1));
+	fc2d_clawpack5_options_t* opts1 = FCLAW_ALLOC_ZERO(fc2d_clawpack5_options_t,1);
+	fc2d_clawpack5_options_t* opts2 = FCLAW_ALLOC_ZERO(fc2d_clawpack5_options_t,1);
+	fc2d_clawpack5_options_store(glob1, opts1);
+	fc2d_clawpack5_options_store(glob2, opts2);
 
 	fclaw_vtables_initialize(glob1);
 	fc2d_clawpack5_solver_initialize(glob1);
@@ -59,6 +61,9 @@ TEST_CASE("fc2d_clawpack5_solver_initialize stores two seperate vtables in two s
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
+	FCLAW_FREE(opts1);
+	FCLAW_FREE(opts2);
+	fclaw_clawpatch_options_destroy(clawpatch_opts);
 }
 
 TEST_CASE("fc2d_clawpack5_solver_initialize sets is_set flag")
@@ -72,7 +77,8 @@ TEST_CASE("fc2d_clawpack5_solver_initialize sets is_set flag")
 	fclaw_clawpatch_options_store(glob, clawpatch_opts);
 
 	/* create some empty options structures */
-	fc2d_clawpack5_options_store(glob, FCLAW_ALLOC_ZERO(fc2d_clawpack5_options_t,1));
+	fc2d_clawpack5_options_t* opts = FCLAW_ALLOC_ZERO(fc2d_clawpack5_options_t,1);
+	fc2d_clawpack5_options_store(glob, opts);
 
 	fclaw_vtables_initialize(glob);
 	fc2d_clawpack5_solver_initialize(glob);
@@ -82,6 +88,8 @@ TEST_CASE("fc2d_clawpack5_solver_initialize sets is_set flag")
 
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob);
+	FCLAW_FREE(opts);
+	fclaw_clawpatch_options_destroy(clawpatch_opts);
 }
 
 #ifdef FCLAW_ENABLE_DEBUG

@@ -48,6 +48,9 @@ TEST_CASE("fclaw_options can store options in two seperate globs")
 
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
+
+	FCLAW_FREE(opts1);
+	FCLAW_FREE(opts2);
 }
 
 #ifdef FCLAW_ENABLE_DEBUG
@@ -285,6 +288,10 @@ TEST_CASE("fclaw_options packing/unpacking")
 	CHECK_UNARY(!strcmp(opts->logging_prefix, output_opts->logging_prefix));
 
 	CHECK_UNARY(output_opts->is_unpacked);
+
+	vt->destroy(output_opts);
+
+	FCLAW_FREE(opts);
 }
 
 #endif
