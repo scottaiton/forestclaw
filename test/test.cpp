@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 	    result = context.run();
 
 	    // global clean-up...
-        // fclaw_app_destory will fail if these has been an abort
+        // fclaw_app_destroy will fail if there has been an abort
         if(!dirty_memory)
         {
             fclaw_app_destroy (app);
