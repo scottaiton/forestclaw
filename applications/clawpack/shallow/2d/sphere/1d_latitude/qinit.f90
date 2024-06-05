@@ -22,14 +22,14 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
     integer init_cond
     common /swe_initcond/ init_cond
 
-    double precision ring_inner, ring_outer
-    common /swe_initcond_parms2/ ring_inner, ring_outer
+    double precision ring_inner, ring_outer, center(3)
+    common /swe_initcond_parms2/ ring_inner, ring_outer, center
 
     integer ring_units
     common /swe_initcond_parms3/ ring_units
 
-    double precision hin, hout, speed
-    common /swe_initcond_parms4/  hin,hout, speed
+    double precision hin, hout
+    common /swe_initcond_parms4/  hin,hout
 
 
     integer, intent(in) :: meqn,mbc,mx,maux
@@ -49,18 +49,13 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
     x0 = 70.     ! initial location of Gaussian
     bathy = -1
 
-    ri = ring_inner
-    ro = ring_outer
+    !! Flip sign so inner is closer to pi/2
+    ri = ring_inner - pi/2
+    ro = ring_outer - pi/2
 
     do i = 1,mx
         xe = xlower + (i-1)*dx  ! latitude in degrees
         xc = xlower +  (i-0.5)*dx
-
-        !!if (abs(x-20) .lt. 5) then
-        !!    eta = 1
-        !!else
-        !!    eta = 0
-        !!endif
 
         if (init_cond .eq. 1) then            
             xe = xe*deg2rad
@@ -79,7 +74,6 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
             eta = exp(-((xc-x0)/width)**2)
 
             if (eta < 1d-20) eta = 0.d0
-            !!q(1,i) = max(0.0, eta - aux(1,i))
             qval = eta
         endif
         q(1,i) = hout + (hin-hout)*qval

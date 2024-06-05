@@ -8,7 +8,6 @@ add_library(sphere_swe_f OBJECT
 	sphere_exceeds_threshold.f90
 	user_4.6/sphere_src2.f90
 	user_4.6/sphere_qinit.f90
-	user_4.6/sphere_gaussian.f90
 	user_4.6/sphere_setaux.f90
 	user_4.6/sphere_b4step2.f90
 	user_4.6/rpn2swsphere.f90

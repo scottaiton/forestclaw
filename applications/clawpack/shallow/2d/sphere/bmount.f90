@@ -10,12 +10,15 @@ double precision function bmount(blockno,xc,yc)
     double precision pi,pi2
     common /compi/ pi, pi2
 
-    double precision Px, Py, Pz, theta_ridge, theta_wave, & 
-                        ampl, alpha, bathy(2), speed
-    common /comm_ridge/ Px, Py, Pz, theta_ridge, theta_wave, & 
-                        ampl, alpha, bathy, speed
+    double precision ring_inner, ring_outer, center(3)
+    common /swe_initcond_parms2/ ring_inner, ring_outer, center
+    
+    double precision theta_ridge, theta_wave, ampl,  & 
+         alpha, bathy(2), speed, gravity_ridge
+    common /comm_ridge/ theta_ridge, theta_wave, ampl,  & 
+         alpha, bathy, speed, gravity_ridge
 
-    double precision xp, yp, zp, theta, d, tr
+    double precision xp, yp, zp, theta, d
     integer*8 cont, fclaw_map_get_context
 
     double precision :: qb
@@ -29,21 +32,22 @@ double precision function bmount(blockno,xc,yc)
 
         !! # Get lat/long coordinates
 
-        d = xp*Px + yp*Py + zp*Pz
+        d = xp*center(1) + yp*center(2) + zp*center(3)
         if (abs(d) .gt. 1) then
             write(6,*) "bmount : Point is not on the sphere"
             write(6,*) 'blockno = ',blockno
             write(6,100) xc,yc
             write(6,*) xp,yp,zp
-            write(6,*) Px, Py, Pz
+            write(6,*) center(1), center(2), center(3)
             write(6,*) "d = ", d
             stop
         endif
         theta = asin(d) !! in [-pi/2, pi/2]
         qb = exp(-alpha*(theta-theta_ridge)**2)
         bmount = -bathy(1) + bathy(2)*qb
-100 format(3F24.16)                
     endif
 
     return
+    
+100 format(3F24.16)                
 end function bmount

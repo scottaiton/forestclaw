@@ -13,8 +13,8 @@ subroutine setprob()
     integer init_cond
     common /swe_initcond/ init_cond
 
-    double precision ring_inner, ring_outer
-    common /swe_initcond_parms2/ ring_inner, ring_outer
+    double precision ring_inner, ring_outer, center(3)
+    common /swe_initcond_parms2/ ring_inner, ring_outer, center
 
     integer ring_units
     common /swe_initcond_parms3/ ring_units
@@ -25,10 +25,10 @@ subroutine setprob()
     double precision gravity
     common /swe_model_parms/  gravity
 
-    double precision Px, Py, Pz, theta_ridge, theta_wave, & 
-                        ampl, alpha, bathy(2), speed
-    common /comm_ridge/ Px, Py, Pz, theta_ridge, theta_wave, & 
-                        ampl, alpha, bathy, speed
+    double precision theta_ridge, theta_wave, ampl,  & 
+         alpha, bathy(2), speed, gravity_ridge
+    common /comm_ridge/ theta_ridge, theta_wave, ampl,  & 
+         alpha, bathy, speed, gravity_ridge
 
     double precision latitude(2), longitude(2)
 
@@ -49,16 +49,21 @@ subroutine setprob()
     read(10,*) latitude(2)
     read(10,*) longitude(1)
     read(10,*) longitude(2)
-    read(10,*) Px
-    read(10,*) Py
-    read(10,*) Pz
+    read(10,*) center(1)
+    read(10,*) center(2)
+    read(10,*) center(3)
     read(10,*) theta_wave
     read(10,*) theta_ridge
+    read(10,*) gravity_ridge
     read(10,*) ampl
     read(10,*) alpha
     read(10,*) speed
     read(10,*) bathy(1)
     read(10,*) bathy(2)
     close(10)
+
+    if (example .eq. 1) then
+        gravity = gravity_ridge
+    endif
 
 end

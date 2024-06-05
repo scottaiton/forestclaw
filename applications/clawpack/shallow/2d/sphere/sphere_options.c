@@ -60,6 +60,9 @@ sphere_register (user_options_t* user , sc_options_t * opt)
 
     sc_options_add_double (opt, 0, "gravity", &user->gravity, 1.0, "[user] gravity [1.0]");
 
+    sc_options_add_double (opt, 0, "gravity_ridge", &user->gravity_ridge, 1.539790e-06, 
+                           "[user] gravity-ridge [1.539790e-06]");
+
     sc_options_add_double (opt, 0, "hin", &user->hin, 1.0, "[user] hin [2.0]");
     sc_options_add_double (opt, 0, "hout", &user->hout, 1.0, "[user] hout [1.0]");
 

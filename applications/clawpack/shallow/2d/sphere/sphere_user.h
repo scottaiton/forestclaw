@@ -71,6 +71,7 @@ typedef struct user_options
     const char* bathy_string;
     double *bathy;
 
+    double gravity_ridge;
     double theta_ridge;
     double theta_wave;
     double ampl;

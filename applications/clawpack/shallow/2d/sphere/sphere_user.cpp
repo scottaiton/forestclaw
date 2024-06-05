@@ -78,6 +78,7 @@ void sphere_problem_setup(fclaw_global_t* glob)
 
         fprintf(f,  "%-24.16f   %s",user->theta_wave,"\% theta_wave\n");
         fprintf(f,  "%-24.16f   %s",user->theta_ridge,"\% theta_ridge\n");
+        fprintf(f,  "%-24.16f   %s",user->gravity_ridge,"\% gravity_ridge\n");
         fprintf(f,  "%-24.16f   %s",user->ampl, "\% ampl\n");
         fprintf(f,  "%-24.16f   %s",user->alpha,"\% alpha\n");
         fprintf(f,  "%-24.16f   %s",user->speed,"\% speed\n");

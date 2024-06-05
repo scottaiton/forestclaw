@@ -20,8 +20,8 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
     double precision ring_inner, ring_outer
     common /swe_initcond_parms2/ ring_inner, ring_outer
 
-    double precision hin, hout
-    common /swe_initcond_parms4/  hin,hout
+    double precision hin, hout, center(3)
+    common /swe_initcond_parms4/  hin,hout, center
 
     double precision Px, Py, Pz, theta_ridge, theta_wave, & 
                         ampl, alpha, bathy(2), speed
@@ -31,7 +31,6 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
     !! Local variables
     integer i,j
     double precision xc,yc,xlow,ylow,xp,yp,zp, w, qval
-    double precision gaussian_sphere
 
     double precision deg2rad, phi, phi0, width
     double precision theta, q1, R, u0, Rsphere
@@ -87,7 +86,7 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
 
                 !! For ridge problem
                 !! theta
-                theta = asin((xp*Px + yp*Py + zp*Pz) / Rsphere)
+                theta = asin((xp*center(1) + yp*center(2) + zp*center(3)) / Rsphere)
                 q1 = dexp(-alpha*(theta-theta_wave)**2)
                 R = max(sqrt(xp**2 + yp**2), 1.d-10)
                 u0 = speed*ampl*q1 / (Rsphere*R)  !! Not sure about 2d2
@@ -106,6 +105,8 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
             endif 
         enddo
     enddo
+!!    write(6,*) 'stopping in qinit'
+!!    stop
     !!close(10)
 
     return

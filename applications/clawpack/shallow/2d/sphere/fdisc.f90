@@ -10,15 +10,15 @@ double precision function fdisc(blockno,xc,yc)
     integer init_cond
     common /swe_initcond/ init_cond
 
-    double precision ring_inner, ring_outer
-    common /swe_initcond_parms2/ ring_inner, ring_outer
+    double precision ring_inner, ring_outer, center(3)
+    common /swe_initcond_parms2/ ring_inner, ring_outer, center
 
     integer ring_units
     common /swe_initcond_parms3/ ring_units
 
     integer*8 cont, fclaw_map_get_context
 
-    double precision xp, yp, zp, rp, m, a
+    double precision xp, yp, zp, rp, a, m, d
     double precision phi, deg2rad, ri, ro
 
 
@@ -27,8 +27,6 @@ double precision function fdisc(blockno,xc,yc)
     call fclaw_map_2d_c2m(cont,blockno,xc,yc,xp,yp,zp)
 
     rp = sqrt(xp**2 + yp**2 + zp**2)
-    !!write(6,*) xp,yp,zp,rp
-    !!call map2spherical(xp,yp,zp,theta,phi)
 
     deg2rad = pi/180
 
@@ -46,13 +44,13 @@ double precision function fdisc(blockno,xc,yc)
         endif
     endif
 
-    !! The ring is centered at (1,0,0).  
-    if (abs(xp/rp) > 1) then
+    d = center(1)*xp + center(2)*yp + center(3)*zp
+    if (abs(d) > 1) then
         write(6,*) 'fdisc : problem taking acos()'
         stop
     endif
-    phi = asin(xp/rp)  
-    a = (ro - ri)/2.0   !! Half-width of the ring
+    phi = acos(d)  
+    a = abs(ro - ri)/2.0   !! Half-width of the ring
     m = (ro + ri)/2.0   !! Midpoint of the ring
     fdisc = abs(phi-m) - a
 end
