@@ -17,11 +17,11 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
     integer initchoice
     common /swe_initcond/ initchoice
 
-    double precision ring_inner, ring_outer
-    common /swe_initcond_parms2/ ring_inner, ring_outer
+    double precision ring_inner, ring_outer, center(3)
+    common /swe_initcond_parms2/ ring_inner, ring_outer, center
 
-    double precision hin, hout, center(3)
-    common /swe_initcond_parms4/  hin,hout, center
+    double precision hin, hout
+    common /swe_initcond_parms4/  hin,hout
 
     double precision Px, Py, Pz, theta_ridge, theta_wave, & 
                         ampl, alpha, bathy(2), speed
@@ -33,7 +33,7 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
     double precision xc,yc,xlow,ylow,xp,yp,zp, w, qval
 
     double precision deg2rad, phi, phi0, width
-    double precision theta, q1, R, u0, Rsphere
+    double precision theta, q1, R, u0, Rsphere, d
 
     integer blockno, fc2d_clawpack46_get_block
     integer*8 cont, fclaw_map_get_context
@@ -52,6 +52,7 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
     !!open(10,file=fname)
     Rsphere = 1
     deg2rad = pi/180
+
     do j = 1-mbc,my+mbc
         yc = ylower + (j-0.5)*dy
         ylow = ylower + (j-1)*dy
@@ -69,7 +70,8 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
                     qval = w
                 elseif (initchoice .eq. 2) then
                     !! RJL initial conditions - matches 1d solution
-                    phi = acos(min(xp,1.0))
+                    d = (xp*center(1) + yp*center(2) + zp*center(3)) / Rsphere
+                    phi = acos(min(d,1.0))
                     phi0 = deg2rad*20
                     width = deg2rad*5
                     qval = exp(-((phi-phi0)/width)**2) 
@@ -105,8 +107,8 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
             endif 
         enddo
     enddo
-!!    write(6,*) 'stopping in qinit'
-!!    stop
+    !! write(6,*) 'stopping in qinit'
+    !! stop
     !!close(10)
 
     return

@@ -42,7 +42,7 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
     real(kind=8) :: xe, xc,x0, bathy, qval, deg2rad
     real(kind=8) :: dxrad
 
-    real(kind=8) :: eta, width, ri, ro
+    real(kind=8) :: eta, width, ri, ro, a, m, phil,phir
 
     deg2rad = pi/180
     width = 5.   ! controls width of Gaussian
@@ -50,25 +50,41 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
     bathy = -1
 
     !! Flip sign so inner is closer to pi/2
-    ri = ring_inner - pi/2
-    ro = ring_outer - pi/2
+    ri = pi/2 - ring_inner
+    ro = pi/2 - ring_outer
 
     do i = 1,mx
         xe = xlower + (i-1)*dx  ! latitude in degrees
         xc = xlower +  (i-0.5)*dx
 
         if (init_cond .eq. 1) then            
-            xe = xe*deg2rad
+            xe = deg2rad*xe
             dxrad = deg2rad*dx
-            if (xe .le. ri .and. ri .lt. xe+dxrad) then
-                qval = (xe+dxrad-ri)/dxrad
-            elseif (xe .le. ro .and. ro .lt. xe+dxrad) then
-                qval = (ro-xe)/dxrad
-            elseif (ri .lt. xe .and. xe .lt. ro) then
+            a = abs(ro-ri)/2  !! half width
+            m = (ro+ri)/2
+            if (xe+dxrad .lt. m-a .or. xe .gt. m + a) then
+                qval = 0
+            elseif (m-a .le. xe .and. xe+dxrad .le. m+a) then
                 qval = 1
             else
-                qval = 0
+                phil = m - a
+                phir = m + a
+                if (xe .lt. m-a) then
+                    qval = (xe+dxrad - phil)/dxrad
+                else
+                    qval = (phir - xe)/dxrad
+                endif
             endif
+
+!!            if (abs(xe)
+!!                qval = (xe+dxrad-ri)/dxrad
+!!            elseif (xe .le. ro .and. ro .lt. xe+dxrad) then
+!!                qval = (ro-xe)/dxrad
+!!            elseif (ri .lt. xe .and. xe .lt. ro) then
+!!                qval = 1
+!!            else
+!!                qval = 0
+!!            endif
         elseif (init_cond .eq. 2) then
 
             eta = exp(-((xc-x0)/width)**2)

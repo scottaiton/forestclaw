@@ -63,7 +63,7 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.upper[0] = 90   # xupper
 
     # Number of grid cells:
-    clawdata.num_cells[0] = 2*1800
+    clawdata.num_cells[0] = 4*1800
 
     # eventually rundata.grid_data should be incorporated in clawutil/data.py
     # and then this import and add_data should be removed:

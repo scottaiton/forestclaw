@@ -21,14 +21,14 @@ if (PlotType  == 4)
 
         mq1d = 3;
         [q1d,xc1d,h1d]  = plotframe1ez(amr1d,mq1d,'b-');
-        set(h1d,'xdata',pi/180*xc1d + pi/2);
+        set(h1d,'xdata',pi/2 - pi/180*xc1d);
         fprintf('%10s : %12.4e\n','qmin(1d)',min(q1d));
         fprintf('%10s : %12.4e\n','qmax(1d)',max(q1d));
         set(h1d,'linewidth',1)
         set(h1d,'linewidth',2);
 
         % X-axis in [-pi/2,pi/2]
-        set(h1d,'xdata',xc1d*pi/180 + pi/2);
+        set(h1d,'xdata',pi/2 - xc1d*pi/180);
     end
 
     xlabel('Latitude','fontsize',16)
@@ -41,7 +41,7 @@ if (PlotType  == 4)
     [h,labels] = getlegendinfo();
     set(h,'markersize',10)
     
-    legend(h,labels);
+    % legend(h,labels);
     grid on;
     hold off;
 else
