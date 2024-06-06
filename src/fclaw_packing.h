@@ -101,7 +101,7 @@ typedef struct fclaw_packing_vtable
   fclaw_packing_packsize_t size; /**< function for packing size */
   fclaw_packing_new_t new_data; /**< function for creating new data */
   fclaw_packing_destroy_t destroy; /**< function for destroying */
-} fclaw_useradata_vtable_t;
+} fclaw_packing_vtable_t;
 
 /**
  * @brief Get the size needed for packing a string
