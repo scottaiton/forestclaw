@@ -276,6 +276,7 @@ check_options(fclaw_global_t * glob, const char* checkpoint_ini)
 {
     if(glob->mpirank == 0)
     {
+        fclaw_global_productionf("\n");
         fclaw_global_productionf("=========== Comparing with options stored in checkpoint ===========\n");
         fclaw_global_productionf("\n");
 
@@ -301,7 +302,7 @@ check_options(fclaw_global_t * glob, const char* checkpoint_ini)
         fprintf(file, "%s", checkpoint_ini);
         fclose(file);
 
-        fclaw_global_productionf("Checkpoints options saved to fclaw_options.ini.checkpoint\n");
+        fclaw_global_productionf("Checkpoint options have been saved to fclaw_options.ini.checkpoint\n");
         fclaw_global_productionf("\n");
 
         dictionary *actual = iniparser_load("fclaw_options.ini.used");
@@ -321,6 +322,7 @@ check_options(fclaw_global_t * glob, const char* checkpoint_ini)
 
         fclaw_global_productionf("\n");
         fclaw_global_productionf("===================================================================\n");
+        fclaw_global_productionf("\n");
     }
 }
 
