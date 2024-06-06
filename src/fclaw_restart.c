@@ -85,6 +85,12 @@ get_used_ini(fclaw_global_t * glob)
     if(glob->mpirank == 0)
     {
         sc_options_t * options = fclaw_global_get_attribute(glob, "fclaw_options");
+        if(options == NULL)
+        {
+            fclaw_abortf("fclaw_restart.c: Cannot find sc options structure in glob."
+                         "                 Make sure the fclaw_global_new(app) constructor is being used in main.\n");
+        }
+
         int retval = sc_options_save (fclaw_get_package_id (),
                                       FCLAW_VERBOSITY_ERROR, 
                                       options, 
