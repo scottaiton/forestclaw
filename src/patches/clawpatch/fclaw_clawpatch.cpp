@@ -1898,10 +1898,10 @@ void fclaw_clawpatch_vtable_initialize(fclaw_global_t* glob,
     patch_vt->partition_unpack     = clawpatch_partition_unpack;
 
     /* restart */
-    patch_vt->restart_num_pointers = restart_num_pointers;
-    patch_vt->restart_pointer_sizes = restart_pointer_sizes;
-    patch_vt->restart_names        = restart_names;
-    patch_vt->restart_get_pointer  = get_pointer;
+    patch_vt->checkpoint_num_pointers = restart_num_pointers;
+    patch_vt->checkpoint_pointer_sizes = restart_pointer_sizes;
+    patch_vt->checkpoint_names        = restart_names;
+    patch_vt->checkpoint_get_pointer  = get_pointer;
 
     /* output functions */
     clawpatch_vt->time_header_ascii  = fclaw_clawpatch_time_header_ascii;

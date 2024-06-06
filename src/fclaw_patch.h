@@ -832,39 +832,50 @@ size_t fclaw_patch_partition_packsize(struct fclaw_global* glob);
 
 ///@}
 /* ------------------------------------------------------------------------------------ */
-///                          @name Restart
+///                          @name Checkpoint
 /* ------------------------------------------------------------------------------------ */
 ///@{
 
 /**
- * @brief Get the number of restart pointers
+ * @brief Get the number of pointers to store in the checkpoint
  * 
  * @param glob the global context
  * @return int the number of restart pointers
  */
-int fclaw_patch_restart_num_pointers(struct fclaw_global* glob);
+int fclaw_patch_checkpoint_num_pointers(struct fclaw_global* glob);
 
 /**
- * @brief Get the sizes of the restart data
+ * @brief Get the sizes of the checkpoint data
  * 
  * @param[in]  glob the global context
  * @param[out] restart_sizes an array of length ::fclaw_patch_restart_num_pointers 
  *                           with the sizes of the restart data
  */
-void fclaw_patch_restart_pointer_sizes(struct fclaw_global* glob, size_t restart_sizes[]);
+void fclaw_patch_checkpoint_pointer_sizes(struct fclaw_global* glob, size_t restart_sizes[]);
+
 /**
- * @brief Get the names of the restart data.
+ * @brief Get the names of the checkpoint data.
  * 
  * @param glob the global context 
  * @return sc_array_t* an array of strings
  */
-void fclaw_patch_restart_names(struct fclaw_global* glob, const char *names[]);
+void fclaw_patch_checkpoint_names(struct fclaw_global* glob, const char *names[]);
 
-void *fclaw_patch_restart_get_pointer(struct fclaw_global* glob,
-                                      struct fclaw_patch* this_patch,
-                                      int blockno,
-                                      int patchno,
-                                      int pointerno);
+/**
+ * @brief Get a specific pointer for the checkpoint
+ * 
+ * @param glob the global context
+ * @param this_patch the patch context
+ * @param blockno the block number
+ * @param patchno the patch number
+ * @param pointerno the pointer number
+ * @return void* the pointer
+ */
+void *fclaw_patch_checkpoint_get_pointer(struct fclaw_global* glob,
+                                         struct fclaw_patch* this_patch,
+                                         int blockno,
+                                         int patchno,
+                                         int pointerno);
 
 ///@}
 /* ------------------------------------------------------------------------------------ */
@@ -1581,6 +1592,53 @@ typedef void* (*fclaw_patch_metric_patch_t)(struct fclaw_patch *patch);
 
 ///@}
 /* ------------------------------------------------------------------------------------ */
+///                         @name Checkpoint Functions (typedefs)
+/* ------------------------------------------------------------------------------------ */
+///@{
+
+/**
+ * @brief Get the number of pointers to store in the checkpoint
+ * 
+ * @param glob the global context
+ * @return int the number of restart pointers
+ */
+typedef int (*checkpoint_num_pointers_t)(struct fclaw_global *glob);
+
+/**
+ * @brief Get the sizes of the checkpoint data
+ * 
+ * @param[in]  glob the global context
+ * @param[out] restart_sizes an array of length ::fclaw_patch_restart_num_pointers 
+ *                           with the sizes of the restart data
+ */
+typedef void (*checkpoint_pointer_sizes_t)(struct fclaw_global *glob, size_t sizes[]);
+
+/**
+ * @brief Get the names of the checkpoint data.
+ * 
+ * @param glob the global context 
+ * @return sc_array_t* an array of strings
+ */
+typedef void (*checkpoint_names_t)(struct fclaw_global *glob, const char *restart_names[]);
+
+/**
+ * @brief Get a specific pointer for the checkpoint
+ * 
+ * @param glob the global context
+ * @param this_patch the patch context
+ * @param blockno the block number
+ * @param patchno the patch number
+ * @param pointerno the pointer number
+ * @return void* the pointer
+ */
+typedef void *(*checkpoint_get_pointer_t)(struct fclaw_global* glob,
+                                          struct fclaw_patch* this_patch,
+                                          int blockno,
+                                          int patchno,
+                                          int pointerno);
+       
+///@}
+/* ------------------------------------------------------------------------------------ */
 ///                            @name Virtual Table
 /* ------------------------------------------------------------------------------------ */
 ///@{
@@ -1751,19 +1809,17 @@ struct fclaw_patch_vtable
 
     /** @} */
 
-    /** @{ @name Restart Functions */
+    /** @{ @name Checkpoint Functions */
 
-    int (*restart_num_pointers)(struct fclaw_global *glob);
+    /** @copybrief :: checkpoint_num_pointers_t */
+    checkpoint_num_pointers_t checkpoint_num_pointers;
+    /** @copybrief :: checkpoint_pointer_sizes_t */
+    checkpoint_pointer_sizes_t checkpoint_pointer_sizes;
+    /** @copybrief :: checkpoint_names_t */
+    checkpoint_names_t checkpoint_names;
+    /** @copybrief :: checkpoint_get_pointer_t */
+    checkpoint_get_pointer_t checkpoint_get_pointer;
 
-    void (*restart_pointer_sizes)(struct fclaw_global *glob, size_t sizes[]);
-
-    void (*restart_names)(struct fclaw_global *glob, const char *restart_names[]);
-
-    void *(*restart_get_pointer)(struct fclaw_global* glob,
-                                 struct fclaw_patch* this_patch,
-                                 int blockno,
-                                 int patchno,
-                                 int pointerno);
     /** @} */
 
     /** True if vtable has been set */

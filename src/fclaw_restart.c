@@ -401,7 +401,7 @@ set_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int pat
 	    fclaw_patch_build(user_data->glob, patch, blockno, patchno,(void*) &build_mode);
     }
 
-    void* data = fclaw_patch_restart_get_pointer(user_data->glob, patch, blockno, patchno, user_data->pointerno);
+    void* data = fclaw_patch_checkpoint_get_pointer(user_data->glob, patch, blockno, patchno, user_data->pointerno);
 
     memcpy(data, sc_array_index(current_arr, 0), user_data->size);
 
@@ -540,11 +540,11 @@ void restart (fclaw_global_t * glob,
 
     //read patch data
 
-    int num_pointers = fclaw_patch_restart_num_pointers(glob);
+    int num_pointers = fclaw_patch_checkpoint_num_pointers(glob);
     size_t sizes[num_pointers];
-    fclaw_patch_restart_pointer_sizes(glob, sizes);
+    fclaw_patch_checkpoint_pointer_sizes(glob, sizes);
     const char* names[num_pointers];
-    fclaw_patch_restart_names(glob, names);
+    fclaw_patch_checkpoint_names(glob, names);
 
     for(int i = 0; i < num_pointers; i++)
     {
@@ -584,7 +584,7 @@ get_patches(fclaw_domain_t * domain, fclaw_patch_t * patch, int blockno, int pat
     sc_array_t *patches = user_data->patches;
     sc_array_t * current_arr = (sc_array_t *) sc_array_index (patches, user_data->curr_index);
 
-    void* data = fclaw_patch_restart_get_pointer(user_data->glob, patch, blockno, patchno, user_data->pointerno);
+    void* data = fclaw_patch_checkpoint_get_pointer(user_data->glob, patch, blockno, patchno, user_data->pointerno);
 
     sc_array_init_data(current_arr, data, user_data->size, 1);
 
@@ -705,11 +705,11 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
 
     //write patch data
 
-    int num_pointers = fclaw_patch_restart_num_pointers(glob);
+    int num_pointers = fclaw_patch_checkpoint_num_pointers(glob);
     size_t sizes[num_pointers];
-    fclaw_patch_restart_pointer_sizes(glob, sizes);
+    fclaw_patch_checkpoint_pointer_sizes(glob, sizes);
     const char* names[num_pointers];
-    fclaw_patch_restart_names(glob, names);
+    fclaw_patch_checkpoint_names(glob, names);
     for(int i = 0; i < num_pointers; i++)
     {
         sc_array_t *patches = sc_array_new_count(sizeof(sc_array_t), glob->domain->local_num_patches);
