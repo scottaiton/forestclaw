@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_regrid.h>
 #include <fclaw_partition.h>
 #include <fclaw_forestclaw.h>
+#include <fclaw_output.h>
 #include <iniparser.h>
 
 /**
