@@ -533,7 +533,8 @@ options_destroy (fclaw_app_t * a, void *package, void *registered)
     fclaw_options_destroy (fclaw_opt);
 
     /* Destroy linked list of section names */
-    sc_keyvalue_t * fclaw_opt_sections = fclaw_app_get_attribute(a, "fclaw_opt_sections", NULL);
+    sc_keyvalue_t * fclaw_opt_sections = 
+        (sc_keyvalue_t*) fclaw_app_get_attribute(a, "fclaw_opt_sections", NULL);
     if(fclaw_opt_sections != NULL)
     {
         sc_keyvalue_destroy(fclaw_opt_sections);
