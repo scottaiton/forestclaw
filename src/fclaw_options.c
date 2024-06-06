@@ -577,7 +577,8 @@ fclaw_options_t* fclaw_options_register (fclaw_app_t * a,
                                 fclaw_opt);
 
     /* append to list of sections for fclaw_opts */
-    sc_keyvalue_t *fclaw_opt_sections = fclaw_app_get_attribute(a, "fclaw_opt_sections", NULL);
+    sc_keyvalue_t *fclaw_opt_sections = 
+        (sc_keyvalue_t*) fclaw_app_get_attribute(a, "fclaw_opt_sections", NULL);
     if(fclaw_opt_sections == NULL)
     {
         fclaw_opt_sections = sc_keyvalue_new();
