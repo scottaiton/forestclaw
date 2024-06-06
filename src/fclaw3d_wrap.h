@@ -121,7 +121,8 @@ fclaw3d_interpolate_point_wrap_cb (fclaw3d_domain_t * domain,
  * @param errcode the 3d error code
  * @return int the dimension independent error code
  */
-int fclaw3d_file_error_wrap(int errcode);
+int 
+fclaw3d_file_error_wrap(int errcode);
 
 #ifdef __cplusplus
 #if 0
