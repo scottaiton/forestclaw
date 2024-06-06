@@ -44,7 +44,6 @@ void fclaw_vtables_initialize(struct fclaw_global *glob);
  * @param glob the global context
  */
 void fclaw_initialize_domain_flags(struct fclaw_global *glob);
-void fclaw_run_vtables_initialize(struct fclaw_global *glob);
 
 void fclaw_initialize (struct fclaw_global *glob);
 /**

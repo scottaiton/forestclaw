@@ -578,8 +578,3 @@ void fclaw_run(fclaw_global_t *glob)
         exit(0);
     }
 }
-
-void fclaw_run_vtables_initialize(struct fclaw_global *glob)
-{
-
-}
