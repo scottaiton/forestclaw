@@ -199,21 +199,58 @@ compare_dictionaries(sc_keyvalue_t *fclaw_opt_secitons,
                         char* actual_value = iniparser_getstring(actual, key, NULL);
                         if(strcmp(expected_value, actual_value) != 0)
                         {
-                            fclaw_global_productionf("%s has mismatched value for %s: %s != %s.\n", section, key, expected_value, actual_value);
+                            fclaw_global_productionf("restarting with mismatched value for [%s]. Value in checkpoint [%s], value being run with [%s].\n", key, expected_value, actual_value);
                             num_differences++;
                         }
 
                     }
                     else
                     {
-                        //fclaw_global_productionf("%s has unused option %s.\n", filename, keys[i_key]);
+                        fclaw_global_productionf("Checkpoint file has unused option %s.\n", keys[i_key]);
+                        num_differences++;
                     }
                 }
                 free (keys);
             }
             else
             {
-                //fclaw_global_productionf("%s has unused section [%s].\n", filename, section);
+                fclaw_global_productionf("Checkpoint file has unused section [%s].\n", section);
+                num_differences++;
+            }
+        }
+    }
+    // do inverse and look for options in actual that are not in expected
+    nsec = iniparser_getnsec(actual);
+    for(int i_sec = 0; i_sec < nsec; i_sec++)
+    {
+        char* section = iniparser_getsecname(actual, i_sec);
+        if(strcmp(section, "arguments") != 0)
+        {
+            if(!iniparser_find_entry(expected, section))
+            {
+                fclaw_global_productionf("Checkpoint file is missing section [%s].\n", section);
+                num_differences++;
+            }
+            else
+            {
+                int nkey = iniparser_getsecnkeys(actual, section);
+                char** keys = iniparser_getseckeys(actual, section);
+
+                for(int i_key = 0; i_key < nkey; i_key++)
+                {
+                    char* key = keys[i_key];
+                    if(skip_option(fclaw_opt_secitons, section, key))
+                    {
+                        continue;
+                    }
+
+                    if(!iniparser_find_entry(expected, key))
+                    {
+                        fclaw_global_productionf("Checkpoint file is missing option %s.\n", keys[i_key]);
+                        num_differences++;
+                    }
+                }
+                free(keys);
             }
         }
     }
