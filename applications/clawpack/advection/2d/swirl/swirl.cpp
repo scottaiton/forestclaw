@@ -74,7 +74,17 @@ void run_program(fclaw_global_t* glob)
     /* ---------------------------------------------------------------
        Run
        --------------------------------------------------------------- */
-    fclaw_initialize(glob);
+
+    fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
+    if(fclaw_opt->restart)
+    {
+        fclaw_restart(glob);
+    }
+    else
+    {
+        fclaw_initialize(glob);
+    }
+
     fclaw_run(glob);
 
     fclaw_finalize(glob);
