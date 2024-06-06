@@ -156,6 +156,14 @@ skip_option(sc_keyvalue_t *fclaw_opt_sections, const char* section, const char* 
         {
             skip = 1;
         }
+        else if(strcmp(key_substr, "restart") == 0)
+        {
+            skip = 1;
+        }
+        else if(strcmp(key_substr, "checkpoint") == 0)
+        {
+            skip = 1;
+        }
     }
     return skip;
 }
