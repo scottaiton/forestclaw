@@ -286,20 +286,36 @@ free_used_ini(void* data)
     FCLAW_FREE(buffer);
 }
 
+/**
+ * @brief Check that the user string matches an expected string.
+ * The user string returned by fclaw_file functions is padded with spaces,
+ * so we need to check that the strings match up to the first space and that 
+ * the rest of the string is just spaces.
+ * 
+ * @param expected  the expected string
+ * @param actual the actual string
+ */
 static
 void check_user_string(const char* expected, const char* actual)
 {
     if(strncmp(expected, actual, strlen(expected)) != 0)
     {
+        fclaw_abortf("fclaw_restart.c: User string mismatch: %s != %s\n", expected, actual);
+    }
+    else
+    {
         //also check that rest of the string is just spaces
         for(int i = strlen(expected); i < FCLAW_FILE_USER_STRING_BYTES; i++)
         {
-            if(actual[i] != ' ')
+            if(actual[i] != '\0')
+            {
+                break;
+            }
+            else if(actual[i] != ' ')
             {
                 fclaw_abortf("fclaw_restart.c: User string mismatch: %s != %s\n", expected, actual);
             }
         }
-        fclaw_abortf("fclaw_restart.c: User string mismatch: %s != %s\n", expected, actual);
     }
 }
 
@@ -433,7 +449,7 @@ void restart (fclaw_global_t * glob,
     fc = fclaw_file_read_block(fc, user_string, ini_length, &array, &errcode);
 
 
-    check_user_string(user_string, "used_ini");
+    check_user_string("used_ini", user_string);
     CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read used_ini");
 
     const char* used_ini = (const char*) sc_array_index(&array, 0);
