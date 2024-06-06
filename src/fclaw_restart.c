@@ -413,7 +413,7 @@ static
 void restart (fclaw_global_t * glob,
               const char* restart_filename,
               const char* partition_filename,
-              int timer)
+              fclaw_timer_names_t timer)
 {
     int refine_dim = glob->domain->refine_dim;
     fclaw_domain_reset(glob);
