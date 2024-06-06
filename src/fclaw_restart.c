@@ -383,10 +383,43 @@ void restart (fclaw_global_t * glob,
     }
 
     sc_array_t array;
+
+    //read the version major
+
+    sc_array_init_size(&array, sizeof(int), 1);
+    fc = fclaw_file_read_block(fc, user_string, sizeof(int), &array, &errcode);
+
+    check_user_string("checkpoint_version_major", user_string);
+    CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read version_major");
+
+    int version_major = *((int*) sc_array_index(&array, 0));
+
+    sc_array_reset(&array);
+
+
+    //read the version minor
+
+    sc_array_init_size(&array, sizeof(int), 1);
+    fc = fclaw_file_read_block(fc, user_string, sizeof(int), &array, &errcode);
+
+    check_user_string("checkpoint_version_minor", user_string);
+    CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read version_minor");
+
+    int version_minor = *((int*) sc_array_index(&array, 0));
+
+    sc_array_reset(&array);
+
+    //version check
+    if(version_major != 1 || version_minor != 0)
+    {
+        fclaw_abortf("fclaw_restart.c: Incompatible checkpoint version: %d.%d\n", version_major, version_minor);
+    }
+
+    //read the length of the used_ini string
+
     sc_array_init_size(&array, sizeof(size_t), 1);
     fc = fclaw_file_read_block(fc, user_string, sizeof(size_t), &array, &errcode);
 
-    //read the length of the used_ini string
 
     check_user_string("used_ini_length", user_string);
     CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read used_ini_length");
@@ -394,10 +427,11 @@ void restart (fclaw_global_t * glob,
     size_t ini_length = *((size_t*) sc_array_index(&array, 0));
     sc_array_reset(&array);
 
+    //read the used_ini string
+
     sc_array_init_size(&array, ini_length, 1);
     fc = fclaw_file_read_block(fc, user_string, ini_length, &array, &errcode);
 
-    //read the used_ini string
 
     check_user_string(user_string, "used_ini");
     CHECK_ERROR_CODE_AND_ABORT(refine_dim, errcode, "restart read used_ini");
@@ -507,6 +541,36 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
         return;
     }
 
+    sc_array_t array;
+
+    //dont know if we are going to bother with supporting older versions
+    //of checkpoint files, but we will write the version number anyway
+
+    //write version major
+
+    int version_major = 1;
+    sc_array_init_data(&array, &version_major, sizeof(int), 1);
+
+    fc = fclaw_file_write_block(fc, "checkpoint_version_major", sizeof(int), &array, &errcode);
+    CHECK_ERROR_CODE(refine_dim, errcode, "checkpoint write version_major");
+    if(errcode != FCLAW_FILE_ERR_SUCCESS)
+    {
+        return;
+    }
+
+    //write version minor
+
+    int version_minor = 0;
+    sc_array_init_data(&array, &version_minor, sizeof(int), 1);
+    fc = fclaw_file_write_block(fc, "checkpoint_version_minor", sizeof(int), &array, &errcode);
+    CHECK_ERROR_CODE(refine_dim , errcode, "checkpoint write version_minor");
+    if(errcode != FCLAW_FILE_ERR_SUCCESS)
+    {
+        return;
+    }
+
+    //write the used_ini length and string
+
     char* used_ini = fclaw_global_get_attribute(glob, "fclaw_used_ini");
     if(used_ini == NULL)
     {
@@ -523,7 +587,6 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
     }
 
     size_t used_ini_length = strlen(used_ini);
-    sc_array_t array;
     sc_array_init_data(&array, &used_ini_length, sizeof(size_t), 1);
 
     fc = fclaw_file_write_block(fc, "used_ini_length", sizeof(size_t), &array, &errcode);
@@ -541,20 +604,19 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
         return;
     }
 
+    //write size of glob buffer
+
     size_t glob_packsize = fclaw_global_packsize(glob);
+    sc_array_init_data(&array, &glob_packsize, sizeof(size_t), 1);
 
-    sc_array_t globsize;
-    sc_array_init_size(&globsize, sizeof(size_t), 1);
-    *((size_t*) sc_array_index(&globsize, 0)) = glob_packsize;
-
-    fc = fclaw_file_write_block(fc, "glob_size", sizeof(size_t), &globsize, &errcode);
+    fc = fclaw_file_write_block(fc, "glob_size", sizeof(size_t), &array, &errcode);
     CHECK_ERROR_CODE(refine_dim , errcode, "write globsize");
     if(errcode != FCLAW_FILE_ERR_SUCCESS)
     {
         return;
     }
 
-    sc_array_reset(&globsize);
+    //write glob buffer
 
     sc_array_t glob_buffer;
     sc_array_init_size(&glob_buffer, glob_packsize, 1);
@@ -569,6 +631,7 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
 
     sc_array_reset(&glob_buffer);
 
+    //write patch data
 
     int num_pointers = fclaw_patch_restart_num_pointers(glob);
     size_t sizes[num_pointers];
