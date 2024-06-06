@@ -84,7 +84,7 @@ get_used_ini(fclaw_global_t * glob)
     long length = 0;
     if(glob->mpirank == 0)
     {
-        sc_options_t * options = fclaw_global_get_attribute(glob, "fclaw_options");
+        sc_options_t * options = (sc_options_t*) fclaw_global_get_attribute(glob, "fclaw_options");
         if(options == NULL)
         {
             fclaw_abortf("fclaw_restart.c: Cannot find sc options structure in glob."
@@ -287,7 +287,8 @@ check_options(fclaw_global_t * glob, const char* checkpoint_ini)
         fclaw_global_productionf("\n");
 
         //save the used ini file
-        sc_options_t * options = fclaw_global_get_attribute(glob, "fclaw_options");
+        sc_options_t * options = 
+            (sc_options_t*) fclaw_global_get_attribute(glob, "fclaw_options");
         int retval = sc_options_save (fclaw_get_package_id (),
                                       FCLAW_VERBOSITY_ERROR, 
                                       options, 
@@ -315,7 +316,7 @@ check_options(fclaw_global_t * glob, const char* checkpoint_ini)
         dictionary *expected = iniparser_load("fclaw_options.ini.checkpoint");
 
         sc_keyvalue_t *fclaw_opt_sections 
-            = fclaw_global_get_attribute(glob, "fclaw_opt_sections");
+            = (sc_keyvalue_t*) fclaw_global_get_attribute(glob, "fclaw_opt_sections");
         int num_differences = compare_dictionaries(fclaw_opt_sections, expected, actual);
         
         iniparser_freedict(actual);
@@ -640,7 +641,8 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
 
     //write the used_ini length and string
 
-    char* used_ini = fclaw_global_get_attribute(glob, "fclaw_used_ini");
+    char* used_ini = 
+        (char*) fclaw_global_get_attribute(glob, "fclaw_used_ini");
     if(used_ini == NULL)
     {
         used_ini = get_used_ini(glob);

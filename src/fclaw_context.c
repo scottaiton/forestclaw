@@ -89,7 +89,8 @@ reset_pointers(const char *key, void *data, void *user)
 
 fclaw_context_t* fclaw_context_get(fclaw_global_t *glob, const char *name)
 {
-    fclaw_context_t *context = fclaw_global_get_attribute(glob, name);
+    fclaw_context_t *context = 
+        (fclaw_context_t*) fclaw_global_get_attribute(glob, name);
 
     if(context == NULL)
     {
@@ -115,7 +116,7 @@ void fclaw_context_get_int(fclaw_context_t *context,
                            const char *name,
                            int *value)
 {
-    value_t *v = fclaw_pointer_map_get(context->values, name);
+    value_t *v = (value_t*) fclaw_pointer_map_get(context->values, name);
     if(v != NULL)
     {
         if(v->type != FCLAW_CONTEXT_INT)
@@ -142,7 +143,7 @@ void fclaw_context_get_double(fclaw_context_t *context,
                               const char *name, 
                               double *value)
 {
-    value_t *v = fclaw_pointer_map_get(context->values, name);
+    value_t *v = (value_t*) fclaw_pointer_map_get(context->values, name);
     if(v != NULL)
     {
         if(v->type != FCLAW_CONTEXT_DOUBLE)

@@ -355,7 +355,8 @@ void fclaw_locate_gauges(fclaw_global_t *glob)
     fclaw_gauge_t *g;
 
 
-    fclaw_gauge_acc_t* gauge_acc = fclaw_diagnostics_get_acc(glob)->gauge_accumulator;
+    fclaw_gauge_acc_t* gauge_acc = 
+        (fclaw_gauge_acc_t*) fclaw_diagnostics_get_acc(glob)->gauge_accumulator;
     //fclaw_gauge_info_t* gauge_info = glob->gauge_info;
 
     /* Locate each gauge in the new mesh */
