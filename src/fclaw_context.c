@@ -102,7 +102,7 @@ fclaw_context_t* fclaw_context_get(fclaw_global_t *glob, const char *name)
         context->initializing = 0;
         if(!context->saved)
         {
-            fclaw_abortf("fclaw_context_get: Context needs to be saved before it can be retrieved again");
+            fclaw_abortf("fclaw_context_get: Context needs to be saved before it can be retrieved again\n");
         }
         context->saved = 0;
         fclaw_pointer_map_iterate(context->values, reset_pointers, NULL);
@@ -121,7 +121,7 @@ void fclaw_context_get_int(fclaw_context_t *context,
     {
         if(v->type != FCLAW_CONTEXT_INT)
         {
-            fclaw_abortf("fclaw_context_get_int: Value %s is not an int", name);
+            fclaw_abortf("fclaw_context_get_int: Value %s is not an int\n", name);
         }
         *value = v->value.i;
     }
@@ -133,7 +133,7 @@ void fclaw_context_get_int(fclaw_context_t *context,
     }
     else
     {
-        fclaw_abortf("fclaw_context_get_int: Value %s not found", name);
+        fclaw_abortf("fclaw_context_get_int: Value %s not found\n", name);
     }
     
     v->pointer = value;
@@ -148,7 +148,7 @@ void fclaw_context_get_double(fclaw_context_t *context,
     {
         if(v->type != FCLAW_CONTEXT_DOUBLE)
         {
-            fclaw_abortf("fclaw_context_get_double: Value %s is not a double", name);
+            fclaw_abortf("fclaw_context_get_double: Value %s is not a double\n", name);
         }
         *value = v->value.d;
     }
@@ -160,7 +160,7 @@ void fclaw_context_get_double(fclaw_context_t *context,
     }
     else
     {
-        fclaw_abortf("fclaw_context_get_double: Value %s not found", name);
+        fclaw_abortf("fclaw_context_get_double: Value %s not found\n", name);
     }
 
     v->pointer = value;
@@ -169,10 +169,10 @@ void fclaw_context_get_double(fclaw_context_t *context,
 static
 void save_value(const char *key, void *data, void *user)
 {
-    value_t *value = (value_t *)data;
+    value_t *value = (value_t *) data;
     if(value->pointer == NULL)
     {
-        fclaw_abortf("fclaw_context_save: Value %s has no pointer", key);
+        fclaw_abortf("fclaw_context_save: Value %s has no pointer\n", key);
     }
     if(value->type == FCLAW_CONTEXT_INT)
     {
@@ -224,7 +224,7 @@ size_t pack_context(fclaw_global_t *glob, void *data, char *buffer)
 
     if(!context->saved)
     {
-        fclaw_abortf("fclaw_context: Context not saved, cannot pack");
+        fclaw_abortf("fclaw_context: Context not saved, cannot pack\n");
     }
 
     buffer += fclaw_pack_int(fclaw_pointer_map_size(context->values), buffer);
