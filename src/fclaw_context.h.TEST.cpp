@@ -52,7 +52,6 @@ TEST_CASE("fclaw_context_get existing context without saving")
 	CHECK_NE(context1, nullptr);
 	//should fail since it wasnn't saved
 	CHECK_SC_ABORTED(fclaw_context_get(glob, "test"));
-	fclaw_global_destroy(glob);
 }
 
 TEST_CASE("fclaw_context_get existing context")
@@ -193,7 +192,6 @@ TEST_CASE("fclaw_context_get_int called for non-existing value")
 	context = fclaw_context_get(glob, "test");
 	int value;
 	CHECK_SC_ABORTED(fclaw_context_get_int(context, "test", &value));
-	fclaw_global_destroy(glob);
 }
 
 TEST_CASE("fclaw_context_get_int called for non-exising value other value")
@@ -206,7 +204,6 @@ TEST_CASE("fclaw_context_get_int called for non-exising value other value")
 
 	context = fclaw_context_get(glob, "test");
 	CHECK_SC_ABORTED(fclaw_context_get_int(context, "test-does-not-exist", &value));
-	fclaw_global_destroy(glob);
 }
 
 TEST_CASE("fclaw_context_get_int save without getting all variables")
@@ -220,7 +217,6 @@ TEST_CASE("fclaw_context_get_int save without getting all variables")
 	// second get call, since we don't get_int, should fail
 	context = fclaw_context_get(glob, "test");
 	CHECK_SC_ABORTED(fclaw_context_save(context));
-	fclaw_global_destroy(glob);
 }
 
 TEST_CASE("fclaw_context_get_double new context")
@@ -335,7 +331,6 @@ TEST_CASE("fclaw_context_get_double called for non-existing value")
 	context = fclaw_context_get(glob, "test");
 	double value;
 	CHECK_SC_ABORTED(fclaw_context_get_double(context, "test", &value));
-	fclaw_global_destroy(glob);
 }
 
 TEST_CASE("fclaw_context_get_double called for non-exising value other value")
@@ -348,7 +343,6 @@ TEST_CASE("fclaw_context_get_double called for non-exising value other value")
 
 	context = fclaw_context_get(glob, "test");
 	CHECK_SC_ABORTED(fclaw_context_get_double(context, "test-does-not-exist", &value));
-	fclaw_global_destroy(glob);
 }
 
 TEST_CASE("fclaw_context_get_double save without getting all variables")
@@ -362,7 +356,6 @@ TEST_CASE("fclaw_context_get_double save without getting all variables")
 	// second get call, since we don't get_double, should fail
 	context = fclaw_context_get(glob, "test");
 	CHECK_SC_ABORTED(fclaw_context_save(context));
-	fclaw_global_destroy(glob);
 }
 
 TEST_CASE("fclaw_context_get_double and fclaw_context_get_int called for same value")
@@ -408,8 +401,6 @@ TEST_CASE("fclaw_context_get_double and fclaw_context_get_int called for same ke
 
 		double value_double = default_double;
 		CHECK_SC_ABORTED(fclaw_context_get_double(context, "test", &value_double));
-
-		fclaw_global_destroy(glob);
 	}
 
 	for(double default_double : {-100, 0, 42})
@@ -422,8 +413,6 @@ TEST_CASE("fclaw_context_get_double and fclaw_context_get_int called for same ke
 
 		int value;
 		CHECK_SC_ABORTED(fclaw_context_get_int(context, "test", &value));
-
-		fclaw_global_destroy(glob);
 	}
 }
 
@@ -446,8 +435,6 @@ TEST_CASE("fclaw_context pack/unpack glob int and double without save")
 
 		char buffer[fclaw_global_packsize(glob)];
 		CHECK_SC_ABORTED(fclaw_global_pack(glob, buffer));
-
-		fclaw_global_destroy(glob);
 	}
 }
 
