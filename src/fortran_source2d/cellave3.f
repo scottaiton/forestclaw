@@ -449,7 +449,7 @@ c     # than criss-cross it.
       y = yl + s*(yh - yl)
       z = zl + s*(zh - zl)
 
-      fs = fdisc(blockno,x,y)
+      fs = fdisc(blockno,x,y,z)
 
       end
 
