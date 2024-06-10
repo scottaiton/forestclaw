@@ -18,8 +18,9 @@ install(FILES
   TYPE INCLUDE
 )
 
-install(TARGETS dummy EXPORT ${PROJECT_NAME}-targets)
+install(TARGETS dummy
+  EXPORT ${PROJECT_NAME}-targets)
 
-# imported target, for use from parent project
+# imported target, for use from FetchContent
 add_library(FORESTCLAW::DUMMY INTERFACE IMPORTED GLOBAL)
 target_link_libraries(FORESTCLAW::DUMMY INTERFACE dummy)

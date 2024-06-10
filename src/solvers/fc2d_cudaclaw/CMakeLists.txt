@@ -59,9 +59,10 @@ install(FILES
   TYPE INCLUDE
 )
 
-install(TARGETS cudaclaw EXPORT ${PROJECT_NAME}-targets)
+install(TARGETS cudaclaw
+  EXPORT ${PROJECT_NAME}-targets)
 
-# imported target, for use from parent project
+# imported target, for use from FetchContent
 add_library(FORESTCLAW::CUDACLAW INTERFACE IMPORTED GLOBAL)
 target_link_libraries(FORESTCLAW::CUDACLAW INTERFACE cudaclaw)
 
