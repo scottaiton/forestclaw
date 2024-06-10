@@ -1,4 +1,4 @@
-set(all ${PROJECT_SOURCE_DIR}/clawpack/advection/2d/all)
+set(all ${PROJECT_SOURCE_DIR}/demo/2d/all)
 
 add_library(swirl_rays_f OBJECT 
   psi.f 
@@ -34,6 +34,3 @@ target_link_libraries(swirl_rays PRIVATE
  FORESTCLAW::CLAWPACK4.6
  FORESTCLAW::CLAWPACK5
 )
-
-add_test(NAME clawpack_advection_2d_swirl_rays COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/regressions.sh WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-set_tests_properties(clawpack_advection_2d_swirl_rays PROPERTIES ENVIRONMENT "${FCLAW_TEST_ENVIRONMENT}")

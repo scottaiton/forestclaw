@@ -52,8 +52,8 @@ TEST_CASE("fclaw_clawpatch_options_new 3d")
 
 TEST_CASE("fclaw_clawpatch_options can store options in two seperate globs")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_clawpatch_options_t* opts1 = fclaw_clawpatch_options_new(2);
 	fclaw_clawpatch_options_t* opts2 = fclaw_clawpatch_options_new(3);
@@ -75,8 +75,8 @@ TEST_CASE("fclaw_clawpatch_options can store options in two seperate globs")
 
 TEST_CASE("fclaw_clawpatch_get_options fails if not intialized")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	CHECK_SC_ABORTED(fclaw_clawpatch_get_options(glob1));
 
@@ -88,8 +88,8 @@ TEST_CASE("fclaw_clawpatch_get_options fails if not intialized")
 
 TEST_CASE("fclaw_clawpatch_options_store fails if called twice on a glob")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_clawpatch_options_t* opts1 = fclaw_clawpatch_options_new(2);
 	fclaw_clawpatch_options_t* opts2 = fclaw_clawpatch_options_new(3);
@@ -149,7 +149,7 @@ TEST_CASE("2d fclaw_clawpatch_options packing/unpacking")
 	CHECK_EQ(output_opts->is_registered,opts->is_registered);
 
 	vt->destroy(output_opts);
-	FCLAW_FREE(opts);
+	fclaw_clawpatch_options_destroy(opts);
 }
 
 TEST_CASE("3d fclaw_clawpatch_options packing/unpacking")
@@ -196,5 +196,5 @@ TEST_CASE("3d fclaw_clawpatch_options packing/unpacking")
 	CHECK_EQ(output_opts->is_registered,opts->is_registered);
 
 	vt->destroy(output_opts);
-	FCLAW_FREE(opts);
+	fclaw_clawpatch_options_destroy(opts);
 }

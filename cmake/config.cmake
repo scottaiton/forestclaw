@@ -57,6 +57,9 @@ set(FCLAW_HAVE_UNISTD_H ${P4EST_HAVE_UNISTD_H} CACHE BOOL "Have unistd.h")
 
 set(FCLAW_PACKAGE \"${PROJECT_NAME}\")
 
+if(TARGET HDF5::HDF5)
+  set(FCLAW_WITH_HDF5 1)
+endif()
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/fclaw_config.h.in ${PROJECT_BINARY_DIR}/include/fclaw_config.h)
 install(FILES ${PROJECT_BINARY_DIR}/include/fclaw_config.h TYPE INCLUDE)

@@ -50,8 +50,13 @@ endif()
 
 # --- configure
 
+if(hdf5 AND NOT TARGET HDF5::HDF5)
+  include(cmake/hdf5.cmake)
+endif()
+
 include(cmake/config.cmake)
 include(cmake/compilers.cmake)
+
 
 # --- test
 if(BUILD_TESTING)
@@ -122,6 +127,32 @@ if(clawpack3_46)
   add_subdirectory(src/solvers/fc3d_clawpack46)
 
 endif(clawpack3_46)
+
+# -- put together in final library
+
+add_library(forestclaw)
+set_target_properties(forestclaw PROPERTIES EXPORT_NAME FORESTCLAW)
+
+target_sources(forestclaw PRIVATE $<TARGET_OBJECTS:forestclaw_f> $<TARGET_OBJECTS:forestclaw_c>)
+
+target_link_libraries(forestclaw PRIVATE ZLIB::ZLIB)
+target_link_libraries(forestclaw PUBLIC P4EST::P4EST SC::SC ${${PROJECT_NAME}_stdfs_link_flags})
+if(mpi)
+  target_link_libraries(forestclaw PUBLIC MPI::MPI_C INTERFACE MPI::MPI_CXX)
+endif(mpi)
+
+target_include_directories(forestclaw
+  INTERFACE
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+# imported target, for use from FetchContent
+add_library(FORESTCLAW::FORESTCLAW INTERFACE IMPORTED GLOBAL)
+target_link_libraries(FORESTCLAW::FORESTCLAW INTERFACE forestclaw)
+
+install(TARGETS forestclaw
+  EXPORT ${PROJECT_NAME}-targets)
 
 
 include(cmake/pkgconf.cmake)

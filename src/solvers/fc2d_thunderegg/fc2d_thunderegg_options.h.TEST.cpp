@@ -30,15 +30,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 TEST_CASE("fc2d_thunderegg_options can store options in two seperate globs")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fc2d_thunderegg_options_t* opts1 = FCLAW_ALLOC_ZERO(fc2d_thunderegg_options_t,1);
 	fc2d_thunderegg_options_t* opts2 = FCLAW_ALLOC_ZERO(fc2d_thunderegg_options_t,1);
 
 	fc2d_thunderegg_options_store(glob1, opts1);
 	/* glob1 has one package glob2 has two */
-	fclaw_options_store(glob2, FCLAW_ALLOC_ZERO(fclaw_options_t,1));
+	fclaw_options_t* fopts2 = FCLAW_ALLOC_ZERO(fclaw_options_t,1);
+	fclaw_options_store(glob2, fopts2);
 	fc2d_thunderegg_options_store(glob2, opts2);
 
 	CHECK_EQ(fc2d_thunderegg_get_options(glob1), opts1);
@@ -46,14 +47,17 @@ TEST_CASE("fc2d_thunderegg_options can store options in two seperate globs")
 
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
+	FCLAW_FREE(opts1);
+	FCLAW_FREE(opts2);
+	FCLAW_FREE(fopts2);
 }
 
 #ifdef FCLAW_ENABLE_DEBUG
 
 TEST_CASE("fc2d_thunderegg_get_options fails if not intialized")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	CHECK_SC_ABORTED(fc2d_thunderegg_get_options(glob1));
 
@@ -65,8 +69,8 @@ TEST_CASE("fc2d_thunderegg_get_options fails if not intialized")
 
 TEST_CASE("fc2d_thunderegg_options_store fails if called twice on a glob")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fc2d_thunderegg_options_store(glob1, FCLAW_ALLOC_ZERO(fc2d_thunderegg_options_t,1));
 	CHECK_SC_ABORTED(fc2d_thunderegg_options_store(glob1, FCLAW_ALLOC_ZERO(fc2d_thunderegg_options_t,1)));

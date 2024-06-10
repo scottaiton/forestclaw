@@ -152,7 +152,7 @@ install(FILES
 	fclaw_diagnostics.h
 	forestclaw2d.h
 	fp_exception_glibc_extension.h
-	fclaw2d_convenience.h
+  fclaw2d_convenience.h
 	fclaw2d_defs.h
   fclaw2d_file.h
   fclaw2d_wrap.h

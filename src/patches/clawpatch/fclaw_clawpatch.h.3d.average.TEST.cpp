@@ -67,6 +67,7 @@ struct CubeDomain {
         fopts.compute_error = true;
         fopts.subcycle = true;
         fopts.init_ghostcell = false;
+        fopts.regression_check = "";
         fclaw_options_store(glob, &fopts);
 
         opts->mx   = 5;
@@ -83,19 +84,19 @@ struct CubeDomain {
 
         //map = fclaw3d_map_new_nomap();
         //fclaw_global_store_map_3d(glob, map);
+        fclaw_map_store(glob, fclaw_map_new_nomap());
 
         fclaw_vtables_initialize(glob);
         fclaw_clawpatch_vtable_initialize(glob, 4);
 
-            }
+    }
     void setup(){
         fclaw_initialize(glob);
     }
     ~CubeDomain(){
-        fclaw_clawpatch_options_destroy(opts);
-        //fclaw_domain_destroy(domain);
-        //fclaw3d_map_destroy(map);
+        fclaw_finalize(glob);
         fclaw_global_destroy(glob);
+        fclaw_clawpatch_options_destroy(opts);
     }
 };
 
