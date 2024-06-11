@@ -40,6 +40,8 @@ endif()
 include(cmake/GitSubmodule.cmake)
 
 git_submodule(${CMAKE_CURRENT_SOURCE_DIR}/p4est)
+set(P4EST_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+set(SC_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 add_subdirectory(p4est)
 
 # --- ThunderEgg
