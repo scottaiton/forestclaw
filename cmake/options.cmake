@@ -1,5 +1,5 @@
 option(openmp "use OpenMP")
-option(fclaw_applications "build applications" off)
+option(applications "build applications" ${PROJECT_IS_TOP_LEVEL})
 option(hdf5 "use HDF5 library")
 
 option(clawpatch "build Clawpatch")
