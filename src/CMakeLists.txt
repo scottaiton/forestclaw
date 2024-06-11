@@ -88,15 +88,16 @@ add_library(forestclaw_f OBJECT
 
 # -- put together in final library
 
-add_library(forestclaw $<TARGET_OBJECTS:forestclaw_f> $<TARGET_OBJECTS:forestclaw_c>)
+add_library(forestclaw)
 set_target_properties(forestclaw PROPERTIES EXPORT_NAME FORESTCLAW)
 
-target_link_libraries(forestclaw
-PUBLIC
-P4EST::P4EST SC::SC "$<$<BOOL:${FCLAW_ENABLE_MPI}>:MPI::MPI_C>"
-INTERFACE
-"$<$<BOOL:${FCLAW_ENABLE_MPI}>:MPI::MPI_CXX>"
-)
+target_sources(forestclaw PRIVATE $<TARGET_OBJECTS:forestclaw_f> $<TARGET_OBJECTS:forestclaw_c>)
+
+target_link_libraries(forestclaw PRIVATE ZLIB::ZLIB)
+target_link_libraries(forestclaw PUBLIC P4EST::P4EST SC::SC ${${PROJECT_NAME}_stdfs_link_flags})
+if(mpi)
+  target_link_libraries(forestclaw PUBLIC MPI::MPI_C INTERFACE MPI::MPI_CXX)
+endif(mpi)
 
 target_include_directories(forestclaw
   INTERFACE
@@ -104,7 +105,7 @@ target_include_directories(forestclaw
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 
-# imported target, for use from parent project
+# imported target, for use from FetchContent
 add_library(FORESTCLAW::FORESTCLAW INTERFACE IMPORTED GLOBAL)
 target_link_libraries(FORESTCLAW::FORESTCLAW INTERFACE forestclaw)
 
