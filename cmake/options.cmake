@@ -1,3 +1,4 @@
+option(mpi "use MPI library")
 option(openmp "use OpenMP")
 option(applications "build applications" ${PROJECT_IS_TOP_LEVEL})
 option(hdf5 "use HDF5 library")
@@ -8,7 +9,6 @@ option(geoclaw "build Geoclaw")
 option(cudaclaw "build CudaClaw")
 option(thunderegg "build ThunderEgg")
 
-set(mpi true)
 # needed by ThunderEgg, P4EST, Libsc
 
 option(CMAKE_TLS_VERIFY "verify TLS cert" on)
