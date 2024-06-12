@@ -14,4 +14,4 @@
 	url = ./cub
 [submodule "thunderegg"]
 	path = thunderegg
-	url = https://github.com/scivision/thunderegg
+	url = https://github.com/ThunderEgg/ThunderEgg
