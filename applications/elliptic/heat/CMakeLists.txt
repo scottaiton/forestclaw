@@ -33,7 +33,7 @@ target_include_directories(heat PRIVATE
 )
 
 target_link_libraries(heat PRIVATE 
-  FORESTCLAW::FC2D_THUNDEREGG ZLIB::ZLIB
+  FORESTCLAW::FC2D_THUNDEREGG 
 )
 
 add_test(NAME elliptic_heat 

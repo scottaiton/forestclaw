@@ -43,7 +43,7 @@ target_include_directories(heat_phasefield PRIVATE
 )
 
 target_link_libraries(heat_phasefield PRIVATE 
-  FORESTCLAW::FC2D_THUNDEREGG ZLIB::ZLIB
+  FORESTCLAW::FC2D_THUNDEREGG
 )
 
 add_test(NAME elliptic_heat_phasefield 
