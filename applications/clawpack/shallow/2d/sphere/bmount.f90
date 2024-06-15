@@ -7,8 +7,8 @@ double precision function bmount(blockno,xc,yc)
     integer example
     common /swe_example/ example
 
-    double precision pi,pi2
-    common /compi/ pi, pi2
+    double precision pi,pi2, deg2rad
+    common /compi/ pi, pi2, deg2rad
 
     double precision ring_inner, ring_outer, center(3)
     common /swe_initcond_parms2/ ring_inner, ring_outer, center
@@ -42,7 +42,7 @@ double precision function bmount(blockno,xc,yc)
             write(6,*) "d = ", d
             stop
         endif
-        theta = asin(d) !! in [-pi/2, pi/2]
+        theta = acos(d) !! in [0,pi]
         qb = exp(-alpha*(theta-theta_ridge)**2)
         bmount = -bathy(1) + bathy(2)*qb
     endif

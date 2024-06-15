@@ -19,7 +19,9 @@ if (PlotType  == 4)
             error('afterframe : 1d and 2d times do not agree.')
         end
 
-        mq1d = 3;
+        mq_map = [1,2,2,2,3];
+        mq1d = mq_map(mq);
+
         [q1d,xc1d,h1d]  = plotframe1ez(amr1d,mq1d,'b-');
         set(h1d,'xdata',pi/2 - pi/180*xc1d);
         fprintf('%10s : %12.4e\n','qmin(1d)',min(q1d));
@@ -29,6 +31,9 @@ if (PlotType  == 4)
 
         % X-axis in [-pi/2,pi/2]
         set(h1d,'xdata',pi/2 - xc1d*pi/180);
+        if length(xc1d) <= 1024
+            set(h1d,'marker','.','markersize',20)
+        end
     end
 
     xlabel('Latitude','fontsize',16)
@@ -39,9 +44,9 @@ if (PlotType  == 4)
     set(gca,'fontsize',16)
 
     [h,labels] = getlegendinfo();
-    set(h,'markersize',10)
+%     set(h,'markersize',20)
     
-    % legend(h,labels);
+    legend(h,labels);
     grid on;
     hold off;
 else
@@ -58,6 +63,19 @@ else
     view([32,24])
 %     view(vright)
     set(gca,'clipping','off')
+end
+
+% axis for comparison.
+if parms.example == 0
+    if Frame == 6
+        al = [2.022879800419728   2.113600386763976   0.050023506586182   0.197204017647021];
+        axis(al)
+        daspect([1,1,1])
+    elseif Frame == 11
+        al = [0.85   1.2  -0.03   0.1];
+        axis(al)
+        daspect([1,1,1])
+    end
 end
 
 NoQuery = 0;

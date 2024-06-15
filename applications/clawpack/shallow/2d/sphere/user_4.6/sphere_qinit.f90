@@ -11,8 +11,8 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
     integer example
     common /swe_example/ example
 
-    double precision pi, pi2
-    common /compi/ pi, pi2
+    double precision pi, pi2, deg2rad
+    common /compi/ pi, pi2, deg2rad
 
     integer initchoice
     common /swe_initcond/ initchoice
@@ -23,16 +23,16 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
     double precision hin, hout
     common /swe_initcond_parms4/  hin,hout
 
-    double precision Px, Py, Pz, theta_ridge, theta_wave, & 
-                        ampl, alpha, bathy(2), speed
-    common /comm_ridge/ Px, Py, Pz, theta_ridge, theta_wave, & 
-                        ampl, alpha, bathy, speed
+    double precision theta_ridge, theta_wave, ampl,  & 
+         alpha, bathy(2), speed, gravity_ridge
+    common /comm_ridge/ theta_ridge, theta_wave, ampl,  & 
+         alpha, bathy, speed, gravity_ridge
 
     !! Local variables
     integer i,j
     double precision xc,yc,xlow,ylow,xp,yp,zp, w, qval
 
-    double precision deg2rad, phi, phi0, width
+    double precision phi, phi0, width
     double precision theta, q1, R, u0, Rsphere, d
 
     integer blockno, fc2d_clawpack46_get_block
@@ -51,7 +51,6 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
 
     !!open(10,file=fname)
     Rsphere = 1
-    deg2rad = pi/180
 
     do j = 1-mbc,my+mbc
         yc = ylower + (j-0.5)*dy
@@ -88,8 +87,9 @@ subroutine clawpack46_qinit(maxmx,maxmy,meqn,mbc,mx,my, &
 
                 !! For ridge problem
                 !! theta
-                theta = asin((xp*center(1) + yp*center(2) + zp*center(3)) / Rsphere)
-                q1 = dexp(-alpha*(theta-theta_wave)**2)
+                d = xp*center(1) + yp*center(2) + zp*center(3)
+                theta = acos(d/Rsphere)
+                q1 = exp(-alpha*(theta-theta_wave)**2)
                 R = max(sqrt(xp**2 + yp**2), 1.d-10)
                 u0 = speed*ampl*q1 / (Rsphere*R)  !! Not sure about 2d2
                 q(i,j,1) = -aux(i,j,18)

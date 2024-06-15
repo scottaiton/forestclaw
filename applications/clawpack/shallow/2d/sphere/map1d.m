@@ -56,12 +56,8 @@ center = parms.center;
 rp = sqrt(xp.^2 + yp.^2 + zp.^2);
 
 d = center(1)*xp + center(2)*yp + center(3)*zp;
+phi = acos(d);
 
-if (parms.example == 0)
-    phi = acos(d);
-else
-    phi = asin(d);
-end    
 r = phi(:);
 q = qgrid(:);
 

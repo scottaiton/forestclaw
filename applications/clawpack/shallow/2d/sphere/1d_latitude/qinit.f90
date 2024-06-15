@@ -31,6 +31,10 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
     double precision hin, hout
     common /swe_initcond_parms4/  hin,hout
 
+    double precision theta_ridge, theta_wave, ampl,  & 
+         alpha, bathy(2), speed, gravity_ridge
+    common /comm_ridge/ theta_ridge, theta_wave, ampl,  & 
+         alpha, bathy, speed, gravity_ridge
 
     integer, intent(in) :: meqn,mbc,mx,maux
     real(kind=8), intent(in) :: xlower,dx
@@ -45,19 +49,16 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
     real(kind=8) :: eta, width, ri, ro, a, m, phil,phir
 
     deg2rad = pi/180
-    width = 5.   ! controls width of Gaussian
-    x0 = 70.     ! initial location of Gaussian
-    bathy = -1
-
-    !! Flip sign so inner is closer to pi/2
-    ri = pi/2 - ring_inner
-    ro = pi/2 - ring_outer
 
     do i = 1,mx
         xe = xlower + (i-1)*dx  ! latitude in degrees
         xc = xlower +  (i-0.5)*dx
 
         if (init_cond .eq. 1) then            
+            !! Flip sign so inner is closer to pi/2
+            ri = pi/2 - ring_inner
+            ro = pi/2 - ring_outer
+
             xe = deg2rad*xe
             dxrad = deg2rad*dx
             a = abs(ro-ri)/2  !! half width
@@ -75,19 +76,12 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
                     qval = (phir - xe)/dxrad
                 endif
             endif
-
-!!            if (abs(xe)
-!!                qval = (xe+dxrad-ri)/dxrad
-!!            elseif (xe .le. ro .and. ro .lt. xe+dxrad) then
-!!                qval = (ro-xe)/dxrad
-!!            elseif (ri .lt. xe .and. xe .lt. ro) then
-!!                qval = 1
-!!            else
-!!                qval = 0
-!!            endif
         elseif (init_cond .eq. 2) then
 
-            eta = exp(-((xc-x0)/width)**2)
+            width = pi/2 - deg2rad*5.   ! controls width of Gaussian
+            x0 = pi/2 - deg2rad*70.     ! initial location of Gaussian
+            bathy = -1
+            eta = exp(-((xc-theta_wave)/width)**2)
 
             if (eta < 1d-20) eta = 0.d0
             qval = eta

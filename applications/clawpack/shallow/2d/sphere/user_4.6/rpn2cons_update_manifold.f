@@ -59,7 +59,7 @@ c     !! Normalize the edge lengths
 
 
       f(1) = hun
-      f(2) = hun**2/h + 0.5*grav*h**2 + psi
+      f(2) = hun**2/h + 0.5*grav*h**2
       f(3) = un*hut
       !!f(4)  = un*q(4)
 

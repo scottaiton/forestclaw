@@ -38,5 +38,5 @@ PlotParallelPartitions=0;
 
 x0 = 1;
 y0 = 0;
-ScatterStyle = {'r.','b.','g*','c*','r*'};
+ScatterStyle = {'c.','y.','r.','c.','b.', 'm.'};
 UserMap1d = 1;

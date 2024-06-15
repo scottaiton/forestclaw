@@ -194,7 +194,7 @@ void sphere_link_solvers(fclaw_global_t *glob)
 
 
     const user_options_t* user_opt = sphere_get_options(glob);
-    if (user_opt->mapping == 1)
+    if (user_opt->mapping == 3)
         fclaw_clawpatch_use_pillowsphere(glob);
 
     if (user_opt->claw_version == 4)
@@ -206,7 +206,7 @@ void sphere_link_solvers(fclaw_global_t *glob)
         fc2d_clawpack46_options_t *clawpack46_opt = fc2d_clawpack46_get_options(glob);
 
         if (clawpack46_opt->use_fwaves)
-        {
+        {            
             clawpack46_vt->fort_rpn2 = &CLAWPACK46_RPN2_FWAVE; 
             clawpack46_vt->fort_rpt2 = &CLAWPACK46_RPT2_FWAVE;                  
         }

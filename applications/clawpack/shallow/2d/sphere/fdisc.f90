@@ -4,8 +4,8 @@ double precision function fdisc(blockno,xc,yc)
     double precision xc,yc
     integer blockno
 
-    double precision pi, pi2
-    common /compi/ pi, pi2
+    double precision pi, pi2, deg2rad
+    common /compi/ pi, pi2, deg2rad
 
     integer init_cond
     common /swe_initcond/ init_cond
@@ -19,7 +19,7 @@ double precision function fdisc(blockno,xc,yc)
     integer*8 cont, fclaw_map_get_context
 
     double precision xp, yp, zp, rp, a, m, d
-    double precision phi, deg2rad, ri, ro
+    double precision phi, ri, ro
 
 
     cont = fclaw_map_get_context()
@@ -27,8 +27,6 @@ double precision function fdisc(blockno,xc,yc)
     call fclaw_map_2d_c2m(cont,blockno,xc,yc,xp,yp,zp)
 
     rp = sqrt(xp**2 + yp**2 + zp**2)
-
-    deg2rad = pi/180
 
     ri = ring_inner
     ro = ring_outer

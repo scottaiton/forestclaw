@@ -290,7 +290,7 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
 
     !! if you don't want to project out momentum in direction
     !! of surface normals, you can 
-    return
+    !!return
 
     !! Project out momentum in direction normal to the surface
     do i=2-mbc,mx+mbc

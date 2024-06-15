@@ -28,7 +28,7 @@ subroutine setaux(mbc,mx,xlower,dx,maux,aux)
 
     do i = 1-mbc, mx+mbc
         xc = xlower + (i-0.5)*dx
-        aux(1,i) = bmount(DEG2RAD*xc)
+        aux(1,i) = bmount(xc)
     end do
     return
 end subroutine setaux

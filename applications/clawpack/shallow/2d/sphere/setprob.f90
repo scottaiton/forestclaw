@@ -1,8 +1,8 @@
 subroutine setprob()
     implicit none
 
-    double precision pi, pi2
-    common /compi/ pi, pi2
+    double precision pi, pi2, deg2rad
+    common /compi/ pi, pi2, deg2rad
 
     integer example
     common /swe_example/ example
@@ -34,6 +34,8 @@ subroutine setprob()
 
     pi = 4.d0*atan(1.d0)
     pi2 = 2*pi
+
+    deg2rad = pi/180.0
 
     open(10,file='setprob_2d.data')
     read(10,*) example
