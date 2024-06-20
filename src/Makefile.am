@@ -30,6 +30,7 @@ libforestclaw_installed_headers = \
 	src/fclaw_patch.h \
 	src/fclaw_vtable.h \
 	src/fclaw_output.h \
+	src/fclaw_restart.h \
 	src/fclaw_time_sync.h \
 	src/fclaw_update_single_step.h \
 	src/fclaw_physical_bc.h \
@@ -47,6 +48,8 @@ libforestclaw_installed_headers = \
 	src/fclaw_map_query.h \
 	src/fclaw_map_query_defs.h \
 	src/fclaw_diagnostics.h \
+	src/fclaw_file.h \
+	src/fclaw_context.h \
 	src/forestclaw2d.h \
 	src/fclaw2d_convenience.h \
 	src/fp_exception_glibc_extension.h \
@@ -92,6 +95,7 @@ libforestclaw_compiled_sources = \
 	src/fclaw_rays.c \
 	src/fclaw_ghost_fill.c \
 	src/fclaw_output.c \
+	src/fclaw_restart.c \
 	src/fclaw_run.c \
 	src/fclaw_diagnostics.c \
 	src/fclaw_update_single_step.c \
@@ -107,6 +111,8 @@ libforestclaw_compiled_sources = \
 	src/fclaw_edge_neighbors.c \
 	src/fclaw_face_neighbors.c \
 	src/fclaw_farraybox.cpp \
+	src/fclaw_file.c \
+	src/fclaw_context.c \
 	src/fclaw2d_convenience.c \
 	src/fclaw2d_output_tikz.c \
 	src/fclaw2d_file.c \
@@ -194,6 +200,7 @@ src_forestclaw_TEST_SOURCES = \
 	src/fclaw_global.h.TEST.cpp \
 	src/fclaw_options.h.TEST.cpp \
 	src/fclaw_patch.h.TEST.cpp \
+	src/fclaw_context.h.TEST.cpp \
 	src/fclaw_vtable.h.TEST.cpp 
 
 src_forestclaw_TEST_CPPFLAGS = \

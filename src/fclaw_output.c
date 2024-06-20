@@ -24,6 +24,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <fclaw_output.h>
+#include <fclaw_restart.h>
 #include <fclaw_global.h>
 #include <fclaw_options.h>
 #include <fclaw_vtable.h>
@@ -69,8 +70,6 @@ fclaw_output_frame (fclaw_global_t * glob, int iframe)
     {
         fclaw2d_output_frame_tikz(glob,iframe);
     }
+
+    
 }
-
-
-
-

@@ -808,6 +808,41 @@ void fclaw_patch_partition_unpack(fclaw_global_t *glob,
 	patch_data_unpack(glob,this_patch,pdata_unpack_data_from_here);
 }
 
+/* ----------------------------------- Restart  --------------------------------------- */
+
+int fclaw_patch_checkpoint_num_pointers(fclaw_global_t* glob)
+{
+	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
+	FCLAW_ASSERT(patch_vt->checkpoint_num_pointers != NULL);
+	return patch_vt->checkpoint_num_pointers(glob);
+}
+
+void fclaw_patch_checkpoint_pointer_sizes(struct fclaw_global *glob, size_t restart_sizes[])
+{
+	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
+	FCLAW_ASSERT(patch_vt->checkpoint_pointer_sizes != NULL);
+	patch_vt->checkpoint_pointer_sizes(glob, restart_sizes);
+}
+
+void fclaw_patch_checkpoint_names(fclaw_global_t* glob, const char *names[])
+{
+	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
+	FCLAW_ASSERT(patch_vt->checkpoint_names != NULL);
+	return patch_vt->checkpoint_names(glob, names);
+}
+
+void* fclaw_patch_checkpoint_get_pointer(struct fclaw_global* glob,
+                                      struct fclaw_patch* this_patch,
+                                      int blockno,
+                                      int patchno,
+                                      int pointerno)
+{
+	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
+	FCLAW_ASSERT(patch_vt->checkpoint_get_pointer != NULL);
+	return patch_vt->checkpoint_get_pointer(glob, this_patch, blockno, patchno, pointerno);
+}
+
+
 /* ----------------------------- Conservative updates --------------------------------- */
 
 /* We need to virtualize this because we call it from fclaw_face_neighbors */

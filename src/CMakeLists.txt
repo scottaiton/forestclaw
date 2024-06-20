@@ -27,6 +27,7 @@ add_library(forestclaw_c OBJECT
   fclaw_physical_bc.c
   fclaw_ghost_fill.c
   fclaw_output.c
+  fclaw_restart.c
   fclaw_run.c
   fclaw_diagnostics.c
   fclaw_rays.c
@@ -43,6 +44,8 @@ add_library(forestclaw_c OBJECT
   fclaw_edge_neighbors.c
   fclaw_face_neighbors.c
   fclaw_farraybox.cpp
+  fclaw_file.c
+  fclaw_context.c
   fclaw2d_convenience.c
   fclaw2d_output_tikz.c
   fclaw2d_file.c
@@ -112,6 +115,7 @@ install(FILES
 	fclaw_patch.h
 	fclaw_vtable.h
 	fclaw_output.h
+	fclaw_restart.h
 	fclaw_time_sync.h
 	fclaw_update_single_step.h
 	fclaw_physical_bc.h
@@ -129,6 +133,8 @@ install(FILES
 	fclaw_map_query.h
 	fclaw_map_query_defs.h
 	fclaw_diagnostics.h
+  fclaw_file.h
+  fclaw_context.h
 	forestclaw2d.h
 	fp_exception_glibc_extension.h
   fclaw2d_convenience.h
@@ -155,6 +161,7 @@ if(BUILD_TESTING)
       fclaw_options.h.TEST.cpp
       fclaw_patch.h.TEST.cpp
       fclaw_vtable.h.TEST.cpp
+      fclaw_context.h.TEST.cpp
   )
 
   target_link_libraries(forestclaw.TEST testutils forestclaw)

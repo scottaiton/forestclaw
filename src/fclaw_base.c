@@ -31,7 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static const char *fclaw_configdir = ".forestclaw";
 static const char *fclaw_env_configdir = "FCLAW_INI_DIR";
 static int fclaw_package_id = -1;
-static fclaw_pointer_map_t* packing_vtables = NULL;
 
 int
 fclaw_app_exit_type_to_status (fclaw_exit_type_t vexit)
@@ -332,10 +331,6 @@ fclaw_app_destroy (fclaw_app_t * a)
     FCLAW_ASSERT (a->opt_pkg != NULL);
     FCLAW_ASSERT (a->opt != NULL);
 
-    /* destroy central structures */
-    sc_keyvalue_destroy (a->attributes);
-    sc_options_destroy (a->opt);
-
     /* let the options packages clean up their memory */
     for (zz = a->opt_pkg->elem_count; zz > 0; --zz)
     {
@@ -350,9 +345,11 @@ fclaw_app_destroy (fclaw_app_t * a)
     }
     sc_array_destroy (a->opt_pkg);
 
-    FCLAW_FREE (a);
+    /* destroy central structures */
+    sc_keyvalue_destroy (a->attributes);
+    sc_options_destroy (a->opt);
 
-    if(packing_vtables!=NULL) fclaw_pointer_map_destroy(packing_vtables);
+    FCLAW_FREE (a);
 
     sc_finalize ();
 
@@ -928,22 +925,6 @@ fclaw_app_get_options (fclaw_app_t * a)
     return a->opt;
 }
 
-
-void fclaw_app_register_options_packing_vtable(const char*name,fclaw_packing_vtable_t* vtable){
-    if(packing_vtables == NULL)
-    {
-        packing_vtables = fclaw_pointer_map_new();
-    }
-    fclaw_pointer_map_insert(packing_vtables, name, vtable, NULL);
-}
-
-fclaw_packing_vtable_t* fclaw_app_get_options_packing_vtable(const char*name){
-    if(packing_vtables == NULL)
-    {
-        packing_vtables = fclaw_pointer_map_new();
-    }
-    return (fclaw_packing_vtable_t*) fclaw_pointer_map_get(packing_vtables,name);
-}
 
 void
 fclaw_abortf(const char *fmt, ...){

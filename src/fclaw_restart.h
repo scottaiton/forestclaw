@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012 Carsten Burstedde, Donna Calhoun
+Copyright (c) 2012-2024 Carsten Burstedde, Donna Calhoun, Scott Aiton
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -23,8 +23,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FCLAW_OUTPUT_H
-#define FCLAW_OUTPUT_H
+#ifndef FCLAW_RESTART_H
+#define FCLAW_RESTART_H
 
 #ifdef __cplusplus
 extern "C"
@@ -36,25 +36,39 @@ extern "C"
 
 struct fclaw_global;  /* This is a hack !! */
 
-void fclaw_output_frame(struct fclaw_global * glob, int iframe);
 
 /**
- * @brief Write out a checkpoint file. 
+ * @brief Restarts the forestclaw simulation from a restart file.
  *
- * This will only output if the checkpoint_out flag is set in fclaw_options.
+ * This function is responsible for restarting the simulation from a previously saved state.
+ * This is meant to be called from fclaw_initalize()
  *
- * This will write two files: a fort_frame_[iframe].checkpoint file and a
- * fort_frame_[iframe].partition file.
+ * This will print an error message and exit for any error.
  *
- * The partition file is optionally used when restarting to ensure that the
- * domain is partitioned in the same way as before.
- * 
- * @param glob the global context
- * @param iframe the frame number
+ * @param glob The global context
+ * @param restart_filename The filename of the restart file.
+ * @param partition_filename The filename of the partition file.
  */
-void fclaw_output_checkpoint(struct fclaw_global * glob, int iframe);
+void
+fclaw_restart_from_file (struct fclaw_global * glob,
+                         const char* restart_filename,
+                         const char* partition_filename);
 
-void fclaw2d_output_frame_tikz(struct fclaw_global* glob, int iframe);
+/**
+ * @brief Tests the restart functionality by reading data from a restart file.
+ *
+ * This function is used to do an "in memory" restart test.
+ * It deletes the current domain and creates a new domain from the restart file,
+ * and overwrites the values in glob with the values from the restart file.
+ *
+ * @param glob The pointer to the global context
+ * @param restart_filename The filename of the restart file to read from.
+ * @param partition_filename The filename of the partition file to read from.
+ */
+void
+fclaw_restart_test_from_file (struct fclaw_global * glob,
+                              const char* restart_filename,
+                              const char* partition_filename);
 
 #ifdef __cplusplus
 #if 0
