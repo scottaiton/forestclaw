@@ -56,6 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_patch_relation_t        fclaw3d_patch_relation_t
 #define fclaw2d_match_callback_t        fclaw3d_match_callback_t
 #define fclaw2d_transfer_callback_t     fclaw3d_transfer_callback_t
+#define fclaw2d_pack_callback_t         fclaw3d_pack_callback_t
+#define fclaw2d_unpack_callback_t       fclaw3d_unpack_callback_t
+#define fclaw2d_domain_partition_t      fclaw3d_domain_partition_t
 #define fclaw2d_domain_exchange_t       fclaw3d_domain_exchange_t
 #define fclaw2d_domain_indirect         fclaw3d_domain_indirect
 #define fclaw2d_domain_indirect_t       fclaw3d_domain_indirect_t
@@ -172,6 +175,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define fclaw2d_domain_allocate_before_partition    fclaw3d_domain_allocate_before_partition
 #define fclaw2d_domain_retrieve_after_partition     fclaw3d_domain_retrieve_after_partition
 #define fclaw2d_domain_iterate_partitioned  fclaw3d_domain_iterate_partitioned
+#define fclaw2d_domain_iterate_pack     fclaw3d_domain_iterate_pack
+#define fclaw2d_domain_iterate_transfer fclaw3d_domain_iterate_transfer
+#define fclaw2d_domain_iterate_unpack   fclaw3d_domain_iterate_unpack
+#define fclaw2d_domain_partition_free   fclaw3d_domain_partition_free
 #define fclaw2d_domain_free_after_partition fclaw3d_domain_free_after_partition
 #define fclaw2d_domain_allocate_before_exchange fclaw3d_domain_allocate_before_exchange
 #define fclaw2d_domain_free_after_exchange  fclaw3d_domain_free_after_exchange
