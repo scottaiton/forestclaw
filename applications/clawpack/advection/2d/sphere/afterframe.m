@@ -13,7 +13,9 @@ cv = linspace(0,1,11);
 cv([1 end]) = [];
 drawcontourlines(cv);
 
-view(vbot)
+% view(vbot)
+view(3)
+showgridlines
 
 MaxFrames = 64;
 NoQuery = 0;
