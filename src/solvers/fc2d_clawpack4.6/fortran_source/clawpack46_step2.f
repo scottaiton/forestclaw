@@ -102,8 +102,8 @@ c        # no capa array:
 c     # Cubed sphere : Set corners for an x-sweep
 c     # This does nothing for non-cubed-sphere grids. 
       sweep_dir = 0
-      call clawpack46_fix_corners(mx,my,mbc,meqn,qold,sweep_dir,
-     &     block_corner_count)
+      call clawpack46_fix_corners(mx,my,mbc,meqn,qold,
+     &         maux,aux,sweep_dir,block_corner_count)
 
 
 c     # perform x-sweeps
@@ -176,8 +176,8 @@ c
 c     # Cubed sphere : Set corners for an y-sweep
 c     # This does nothing for non-cubed-sphere grids. 
       sweep_dir = 1
-      call clawpack46_fix_corners(mx,my,mbc,meqn,qold,sweep_dir,
-     &     block_corner_count)
+      call clawpack46_fix_corners(mx,my,mbc,meqn,qold,
+     &     maux, aux, sweep_dir, block_corner_count)
 
 c     
       do  i = 2-mbc, mx+mbc-1
@@ -240,13 +240,14 @@ c
       end
 
 c     #  See 'cubed_sphere_corners.ipynb'
-      subroutine clawpack46_fix_corners(mx,my,mbc,meqn,q,sweep_dir,
-     &     block_corner_count)
+      subroutine clawpack46_fix_corners(mx,my,mbc,meqn,q,maux,aux,
+     &     sweep_dir,block_corner_count)
       implicit none
 
-      integer :: mx,my,mbc,meqn,sweep_dir
+      integer :: mx,my,mbc,meqn,sweep_dir,maux
       integer :: block_corner_count(0:3)
       double precision :: q(1-mbc:mx+mbc,1-mbc:my+mbc,meqn)
+      double precision :: aux(1-mbc:mx+mbc,1-mbc:my+mbc,maux)
 
       integer :: k,m,idata,jdata
       double precision :: ihat(0:3),jhat(0:3)
@@ -303,9 +304,12 @@ c                 # Transform involves B.transpose()
                endif 
                do m = 1,meqn
                   q(i1,j1,m) = q(idata,jdata,m)
-               end do           !! jbc
+               end do           
+               do m = 1,maux
+                  aux(i1,j1,m) = aux(idata,jdata,m)
+               end do           
             end do              !! ibc
-         end do                 !! corner 'k' loop
-      end do                    !! meqn loop
+         end do                 !! jbc
+      end do                    !! corner 'k' loop
 
       end

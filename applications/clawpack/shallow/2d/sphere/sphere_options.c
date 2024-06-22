@@ -130,6 +130,31 @@ sphere_postprocess (user_options_t *user)
     fclaw_options_convert_double_array (user->longitude_string, &user->longitude,2);
     fclaw_options_convert_double_array (user->center_string, &user->center,3);
     fclaw_options_convert_double_array (user->bathy_string, &user->bathy,2);
+
+    double d = 0;
+    for(int i = 0; i < 3; i++)
+        d += user->center[i]*user->center[i];
+    d = sqrt(d);
+    double tol = 1e-15;
+    if (d > 1+tol) 
+    {
+        fclaw_global_essentialf("\n");
+        fclaw_global_essentialf("Omega must have unit length\n");
+        printf("%24.16f\n",d);
+        fclaw_global_essentialf("\n");
+        return FCLAW_EXIT_ERROR;
+    }
+    else if (1 < d && d < 1 + tol)
+    {
+        fclaw_global_essentialf("\n");
+        fclaw_global_essentialf("Normalizing omega\n");
+        fclaw_global_essentialf("\n");
+        for(int j = 0; j < 3; j++)
+        {
+            user->center[j] /= d;
+        }
+    }
+
     return FCLAW_NOEXIT;
 }
 
