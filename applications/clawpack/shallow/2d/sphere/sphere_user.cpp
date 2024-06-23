@@ -39,6 +39,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <clawpack46_user_fort.h>
 
 
+#include <fc2d_clawpack5.h> 
+#include <fc2d_clawpack5_fort.h>
+#include <fc2d_clawpack5_options.h>
+#include <clawpack5_user_fort.h>
+
 
 
 #if 0
@@ -125,13 +130,27 @@ void sphere_patch_setup_manifold(fclaw_global_t *glob,
                                    &edgelengths,&curvature);
 
 
-    CLAWPACK46_SET_BLOCK(&blockno);
-    SPHERE_SETAUX(&mx,&my,&mbc,&xlower,&ylower,
-                  &dx,&dy,area,xnormals,ynormals,
-                  xtangents,ytangents,surfnormals, curvature,
-                  edgelengths,
-                  aux, &maux);
-    CLAWPACK46_UNSET_BLOCK();
+    const user_options_t* user_opt = sphere_get_options(glob);
+    if (user_opt->claw_version == 4)
+    {
+        CLAWPACK46_SET_BLOCK(&blockno);
+        SPHERE_SETAUX(&mx,&my,&mbc,&xlower,&ylower,
+                      &dx,&dy,area,xnormals,ynormals,
+                      xtangents,ytangents,surfnormals, curvature,
+                      edgelengths,
+                      aux, &maux);
+        CLAWPACK46_UNSET_BLOCK();
+    }
+    else
+    {
+        CLAWPACK5_SET_BLOCK(&blockno);
+        SPHERE5_SETAUX(&mx,&my,&mbc,&xlower,&ylower,
+                      &dx,&dy,area,xnormals,ynormals,
+                      xtangents,ytangents,surfnormals, curvature,
+                      edgelengths,
+                      aux, &maux);
+        CLAWPACK5_UNSET_BLOCK();
+    }        
 }
 
 static
@@ -165,9 +184,15 @@ void cb_sphere_output_ascii(fclaw_domain_t *domain,
     int maux;
     fclaw_clawpatch_aux_data(glob,patch,&aux,&maux);
 
-    SPHERE_FORT_WRITE_FILE(&mx,&my,&meqn, &maux,&mbc,&xlower,&ylower,
-                                 &dx,&dy,q,aux,&iframe,&global_num,&level,
-                                 &blockno,&glob->mpirank);
+    const user_options_t* user_opt = sphere_get_options(glob);
+    if (user_opt->claw_version == 4)
+        SPHERE_FORT_WRITE_FILE(&mx,&my,&meqn, &maux,&mbc,&xlower,&ylower,
+                               &dx,&dy,q,aux,&iframe,&global_num,&level,
+                               &blockno,&glob->mpirank);
+    else
+        SPHERE5_FORT_WRITE_FILE(&mx,&my,&meqn, &maux,&mbc,&xlower,&ylower,
+                               &dx,&dy,q,aux,&iframe,&global_num,&level,
+                               &blockno,&glob->mpirank);
 }
 
 static
@@ -197,6 +222,14 @@ void sphere_link_solvers(fclaw_global_t *glob)
     if (user_opt->mapping == 3)
         fclaw_clawpatch_use_pillowsphere(glob);
 
+
+    /* Clawpatch functions */    
+    fclaw_clawpatch_vtable_t *clawpatch_vt = fclaw_clawpatch_vt(glob);
+    clawpatch_vt->d2->fort_user_exceeds_threshold = &USER_EXCEEDS_THRESHOLD;
+
+    clawpatch_vt->time_header_ascii = &sphere_header_ascii;
+    clawpatch_vt->cb_output_ascii   = &cb_sphere_output_ascii;
+
     if (user_opt->claw_version == 4)
     {
         fc2d_clawpack46_vtable_t  *clawpack46_vt = fc2d_clawpack46_vt(glob);
@@ -217,17 +250,26 @@ void sphere_link_solvers(fclaw_global_t *glob)
         }
 
         clawpack46_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
-
-        /* Clawpatch functions */    
-        fclaw_clawpatch_vtable_t *clawpatch_vt = fclaw_clawpatch_vt(glob);
-        clawpatch_vt->d2->fort_user_exceeds_threshold = &USER_EXCEEDS_THRESHOLD;
-
-        clawpatch_vt->time_header_ascii = &sphere_header_ascii;
-        clawpatch_vt->cb_output_ascii   = &cb_sphere_output_ascii;
-
     }
     else
     {
-        printf("Clawpack 5 not yet implemented\n");
+        fc2d_clawpack5_vtable_t  *clawpack5_vt = fc2d_clawpack5_vt(glob);
+        // clawpack46_vt->b4step2        = sphere_b4step2;
+        clawpack5_vt->fort_qinit     = CLAWPACK5_QINIT;
+
+        fc2d_clawpack5_options_t *clawpack5_opt = fc2d_clawpack5_get_options(glob);
+
+        if (clawpack5_opt->use_fwaves)
+        {            
+            clawpack5_vt->fort_rpn2 = &CLAWPACK5_RPN2_FWAVE; 
+            clawpack5_vt->fort_rpt2 = &CLAWPACK5_RPT2_FWAVE;                  
+        }
+        else
+        {
+            clawpack5_vt->fort_rpn2 = &CLAWPACK5_RPN2;
+            clawpack5_vt->fort_rpt2 = &CLAWPACK5_RPT2;            
+        }
+
+        clawpack5_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
     }
  }

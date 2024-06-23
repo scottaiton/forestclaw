@@ -106,6 +106,18 @@ void SPHERE_SETAUX(const int* mx, const int* my,const int* mbc,
                    double aux[],int* maux);
 
 
+#define SPHERE5_SETAUX FCLAW_F77_FUNC(sphere5_setaux,SPHERE5_SETAUX)
+void SPHERE5_SETAUX(const int* mx, const int* my,const int* mbc,
+                    const double* xlower, const double* ylower,
+                    const double* dx, const double* dy,
+                    double area[],
+                    double xnormals[], double ynormals[],
+                    double xtangents[], double ytangents[],
+                    double surnormals[],double edgelengths[],
+                    double curvature[],
+                    double aux[],int* maux);
+
+
 #define RPN2CONS_UPDATE FCLAW_F77_FUNC(rpn2cons_update, \
                                        RPN2CONS_UPDATE)
 
@@ -143,6 +155,25 @@ void SPHERE_FORT_WRITE_HEADER(int* iframe, double* time, int* meqn,
 #define SPHERE_FORT_WRITE_FILE FCLAW_F77_FUNC(sphere_fort_write_file, \
                                                     SPHERE_FORT_WRITE_FILE)
 void SPHERE_FORT_WRITE_FILE(const int* mx, 
+                                  const int* my, 
+                                  const int* meqn, 
+                                  const int* maux, 
+                                  const int* mbc, 
+                                  const double* xlower, 
+                                  const double* ylower, 
+                                  const double* dx, 
+                                  const double* dy,
+                                  double q[], double aux[], 
+                                  const int* iframe, 
+                                  const int* patch_num, 
+                                  const int* level,
+                                  const int* blockno, 
+                                  const int* mpirank);
+
+
+#define SPHERE5_FORT_WRITE_FILE FCLAW_F77_FUNC(sphere5_fort_write_file, \
+                                                    SPHERE5_FORT_WRITE_FILE)
+void SPHERE5_FORT_WRITE_FILE(const int* mx, 
                                   const int* my, 
                                   const int* meqn, 
                                   const int* maux, 
