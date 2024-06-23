@@ -114,7 +114,7 @@ subroutine clawpack5_rpt2(ixy,imp,maxm,meqn,mwaves,maux, &
 
     !! # find a1 thru a3, the coefficients of the 3 eigenvectors:
     do  i = ix1,ixm1
-        delta(1) = asdq(i,1)
+        delta(1) = asdq(1,i)
         delta(2) = enx(i)*asdq(2,i)+eny(i)*asdq(3,i)+enz(i)*asdq(4,i)
         delta(3) = etx(i)*asdq(2,i)+ety(i)*asdq(3,i)+etz(i)*asdq(4,i)
         a1 = ((u(i)+a(i))*delta(1) - delta(2))*(0.50d0/a(i))
@@ -183,30 +183,30 @@ subroutine clawpack5_rpt2(ixy,imp,maxm,meqn,mwaves,maux, &
     !! [ alf  beta ]
     !! [-beta  alf ]
 
-    do i=ix1,ixm1
-
-        if (imp.eq.1) then
-            i1 = i-1
-        else
-            i1 = i
-        endif
-
-        enx(i) =   aux2(ioff+1,i1)
-        eny(i) =   aux2(ioff+2,i1)
-        enz(i) =   aux2(ioff+3,i1)
-        etx(i) =   aux2(ioff+4,i1)
-        ety(i) =   aux2(ioff+5,i1)
-        etz(i) =   aux2(ioff+6,i1)
-        gamma(i) = dsqrt(etx(i)**2 + ety(i)**2 + etz(i)**2)
-        !!gamma(i) = aux3(i1,17+(3-ixy)-1)
-        etx(i) =   etx(i) / gamma(i)
-        ety(i) =   ety(i) / gamma(i)
-        etz(i) =   etz(i) / gamma(i)
-        u(i) = (enx(i)*ql(2,i1)+eny(i)*ql(3,i1)+enz(i)*ql(4,i1)) & 
-                 / h(i)
-        v(i) = (etx(i)*ql(2,i1)+ety(i)*ql(3,i1)+etz(i)*ql(4,i1)) &
-                 / h(i)
-    end do
+!!    do i=ix1,ixm1
+!!
+!!        if (imp.eq.1) then
+!!            i1 = i-1
+!!        else
+!!            i1 = i
+!!        endif
+!!
+!!        enx(i) =   aux2(ioff+1,i1)
+!!        eny(i) =   aux2(ioff+2,i1)
+!!        enz(i) =   aux2(ioff+3,i1)
+!!        etx(i) =   aux2(ioff+4,i1)
+!!        ety(i) =   aux2(ioff+5,i1)
+!!        etz(i) =   aux2(ioff+6,i1)
+!!        gamma(i) = dsqrt(etx(i)**2 + ety(i)**2 + etz(i)**2)
+!!        !!gamma(i) = aux3(i1,17+(3-ixy)-1)
+!!        etx(i) =   etx(i) / gamma(i)
+!!        ety(i) =   ety(i) / gamma(i)
+!!        etz(i) =   etz(i) / gamma(i)
+!!        u(i) = (enx(i)*ql(2,i1)+eny(i)*ql(3,i1)+enz(i)*ql(4,i1)) & 
+!!                 / h(i)
+!!        v(i) = (etx(i)*ql(2,i1)+ety(i)*ql(3,i1)+etz(i)*ql(4,i1)) &
+!!                 / h(i)
+!!    end do
 
 
 
@@ -214,7 +214,7 @@ subroutine clawpack5_rpt2(ixy,imp,maxm,meqn,mwaves,maux, &
 
     !!# find a1 thru a3, the coefficients of the 3 eigenvectors:
     do i = ix1,ixm1
-        delta(1) = asdq(i,1)
+        delta(1) = asdq(1,i)
         delta(2) = enx(i)*asdq(2,i)+eny(i)*asdq(3,i)+enz(i)*asdq(4,i)
         delta(3) = etx(i)*asdq(2,i)+ety(i)*asdq(3,i)+etz(i)*asdq(4,i)
 

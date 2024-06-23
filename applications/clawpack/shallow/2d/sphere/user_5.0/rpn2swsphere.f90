@@ -10,8 +10,8 @@ subroutine clawpack5_rpn2(ixy,maxm,meqn,mwaves,maux, mbc,mx,&
     double precision    qr(meqn,1-mbc:maxm+mbc)
     double precision  apdq(meqn,1-mbc:maxm+mbc)
     double precision  amdq(meqn,1-mbc:maxm+mbc)
-    double precision auxl(1-mbc:maxm+mbc, maux)
-    double precision auxr(1-mbc:maxm+mbc, maux)
+    double precision auxl(maux,1-mbc:maxm+mbc)
+    double precision auxr(maux,1-mbc:maxm+mbc)
     
     !!     local arrays -- common block comroe is passed to rpt2
     !! ------------
@@ -38,7 +38,6 @@ subroutine clawpack5_rpn2(ixy,maxm,meqn,mwaves,maux, mbc,mx,&
     common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
 
     data efix /.false./    !# use entropy fix for transonic rarefactions
-
 
     if(ixy.eq.1) then
         dy = dycom
@@ -87,9 +86,9 @@ subroutine clawpack5_rpn2(ixy,maxm,meqn,mwaves,maux, mbc,mx,&
         etz =   etz / gamma
 
         !! # projection to the sphere  (already done in src2)
-        erx = auxl(i,14)
-        ery = auxl(i,15)
-        erz = auxl(i,16)
+        erx = auxl(14,i)
+        ery = auxl(15,i)
+        erz = auxl(16,i)
 !!        qn = erx*ql(i,2) + ery*ql(i,3) + erz*ql(i,4)
 
     !! # compute normal and tangential momentum at cell edge:
@@ -117,8 +116,8 @@ subroutine clawpack5_rpn2(ixy,maxm,meqn,mwaves,maux, mbc,mx,&
         delta(2) = hunl - hunr
         delta(3) = hutl - hutr
 
-        a1 =  ((u(i)+a(i))*delta(1) - delta(2))*(0.50d0/a(i))
-        a3 = (-(u(i)-a(i))*delta(1) + delta(2))*(0.50d0/a(i))
+        a1 =  ((u(i)+a(i))*delta(1) - delta(2))*(0.5d0/a(i))
+        a3 = (-(u(i)-a(i))*delta(1) + delta(2))*(0.5d0/a(i))
         a2 = -v(i)*delta(1) + delta(3)
 
         !! # Compute the waves.  Rotate waves back into 
@@ -182,9 +181,6 @@ subroutine clawpack5_rpn2(ixy,maxm,meqn,mwaves,maux, mbc,mx,&
 
     !! # project momentum components of amdq and apdq onto tangent plane:
 
-    !!goto 900
-
-    !! # Do projection in b4step2
     do i=2-mbc,mx+mbc
         erx = auxr(14,i-1)
         ery = auxr(15,i-1)

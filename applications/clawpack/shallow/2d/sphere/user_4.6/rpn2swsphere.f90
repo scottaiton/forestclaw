@@ -33,8 +33,6 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
     double precision grav
     common /swe_model_parms/  grav
 
-    !!common /comroe/ u, v, a, h
-
     double precision dtcom, dxcom, dycom, tcom
     integer icom,jcom
     common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
@@ -112,6 +110,10 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
         !! # later used in routine rpt2 to do the transverse wave splitting.
         hl = ql(i,1)
         hr = qr(i-1,1)
+        if (hl .lt. 0 .or. hr .lt. 0) then
+            write(6,*) 'rpn2swsphere : hl or hr < 0'
+            stop
+        endif
         h(i) = (hl+hr)*0.50d0
         hsqr = sqrt(hr)
         hsql = sqrt(hl)
@@ -125,8 +127,8 @@ subroutine clawpack46_rpn2(ixy,maxm,meqn,mwaves,mbc,mx,&
         delta(2) = hunl - hunr
         delta(3) = hutl - hutr
 
-        a1 =  ((u(i)+a(i))*delta(1) - delta(2))*(0.50d0/a(i))
-        a3 = (-(u(i)-a(i))*delta(1) + delta(2))*(0.50d0/a(i))
+        a1 =  ((u(i)+a(i))*delta(1) - delta(2))*(0.5d0/a(i))
+        a3 = (-(u(i)-a(i))*delta(1) + delta(2))*(0.5d0/a(i))
         a2 = -v(i)*delta(1) + delta(3)
 
         !! # Compute the waves.  Rotate waves back into 

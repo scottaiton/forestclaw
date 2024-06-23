@@ -146,23 +146,6 @@ subroutine clawpack5_rpt2_fwave(ixy,imp,maxm,meqn,mwaves, maux,&
         end do
     end do
 
-
-    !! # project momentum component of bpasdq to tangent plane:
-    do i = ix1, ixm1
-        !!if (imp.eq.1) then
-        !!    i1 = i-1
-        !!else
-        !!    i1 = i
-        !!endif
-        !!erx = aux3(14,i1)
-        !!ery = aux3(15,i1)
-        !!erz = aux3(16,i1)
-        !!bn = erx*bpasdq(2,i)+ery*bpasdq(3,i)+erz*bpasdq(4,i)
-        !!bpasdq(2,i) = bpasdq(2,i) - bn*erx
-        !!bpasdq(3,i) = bpasdq(3,i) - bn*ery
-        !!bpasdq(4,i) = bpasdq(4,i) - bn*erz
-    end do
-
     !! --------------
     !! # down-going:
     !! --------------
@@ -204,7 +187,7 @@ subroutine clawpack5_rpt2_fwave(ixy,imp,maxm,meqn,mwaves, maux,&
 
     !!# find a1 thru a3, the coefficients of the 3 eigenvectors:
     do i = ix1,ixm1
-        delta(1) = asdq(i,1)
+        delta(1) = asdq(1,i)
         delta(2) = enx(i)*asdq(2,i)+eny(i)*asdq(3,i)+enz(i)*asdq(4,i)
         delta(3) = etx(i)*asdq(2,i)+ety(i)*asdq(3,i)+etz(i)*asdq(4,i)
 
@@ -245,22 +228,6 @@ subroutine clawpack5_rpt2_fwave(ixy,imp,maxm,meqn,mwaves, maux,&
                     + dmin1(s(mw,i), 0.d0)*wave(m,mw,i)
             end do
         end do
-    end do
-
-    !! # project momentum component of bmasdq to tangent plane:
-    do i = ix1, ixm1
-        !! if (imp.eq.1) then
-        !!     i1 = i-1
-        !! else
-        !!     i1 = i
-        !! endif
-        !! erx = aux1(14,i)
-        !! ery = aux1(15,i)
-        !! erz = aux1(16,i)
-        !! bn = erx*bmasdq(i,2)+ery*bmasdq(i,3)+erz*bmasdq(i,4)
-        !! bmasdq(i,2) = bmasdq(i,2) - bn*erx
-        !! bmasdq(i,3) = bmasdq(i,3) - bn*ery
-        !! bmasdq(i,4) = bmasdq(i,4) - bn*erz
     end do
 
     return

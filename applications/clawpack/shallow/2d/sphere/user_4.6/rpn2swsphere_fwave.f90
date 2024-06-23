@@ -111,16 +111,16 @@ SUBROUTINE clawpack46_rpn2_fwave(ixy,maxm,meqn,mwaves, &
         etz =   etz / gamma
 
         !! # projection to the sphere  (already done in src2)
-        erx = auxl(i,14)
-        ery = auxl(i,15)
-        erz = auxl(i,16)
-        qn = erx*ql(i,2) + ery*ql(i,3) + erz*ql(i,4)
-        ql(i,2) = ql(i,2) - qn*erx
-        ql(i,3) = ql(i,3) - qn*ery
-        ql(i,4) = ql(i,4) - qn*erz
-        qr(i,2) = ql(i,2)
-        qr(i,3) = ql(i,3)
-        qr(i,4) = ql(i,4)
+        !! erx = auxl(i,14)
+        !! ery = auxl(i,15)
+        !! erz = auxl(i,16)
+        !! qn = erx*ql(i,2) + ery*ql(i,3) + erz*ql(i,4)
+        !! ql(i,2) = ql(i,2) - qn*erx
+        !! ql(i,3) = ql(i,3) - qn*ery
+        !! ql(i,4) = ql(i,4) - qn*erz
+        !! qr(i,2) = ql(i,2)
+        !! qr(i,3) = ql(i,3)
+        !! qr(i,4) = ql(i,4)
 
 
         !!  # compute normal and tangential momentum at cell edge:

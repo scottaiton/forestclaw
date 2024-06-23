@@ -310,7 +310,6 @@ SUBROUTINE clawpack5_rpn2_fwave(ixy,maxm,meqn,mwaves, maux, &
         apdq(2,i) = apdq(2,i) - apn*erx
         apdq(3,i) = apdq(3,i) - apn*ery
         apdq(4,i) = apdq(4,i) - apn*erz
-
     END DO
 
     return

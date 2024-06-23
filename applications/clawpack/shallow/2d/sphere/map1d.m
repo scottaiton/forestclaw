@@ -61,4 +61,9 @@ phi = acos(d);
 r = phi(:);
 q = qgrid(:);
 
+if length(r) == 0 || length(q) == 0
+    fprintf('map1d : length = 0')
+    keyboard;
+end
+
 end

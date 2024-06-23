@@ -150,23 +150,6 @@ subroutine clawpack46_rpt2_fwave(ixy,maxm,meqn,mwaves,mbc,mx, &
         end do
     end do
 
-
-    !! # project momentum component of bpasdq to tangent plane:
-    do i = ix1, ixm1
-        if (imp.eq.1) then
-            i1 = i-1
-        else
-            i1 = i
-        endif
-        erx = aux3(i1,14)
-        ery = aux3(i1,15)
-        erz = aux3(i1,16)
-        bn = erx*bpasdq(i,2)+ery*bpasdq(i,3)+erz*bpasdq(i,4)
-        bpasdq(i,2) = bpasdq(i,2) - bn*erx
-        bpasdq(i,3) = bpasdq(i,3) - bn*ery
-        bpasdq(i,4) = bpasdq(i,4) - bn*erz
-    end do
-
     !! --------------
     !! # down-going:
     !! --------------
@@ -249,22 +232,6 @@ subroutine clawpack46_rpt2_fwave(ixy,maxm,meqn,mwaves,mbc,mx, &
                     + dmin1(s(i,mw), 0.d0)*wave(i,m,mw)
             end do
         end do
-    end do
-
-    !! # project momentum component of bmasdq to tangent plane:
-    do i = ix1, ixm1
-        if (imp.eq.1) then
-            i1 = i-1
-        else
-            i1 = i
-        endif
-        erx = aux1(i1,14)
-        ery = aux1(i1,15)
-        erz = aux1(i1,16)
-        bn = erx*bmasdq(i,2)+ery*bmasdq(i,3)+erz*bmasdq(i,4)
-        bmasdq(i,2) = bmasdq(i,2) - bn*erx
-        bmasdq(i,3) = bmasdq(i,3) - bn*ery
-        bmasdq(i,4) = bmasdq(i,4) - bn*erz
     end do
 
     return
