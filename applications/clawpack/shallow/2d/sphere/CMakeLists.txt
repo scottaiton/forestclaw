@@ -3,7 +3,7 @@ set(maps ${PROJECT_SOURCE_DIR}/clawpack/advection/2d/all)
 add_library(sphere_swe_f OBJECT
 	setprob.f90
 	fdisc.f90
-	rpn2cons_update_manifold.f90 
+	rpn2cons_update_manifold.f
 	bmount.f90 
 	sphere_exceeds_threshold.f90
 	user_4.6/sphere_src2.f90
