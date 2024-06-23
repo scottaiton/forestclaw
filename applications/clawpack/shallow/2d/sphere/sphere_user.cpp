@@ -44,8 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fc2d_clawpack5_options.h>
 #include <clawpack5_user_fort.h>
 
-
-
 #if 0
 // Fix syntax highlighting
 #endif
@@ -258,7 +256,6 @@ void sphere_link_solvers(fclaw_global_t *glob)
         clawpack5_vt->fort_qinit     = CLAWPACK5_QINIT;
 
         fc2d_clawpack5_options_t *clawpack5_opt = fc2d_clawpack5_get_options(glob);
-
         if (clawpack5_opt->use_fwaves)
         {            
             clawpack5_vt->fort_rpn2 = &CLAWPACK5_RPN2_FWAVE; 

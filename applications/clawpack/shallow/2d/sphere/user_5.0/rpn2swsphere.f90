@@ -33,8 +33,6 @@ subroutine clawpack5_rpn2(ixy,maxm,meqn,mwaves,maux, mbc,mx,&
     double precision grav
     common /swe_model_parms/  grav
 
-    !!common /comroe/ u, v, a, h
-
     double precision dtcom, dxcom, dycom, tcom
     integer icom,jcom
     common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom

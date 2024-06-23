@@ -127,7 +127,7 @@ SUBROUTINE clawpack5_rpn2_fwave(ixy,maxm,meqn,mwaves, maux, &
         huR = enx*ql(2,i)   + eny*ql(3,i)   + enz*ql(4,i)
         huL = enx*qr(2,i-1) + eny*qr(3,i-1) + enz*qr(4,i-1)
 
-        hvR = etx*ql(2,i)   + ety*ql(3,i) + etz*ql(4,i)
+        hvR = etx*ql(2,i)   + ety*ql(3,i)   + etz*ql(4,i)
         hvL = etx*qr(2,i-1) + ety*qr(3,i-1) + etz*qr(4,i-1)
 
         !! Get Riemann variables Riemann problem variables
@@ -280,7 +280,7 @@ SUBROUTINE clawpack5_rpn2_fwave(ixy,maxm,meqn,mwaves, maux, &
         do m=1,4
             df = 0.0d0
             do mw=1,mwaves
-                df = df + sign(1.d0,s(mw,i))*fw(mw,m)
+                df = df + sign(1.d0,s(mw,i))*fw(m,mw)
             end do
             apdq(m,i)=df - amdq(m,i)
         END DO

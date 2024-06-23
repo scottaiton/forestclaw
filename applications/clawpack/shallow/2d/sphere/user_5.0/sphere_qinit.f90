@@ -81,10 +81,10 @@ subroutine clawpack5_qinit(meqn,mbc,mx,my, &
                 !! For ridge problem
                 !! theta
                 d = xp*center(1) + yp*center(2) + zp*center(3)
-                theta = acos(d/Rsphere)
+                theta = acos(d)
                 q1 = exp(-alpha*(theta-theta_wave)**2)
                 R = max(sqrt(xp**2 + yp**2), 1.d-10)
-                u0 = speed*ampl*q1 / (Rsphere*R)  !! Not sure about 2d2
+                u0 = speed*ampl*q1 / (R)  !! Not sure about 2d2
                 q(1,i,j) = -aux(18,i,j)
                 !!write(6,*) blockno, q(i,j,1)
                 if (q1 .gt. 1.d-20) then
