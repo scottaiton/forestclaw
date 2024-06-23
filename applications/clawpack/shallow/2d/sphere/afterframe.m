@@ -22,7 +22,7 @@ if (PlotType  == 4)
             mq_map = [1,2,2,2,3];
             mq1d = mq_map(mq);
 
-            [q1d,xc1d,h1d]  = plotframe1ez(amr1d,mq1d,'b-');
+            [q1d,xc1d,h1d]  = plotframe1ez(amr1d,mq1d,'k-');
             set(h1d,'xdata',pi/2 - pi/180*xc1d);
             fprintf('%10s : %12.4e\n','qmin(1d)',min(q1d));
             fprintf('%10s : %12.4e\n','qmax(1d)',max(q1d));
@@ -45,9 +45,9 @@ if (PlotType  == 4)
     set(gca,'fontsize',16)
 
     [h,labels] = getlegendinfo();
-%     set(h,'markersize',20)
+    set(h,'markersize',20)
     
-%     legend(h,labels);
+    legend(h,labels);
     grid on;
     hold off;
 %{
