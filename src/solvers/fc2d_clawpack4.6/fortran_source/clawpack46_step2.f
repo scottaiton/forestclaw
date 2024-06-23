@@ -48,8 +48,6 @@ c     ==========================================================
       integer :: m,i,j, ma, ixy
       integer :: sweep_dir
 
-      integer :: blockno, fc2d_clawpack46_get_block
-
       ierror = 0
 c     
 c     # store mesh parameters that may be needed in Riemann solver but not
@@ -109,8 +107,6 @@ c     # This does nothing for non-cubed-sphere grids.
 c     # perform x-sweeps
 c     ==================
 c     
-      blockno = fc2d_clawpack46_get_block()
-c      write(6,*) 'Doing x=sweep : blockno = ', blockno
       do  j = 2-mbc,my+mbc-1
 c     
 c        # copy data along a slice into 1d arrays:
