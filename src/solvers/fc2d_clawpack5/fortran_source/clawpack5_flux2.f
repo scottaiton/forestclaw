@@ -54,7 +54,8 @@ c            bpasdq =   the up-going transverse flux difference B^+ A^* Delta q
 c        where A^* represents either A^- or A^+.
 c
 c
-      use clawpack5_amr_module
+      use clawpack5_amr_module, only : mwaves, mcapa, method, 
+     &       mthlim, use_fwaves
       implicit none
 
       external rpn2, rpt2
@@ -98,8 +99,8 @@ c
 c     # initialize flux increments:
 c     -----------------------------
 c
-       do i = 1-mbc, mx+mbc
-         do m = 1,meqn
+      do m = 1,meqn
+         do i = 1-mbc, mx+mbc
             faddm(m,i) = 0.d0
             faddp(m,i) = 0.d0
             gaddm(m,i,1) = 0.d0
@@ -117,7 +118,7 @@ c
      &          aux2,aux2,wave,s,amdq,apdq)
 c
 c     # Set fadd for the donor-cell upwind method (Godunov)
-      do i = 1,mx+1
+      do i = 2-mbc,mx+mbc-1
          do m = 1,meqn
             faddp(m,i) = faddp(m,i) - apdq(m,i)
             faddm(m,i) = faddm(m,i) + amdq(m,i)
@@ -145,7 +146,7 @@ c     # !!! Change to call clawpack5_limiter (original:limiter)
       if (limit) call clawpack5_inlinelimiter(maxm,meqn,mwaves,mbc,mx,
      &      wave,s,mthlim)
 c
-      do  i = 1, mx+1
+      do  i = 2-mbc, mx+mbc
 c
 c        # For correction terms below, need average of dtdx in cell
 c        # i-1 and i.  Compute these and overwrite dtdx1d:
@@ -161,7 +162,12 @@ c        # second order corrections:
             do mw=1,mwaves
 c
                if (use_fwaves) then
-                   abs_sign = dsign(1.d0,s(mw,i))
+                     if (s(mw,i) .eq. 0) then
+                        abs_sign = 0
+                     else
+                        abs_sign = dsign(1.d0,s(mw,i))
+                     endif
+                     !! abs_sign = dsign(1.d0,s(mw,i))
                else
                    abs_sign = dabs(s(mw,i))
                endif
@@ -181,7 +187,7 @@ c
 c
        if (method(2).gt.1 .and. method(3).eq.2) then
 c         # incorporate cqxx into amdq and apdq so that it is split also.
-          do i = 1, mx+1
+          do i = 2-mbc, mx+mbc-1
              do m=1,meqn
                 amdq(m,i) = amdq(m,i) + cqxx(m,i)
                 apdq(m,i) = apdq(m,i) - cqxx(m,i)
@@ -200,16 +206,16 @@ c     # split the left-going flux difference into down-going and up-going:
      &          amdq,bmasdq,bpasdq)
 c
 c     # modify flux below and above by B^- A^- Delta q and  B^+ A^- Delta q:
-      do i = 1, mx+1
-         do m=1,meqn
-               gupdate = 0.5d0*dtdx1d(i-1) * bmasdq(m,i)
-               gaddm(m,i-1,1) = gaddm(m,i-1,1) - gupdate
-               gaddp(m,i-1,1) = gaddp(m,i-1,1) - gupdate
+      do m=1,meqn
+         do i = 2-mbc, mx+mbc
+            gupdate = 0.5d0*dtdx1d(i-1) * bmasdq(m,i)
+            gaddm(m,i-1,1) = gaddm(m,i-1,1) - gupdate
+            gaddp(m,i-1,1) = gaddp(m,i-1,1) - gupdate
 c
-               gupdate = 0.5d0*dtdx1d(i-1) * bpasdq(m,i)
-               gaddm(m,i-1,2) = gaddm(m,i-1,2) - gupdate
-               gaddp(m,i-1,2) = gaddp(m,i-1,2) - gupdate
-            end do
+            gupdate = 0.5d0*dtdx1d(i-1) * bpasdq(m,i)
+            gaddm(m,i-1,2) = gaddm(m,i-1,2) - gupdate
+            gaddp(m,i-1,2) = gaddp(m,i-1,2) - gupdate
+         end do
       end do
 c
 c     # split the right-going flux difference into down-going and up-going:
@@ -218,15 +224,15 @@ c     # split the right-going flux difference into down-going and up-going:
      &          apdq,bmasdq,bpasdq)
 c
 c     # modify flux below and above by B^- A^+ Delta q and  B^+ A^+ Delta q:
-       do i = 1, mx+1
-          do m=1,meqn
-               gupdate = 0.5d0*dtdx1d(i) * bmasdq(m,i)
-               gaddm(m,i,1) = gaddm(m,i,1) - gupdate
-               gaddp(m,i,1) = gaddp(m,i,1) - gupdate
+      do m=1,meqn
+         do i = 2-mbc, mx+mbc
+            gupdate = 0.5d0*dtdx1d(i) * bmasdq(m,i)
+            gaddm(m,i,1) = gaddm(m,i,1) - gupdate
+            gaddp(m,i,1) = gaddp(m,i,1) - gupdate
 c
-               gupdate = 0.5d0*dtdx1d(i) * bpasdq(m,i)
-               gaddm(m,i,2) = gaddm(m,i,2) - gupdate
-               gaddp(m,i,2) = gaddp(m,i,2) - gupdate
+            gupdate = 0.5d0*dtdx1d(i) * bpasdq(m,i)
+            gaddm(m,i,2) = gaddm(m,i,2) - gupdate
+            gaddp(m,i,2) = gaddp(m,i,2) - gupdate
          end do
       end do
 c

@@ -14,7 +14,8 @@ SUBROUTINE clawpack5_step2(maxm,meqn,maux,mbc,mx,my,qold,aux,dx,dy,dt, &
 !     Converted to f90 2012-1-04 (KTM)
 !
 
-    use clawpack5_amr_module
+    use clawpack5_amr_module, only : mwaves, mcapa, method,mthlim
+
 
     implicit none
 
@@ -53,10 +54,10 @@ SUBROUTINE clawpack5_step2(maxm,meqn,maux,mbc,mx,my,qold,aux,dx,dy,dt, &
     real(kind=8) :: bmadq(meqn,1-mbc:maxm + mbc)
     REAL(kind=8) :: bpadq(meqn,1-mbc:maxm + mbc)
 
-    INTEGER block_corner_count(0:3), sweep_dir
+    INTEGER block_corner_count(0:3), sweep_dir    
 
     ! Looping scalar storage
-    integer :: i,j
+    integer :: i,j,m
     real(kind=8) :: dtdx,dtdy,cfl1d
 
     ! Common block storage
@@ -81,8 +82,8 @@ SUBROUTINE clawpack5_step2(maxm,meqn,maux,mbc,mx,my,qold,aux,dx,dy,dt, &
     !! # Cubed sphere : Set corners for an x-sweep
     !! # This does nothing for non-cubed-sphere grids. 
     sweep_dir = 0
-    call clawpack5_fix_corners(mx,my,mbc,meqn,qold,sweep_dir, &
-                               block_corner_count)
+    call clawpack5_fix_corners(mx,my,mbc,meqn,qold,maux,aux, &
+                               sweep_dir, block_corner_count)
 
     ! ============================================================================
     ! Perform X-Sweeps
@@ -109,21 +110,38 @@ SUBROUTINE clawpack5_step2(maxm,meqn,maux,mbc,mx,my,qold,aux,dx,dy,dt, &
 
         ! Compute modifications fadd and gadd to fluxes along this slice:
         !!! Change from flux2 to clawpack5_flux2
-        call clawpack5_flux2(1,maxm,meqn,maux,mbc,mx,q1d,dtdx1d,aux1,aux2,aux3, &
-                   faddm,faddp,gaddm,gaddp,cfl1d,wave,s, &
-                   amdq,apdq,cqxx,bmadq,bpadq,rpn2,rpt2)
+        call clawpack5_flux2(1,maxm,meqn,maux,mbc,mx,q1d,dtdx1d, & 
+                             aux1,aux2,aux3, faddm,faddp,gaddm,gaddp, & 
+                             cfl1d,wave,s,amdq,apdq,cqxx,bmadq,bpadq, & 
+                             rpn2,rpt2)
         cflgrid = max(cflgrid,cfl1d)
 
         ! Update fluxes
-        fm(:,1:mx+1,j) = fm(:,1:mx+1,j) + faddm(:,1:mx+1)
-        fp(:,1:mx+1,j) = fp(:,1:mx+1,j) + faddp(:,1:mx+1)
-        gm(:,1:mx+1,j) = gm(:,1:mx+1,j) + gaddm(:,1:mx+1,1)
-        gp(:,1:mx+1,j) = gp(:,1:mx+1,j) + gaddp(:,1:mx+1,1)
-        gm(:,1:mx+1,j+1) = gm(:,1:mx+1,j+1) + gaddm(:,1:mx+1,2)
-        gp(:,1:mx+1,j+1) = gp(:,1:mx+1,j+1) + gaddp(:,1:mx+1,2)
+        do m = 1,meqn
+            do i = 2-mbc,mx+mbc
+               fm(m,i,j)   = fm(m,i,j) + faddm(m,i)
+               fp(m,i,j)   = fp(m,i,j) + faddp(m,i)
+               gm(m,i,j)   = gm(m,i,j) + gaddm(m,i,1)
+               gp(m,i,j)   = gp(m,i,j) + gaddp(m,i,1)
+               gm(m,i,j+1) = gm(m,i,j+1) + gaddm(m,i,2)
+               gp(m,i,j+1) = gp(m,i,j+1) + gaddp(m,i,2)
+            end do
+         end do
+
+
+!!        fm(:,1:mx+1,j) = fm(:,1:mx+1,j) + faddm(:,1:mx+1)
+!!        fp(:,1:mx+1,j) = fp(:,1:mx+1,j) + faddp(:,1:mx+1)
+!!        gm(:,1:mx+1,j) = gm(:,1:mx+1,j) + gaddm(:,1:mx+1,1)
+!!        gp(:,1:mx+1,j) = gp(:,1:mx+1,j) + gaddp(:,1:mx+1,1)
+!!        gm(:,1:mx+1,j+1) = gm(:,1:mx+1,j+1) + gaddm(:,1:mx+1,2)
+!!        gp(:,1:mx+1,j+1) = gp(:,1:mx+1,j+1) + gaddp(:,1:mx+1,2)
 
 
     enddo
+
+    sweep_dir = 1
+    call clawpack5_fix_corners(mx,my,mbc,meqn,qold,maux,aux, &
+                               sweep_dir, block_corner_count)
 
     ! ============================================================================
     !  y-sweeps
@@ -158,13 +176,25 @@ SUBROUTINE clawpack5_step2(maxm,meqn,maux,mbc,mx,my,qold,aux,dx,dy,dt, &
                    amdq,apdq,cqxx,bmadq,bpadq,rpn2,rpt2)
         cflgrid = max(cflgrid,cfl1d)
 
+
+         do  m=1,meqn
+            do  j=2-mbc,my+mbc
+               gm(m,i,j) = gm(m,i,j) + faddm(m,j)
+               gp(m,i,j) = gp(m,i,j) + faddp(m,j)
+               fm(m,i,j) = fm(m,i,j) + gaddm(m,j,1)
+               fp(m,i,j) = fp(m,i,j) + gaddp(m,j,1)
+               fm(m,i+1,j) = fm(m,i+1,j) + gaddm(m,j,2)
+               fp(m,i+1,j) = fp(m,i+1,j) + gaddp(m,j,2)
+            end do
+         end do
+
         ! Update fluxes
-        gm(:,i,1:my+1)   = gm(:,i,1:my+1)   + faddm(:,1:my+1)
-        gp(:,i,1:my+1)   = gp(:,i,1:my+1)   + faddp(:,1:my+1)
-        fm(:,i,1:my+1)   = fm(:,i,1:my+1)   + gaddm(:,1:my+1,1)
-        fp(:,i,1:my+1)   = fp(:,i,1:my+1)   + gaddp(:,1:my+1,1)
-        fm(:,i+1,1:my+1) = fm(:,i+1,1:my+1) + gaddm(:,1:my+1,2)
-        fp(:,i+1,1:my+1) = fp(:,i+1,1:my+1) + gaddp(:,1:my+1,2)
+!!        gm(:,i,1:my+1)   = gm(:,i,1:my+1)   + faddm(:,1:my+1)
+!!        gp(:,i,1:my+1)   = gp(:,i,1:my+1)   + faddp(:,1:my+1)
+!!        fm(:,i,1:my+1)   = fm(:,i,1:my+1)   + gaddm(:,1:my+1,1)
+!!        fp(:,i,1:my+1)   = fp(:,i,1:my+1)   + gaddp(:,1:my+1,1)
+!!        fm(:,i+1,1:my+1) = fm(:,i+1,1:my+1) + gaddm(:,1:my+1,2)
+!!        fp(:,i+1,1:my+1) = fp(:,i+1,1:my+1) + gaddp(:,1:my+1,2)
 
     enddo
 
@@ -174,13 +204,14 @@ end subroutine clawpack5_step2
 
 !!    #  See 'cubed_sphere_corners.ipynb'
 
-SUBROUTINE clawpack5_fix_corners(mx,my,mbc,meqn,q,sweep_dir, & 
-                                 block_corner_count)
+SUBROUTINE clawpack5_fix_corners(mx,my,mbc,meqn,q,maux,aux, &
+                                 sweep_dir, block_corner_count)
    IMPLICIT NONE
 
-   INTEGER :: mx,my,mbc,meqn,sweep_dir
+   INTEGER :: mx,my,mbc,meqn,sweep_dir, maux
    INTEGER :: block_corner_count(0:3)
-   DOUBLE PRECISION :: q(meqn,1-mbc:mx+mbc,1-mbc:my+mbc)
+   DOUBLE PRECISION ::   q(meqn,1-mbc:mx+mbc,1-mbc:my+mbc)
+   DOUBLE PRECISION :: aux(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
 
    INTEGER :: k,m,idata,jdata
    DOUBLE PRECISION :: ihat(0:3),jhat(0:3)
@@ -238,6 +269,10 @@ SUBROUTINE clawpack5_fix_corners(mx,my,mbc,meqn,q,sweep_dir, &
             DO m = 1,meqn
                q(m,i1,j1) = q(m,idata,jdata)
             END DO   !! m=1,meqn
+            do m = 1,maux
+               aux(m,i1,j1) = aux(m,idata,jdata)
+            end do           
+
          END DO  !! jbc
       END DO   !! ibc
    END DO  !! loop over corners
