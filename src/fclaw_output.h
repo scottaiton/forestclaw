@@ -38,6 +38,22 @@ struct fclaw_global;  /* This is a hack !! */
 
 void fclaw_output_frame(struct fclaw_global * glob, int iframe);
 
+/**
+ * @brief Write out a checkpoint file. 
+ *
+ * This will only output if the checkpoint_out flag is set in fclaw_options.
+ *
+ * This will write two files: a fort_frame_[iframe].checkpoint file and a
+ * fort_frame_[iframe].partition file.
+ *
+ * The partition file is optionally used when restarting to ensure that the
+ * domain is partitioned in the same way as before.
+ * 
+ * @param glob the global context
+ * @param iframe the frame number
+ */
+void fclaw_output_checkpoint(struct fclaw_global * glob, int iframe);
+
 void fclaw2d_output_frame_tikz(struct fclaw_global* glob, int iframe);
 
 #ifdef __cplusplus

@@ -60,6 +60,7 @@ struct fc2d_clawpack46_options
     /* Output */
     int ascii_out;
     int vtk_out;
+    int hdf5_out;
 
     int is_registered;
     int is_unpacked;
@@ -92,13 +93,6 @@ fc2d_clawpack46_options_t* fc2d_clawpack46_get_options(struct fclaw_global *glob
 void fc2d_clawpack46_options_store (struct fclaw_global* glob, fc2d_clawpack46_options_t* clawopt);
 
 void fc2d_clawpack46_output(struct fclaw_global *glob, int iframe);
-
-/**
- * @brief Get the packing vtable for fc2d_clawpack46_options_t
- * 
- * @return const fclaw_packing_vtable_t* the vtable
- */
-const fclaw_packing_vtable_t* fc2d_clawpack46_options_get_packing_vtable();
 
 #ifdef __cplusplus
 #if 0

@@ -27,10 +27,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <forestclaw2d.h>
 #include <p4est_bits.h>
 #include <p4est_wrap.h>
+#include <p4est_communication.h>
 #else
 #include <forestclaw3d.h>
 #include <p8est_bits.h>
 #include <p8est_wrap.h>
+#include <p8est_communication.h>
 #endif
 
 #ifndef P4_TO_P8
@@ -1698,6 +1700,176 @@ fclaw2d_domain_iterate_partitioned (fclaw2d_domain_t * old_domain,
         FCLAW_ASSERT (nj == new_block->num_patches);
         FCLAW_ASSERT (ndone == nbp);
     }
+}
+
+typedef enum comm_tag
+{
+    COMM_TAG_FIXED,
+    COMM_TAG_CUSTOM,
+    COMM_TAG_LAST
+}
+comm_tag_t;
+
+fclaw2d_domain_partition_t *
+fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
+                             fclaw2d_pack_callback_t patch_pack, void *user)
+{
+    fclaw2d_domain_partition_t *p;
+    p4est_wrap_t *wrap = (p4est_wrap_t *) domain->pp;
+    int blockno, patchno;
+    size_t zz;
+    fclaw2d_block_t *block;
+    fclaw2d_patch_t *patch;
+
+    /* this routine should only be called for changed partitions */
+    P4EST_ASSERT (!domain->pp_owned);
+    P4EST_ASSERT (wrap->old_global_first_quadrant != NULL);
+    P4EST_ASSERT (domain->local_num_patches == (int)
+                  wrap->old_global_first_quadrant[wrap->p4est->mpirank + 1] -
+                  wrap->old_global_first_quadrant[wrap->p4est->mpirank]);
+
+    p = FCLAW_ALLOC (fclaw2d_domain_partition_t, 1);
+    p->dest_data =
+        sc_array_new_count (data_size,
+                            (size_t) wrap->p4est->local_num_quadrants);
+
+    /* pack patches into src_data array */
+    p->src_data =
+        sc_array_new_count (data_size, (size_t) domain->local_num_patches);
+    for (zz = 0, blockno = 0; blockno < domain->num_blocks; ++blockno)
+    {
+        block = domain->blocks + blockno;
+        for (patchno = 0; patchno < block->num_patches; ++zz, ++patchno)
+        {
+            FCLAW_ASSERT (zz ==
+                          (size_t) (block->num_patches_before + patchno));
+            patch = block->patches + patchno;
+            patch_pack (domain, patch, blockno, patchno,
+                        sc_array_index (p->src_data, zz), user);
+        }
+    }
+    FCLAW_ASSERT (zz == (size_t) domain->local_num_patches);
+
+    /* start transfering patch data according to the new partition */
+    p->async_state = (void *)
+        p4est_transfer_fixed_begin (wrap->p4est->global_first_quadrant,
+                                    wrap->old_global_first_quadrant,
+                                    domain->mpicomm, COMM_TAG_FIXED,
+                                    p->dest_data->array, p->src_data->array,
+                                    data_size);
+    p->inside_async = 1;
+
+    return p;
+}
+
+void
+fclaw2d_domain_iterate_transfer (fclaw2d_domain_t * old_domain,
+                                 fclaw2d_domain_t * new_domain,
+                                 fclaw2d_transfer_callback_t patch_transfer,
+                                 void *user)
+{
+    int blockno, old_patchno, new_patchno;
+    fclaw2d_block_t *old_block, *new_block;
+    fclaw2d_patch_t *old_patch, *new_patch;
+    int dpuf, dpul, bnpb;
+
+    /* this routine should only be called for a changed partition */
+    P4EST_ASSERT (!old_domain->pp_owned);
+    P4EST_ASSERT (new_domain->pp_owned);
+
+    /* unpack patches from dest_data array */
+    dpuf = new_domain->partition_unchanged_first;
+    dpul = new_domain->partition_unchanged_length;
+
+    for (blockno = 0; blockno < new_domain->num_blocks; ++blockno)
+    {
+        old_block = old_domain->blocks + blockno;
+        new_block = new_domain->blocks + blockno;
+        bnpb = new_block->num_patches_before;
+
+        /* iterate over patches that stayed local */
+        for (new_patchno = SC_MAX (dpuf - bnpb, 0);
+             new_patchno < SC_MIN (dpuf + dpul - bnpb,
+                                   new_block->num_patches); ++new_patchno)
+        {
+            new_patch = new_block->patches + new_patchno;
+            old_patchno = new_domain->partition_unchanged_old_first -
+                old_block->num_patches_before + new_patchno - (dpuf - bnpb);
+            old_patch = old_block->patches + old_patchno;
+
+            patch_transfer (old_domain, old_patch, new_domain, new_patch,
+                            blockno, old_patchno, new_patchno, user);
+        }
+
+    }
+}
+
+void
+fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
+                               fclaw2d_domain_partition_t * p,
+                               fclaw2d_unpack_callback_t patch_unpack,
+                               void *user)
+{
+    int blockno, patchno;
+    size_t zz;
+    fclaw2d_block_t *block;
+    fclaw2d_patch_t *patch;
+    int dpuf, dpul, bnpb;
+
+    /* this routine should only be called for the new domain of a changed
+     * partition */
+    P4EST_ASSERT (domain->pp_owned);
+    P4EST_ASSERT (p->inside_async);
+
+    /* wait for transfer of patch data to complete */
+    p4est_transfer_fixed_end ((p4est_transfer_context_t *) p->async_state);
+    p->async_state = NULL;
+    p->inside_async = 0;
+
+    /* unpack patches from dest_data array */
+    dpuf = domain->partition_unchanged_first;
+    dpul = domain->partition_unchanged_length;
+
+    for (zz = 0, blockno = 0; blockno < domain->num_blocks; ++blockno)
+    {
+        block = domain->blocks + blockno;
+        bnpb = block->num_patches_before;
+
+        /* iterate over new patches before unchanged section */
+        for (patchno = 0; patchno < SC_MIN (dpuf - bnpb, block->num_patches);
+             ++zz, ++patchno)
+        {
+            patch = block->patches + patchno;
+            patch_unpack (domain, patch, blockno, patchno,
+                          sc_array_index (p->dest_data, zz), user);
+        }
+
+        /* we skip the local patches for unpacking */
+        if (zz == (size_t) dpuf)
+        {
+            zz += dpul;
+        }
+
+        /* iterate over new patches after unchanged section */
+        for (patchno = SC_MAX (0, dpuf + dpul - bnpb);
+             patchno < block->num_patches; ++patchno, ++zz)
+        {
+            patch = block->patches + patchno;
+            patch_unpack (domain, patch, blockno, patchno,
+                          sc_array_index (p->dest_data, zz), user);
+        }
+    }
+    FCLAW_ASSERT (zz == (size_t) domain->local_num_patches);
+}
+
+void
+fclaw2d_domain_partition_free (fclaw2d_domain_partition_t * p)
+{
+    P4EST_ASSERT (!p->inside_async);
+    sc_array_destroy (p->src_data);
+    sc_array_destroy (p->dest_data);
+
+    FCLAW_FREE (p);
 }
 
 void

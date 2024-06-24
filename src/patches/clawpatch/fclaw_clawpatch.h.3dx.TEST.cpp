@@ -69,7 +69,7 @@ struct SinglePatchDomain {
     fclaw_clawpatch_options_t* opts;
 
     SinglePatchDomain(){
-        glob = fclaw_global_new();
+        glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
         opts = fclaw_clawpatch_options_new(3);
         memset(&fopts, 0, sizeof(fopts));
         fopts.mi=1;
@@ -122,7 +122,7 @@ struct QuadDomain {
     fclaw_clawpatch_options_t* opts;
 
     QuadDomain(){
-        glob = fclaw_global_new();
+        glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
         opts = fclaw_clawpatch_options_new(3);
         memset(&fopts, 0, sizeof(fopts));
         fopts.mi=1;
@@ -178,7 +178,7 @@ struct QuadDomain {
 TEST_CASE("3dx fclaw_clawpatch_vtable_initialize")
 {
 	fclaw_domain_t* domain = fclaw_domain_new_unitsquare(sc_MPI_COMM_WORLD, 1);
-    fclaw_global_t* glob = fclaw_global_new();
+    fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	fclaw_global_store_domain(glob, domain);
 
     fclaw_clawpatch_options_t* opts = fclaw_clawpatch_options_new(3);
@@ -240,6 +240,7 @@ TEST_CASE("3dx fclaw_clawpatch_vtable_initialize")
     CHECK(patch_vt->build_from_fine                != NULL);
     CHECK(patch_vt->setup                          == NULL);
 
+    fclaw_clawpatch_options_destroy(opts);
     fclaw_domain_destroy(domain);
     fclaw_global_destroy(glob);
 }
@@ -256,7 +257,7 @@ TEST_CASE("3dx fclaw_clawpatch patch_build")
     for(const int& rhs_fields : {0,2})
     for(fclaw_build_mode_t build_mode : {FCLAW_BUILD_FOR_GHOST_AREA_COMPUTED, FCLAW_BUILD_FOR_UPDATE})
     {
-        fclaw_global_t* glob = fclaw_global_new();
+        fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
         fclaw_options_t fopts;
         memset(&fopts, 0, sizeof(fopts));
@@ -350,6 +351,7 @@ TEST_CASE("3dx fclaw_clawpatch patch_build")
         }
 
         fclaw_patch_data_delete(glob, &domain->blocks[0].patches[0]);
+        fclaw_clawpatch_options_destroy(opts);
         fclaw_domain_destroy(domain);
         fclaw_map_destroy(map);
         fclaw_global_destroy(glob);
@@ -680,7 +682,7 @@ TEST_CASE("3dx fclaw_clawpatch_metric_scalar")
 /* DAC : Fix this test for fclaw3d_metric? */
 TEST_CASE("3dx fclaw_clawpatch_metric_vector")
 {
-    fclaw_global_t* glob = fclaw_global_new(); 
+    fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);; 
     fclaw_vtables_initialize(glob);
 
     SinglePatchDomain test_data;

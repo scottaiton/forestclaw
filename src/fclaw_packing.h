@@ -27,6 +27,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define FCLAW_PACKING_H
 
 #include <fclaw_base.h>
+#include <fclaw_global.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -50,27 +51,45 @@ extern "C"
 
 /**
  * @brief Pack userdata into a buffer
+ * @param glob global context
  * @param userdata pointer to userdata
  * @param buffer buffer to pack into
+ * @return size_t number of bytes written
  */
-typedef size_t (*fclaw_packing_pack_t)(void* userdata,
-                                     char* buffer);
+typedef size_t (*fclaw_packing_pack_t)(fclaw_global_t *glob,
+                                       void *userdata,
+                                       char *buffer);
 /**
  * @brief Unpack userdata from buffer 
+ * @param glob global context
  * @param buffer buffer to unpack from
- * @return newly create userdata
+ * @param userdata user data to read from
+ * @return size_t number of bytes read
  */
-typedef size_t (*fclaw_packing_unpack_t)(char* buffer,void**);
+typedef size_t (*fclaw_packing_unpack_t)(fclaw_global_t *glob,
+                                         char *buffer,
+                                         void *userdata);
 /**
  * @brief Get the size needed to pack userdata
- * @return the size
+ * @param glob global context
+ * @param userdata pointer to userdata
+ * @return size_t number of bytes needed to pack userdata
  */
-typedef size_t (*fclaw_packing_packsize_t)(void* userdata);
+typedef size_t (*fclaw_packing_packsize_t)(fclaw_global_t *glob, 
+                                           void *userdata);
+
+/**
+ * @brief create new userdata
+ * @param glob global context
+ * @return void * pointer to new userdata
+ */
+typedef void * (*fclaw_packing_new_t)(fclaw_global_t *glob);
 
 /**
  * @brief destroy userdata
+ * @param value pointer to userdata to destroy
  */
-typedef void (*fclaw_packing_destroy_t)(void* value);
+typedef void (*fclaw_packing_destroy_t)(void *value);
 
 /**
  * @brief vtable for packing functions
@@ -80,8 +99,9 @@ typedef struct fclaw_packing_vtable
   fclaw_packing_pack_t pack; /**< function for packing */
   fclaw_packing_unpack_t unpack; /**< function for unpacking*/
   fclaw_packing_packsize_t size; /**< function for packing size */
+  fclaw_packing_new_t new_data; /**< function for creating new data */
   fclaw_packing_destroy_t destroy; /**< function for destroying */
-} fclaw_useradata_vtable_t;
+} fclaw_packing_vtable_t;
 
 /**
  * @brief Get the size needed for packing a string

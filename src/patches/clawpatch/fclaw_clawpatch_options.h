@@ -89,6 +89,8 @@ struct fclaw_clawpatch_options
 
 
     int vtk_patch_threshold; /**< The buffer threshold for vtk output */
+    int hdf5_patch_threshold; /**< The buffer threshold for hdf5 output */
+    int hdf5_compression_level; /**< The compression level for hdf5 output */
 
     int is_registered; /**< true if options have been registered */
 
@@ -167,14 +169,6 @@ void fclaw_clawpatch_options_store (struct fclaw_global *glob,
  * @return fclaw_clawpatch_options_t* the options
  */
 fclaw_clawpatch_options_t* fclaw_clawpatch_get_options(struct fclaw_global* glob);
-
-/**
- * @brief Get the packing vtable for fclaw_clawpatch_options_t
- * 
- * @return const fclaw_packing_vtable_t* the vtable
- */
-const fclaw_packing_vtable_t* fclaw_clawpatch_options_get_packing_vtable();
-
 
 #ifdef __cplusplus
 #if 0

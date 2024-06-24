@@ -52,8 +52,8 @@ TEST_CASE("fclaw_clawpatch_options_new 3d")
 
 TEST_CASE("fclaw_clawpatch_options can store options in two seperate globs")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_clawpatch_options_t* opts1 = fclaw_clawpatch_options_new(2);
 	fclaw_clawpatch_options_t* opts2 = fclaw_clawpatch_options_new(3);
@@ -75,8 +75,8 @@ TEST_CASE("fclaw_clawpatch_options can store options in two seperate globs")
 
 TEST_CASE("fclaw_clawpatch_get_options fails if not intialized")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	CHECK_SC_ABORTED(fclaw_clawpatch_get_options(glob1));
 
@@ -88,8 +88,8 @@ TEST_CASE("fclaw_clawpatch_get_options fails if not intialized")
 
 TEST_CASE("fclaw_clawpatch_options_store fails if called twice on a glob")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_clawpatch_options_t* opts1 = fclaw_clawpatch_options_new(2);
 	fclaw_clawpatch_options_t* opts2 = fclaw_clawpatch_options_new(3);
@@ -107,94 +107,3 @@ TEST_CASE("fclaw_clawpatch_options_store fails if called twice on a glob")
 }
 
 #endif
-TEST_CASE("2d fclaw_clawpatch_options packing/unpacking")
-{
-	fclaw_clawpatch_options_t* opts = fclaw_clawpatch_options_new(2);
-	opts->mx = 5;
-	opts->my = 6;
-	opts->maux = 4;
-	opts->mbc = 3;
-	opts->meqn = 32;
-	opts->rhs_fields = 39;
-	opts->refinement_criteria = 1;
-	opts->interp_stencil_width = 3;
-	opts->ghost_patch_pack_aux = 7;
-	opts->save_aux = 1;
-	opts->is_registered = 1;
-
-	const fclaw_packing_vtable_t* vt = fclaw_clawpatch_options_get_packing_vtable();
-
-	size_t size = vt->size(opts);
-	char buffer[size];
-	size_t bytes_written = vt->pack(opts,buffer);
-	REQUIRE_EQ(bytes_written,size);
-
-	fclaw_clawpatch_options_t* output_opts = nullptr;
-	size_t bytes_read = vt->unpack(buffer,(void**)&output_opts);
-
-	REQUIRE_EQ(bytes_read,size);
-	REQUIRE_NE(output_opts,nullptr);
-
-	CHECK_EQ(output_opts->patch_dim,2);
-	CHECK_EQ(output_opts->mx,opts->mx);
-	CHECK_EQ(output_opts->my,opts->my);
-	CHECK_EQ(output_opts->maux,opts->maux);
-	CHECK_EQ(output_opts->mbc,opts->mbc);
-	CHECK_EQ(output_opts->meqn,opts->meqn);
-	CHECK_EQ(output_opts->rhs_fields,opts->rhs_fields);
-	CHECK_EQ(output_opts->refinement_criteria,opts->refinement_criteria);
-	CHECK_EQ(output_opts->interp_stencil_width,opts->interp_stencil_width);
-	CHECK_EQ(output_opts->ghost_patch_pack_aux,opts->ghost_patch_pack_aux);
-	CHECK_EQ(output_opts->save_aux,opts->save_aux);
-	CHECK_EQ(output_opts->is_registered,opts->is_registered);
-
-	vt->destroy(output_opts);
-	FCLAW_FREE(opts);
-}
-
-TEST_CASE("3d fclaw_clawpatch_options packing/unpacking")
-{
-	fclaw_clawpatch_options_t* opts = fclaw_clawpatch_options_new(3);
-	opts->mx = 5;
-	opts->my = 6;
-	opts->mz = 3;
-	opts->maux = 4;
-	opts->mbc = 3;
-	opts->meqn = 32;
-	opts->rhs_fields = 39;
-	opts->refinement_criteria = 1;
-	opts->interp_stencil_width = 3;
-	opts->ghost_patch_pack_aux = 7;
-	opts->save_aux = 1;
-	opts->is_registered = 1;
-
-	const fclaw_packing_vtable_t* vt = fclaw_clawpatch_options_get_packing_vtable();
-
-	size_t size = vt->size(opts);
-	char buffer[size];
-	size_t bytes_written = vt->pack(opts,buffer);
-	REQUIRE_EQ(bytes_written,size);
-
-	fclaw_clawpatch_options_t* output_opts = nullptr;
-	size_t bytes_read = vt->unpack(buffer,(void**)&output_opts);
-
-	REQUIRE_EQ(bytes_read,size);
-	REQUIRE_NE(output_opts,nullptr);
-
-	CHECK_EQ(output_opts->patch_dim,3);
-	CHECK_EQ(output_opts->mx,opts->mx);
-	CHECK_EQ(output_opts->my,opts->my);
-	CHECK_EQ(output_opts->mz,opts->mz);
-	CHECK_EQ(output_opts->maux,opts->maux);
-	CHECK_EQ(output_opts->mbc,opts->mbc);
-	CHECK_EQ(output_opts->meqn,opts->meqn);
-	CHECK_EQ(output_opts->rhs_fields,opts->rhs_fields);
-	CHECK_EQ(output_opts->refinement_criteria,opts->refinement_criteria);
-	CHECK_EQ(output_opts->interp_stencil_width,opts->interp_stencil_width);
-	CHECK_EQ(output_opts->ghost_patch_pack_aux,opts->ghost_patch_pack_aux);
-	CHECK_EQ(output_opts->save_aux,opts->save_aux);
-	CHECK_EQ(output_opts->is_registered,opts->is_registered);
-
-	vt->destroy(output_opts);
-	FCLAW_FREE(opts);
-}

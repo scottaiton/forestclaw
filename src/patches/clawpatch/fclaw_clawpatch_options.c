@@ -97,6 +97,14 @@ clawpatch_register(fclaw_clawpatch_options_t *clawpatch_options,
                        &clawpatch_options->vtk_patch_threshold, 0,
                        "Number of patches to buffer before each write in vtk output. 0 means buffer all patches before writing [0]");
 
+    /* ---------------------- hdf5 options -------------------------- */
+    sc_options_add_int(opt, 0, "hdf5-patch-threshold", 
+                       &clawpatch_options->hdf5_patch_threshold, 0,
+                       "Number of patches to buffer before each write in hdf5 output. 0 means buffer all patches before writing [0]");
+    sc_options_add_int(opt, 0, "hdf5-compression-level", 
+                       &clawpatch_options->hdf5_compression_level, 5,
+                       "Compression level for hdf5 output. 0 is no compression, 9 is most compression. [5]");
+
     /* Set verbosity level for reporting timing */
     sc_keyvalue_t *kv = clawpatch_options->kv_refinement_criteria;
     sc_options_add_keyvalue (opt, 0, "refinement-criteria", 
@@ -158,6 +166,20 @@ clawpatch_check(fclaw_clawpatch_options_t *clawpatch_opt)
         return FCLAW_EXIT_ERROR;            
     }
 
+    if (clawpatch_opt->hdf5_patch_threshold < 0)
+    {
+        fclaw_global_essentialf("Clawpatch error : hdf5-patch-threshold must be " \
+                                "non-negative.\n");
+        return FCLAW_EXIT_ERROR;            
+    }
+
+    if (clawpatch_opt->hdf5_compression_level < 0 || clawpatch_opt->hdf5_compression_level > 9)
+    {
+        fclaw_global_essentialf("Clawpatch error : hdf5-compression-level must be " \
+                                "between 0 and 9.\n");
+        return FCLAW_EXIT_ERROR;            
+    }
+     
     return FCLAW_NOEXIT;
 }
 
@@ -184,59 +206,6 @@ fclaw_clawpatch_options_destroy (fclaw_clawpatch_options_t *clawpatch_opt)
     FCLAW_FREE(clawpatch_opt);
 }
 
-static void
-clawpatch_destroy_void(void *clawpatch_opt)
-{
-    fclaw_clawpatch_options_destroy ((fclaw_clawpatch_options_t *) clawpatch_opt);
-}
-
-static size_t 
-options_packsize(void* user)
-{
-    return sizeof(fclaw_clawpatch_options_t);
-}
-
-static size_t 
-options_pack(void* user, char* buffer)
-{
-    char* buffer_start = buffer;
-    fclaw_clawpatch_options_t* opts = (fclaw_clawpatch_options_t*) user;
-
-    //pack entire struct
-    buffer += FCLAW_PACK(*opts,buffer);
-
-    return buffer - buffer_start;
-}
-
-static size_t 
-options_unpack(char* buffer, void** user)
-{
-    char* buffer_start = buffer;
-    fclaw_clawpatch_options_t** opts_ptr = (fclaw_clawpatch_options_t**) user;
-
-    *opts_ptr = FCLAW_ALLOC(fclaw_clawpatch_options_t,1);
-
-    buffer += FCLAW_UNPACK(buffer,*opts_ptr);
-
-    (*opts_ptr)->kv_refinement_criteria = kv_refinement_criterea_new();
-
-    return buffer - buffer_start;
-}
-
-static fclaw_packing_vtable_t packing_vt = 
-{
-	options_pack,
-	options_unpack,
-	options_packsize,
-	clawpatch_destroy_void
-};
-
-const fclaw_packing_vtable_t* 
-fclaw_clawpatch_options_get_packing_vtable()
-{
-    return &packing_vt;
-}
-
 /* ------------------------------------------------------------------------
   Generic functions - these call the functions above
   ------------------------------------------------------------------------ */
@@ -250,8 +219,6 @@ options_register(fclaw_app_t * a, void *optpkg, sc_options_t * opt)
 
     fclaw_clawpatch_options_t *clawpatch_opt = 
                                (fclaw_clawpatch_options_t *) optpkg;
-
-    fclaw_app_register_options_packing_vtable("clawpatch", &packing_vt);
 
     return clawpatch_register(clawpatch_opt,opt);
 }

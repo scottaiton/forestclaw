@@ -1,6 +1,7 @@
 option(mpi "use MPI library")
 option(openmp "use OpenMP")
 option(applications "build applications" ON)
+option(hdf5 "use HDF5 library")
 
 option(clawpatch "build Clawpatch")
 option(clawpack "build Clawpack")
@@ -21,7 +22,22 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND PROJECT_IS_TOP_LEVEL)
   set(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/local" CACHE PATH "Install top-level directory" FORCE)
 endif()
 
+unset(${PROJECT_NAME}_stdfs_link_flags)
+if( (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.1.0") OR
+  (LINUX AND CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "23") OR
+  (CMAKE_CXX_COMPILER_ID STREQUAL "NVHPC" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "23.11") )
+set(${PROJECT_NAME}_stdfs_link_flags stdc++fs stdc++)
+endif()
+# GCC < 9.1 needs -lstdc++ to avoid C main program link error
+# NVHPC at least 23.11 and newer doesn't need the flags, but at least 23.5 and older do.
+# INtel oneAPI 2021.1 and older needs, but 2023 and newer doesn't. (not sure about 2022)
+
+
 # enable needed dependencies
+if(mpi AND hdf5)
+  set(hdf5_parallel ON)
+endif()
+
 if(clawpack)
   set(clawpatch ON)
   set(clawpack4.6 ON)
