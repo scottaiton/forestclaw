@@ -44,6 +44,11 @@ void diagnostics_vt_destroy(void* vt)
     FCLAW_FREE (vt);
 }
 
+static
+void diagnostics_accumulator_destroy(void* acc)
+{
+    FCLAW_FREE (acc);
+}
 /* ---------------------------------------------------
     Public interface
     ------------------------------------------------ */
@@ -55,6 +60,14 @@ fclaw_diagnostics_vtable_t* fclaw_diagnostics_vt(fclaw_global_t* glob)
 	FCLAW_ASSERT(diagnostics_vt != NULL);
 	FCLAW_ASSERT(diagnostics_vt->is_set != 0);
     return diagnostics_vt;
+}
+
+fclaw_diagnostics_accumulator_t* fclaw_diagnostics_get_acc(fclaw_global_t* glob)
+{
+    fclaw_diagnostics_accumulator_t* acc = (fclaw_diagnostics_accumulator_t*) 
+        fclaw_global_get_attribute(glob, "fclaw_diagnostics_accumulator");
+    FCLAW_ASSERT(acc != NULL);
+    return acc;
 }
 
 /* global_maximum is in forestclaw2d.c */
@@ -93,7 +106,13 @@ void fclaw_diagnostics_initialize(fclaw_global_t *glob)
 {
     fclaw_diagnostics_vtable_t *diag_vt = fclaw_diagnostics_vt(glob);
 
-    fclaw_diagnostics_accumulator_t *acc = glob->acc;
+    fclaw_diagnostics_accumulator_t *acc = FCLAW_ALLOC(fclaw_diagnostics_accumulator_t, 1);
+    fclaw_global_attribute_store(glob,
+                                 "fclaw_diagnostics_accumulator",
+                                 acc,
+                                 NULL,
+                                 diagnostics_accumulator_destroy);
+
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
 
     /* Return an error accumulator */
@@ -122,7 +141,7 @@ void fclaw_diagnostics_initialize(fclaw_global_t *glob)
 void fclaw_diagnostics_gather(fclaw_global_t *glob,
                                 int init_flag)
 {
-    fclaw_diagnostics_accumulator_t *acc = glob->acc;
+    fclaw_diagnostics_accumulator_t *acc = fclaw_diagnostics_get_acc(glob);
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
     fclaw_diagnostics_vtable_t *diag_vt = fclaw_diagnostics_vt(glob);
 
@@ -182,7 +201,7 @@ void fclaw_diagnostics_gather(fclaw_global_t *glob,
 
 void fclaw_diagnostics_reset(fclaw_global_t *glob)
 {
-    fclaw_diagnostics_accumulator_t *acc = glob->acc;
+    fclaw_diagnostics_accumulator_t *acc = fclaw_diagnostics_get_acc(glob);
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
     fclaw_diagnostics_vtable_t *diag_vt = fclaw_diagnostics_vt(glob);
 
@@ -208,7 +227,7 @@ void fclaw_diagnostics_reset(fclaw_global_t *glob)
 
 void fclaw_diagnostics_finalize(fclaw_global_t *glob)
 {
-    fclaw_diagnostics_accumulator_t *acc = glob->acc;
+    fclaw_diagnostics_accumulator_t *acc = fclaw_diagnostics_get_acc(glob);
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
     fclaw_diagnostics_vtable_t *diag_vt = fclaw_diagnostics_vt(glob);
 

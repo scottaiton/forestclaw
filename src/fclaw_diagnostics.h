@@ -106,6 +106,15 @@ struct fclaw_diagnostics_vtable
 
 fclaw_diagnostics_vtable_t* fclaw_diagnostics_vt(struct fclaw_global* glob);
 
+
+/**
+ * @brief get the accumulator for diagnostic information
+ *
+ * @param glob global context 
+ * @return fclaw_diagnostics_accumulator_t accumulator
+ */
+fclaw_diagnostics_accumulator_t* fclaw_diagnostics_get_acc(struct fclaw_global* glob);
+
 void fclaw_diagnostics_vtable_initialize(struct fclaw_global* glob);
 
 double fclaw_domain_global_minimum (struct fclaw_domain* domain, double d);

@@ -124,6 +124,23 @@ fclaw_register (fclaw_options_t* fclaw_opt, sc_options_t * opt)
     sc_options_add_bool (opt, 0, "output", &fclaw_opt->output, 0,
                             "Enable output [F]");
 
+    sc_options_add_bool (opt, 0, "checkpoint", &fclaw_opt->checkpoint, 0,
+                            "Enable checkpoint output [F]");
+
+    /* ------------------------------- Restart options --------------------------------- */
+
+    sc_options_add_bool (opt, 0, "restart", &fclaw_opt->restart, 0,
+                            "Restart from file [F]");
+
+    sc_options_add_string(opt, 0, "restart-file",
+                          &fclaw_opt->restart_file, 
+                          "","Filename of restart file. "
+                          " If defined, a restart will be performed frome the specified file. [""]");
+
+    sc_options_add_string(opt, 0, "partition-file",
+                          &fclaw_opt->partition_file, 
+                          "","Partition file associated with restart file. "
+                          " This should be specified if a restart file is specified. [""]");
 
     /* -------------------------------------- Gauges  --------------------------------- */
     /* Gauge options */
@@ -358,6 +375,7 @@ fclaw_register (fclaw_options_t* fclaw_opt, sc_options_t * opt)
     sc_options_add_double(opt, 0, "max-refinement-ratio",
                           &fclaw_opt->max_refinement_ratio, 1.0,
                           "Ratio of patches to refine before paritioning and continuing refinement. [1.0]");
+
     fclaw_opt->is_registered = 1;
     fclaw_opt->is_unpacked = 0;
 
@@ -452,116 +470,6 @@ fclaw_options_destroy(fclaw_options_t* fclaw_opt)
     FCLAW_FREE(fclaw_opt);
 }
 
-static void
-fclaw_options_destroy_void(void* user)
-{
-    fclaw_options_t* fclaw_opt = (fclaw_options_t*) user;
-    fclaw_options_destroy(fclaw_opt);
-}
-
-/* ------------------------------------------------------------------------
-  Options packing
-  ------------------------------------------------------------------------ */
-
-static size_t options_packsize(void* user){
-    fclaw_options_t* opts = (fclaw_options_t*) user;
-
-    size_t size = sizeof(fclaw_options_t);
-    size += fclaw_packsize_string(opts->run_directory);
-    size += fclaw_packsize_string(opts->scale_string);
-    size += fclaw_packsize_string(opts->shift_string);
-    size += 3*sizeof(double); //scale
-    size += 3*sizeof(double); //shift
-    size += fclaw_packsize_string(opts->tikz_figsize_string);
-    size += 2*sizeof(double); //tickz_figsize
-    size += fclaw_packsize_string(opts->tikz_plot_prefix);
-    size += fclaw_packsize_string(opts->tikz_plot_suffix);
-    size += fclaw_packsize_string(opts->prefix);
-    size += fclaw_packsize_string(opts->logging_prefix);
-
-    return size;
-}
-
-static size_t options_pack(void* user, char* buffer){
-    char* buffer_start = buffer;
-
-    fclaw_options_t* opts = (fclaw_options_t*) user;
-
-    //pack entire struct
-    buffer += FCLAW_PACK(*opts, buffer);
-
-    //append arrays to buffer
-    buffer += fclaw_pack_string(opts->run_directory, buffer);
-    buffer += fclaw_pack_string(opts->scale_string, buffer);
-    buffer += fclaw_pack_string(opts->shift_string, buffer);
-    for(size_t i = 0; i < 3; i++){
-        buffer += fclaw_pack_double(opts->scale[i], buffer);
-        buffer += fclaw_pack_double(opts->shift[i], buffer);
-    }
-    buffer += fclaw_pack_string(opts->tikz_figsize_string, buffer);
-    buffer += fclaw_pack_double(opts->tikz_figsize[0], buffer);
-    buffer += fclaw_pack_double(opts->tikz_figsize[1], buffer);
-    buffer += fclaw_pack_string(opts->tikz_plot_prefix, buffer);
-    buffer += fclaw_pack_string(opts->tikz_plot_suffix, buffer);
-    buffer += fclaw_pack_string(opts->prefix, buffer);
-    buffer += fclaw_pack_string(opts->logging_prefix, buffer);
-
-    return buffer-buffer_start;
-}
-
-static size_t options_unpack(char* buffer, void** user){
-    char* buffer_start = buffer;
-
-    fclaw_options_t** opts_ptr = (fclaw_options_t**) user;
-    *opts_ptr = FCLAW_ALLOC(fclaw_options_t,1);
-    fclaw_options_t* opts = *opts_ptr;
-
-    buffer += FCLAW_UNPACK(buffer, opts);
-
-    buffer += fclaw_unpack_string(buffer, (char **) &opts->run_directory);
-    buffer += fclaw_unpack_string(buffer, (char **) &opts->scale_string);
-    buffer += fclaw_unpack_string(buffer, (char **) &opts->shift_string);
-    opts->scale = FCLAW_ALLOC(double,3);
-    opts->shift = FCLAW_ALLOC(double,3);
-    for(size_t i = 0; i < 3; i++){
-        buffer += fclaw_unpack_double(buffer, &opts->scale[i]);
-        buffer += fclaw_unpack_double(buffer, &opts->shift[i]);
-    }
-    buffer += fclaw_unpack_string(buffer, (char **) &opts->tikz_figsize_string);
-    opts->tikz_figsize = FCLAW_ALLOC(double,2);
-    buffer += fclaw_unpack_double(buffer, &opts->tikz_figsize[0]);
-    buffer += fclaw_unpack_double(buffer, &opts->tikz_figsize[1]);
-    buffer += fclaw_unpack_string(buffer, (char **) &opts->tikz_plot_prefix);
-    buffer += fclaw_unpack_string(buffer, (char **) &opts->tikz_plot_suffix);
-    buffer += fclaw_unpack_string(buffer, (char **) &opts->prefix);
-    buffer += fclaw_unpack_string(buffer, (char **) &opts->logging_prefix);
-
-    sc_keyvalue_t *kv = opts->kv_timing_verbosity = sc_keyvalue_new ();
-    sc_keyvalue_set_int (kv, "wall",      FCLAW_TIMER_PRIORITY_WALL);
-    sc_keyvalue_set_int (kv, "summary",   FCLAW_TIMER_PRIORITY_SUMMARY);
-    sc_keyvalue_set_int (kv, "exclusive", FCLAW_TIMER_PRIORITY_EXCLUSIVE);
-    sc_keyvalue_set_int (kv, "counters",  FCLAW_TIMER_PRIORITY_COUNTERS);
-    sc_keyvalue_set_int (kv, "details",   FCLAW_TIMER_PRIORITY_DETAILS);
-    sc_keyvalue_set_int (kv, "extra",     FCLAW_TIMER_PRIORITY_EXTRA);
-    sc_keyvalue_set_int (kv, "all",       FCLAW_TIMER_PRIORITY_EXTRA);
-
-    opts->is_unpacked = 1;
-   
-    return buffer-buffer_start;
-}
-
-static fclaw_packing_vtable_t packing_vt = 
-{
-	options_pack,
-	options_unpack,
-	options_packsize,
-	fclaw_options_destroy_void
-};
-
-const fclaw_packing_vtable_t* fclaw_options_get_packing_vtable(){
-    return &packing_vt;
-}
-
 /* ------------------------------------------------------------------------
   Generic functions - these call the functions above
   ------------------------------------------------------------------------ */
@@ -623,6 +531,15 @@ options_destroy (fclaw_app_t * a, void *package, void *registered)
 
     /* Destroy option arrays created in post-process */
     fclaw_options_destroy (fclaw_opt);
+
+    /* Destroy linked list of section names */
+    sc_keyvalue_t * fclaw_opt_sections = 
+        (sc_keyvalue_t*) fclaw_app_get_attribute(a, "fclaw_opt_sections", NULL);
+    if(fclaw_opt_sections != NULL)
+    {
+        sc_keyvalue_destroy(fclaw_opt_sections);
+        fclaw_app_set_attribute(a, "fclaw_opt_sections", NULL);
+    }
 }
 
 static const fclaw_app_options_vtable_t options_vtable = {
@@ -658,10 +575,28 @@ fclaw_options_t* fclaw_options_register (fclaw_app_t * a,
                                 configfile,
                                 &options_vtable,
                                 fclaw_opt);
-    
-    /* register packing vtable */
-    fclaw_app_register_options_packing_vtable("fclaw2d", &packing_vt);
 
+    /* append to list of sections for fclaw_opts */
+    sc_keyvalue_t *fclaw_opt_sections = 
+        (sc_keyvalue_t*) fclaw_app_get_attribute(a, "fclaw_opt_sections", NULL);
+    if(fclaw_opt_sections == NULL)
+    {
+        fclaw_opt_sections = sc_keyvalue_new();
+        fclaw_app_set_attribute(a, "fclaw_opt_sections", fclaw_opt_sections);
+    }
+    char *key = strdup(section == NULL ? "Options" : section);
+    char* curr_char = key;
+    while(*curr_char != '\0')
+    {
+        *curr_char = tolower(*curr_char);
+        curr_char++;
+    }
+    /* set to 1 for the section, so if checking the section 
+       exists int the keyvalue, the return value is 1 */
+    sc_keyvalue_set_int(fclaw_opt_sections, 
+                        key,
+                        1);
+    
     return fclaw_opt;
 }
 

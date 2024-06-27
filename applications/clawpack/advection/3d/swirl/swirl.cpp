@@ -173,7 +173,18 @@ void run_program(fclaw_global_t* glob)
     /* ---------------------------------------------------------------
        Run
        --------------------------------------------------------------- */
-    fclaw_initialize(glob);
+
+    fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
+    if(fclaw_opt->restart)
+    {
+        fclaw_restart(glob);
+    }
+    else
+    {
+        fclaw_initialize(glob);
+    }
+
+
     fclaw_run(glob);
     fclaw_finalize(glob);
 }
@@ -205,9 +216,7 @@ main (int argc, char **argv)
     if (!vexit)
     {
         /* Options have been checked and are valid */
-        int size, rank;
-        sc_MPI_Comm mpicomm = fclaw_app_get_mpi_size_rank (app, &size, &rank);
-        fclaw_global_t *glob = fclaw_global_new_comm (mpicomm, size, rank);
+        fclaw_global_t *glob = fclaw_global_new(app);
 
         /* Store option packages in glob */
         fclaw_options_store           (glob, fclaw_opt);

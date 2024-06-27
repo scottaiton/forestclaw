@@ -2,6 +2,7 @@
 #define FCLAW_TEST_HPP
 #include <doctest.h>
 #include <csetjmp>
+#include <initializer_list>
 
 bool test_output_vtk();
 

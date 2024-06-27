@@ -55,7 +55,7 @@ set(HDF5_INCLUDE_DIRS ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 file(MAKE_DIRECTORY ${HDF5_INCLUDE_DIRS})
 # avoid race condition
 
-add_library(HDF5::HDF5 INTERFACE IMPORTED)
+add_library(HDF5::HDF5 INTERFACE IMPORTED GLOBAL)
 add_dependencies(HDF5::HDF5 hdf5)
 target_include_directories(HDF5::HDF5 INTERFACE "${HDF5_INCLUDE_DIRS}")
 target_link_libraries(HDF5::HDF5 INTERFACE "${HDF5_LIBRARIES}")

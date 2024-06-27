@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_patch.h>
 #include <fclaw_domain.h>
 #include <fclaw_vtable.h>
+#include <fclaw_restart.h>
 
 #if defined(_OPENMP)
 #include <omp.h>
@@ -69,54 +70,18 @@ void cb_initialize (fclaw_domain_t *domain,
 }
 
 
-
-/* -----------------------------------------------------------------
-   Public interface
-   ----------------------------------------------------------------- */
-void fclaw_initialize(fclaw_global_t *glob)
+static
+void build_initial_domain(fclaw_global_t *glob)
 {
+    fclaw_initialize_domain_flags(glob);
 	fclaw_domain_t** domain = &glob->domain;
 
-    int time_interp = 0;
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
-
-    /* set partitioning */
-    fclaw_domain_set_partitioning(*domain,  fclaw_opt->partition_for_coarsening);
-
-	/* This mapping context is needed by fortran mapping functions */
-	fclaw_map_context_t *cont = glob->cont;
-	FCLAW_MAP_SET_CONTEXT(&cont);
-
-	int maxthreads = 0;
-
-#if defined(_OPENMP)
-	maxthreads = omp_get_max_threads();
-#endif
-	
-    fclaw_global_essentialf("Max threads set to %d\n",maxthreads);
 
     int minlevel = fclaw_opt->minlevel;
     int maxlevel = fclaw_opt->maxlevel;
 
-    /* Initialize all timers */
-    int i;
-    for (i = 0; i < FCLAW_TIMER_COUNT; ++i) {
-        fclaw_timer_init (&glob->timers[i]);
-    }
-
-    /* start timing */
-    fclaw_domain_barrier (*domain);
-    fclaw_timer_start (&glob->timers[FCLAW_TIMER_WALLTIME]);
-    fclaw_timer_start (&glob->timers[FCLAW_TIMER_INIT]);
-
-    /* User defined problem setup */
-    fclaw_problem_setup(glob);
-
-    /* set specific refinement strategy */
-    fclaw_domain_set_refinement
-        (*domain, fclaw_opt->smooth_refine, fclaw_opt->smooth_level,
-         fclaw_opt->coarsen_delay);
-
+    int time_interp = 0;
 
     /* ------------------------------------------------
        Set up initial domain.
@@ -241,7 +206,57 @@ void fclaw_initialize(fclaw_global_t *glob)
                              (*domain)->global_maxlevel,0.0,
                              time_interp,FCLAW_TIMER_INIT);
     }
+}
 
+void fclaw_initialize_domain_flags(fclaw_global_t *glob)
+{
+    const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
+
+    /* set specific refinement strategy */
+    fclaw_domain_set_refinement
+        (glob->domain, fclaw_opt->smooth_refine, fclaw_opt->smooth_level,
+         fclaw_opt->coarsen_delay);
+
+    /* set partitioning */
+    fclaw_domain_set_partitioning(glob->domain,  fclaw_opt->partition_for_coarsening);
+}
+
+static void
+pre_setup(fclaw_global_t* glob)
+{
+	fclaw_domain_t** domain = &glob->domain;
+
+	/* This mapping context is needed by fortran mapping functions */
+	fclaw_map_context_t *cont = glob->cont;
+	FCLAW_MAP_SET_CONTEXT(&cont);
+
+	int maxthreads = 0;
+
+#if defined(_OPENMP)
+	maxthreads = omp_get_max_threads();
+#endif
+	
+    fclaw_global_essentialf("Max threads set to %d\n",maxthreads);
+
+
+    /* Initialize all timers */
+    int i;
+    for (i = 0; i < FCLAW_TIMER_COUNT; ++i) {
+        fclaw_timer_init (&glob->timers[i]);
+    }
+
+    /* start timing */
+    fclaw_domain_barrier (*domain);
+    fclaw_timer_start (&glob->timers[FCLAW_TIMER_WALLTIME]);
+    fclaw_timer_start (&glob->timers[FCLAW_TIMER_INIT]);
+
+    /* User defined problem setup */
+    fclaw_problem_setup(glob);
+}
+
+static void
+post_setup(fclaw_global_t* glob)
+{
     fclaw_diagnostics_initialize(glob);
     fclaw_locate_gauges(glob);
 
@@ -249,8 +264,37 @@ void fclaw_initialize(fclaw_global_t *glob)
 
     /* Print global minimum and maximum levels */
     fclaw_global_infof("Global minlevel %d maxlevel %d\n",
-                (*domain)->global_minlevel, (*domain)->global_maxlevel);
+                glob->domain->global_minlevel, glob->domain->global_maxlevel);
 
     /* Stop timer */
     fclaw_timer_stop (&glob->timers[FCLAW_TIMER_INIT]);
+}
+/* -----------------------------------------------------------------
+   Public interface
+   ----------------------------------------------------------------- */
+void fclaw_initialize(fclaw_global_t *glob)
+{
+    pre_setup(glob);
+
+    build_initial_domain(glob);
+
+    post_setup(glob);
+}
+
+void fclaw_restart(fclaw_global_t *glob)
+{
+    pre_setup(glob);
+
+    const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
+
+    const char* partition_filename = NULL;
+    if(strcmp(fclaw_opt->partition_file,"") != 0)
+    {
+        partition_filename = fclaw_opt->partition_file;
+    }
+
+    fclaw_restart_from_file(glob, fclaw_opt->restart_file,
+                            partition_filename);
+
+    post_setup(glob);
 }
