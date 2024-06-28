@@ -47,7 +47,7 @@ endif()
 # Clawpack 4.6 and 5.0 examples
 # --------------------------------------------
 
-if(TARGET FORESTCLAW::CLAWPACK4.6 AND TARGET FORESTCLAW::CLAWPACK5)
+if(FCLAW_ENABLE_CLAWPACK)
 
     include(clawpack/clawpack.cmake)
 
@@ -57,7 +57,7 @@ endif()
 # ThunderEgg solver
 # --------------------------------------------
 
-if(TARGET FORESTCLAW::FC2D_THUNDEREGG)
+if(FCLAW_ENABLE_THUNDEREGG)
 
     include(elliptic/elliptic.cmake)
 
@@ -69,7 +69,7 @@ endif()
 # ----------------------------------
 # Projects under development
 # ----------------------------------
-if(TARGET FORESTCLAW::CLAWPACK4.6 AND TARGET FORESTCLAW::CLAWPACK5)
+if(FCLAW_ENABLE_CLAWPACK)
 
     # Development projects
     #include(development.cmake)
@@ -79,7 +79,7 @@ endif()
 # ----------------------------------
 # Projects for paper
 # ----------------------------------
-if(TARGET FORESTCLAW::CLAWPACK4.6 AND TARGET FORESTCLAW::CLAWPACK5)
+if(FCLAW_ENABLE_CLAWPACK)
 
     #include(paper/paper.cmake)
 
@@ -90,7 +90,7 @@ endif()
 # GeoClaw library and examples
 # ----------------------------------
 
-if(TARGET FORESTCLAW::GEOCLAW)
+if(FCLAW_ENABLE_GEOCLAW)
 
     include(geoclaw/geoclaw.cmake)
 
@@ -133,7 +133,7 @@ endif()
 # ----------------------------------
 # CudaClaw library and examples
 # ----------------------------------
-if(TARGET FORESTCLAW::CUDACLAW)
+if(FCLAW_ENABLE_CUDACLAW)
 
     include(cudaclaw/cudaclaw.cmake)
 
@@ -142,7 +142,7 @@ endif()
 # ----------------------------------
 # clawpack3 library and examples
 # ----------------------------------
-if(TARGET FORESTCLAW::CLAWPACK3_46)
+if(FCLAW_ENABLE_CLAWPACK)
 
     include(clawpack/claw3.cmake)
 
@@ -151,7 +151,7 @@ endif()
 # ----------------------------------
 # demo examples
 # ----------------------------------
-if(TARGET FORESTCLAW::CLAWPACK4.6 AND TARGET FORESTCLAW::CLAWPACK5)
+if(FCLAW_ENABLE_CLAWPACK)
     include(demo/demo.cmake)
 endif()
 
