@@ -1,4 +1,4 @@
-name: External Project Tests
+name: Fetch Content Tests
 
 on:
   push:
@@ -23,41 +23,41 @@ jobs:
       matrix:
         include:
         - name:            "Serial Minimal"
-          components:      ""
+          flags:           ""
           ubuntu_packages: ""
 
         - name:            "Serial With Clawpack"
-          components:      "clawpack"
+          flags:           "-DFCLAW_ENABLE_CLAWPACK=ON"
           ubuntu_packages: ""
 
         - name:            "Serial With GeoClaw"
-          components:      "geoclaw"
+          flags:           "-DFCLAW_ENABLE_GEOCLAW=ON"
           ubuntu_packages: ""
 
         - name:            "Serial With CudaClaw"
-          components:      "cudaclaw"
+          flags:           "-DFCLAW_ENABLE_CUDACLAW=ON"
           ubuntu_packages: "nvidia-cuda-toolkit"
           cuda:            true
 
         - name:            "MPI Minimal"
-          components:      "mpi"
+          flags:           "-DFCLAW_EANBLE_MPI=ON"
           ubuntu_packages: "libopenmpi-dev openmpi-bin"
 
         - name:            "MPI With Clawpack"
-          components:      "mpi clawpack"
+          flags:           "-DFCLAW_ENABLE_MPI=ON -DFCLAW_ENABLE_CLAWPACK=ON"
           ubuntu_packages: "libopenmpi-dev openmpi-bin"
 
         - name:            "MPI With GeoClaw"
-          components:      "mpi geoclaw"
+          flags:           "-DFCLAW_ENABLE_MPI=ON -DFCLAW_ENABLE_GEOCLAW=ON"
           ubuntu_packages: "libopenmpi-dev openmpi-bin"
 
         - name:            "MPI With CudaClaw"
-          components:      "mpi cudaclaw"
+          flags:           "-DFCLAW_ENABLE_MPI=ON -DFCLAW_ENABLE_CUDACLAW=ON"
           ubuntu_packages: "libopenmpi-dev openmpi-bin nvidia-cuda-toolkit"
           cuda:            true
 
         - name:            "MPI With ThunderEgg"
-          components:      "mpi thunderegg"
+          flags:           "-DFCLAW_ENABLE_MPI=ON -DFCLAW_ENABLE_THUNDEREGG=ON"
           ubuntu_packages: "libopenmpi-dev openmpi-bin libfftw3-dev"
 
     name: External ${{ matrix.name }} Build on Linux
@@ -72,7 +72,7 @@ jobs:
             ninja-build ${{ matrix.ubuntu_packages }}
 
     - name: CMake configure examples
-      run: cmake -B applications/build -S applications --preset ci -DTEST_EXTERNAL_PROJECT=true -DTEST_EXTERNAL_PROJECT_COMPONENTS="${{ matrix.components }}" -DTEST_EXTERNAL_PROJECT_TAG="`git rev-parse HEAD`" -DTEST_EXTERNAL_PROJECT_REPO="`pwd`"
+      run: cmake -B applications/build -S applications --preset ci -DTEST_FETCH_CONTENT=true ${{ matrix.flags }} -DTEST_FETCH_CONTENT_TAG="`git rev-parse HEAD`" -DTEST_FETCH_CONTENT_REPO="`pwd`"
 
     - name: CMake build examples
       working-directory: applications
