@@ -30,7 +30,7 @@ message(STATUS "${PROJECT_NAME} ${PROJECT_VERSION}  install prefix: ${CMAKE_INST
 
 # --- external libs
 
-if(cudaclaw)
+if(FCLAW_ENABLE_CUDACLAW)
   enable_language(CUDA)
   set(CMAKE_CUDA_STANDARD 14)
   find_package(CUDAToolkit REQUIRED)
@@ -45,14 +45,14 @@ set(SC_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 add_subdirectory(p4est)
 
 # --- ThunderEgg
-if(thunderegg)
+if(FCLAW_ENABLE_THUNDEREGG)
   git_submodule(${CMAKE_CURRENT_SOURCE_DIR}/thunderegg)
   add_subdirectory(thunderegg)
 endif()
 
 # --- configure
 
-if(hdf5 AND NOT TARGET HDF5::HDF5)
+if(FCLAW_ENABLE_HDF5 AND NOT TARGET HDF5::HDF5)
   include(cmake/hdf5.cmake)
 endif()
 
@@ -70,65 +70,46 @@ endif(BUILD_TESTING)
 add_subdirectory(src)
 
 # --- Clawpatch
-if(clawpatch)
-
-  add_subdirectory(src/patches/clawpatch)
-
-endif(clawpatch)
-
+add_subdirectory(src/patches/clawpatch)
 
 
 # --- Clawpack 4.6
-if(clawpack4.6)
+if(FCLAW_ENABLE_CLAWPACK)
 
   add_subdirectory(src/solvers/fc2d_clawpack4.6)
-
-endif(clawpack4.6)
-
-
-
-# --- Clawpack 5
-if(clawpack5)
-
   add_subdirectory(src/solvers/fc2d_clawpack5)
+  add_subdirectory(src/solvers/fc3d_clawpack46)
 
-endif(clawpack5)
+endif(FCLAW_ENABLE_CLAWPACK)
 
 
 
 # --- geoclaw
-if(geoclaw)
+if(FCLAW_ENABLE_GEOCLAW)
 
   add_subdirectory(src/solvers/fc2d_geoclaw)
 
-endif(geoclaw)
+endif(FCLAW_ENABLE_GEOCLAW)
 
 
 
 # --- cudaclaw
-if(cudaclaw)
+if(FCLAW_ENABLE_CUDACLAW)
 
   add_subdirectory(src/solvers/fc2d_cudaclaw)
 
-endif(cudaclaw)
+endif(FCLAW_ENABLE_CUDACLAW)
 
 
 
 # --- ThunderEgg
-if(thunderegg)
+if(FCLAW_ENABLE_THUNDEREGG)
 
   add_subdirectory(src/solvers/fc2d_thunderegg)
 
-endif(thunderegg)
+endif(FCLAW_ENABLE_THUNDEREGG)
 # --- package
 
-
-# --- clawpack3
-if(clawpack3_46)
-
-  add_subdirectory(src/solvers/fc3d_clawpack46)
-
-endif(clawpack3_46)
 
 # -- put together in final library
 
@@ -137,7 +118,7 @@ include(cmake/install.cmake)
 
 
 # --- examples
-if(applications)
+if(FCLAW_ENABLE_APPLICATIONS)
   add_subdirectory(applications)
 endif()
 
