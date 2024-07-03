@@ -159,6 +159,9 @@ typedef struct fclaw3d_domain_persist
                                      the desired refinement level to neighbors. */
     int smooth_level;           /**< The minimum level that refinement smoothing
                                      is enabled on.  Use 0 for al levels. */
+    int skip_local;             /**< Boolean: If true the patch data of patches
+                                     that stay local is not packed during
+                                     partitioning. */
 }
 fclaw3d_domain_persist_t;
 
@@ -798,9 +801,13 @@ void fclaw3d_domain_set_refinement (fclaw3d_domain_t * domain,
  * \param [in] partition_for_coarsening Boolean:  If true, all future partitions
  *                              of the domain allow one level of coarsening.
  *                              Suggested default: 1.
+ * \param [in] skip_local       Boolean: If true, the patch data of patches that
+ *                              stay local are not packed during partitioning.
+ *                              Suggested default: 1.
  */
 void fclaw3d_domain_set_partitioning (fclaw3d_domain_t * domain,
-                                      int partition_for_coarsening);
+                                      int partition_for_coarsening,
+                                      int skip_local);
 
 /** Mark a patch for refinement.
  * This must ONLY be called for local patches.

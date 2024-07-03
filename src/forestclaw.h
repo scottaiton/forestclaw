@@ -863,9 +863,13 @@ void fclaw_domain_set_refinement (fclaw_domain_t * domain,
  * \param [in] partition_for_coarsening Boolean:  If true, all future partitions
  *                              of the domain allow one level of coarsening.
  *                              Suggested default: 1.
+ * \param [in] skip_local       Boolean: If true, the patch data of patches that
+ *                              stay local are not packed during partitioning.
+ *                              Suggested default: 1.
  */
 void fclaw_domain_set_partitioning (fclaw_domain_t * domain,
-                                    int partition_for_coarsening);
+                                    int partition_for_coarsening,
+                                    int skip_local);
 
 /** Mark a patch for refinement.
  * This must ONLY be called for local patches.

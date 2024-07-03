@@ -698,15 +698,15 @@ fclaw_domain_set_refinement (fclaw_domain_t * domain,
 }
 
 void
-fclaw_domain_set_partitioning(fclaw_domain_t *domain, int partition_for_coarsening)
+fclaw_domain_set_partitioning(fclaw_domain_t *domain, int partition_for_coarsening, int skip_local)
 {
     if(domain->refine_dim == 2)
     {
-        fclaw2d_domain_set_partitioning(domain->d2,partition_for_coarsening);
+        fclaw2d_domain_set_partitioning(domain->d2,partition_for_coarsening, skip_local);
     }
     else if (domain->refine_dim == 3)
     {
-        fclaw3d_domain_set_partitioning(domain->d3,partition_for_coarsening);
+        fclaw3d_domain_set_partitioning(domain->d3,partition_for_coarsening, skip_local);
     }
     else
     {
