@@ -27,27 +27,28 @@
 #include <p4est_wrap.h>         /* just for testing */
 #include <fclaw2d_convenience.h>
 
-static
-void mark_refine (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
-                  int blockno, int patchno, void *user)
+static void
+mark_refine (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+             int blockno, int patchno, void *user)
 {
-    if (domain->mpirank == 1 || domain->mpirank == 3) {
+    if (domain->mpirank == 1 || domain->mpirank == 3)
+    {
         fclaw2d_patch_mark_refine (domain, blockno, patchno);
     }
 }
 
-static
-void alloc_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
-                       int blockno, int patchno, void *user)
+static void
+alloc_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+                  int blockno, int patchno, void *user)
 {
     patch->user = FCLAW_ALLOC (double, 1);
     double *patch_data = (double *) patch->user;
     *patch_data = (double) -1;
 }
 
-static
-void set_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
-                     int blockno, int patchno, void *user)
+static void
+set_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+                int blockno, int patchno, void *user)
 {
     double *patch_data = (double *) patch->user;
     *patch_data = (double) domain->mpirank * 1000 + blockno * 100 + patchno;
@@ -55,10 +56,9 @@ void set_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
 
 static int num_patches_packed;
 
-static
-void pack_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
-                      int blockno, int patchno, void *pack_data_here,
-                      void *user)
+static void
+pack_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+                 int blockno, int patchno, void *pack_data_here, void *user)
 {
     FCLAW_ASSERT (patch != NULL);
     num_patches_packed++;
@@ -68,12 +68,12 @@ void pack_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
     *pack_double_here = *patch_data;
 }
 
-static
-void transfer_patch_data (fclaw2d_domain_t * old_domain,
-                          fclaw2d_patch_t * old_patch,
-                          fclaw2d_domain_t * new_domain,
-                          fclaw2d_patch_t * new_patch, int blockno,
-                          int old_patchno, int new_patchno,void *user)
+static void
+transfer_patch_data (fclaw2d_domain_t * old_domain,
+                     fclaw2d_patch_t * old_patch,
+                     fclaw2d_domain_t * new_domain,
+                     fclaw2d_patch_t * new_patch, int blockno,
+                     int old_patchno, int new_patchno, void *user)
 {
     double *old_patch_data = (double *) old_patch->user;
     double *new_patch_data = (double *) new_patch->user;
@@ -81,10 +81,10 @@ void transfer_patch_data (fclaw2d_domain_t * old_domain,
     *new_patch_data = *old_patch_data;
 }
 
-static
-void unpack_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
-                        int blockno, int patchno, void *unpack_data_from_here,
-                        void *user)
+static void
+unpack_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+                   int blockno, int patchno, void *unpack_data_from_here,
+                   void *user)
 {
     double *unpack_double_from_here = (double *) unpack_data_from_here;
     double *patch_data = (double *) patch->user;
@@ -92,21 +92,22 @@ void unpack_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
     *patch_data = *unpack_double_from_here;
 }
 
-static
-void print_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
-                       int blockno, int patchno, void *user)
+static void
+print_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+                  int blockno, int patchno, void *user)
 {
     double *patch_data = (double *) patch->user;
 //    printf ("%d: entering patch with patchno %d.\n", domain->mpirank, patchno);
-    if (patch_data == NULL) {
+    if (patch_data == NULL)
+    {
         return;
     }
 //    printf ("%d: we have patch_data %f.\n", domain->mpirank, *patch_data);
 };
 
-static
-void delete_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
-                        int blockno, int patchno, void *user)
+static void
+delete_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+                   int blockno, int patchno, void *user)
 {
     FCLAW_FREE (patch->user);
 };
@@ -147,11 +148,12 @@ main (int argc, char **argv)
     partitioned_domain = fclaw2d_domain_partition (refined_domain, 0);
 
     fclaw_global_productionf ("Starting pack data transfer.\n");
-    fclaw2d_domain_iterate_patches (partitioned_domain, alloc_patch_data, NULL);
+    fclaw2d_domain_iterate_patches (partitioned_domain, alloc_patch_data,
+                                    NULL);
 
     num_patches_packed = 0;
     fclaw2d_domain_partition_t *p;
-    p = fclaw2d_domain_iterate_pack (refined_domain, sizeof(double),
+    p = fclaw2d_domain_iterate_pack (refined_domain, sizeof (double),
                                      pack_patch_data, NULL);
     fclaw_infof ("Packed %d of %d local patches.\n", num_patches_packed,
                  refined_domain->local_num_patches);
@@ -163,17 +165,19 @@ main (int argc, char **argv)
     fclaw2d_domain_partition_free (p);
 
 //    sleep (domain->mpirank);
-    fclaw2d_domain_iterate_patches (partitioned_domain, print_patch_data, NULL);
+    fclaw2d_domain_iterate_patches (partitioned_domain, print_patch_data,
+                                    NULL);
 
     fclaw2d_domain_complete (partitioned_domain);
 
     fclaw2d_domain_iterate_patches (refined_domain, delete_patch_data, NULL);
-    fclaw2d_domain_iterate_patches (partitioned_domain, delete_patch_data, NULL);
+    fclaw2d_domain_iterate_patches (partitioned_domain, delete_patch_data,
+                                    NULL);
     fclaw2d_domain_destroy (domain);
     fclaw2d_domain_destroy (refined_domain);
     fclaw2d_domain_destroy (partitioned_domain);
 
-    fclaw_global_destroy(glob);
+    fclaw_global_destroy (glob);
 
     fclaw_app_destroy (app);
 
