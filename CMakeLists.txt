@@ -39,15 +39,31 @@ endif()
 # --- p4est, sc
 include(cmake/GitSubmodule.cmake)
 
-git_submodule(${CMAKE_CURRENT_SOURCE_DIR}/p4est)
-set(P4EST_BUILD_TESTING OFF CACHE BOOL "" FORCE)
-set(SC_BUILD_TESTING OFF CACHE BOOL "" FORCE)
-add_subdirectory(p4est)
+if(FCLAW_ENABLE_SUBMODULES)
+
+  git_submodule(${CMAKE_CURRENT_SOURCE_DIR}/p4est)
+  set(P4EST_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  set(SC_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  add_subdirectory(p4est)
+
+else()
+
+  find_package(P4EST CONFIG REQUIRED)
+
+endif()
 
 # --- ThunderEgg
 if(FCLAW_ENABLE_THUNDEREGG)
-  git_submodule(${CMAKE_CURRENT_SOURCE_DIR}/thunderegg)
-  add_subdirectory(thunderegg)
+  if(FCLAW_ENABLE_SUBMODULES)
+
+    git_submodule(${CMAKE_CURRENT_SOURCE_DIR}/thunderegg)
+    add_subdirectory(thunderegg)
+
+  else()
+
+    find_package(ThunderEgg REQUIRED)
+
+  endif()
 endif()
 
 # --- configure
