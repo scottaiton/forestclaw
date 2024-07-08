@@ -4,7 +4,7 @@ on:
   push:
     paths-ignore:
        - '.github/workflows/*.yml'
-       - '!.github/workflows/ci_external_project.yml'
+       - '!.github/workflows/ci_fetch_content.yml'
   pull_request:
   release:
     types: [published]
