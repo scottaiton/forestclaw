@@ -1,4 +1,15 @@
-option(mpi "use MPI library")
+option(FCLAW_ENABLE_MPI "use MPI library")
+option(FCLAW_ENABLE_OPENMP "use OpenMP")
+option(FCLAW_ENABLE_APPLICATIONS "build applications" ${PROJECT_IS_TOP_LEVEL})
+option(FCLAW_ENABLE_HDF5 "use HDF5 library")
+
+option(FCLAW_ENABLE_CLAWPATCH "build Clawpatch")
+option(FCLAW_ENABLE_CLAWPACK "build Clawpack")
+option(FCLAW_ENABLE_GEOCLAW "build Geoclaw")
+option(FCLAW_ENABLE_CUDACLAW "build CudaClaw")
+option(FCLAW_ENABLE_THUNDEREGG "build ThunderEgg")
+
+#option(mpi "use MPI library")
 option(openmp "use OpenMP")
 option(applications "build applications" ${PROJECT_IS_TOP_LEVEL})
 option(hdf5 "use HDF5 library")
@@ -39,8 +50,12 @@ endif()
 
 
 # enable needed dependencies
-if(mpi AND hdf5)
+if(FCLAW_ENABLE_MPI AND FCLAW_ENABLE_HDF5)
   set(hdf5_parallel ON)
+endif()
+
+if(FCLAW_ENABLE_MPI)
+  set(mpi ON)
 endif()
 
 if(clawpack)
