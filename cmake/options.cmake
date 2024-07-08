@@ -1,24 +1,17 @@
-option(FCLAW_ENABLE_MPI "use MPI library")
-option(FCLAW_ENABLE_OPENMP "use OpenMP")
-option(FCLAW_ENABLE_APPLICATIONS "build applications" ${PROJECT_IS_TOP_LEVEL})
-option(FCLAW_ENABLE_HDF5 "use HDF5 library")
+option(FCLAW_ENABLE_MPI "use MPI library" ${mpi})
+option(FCLAW_ENABLE_OPENMP "use OpenMP" ${openmp})
+option(FCLAW_ENABLE_HDF5 "use HDF5 library" ${hdf5})
 
-option(FCLAW_ENABLE_CLAWPATCH "build Clawpatch")
-option(FCLAW_ENABLE_CLAWPACK "build Clawpack")
-option(FCLAW_ENABLE_GEOCLAW "build Geoclaw")
-option(FCLAW_ENABLE_CUDACLAW "build CudaClaw")
-option(FCLAW_ENABLE_THUNDEREGG "build ThunderEgg")
+if(NOT DEFINED applications AND ${PROJECT_IS_TOP_LEVEL})
+  set(applications ON)
+endif()
+option(FCLAW_ENABLE_APPLICATIONS "build applications" ${applications})
 
-#option(mpi "use MPI library")
-option(openmp "use OpenMP")
-option(applications "build applications" ${PROJECT_IS_TOP_LEVEL})
-option(hdf5 "use HDF5 library")
-
-option(clawpatch "build Clawpatch")
-option(clawpack "build Clawpack")
-option(geoclaw "build Geoclaw")
-option(cudaclaw "build CudaClaw")
-option(thunderegg "build ThunderEgg")
+option(FCLAW_ENABLE_CLAWPATCH "build Clawpatch" ${clawpatch})
+option(FCLAW_ENABLE_CLAWPACK "build Clawpack" ${clawpack})
+option(FCLAW_ENABLE_GEOCLAW "build Geoclaw" ${geoclaw})
+option(FCLAW_ENABLE_CUDACLAW "build CudaClaw" ${cudaclaw})
+option(FCLAW_ENABLE_THUNDEREGG "build ThunderEgg" ${thunderegg})
 
 # needed by ThunderEgg, P4EST, Libsc
 
@@ -53,33 +46,6 @@ endif()
 if(FCLAW_ENABLE_MPI AND FCLAW_ENABLE_HDF5)
   set(hdf5_parallel ON)
 endif()
-
-if(FCLAW_ENABLE_MPI)
-  set(mpi ON)
-endif()
-
-if(clawpack)
-  set(clawpatch ON)
-  set(clawpack4.6 ON)
-  set(clawpack5 ON)
-  set(clawpatch ON)
-  set(clawpack3_46 ON)
-endif(clawpack)
-
-if(geoclaw)
-  set(clawpatch ON)
-endif(geoclaw)
-
-if(cudaclaw)
-  set(clawpatch ON)
-  set(clawpack4.6 ON)
-  set(clawpack5 ON)
-endif(cudaclaw)
-
-if(thunderegg)
-  set(clawpatch ON)
-  set(clawpack4.6 ON)
-endif(thunderegg)
 
 # Necessary for shared library with Visual Studio / Windows oneAPI
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true)
