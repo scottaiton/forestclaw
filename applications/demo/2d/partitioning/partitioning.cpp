@@ -136,46 +136,54 @@ main (int argc, char **argv)
     fclaw2d_domain_set_partitioning (domain, 1, 1);
     FCLAW_ASSERT (domain->p.skip_local == 1);
 
-    fclaw2d_domain_iterate_patches (domain, mark_refine, NULL);
+    if (domain->mpisize != 1)
+    {
+        fclaw2d_domain_iterate_patches (domain, mark_refine, NULL);
 
-    refined_domain = fclaw2d_domain_adapt (domain);
+        refined_domain = fclaw2d_domain_adapt (domain);
 
-    fclaw2d_domain_iterate_patches (refined_domain, alloc_patch_data, NULL);
-    fclaw2d_domain_iterate_patches (refined_domain, set_patch_data, NULL);
-    sleep (domain->mpirank);
-    fclaw2d_domain_iterate_patches (refined_domain, print_patch_data, NULL);
+        fclaw2d_domain_iterate_patches (refined_domain, alloc_patch_data,
+                                        NULL);
+        fclaw2d_domain_iterate_patches (refined_domain, set_patch_data, NULL);
+        sleep (domain->mpirank);
+        fclaw2d_domain_iterate_patches (refined_domain, print_patch_data,
+                                        NULL);
 
-    partitioned_domain = fclaw2d_domain_partition (refined_domain, 0);
+        partitioned_domain = fclaw2d_domain_partition (refined_domain, 0);
 
-    fclaw_global_productionf ("Starting pack data transfer.\n");
-    fclaw2d_domain_iterate_patches (partitioned_domain, alloc_patch_data,
-                                    NULL);
+        fclaw_global_productionf ("Starting pack data transfer.\n");
+        fclaw2d_domain_iterate_patches (partitioned_domain, alloc_patch_data,
+                                        NULL);
 
-    num_patches_packed = 0;
-    fclaw2d_domain_partition_t *p;
-    p = fclaw2d_domain_iterate_pack (refined_domain, sizeof (double),
-                                     pack_patch_data, NULL);
-    fclaw_infof ("Packed %d of %d local patches.\n", num_patches_packed,
-                 refined_domain->local_num_patches);
+        num_patches_packed = 0;
+        fclaw2d_domain_partition_t *p;
+        p = fclaw2d_domain_iterate_pack (refined_domain, sizeof (double),
+                                         pack_patch_data, NULL);
+        fclaw_infof ("Packed %d of %d local patches.\n", num_patches_packed,
+                     refined_domain->local_num_patches);
 
-    fclaw2d_domain_iterate_unpack (partitioned_domain, p, unpack_patch_data,
-                                   NULL);
-    fclaw2d_domain_iterate_transfer (refined_domain, partitioned_domain,
-                                     transfer_patch_data, NULL);
-    fclaw2d_domain_partition_free (p);
+        fclaw2d_domain_iterate_unpack (partitioned_domain, p,
+                                       unpack_patch_data, NULL);
+        fclaw2d_domain_iterate_transfer (refined_domain, partitioned_domain,
+                                         transfer_patch_data, NULL);
+        fclaw2d_domain_partition_free (p);
 
-//    sleep (domain->mpirank);
-    fclaw2d_domain_iterate_patches (partitioned_domain, print_patch_data,
-                                    NULL);
+//        sleep (domain->mpirank);
+        fclaw2d_domain_iterate_patches (partitioned_domain, print_patch_data,
+                                        NULL);
 
-    fclaw2d_domain_complete (partitioned_domain);
+        fclaw2d_domain_complete (partitioned_domain);
 
-    fclaw2d_domain_iterate_patches (refined_domain, delete_patch_data, NULL);
-    fclaw2d_domain_iterate_patches (partitioned_domain, delete_patch_data,
-                                    NULL);
+        fclaw2d_domain_iterate_patches (refined_domain, delete_patch_data,
+                                        NULL);
+        fclaw2d_domain_iterate_patches (partitioned_domain, delete_patch_data,
+                                        NULL);
+
+        fclaw2d_domain_destroy (partitioned_domain);
+        fclaw2d_domain_destroy (refined_domain);
+    }
+
     fclaw2d_domain_destroy (domain);
-    fclaw2d_domain_destroy (refined_domain);
-    fclaw2d_domain_destroy (partitioned_domain);
 
     fclaw_global_destroy (glob);
 
