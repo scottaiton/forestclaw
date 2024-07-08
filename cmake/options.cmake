@@ -13,6 +13,11 @@ option(FCLAW_ENABLE_GEOCLAW "build Geoclaw" ${geoclaw})
 option(FCLAW_ENABLE_CUDACLAW "build CudaClaw" ${cudaclaw})
 option(FCLAW_ENABLE_THUNDEREGG "build ThunderEgg" ${thunderegg})
 
+if(NOT DEFINED submodules)
+  set(submodules ON)
+endif()
+option(FCLAW_ENABLE_SUBMODULES "use submodules for depedencies" ${submodules})
+
 # needed by ThunderEgg, P4EST, Libsc
 
 option(CMAKE_TLS_VERIFY "verify TLS cert" on)
