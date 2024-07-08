@@ -931,7 +931,9 @@ void fclaw3d_domain_iterate_partitioned (fclaw3d_domain_t * old_domain,
 typedef struct fclaw3d_domain_partition
 {
     sc_array_t *src_data; /**< The patch data to send */
+    sc_array_t *src_sizes; /**< The patch data sizes to send */
     sc_array_t *dest_data; /**< The patch data to receive */
+    sc_array_t *dest_sizes; /**< The patch data sizes to receive */
     /** Temporary storage required for asynchronous patch data transfer.
      * It is allocated and freed by the begin/end calls below.
      */

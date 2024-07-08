@@ -53,11 +53,15 @@ void set_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
     *patch_data = (double) domain->mpirank * 1000 + blockno * 100 + patchno;
 };
 
+static int num_patches_packed;
+
 static
 void pack_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                       int blockno, int patchno, void *pack_data_here,
                       void *user)
 {
+    FCLAW_ASSERT (patch != NULL);
+    num_patches_packed++;
     double *pack_double_here = (double *) pack_data_here;
     double *patch_data = (double *) patch->user;
 
@@ -144,16 +148,21 @@ main (int argc, char **argv)
 
     fclaw_global_productionf ("Starting pack data transfer.\n");
     fclaw2d_domain_iterate_patches (partitioned_domain, alloc_patch_data, NULL);
+
+    num_patches_packed = 0;
     fclaw2d_domain_partition_t *p;
     p = fclaw2d_domain_iterate_pack (refined_domain, sizeof(double),
                                      pack_patch_data, NULL);
+    fclaw_infof ("Packed %d of %d local patches.\n", num_patches_packed,
+                 refined_domain->local_num_patches);
+
     fclaw2d_domain_iterate_unpack (partitioned_domain, p, unpack_patch_data,
                                    NULL);
     fclaw2d_domain_iterate_transfer (refined_domain, partitioned_domain,
                                      transfer_patch_data, NULL);
     fclaw2d_domain_partition_free (p);
 
-    sleep (domain->mpirank);
+//    sleep (domain->mpirank);
     fclaw2d_domain_iterate_patches (partitioned_domain, print_patch_data, NULL);
 
     fclaw2d_domain_complete (partitioned_domain);
