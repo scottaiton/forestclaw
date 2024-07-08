@@ -27,37 +27,37 @@ jobs:
           ubuntu_packages: ""
 
         - name:            "Serial With Clawpack"
-          flags:           "-DFCLAW_ENABLE_CLAWPACK=ON"
+          flags:           "-Dclawpack=ON"
           ubuntu_packages: ""
 
         - name:            "Serial With GeoClaw"
-          flags:           "-DFCLAW_ENABLE_GEOCLAW=ON"
+          flags:           "-Dgeoclaw=ON"
           ubuntu_packages: ""
 
         - name:            "Serial With CudaClaw"
-          flags:           "-DFCLAW_ENABLE_CUDACLAW=ON"
+          flags:           "-Dcudaclaw=ON"
           ubuntu_packages: "nvidia-cuda-toolkit"
           cuda:            true
 
         - name:            "MPI Minimal"
-          flags:           "-DFCLAW_EANBLE_MPI=ON"
+          flags:           "-Dmpi=ON"
           ubuntu_packages: "libopenmpi-dev openmpi-bin"
 
         - name:            "MPI With Clawpack"
-          flags:           "-DFCLAW_ENABLE_MPI=ON -DFCLAW_ENABLE_CLAWPACK=ON"
+          flags:           "-Dmpi=ON -Dclawpack=ON"
           ubuntu_packages: "libopenmpi-dev openmpi-bin"
 
         - name:            "MPI With GeoClaw"
-          flags:           "-DFCLAW_ENABLE_MPI=ON -DFCLAW_ENABLE_GEOCLAW=ON"
+          flags:           "-Dmpi=ON -Dgeoclaw=ON"
           ubuntu_packages: "libopenmpi-dev openmpi-bin"
 
         - name:            "MPI With CudaClaw"
-          flags:           "-DFCLAW_ENABLE_MPI=ON -DFCLAW_ENABLE_CUDACLAW=ON"
+          flags:           "-Dmpi=ON -Dcudaclaw=ON"
           ubuntu_packages: "libopenmpi-dev openmpi-bin nvidia-cuda-toolkit"
           cuda:            true
 
         - name:            "MPI With ThunderEgg"
-          flags:           "-DFCLAW_ENABLE_MPI=ON -DFCLAW_ENABLE_THUNDEREGG=ON"
+          flags:           "-Dmpi=ON -Dthunderegg=ON"
           ubuntu_packages: "libopenmpi-dev openmpi-bin libfftw3-dev"
 
     name: External ${{ matrix.name }} Build on Linux
