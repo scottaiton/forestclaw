@@ -208,7 +208,6 @@ void fclaw_global_iterate_partitioned (fclaw_global_t * glob,
 void fclaw_global_options_store (fclaw_global_t* glob, const char* key, void* options)
 {
     
-    FCLAW_ASSERT(fclaw_pointer_map_get(glob->options,key) == NULL);
     fclaw_pointer_map_insert(glob->options, key, options, NULL);
 }
 
