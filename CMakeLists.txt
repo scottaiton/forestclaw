@@ -69,7 +69,15 @@ endif()
 # --- configure
 
 if(FCLAW_ENABLE_HDF5 AND NOT TARGET HDF5::HDF5)
-  include(cmake/hdf5.cmake)
+  if(FCLAW_ENABLE_SUBMODULES)
+
+    include(cmake/hdf5.cmake)
+
+  else()
+
+    find_package(HDF5 REQUIRED)
+
+  endif()
 endif()
 
 include(cmake/config.cmake)
