@@ -86,22 +86,28 @@ TEST_CASE("fclaw_clawpatch_get_options fails if not intialized")
 	fclaw_global_destroy(glob2);
 }
 
-TEST_CASE("fclaw_clawpatch_options_store fails if called twice on a glob")
+TEST_CASE("fclaw_clawpatch_options_store called twice on a glob")
 {
 	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
-	fclaw_clawpatch_options_t* opts1 = fclaw_clawpatch_options_new(2);
-	fclaw_clawpatch_options_t* opts2 = fclaw_clawpatch_options_new(3);
+	fclaw_clawpatch_options_t* opts1_1 = fclaw_clawpatch_options_new(2);
+	fclaw_clawpatch_options_t* opts1_2 = fclaw_clawpatch_options_new(2);
+	fclaw_clawpatch_options_t* opts2_1 = fclaw_clawpatch_options_new(3);
+	fclaw_clawpatch_options_t* opts2_2 = fclaw_clawpatch_options_new(3);
 
-	fclaw_clawpatch_options_store(glob1, opts1);
-	CHECK_SC_ABORTED(fclaw_clawpatch_options_store(glob1, FCLAW_ALLOC_ZERO(fclaw_clawpatch_options_t,1)));
+	fclaw_clawpatch_options_store(glob1, opts1_1);
+	fclaw_clawpatch_options_store(glob1, opts1_2);
+	CHECK_EQ(fclaw_clawpatch_get_options(glob1), opts1_2);
 
-	fclaw_clawpatch_options_store(glob2, opts2);
-	CHECK_SC_ABORTED(fclaw_clawpatch_options_store(glob2, FCLAW_ALLOC_ZERO(fclaw_clawpatch_options_t,1)));
+	fclaw_clawpatch_options_store(glob2, opts2_1);
+	fclaw_clawpatch_options_store(glob2, opts2_2);
+	CHECK_EQ(fclaw_clawpatch_get_options(glob2), opts2_2);
 
-	fclaw_clawpatch_options_destroy(opts1);
-	fclaw_clawpatch_options_destroy(opts2);
+	fclaw_clawpatch_options_destroy(opts1_1);
+	fclaw_clawpatch_options_destroy(opts1_2);
+	fclaw_clawpatch_options_destroy(opts2_1);
+	fclaw_clawpatch_options_destroy(opts2_2);
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
 }
