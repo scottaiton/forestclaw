@@ -9,7 +9,7 @@
       external rpn2,rpt2, flux2
 
       integer maxm,meqn,maux,mbc,mcapa,mwaves,mx,my, mwork
-      integer maxmx, maxmy, level, ierror
+      integer maxmx, maxmy, level, ierror, use_fwaves
       integer method(7), mthlim(mwaves)
       integer block_corner_count(0:3)
 
@@ -95,8 +95,8 @@ c     # update q
       dtdx = dt/dx
       dtdy = dt/dy
       do m = 1,meqn
-         do i = 1,mx
-            do j = 1,my
+         do i = 1-mbc,mx+mbc-1
+            do j = 1-mbc,my+mbc-1
                if (mcapa.eq.0) then
 c                 # no capa array.  Standard flux differencing:
                   qold(m,i,j) = qold(m,i,j)

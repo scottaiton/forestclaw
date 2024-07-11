@@ -4,7 +4,7 @@ function [xp,yp,zp] = mapc2m(xc1,yc1)
 global notpillowsphere;
 
 map = 'cubedsphere';
-% map = 'pillowsphere';
+map = 'pillowsphere';
 
 b = getblocknumber();
 

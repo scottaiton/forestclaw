@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012 Carsten Burstedde, Donna Calhoun
+Copyright (c) 2012-2023 Carsten Burstedde, Donna Calhoun
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -24,69 +24,250 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "sphere_user.h"
-#include <fclaw_forestclaw.h>
 
-#include <fc2d_clawpack46.h>
+#include <fclaw_include_all.h>
+
+#include <fclaw_clawpatch_pillow.h>
+#include <fclaw_clawpatch.h>
+#include <fclaw_clawpatch_options.h>
+
+#include <fclaw2d_clawpatch_fort.h>
+
+#include <fc2d_clawpack46.h> 
+#include <fc2d_clawpack46_fort.h>
+#include <fc2d_clawpack46_options.h>
+#include <clawpack46_user_fort.h>
 
 
-static fc2d_clawpack46_vtable_t classic_claw;
+#include <fc2d_clawpack5.h> 
+#include <fc2d_clawpack5_fort.h>
+#include <fc2d_clawpack5_options.h>
+#include <clawpack5_user_fort.h>
 
-static fclaw_vtable_t vt;
+#if 0
+// Fix syntax highlighting
+#endif
 
-void sphere_link_solvers(fclaw_domain_t *domain)
+
+static
+void sphere_problem_setup(fclaw_global_t* glob)
 {
-    fclaw2d_init_vtable(&vt);
-    fc2d_clawpack46_init_vtable(&classic_claw);
+    const user_options_t* user = sphere_get_options(glob);
+    const fclaw_options_t* fclaw_opt = fclaw_get_options(glob);
 
-    vt.problem_setup = &fc2d_clawpack46_setprob;
-    classic_claw.setprob = &SETPROB;
+    if (glob->mpirank == 0)
+    {
+        FILE *f = fopen("setprob_2d.data","w");
+        fprintf(f,  "%-24d   %s",user->example,"\% example\n");
+        fprintf(f,  "%-24.16f   %s",user->gravity,"\% gravity\n");
+        fprintf(f,  "%-24d   %s",user->mapping,"\% mapping\n");
+        fprintf(f,  "%-24d   %s",user->init_cond,"\% initial_condition\n");        
 
-    vt.patch_setup = &sphere_patch_manifold_setup;
-    /* classic_claw.setaux = &SETAUX_SPHERE; */
+        fprintf(f,  "%-24.16f   %s",user->hin,"\% hin\n");
+        fprintf(f,  "%-24.16f   %s",user->hout,"\% hout\n");
 
-    vt.patch_initialize = &fc2d_clawpack46_qinit;
-    classic_claw.qinit = &QINIT;
+        fprintf(f,  "%-24.16f   %s",user->ring_inner,"\% ring-inner\n");
+        fprintf(f,  "%-24.16f   %s",user->ring_outer,"\% ring-outer\n");
+        fprintf(f,  "%-24d   %s",user->ring_units,"\% ring_units\n");
 
-    vt.patch_physical_bc = &fc2d_clawpack46_bc2;     /* Needed for lat-long grid */
+        fprintf(f,  "%-24.16f   %s",user->latitude[0],"\% latitude\n");
+        fprintf(f,  "%-24.16f   %s",user->latitude[1],"\% latitude\n");
+        fprintf(f,  "%-24.16f   %s",user->longitude[0],"\% longitude\n");
+        fprintf(f,  "%-24.16f   %s",user->longitude[1],"\% longitude\n");
 
-    vt.metric_compute_area = &fclaw2d_metric_compute_area;
+        fprintf(f,  "%-24.16f   %s",user->center[0],"\% center[0]\n");
+        fprintf(f,  "%-24.16f   %s",user->center[1],"\% center[1]\n");
+        fprintf(f,  "%-24.16f   %s",user->center[2],"\% center[2]\n");
 
-    vt.patch_single_step_update = &fc2d_clawpack46_update;  /* Includes b4step2 and src2 */
-    classic_claw.b4step2 = &B4STEP2;
-    classic_claw.rpn2 = &RPN2;
-    classic_claw.rpt2 = &RPT2;
+        fprintf(f,  "%-24.16f   %s",user->theta_wave,"\% theta_wave\n");
+        fprintf(f,  "%-24.16f   %s",user->theta_ridge,"\% theta_ridge\n");
+        fprintf(f,  "%-24.16f   %s",user->gravity_ridge,"\% gravity_ridge\n");
+        fprintf(f,  "%-24.16f   %s",user->ampl, "\% ampl\n");
+        fprintf(f,  "%-24.16f   %s",user->alpha,"\% alpha\n");
+        fprintf(f,  "%-24.16f   %s",user->speed,"\% speed\n");
+        fprintf(f,  "%-24.16f   %s",user->bathy[0],"\% bathy[0]\n");
+        fprintf(f,  "%-24.16f   %s",user->bathy[1],"\% bathy[1]\n");
 
+        fprintf(f,  "%-24.16f   %s",fclaw_opt->refine_threshold,"\% refine_threshold\n");
+        fprintf(f,  "%-24.16f   %s",fclaw_opt->coarsen_threshold,"\% coarsen_threshold\n");
 
-    fclaw2d_set_vtable(domain,&vt);
-    fc2d_clawpack46_set_vtable(&classic_claw);
-
+        fclose(f);
+    }
+    fclaw_domain_barrier (glob->domain);
+    SETPROB();
 }
 
-void sphere_patch_manifold_setup(fclaw_domain_t *domain,
-                                fclaw_patch_t *this_patch,
-                                int this_block_idx,
-                                int this_patch_idx)
+static
+void sphere_patch_setup_manifold(fclaw_global_t *glob,
+                                 fclaw_patch_t *patch,
+                                 int blockno,
+                                 int patchno)
 {
-    int mx,my,mbc,maux;
-    double xlower,ylower,dx,dy;
-    double *aux;
-    double *xnormals, *ynormals,*xtangents;
-    double *ytangents,*surfnormals;
-    double *edgelengths, *curvature;
+    //const user_options_t *user = sphere_get_options(glob);
 
-    fc2d_clawpack46_define_auxarray(domain,this_patch);
-
-    fclaw_clawpatch_2d_grid_data(domain,this_patch,&mx,&my,&mbc,
+    int mx, my, mbc;
+    double xlower, ylower, dx,dy;
+    fclaw_clawpatch_2d_grid_data(glob,patch,&mx,&my,&mbc,
                                 &xlower,&ylower,&dx,&dy);
 
-    fc2d_clawpack46_aux_data(domain,this_patch,&aux,&maux);
-    fclaw_clawpatch_2d_metric_data2(domain,this_patch,&xnormals,&ynormals,
-                                   &xtangents,&ytangents,&surfnormals,
+    int maux;
+    double *aux;
+    fclaw_clawpatch_aux_data(glob,patch,&aux,&maux);
+
+    double *xd,*yd,*zd,*area;
+    double *xp,*yp,*zp;
+    fclaw_clawpatch_2d_metric_data(glob,patch,&xp,&yp,&zp,
+                                  &xd,&yd,&zd,&area);
+
+    double *xnormals, *ynormals,*xtangents,*ytangents;
+    double *surfnormals, *edgelengths, *curvature;
+    fclaw_clawpatch_2d_metric_data2(glob,patch,
+                                   &xnormals,&ynormals,
+                                   &xtangents,&ytangents,
+                                   &surfnormals,
                                    &edgelengths,&curvature);
 
-    SETAUX_SPHERE(&mx,&my,&mbc,&xlower,&ylower,
-                  &dx,&dy,&maux,aux,xnormals,ynormals,
-                  xtangents,ytangents,surfnormals);
 
-    fc2d_clawpack46_set_capacity(domain,this_patch,this_block_idx,this_patch_idx);
+    const user_options_t* user_opt = sphere_get_options(glob);
+    if (user_opt->claw_version == 4)
+    {
+        CLAWPACK46_SET_BLOCK(&blockno);
+        SPHERE_SETAUX(&mx,&my,&mbc,&xlower,&ylower,
+                      &dx,&dy,area,xnormals,ynormals,
+                      xtangents,ytangents,surfnormals, curvature,
+                      edgelengths,
+                      aux, &maux);
+        CLAWPACK46_UNSET_BLOCK();
+    }
+    else
+    {
+        CLAWPACK5_SET_BLOCK(&blockno);
+        SPHERE5_SETAUX(&mx,&my,&mbc,&xlower,&ylower,
+                      &dx,&dy,area,xnormals,ynormals,
+                      xtangents,ytangents,surfnormals, curvature,
+                      edgelengths,
+                      aux, &maux);
+        CLAWPACK5_UNSET_BLOCK();
+    }        
 }
+
+static
+void cb_sphere_output_ascii(fclaw_domain_t *domain,
+                             fclaw_patch_t *patch,
+                             int blockno, int patchno,
+                             void *user)
+{
+    fclaw_global_iterate_t* s = (fclaw_global_iterate_t*) user;
+    fclaw_global_t *glob = (fclaw_global_t*) s->glob;
+
+    int iframe = *((int *) s->user);    
+
+    /* Get info not readily available to user */
+    int local_num, global_num, level;
+    fclaw_patch_get_info(glob->domain,patch,
+                           blockno,patchno,
+                           &global_num, 
+                           &local_num,&level);
+
+    int mx,my,mbc;
+    double xlower,ylower,dx,dy;
+    fclaw_clawpatch_2d_grid_data(glob,patch,&mx,&my,&mbc,
+                                &xlower,&ylower,&dx,&dy);
+
+    double *q;
+    int meqn;
+    fclaw_clawpatch_soln_data(glob,patch,&q,&meqn);
+
+    double *aux;
+    int maux;
+    fclaw_clawpatch_aux_data(glob,patch,&aux,&maux);
+
+    const user_options_t* user_opt = sphere_get_options(glob);
+    if (user_opt->claw_version == 4)
+        SPHERE_FORT_WRITE_FILE(&mx,&my,&meqn, &maux,&mbc,&xlower,&ylower,
+                               &dx,&dy,q,aux,&iframe,&global_num,&level,
+                               &blockno,&glob->mpirank);
+    else
+        SPHERE5_FORT_WRITE_FILE(&mx,&my,&meqn, &maux,&mbc,&xlower,&ylower,
+                               &dx,&dy,q,aux,&iframe,&global_num,&level,
+                               &blockno,&glob->mpirank);
+}
+
+static
+void sphere_header_ascii(fclaw_global_t* glob,int iframe)
+{
+    double time = glob->curr_time;
+    int ngrids = glob->domain->global_num_patches;
+
+    const fclaw_clawpatch_options_t *clawpatch_opt = fclaw_clawpatch_get_options(glob);
+    int meqn = clawpatch_opt->meqn;
+    int maux = clawpatch_opt->maux;
+
+    SPHERE_FORT_WRITE_HEADER(&iframe,&time,&meqn,&maux,&ngrids);
+}
+
+void sphere_link_solvers(fclaw_global_t *glob)
+{
+    /* ForestClaw core functions */
+    fclaw_vtable_t *vt = fclaw_vt(glob);
+    vt->problem_setup = &sphere_problem_setup;  /* Version-independent */
+
+    fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
+    patch_vt->setup   = &sphere_patch_setup_manifold;
+
+    const user_options_t* user_opt = sphere_get_options(glob);
+    if (user_opt->mapping == 3)
+        fclaw_clawpatch_use_pillowsphere(glob);
+
+
+    /* Clawpatch functions */    
+    fclaw_clawpatch_vtable_t *clawpatch_vt = fclaw_clawpatch_vt(glob);
+    clawpatch_vt->d2->fort_user_exceeds_threshold = &USER_EXCEEDS_THRESHOLD;
+
+    clawpatch_vt->time_header_ascii = &sphere_header_ascii;
+    clawpatch_vt->cb_output_ascii   = &cb_sphere_output_ascii;
+
+    if (user_opt->claw_version == 4)
+    {
+        fc2d_clawpack46_vtable_t  *clawpack46_vt = fc2d_clawpack46_vt(glob);
+        // clawpack46_vt->b4step2        = sphere_b4step2;
+        clawpack46_vt->fort_qinit     = CLAWPACK46_QINIT;
+
+        fc2d_clawpack46_options_t *clawpack46_opt = 
+            fc2d_clawpack46_get_options(glob);
+
+        if (clawpack46_opt->use_fwaves)
+        {            
+            clawpack46_vt->fort_rpn2 = &CLAWPACK46_RPN2_FWAVE; 
+            clawpack46_vt->fort_rpt2 = &CLAWPACK46_RPT2_FWAVE;                  
+        }
+        else
+        {
+            clawpack46_vt->fort_rpn2 = &CLAWPACK46_RPN2;
+            clawpack46_vt->fort_rpt2 = &CLAWPACK46_RPT2;            
+        }
+
+        clawpack46_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
+    }
+    else
+    {
+        fc2d_clawpack5_vtable_t  *clawpack5_vt = fc2d_clawpack5_vt(glob);
+        // clawpack46_vt->b4step2        = sphere_b4step2;
+        clawpack5_vt->fort_qinit     = CLAWPACK5_QINIT;
+
+        fc2d_clawpack5_options_t *clawpack5_opt = 
+            fc2d_clawpack5_get_options(glob);
+        if (clawpack5_opt->use_fwaves)
+        {            
+            clawpack5_vt->fort_rpn2 = &CLAWPACK5_RPN2_FWAVE; 
+            clawpack5_vt->fort_rpt2 = &CLAWPACK5_RPT2_FWAVE;                  
+        }
+        else
+        {
+            clawpack5_vt->fort_rpn2 = &CLAWPACK5_RPN2;
+            clawpack5_vt->fort_rpt2 = &CLAWPACK5_RPT2;            
+        }
+
+        clawpack5_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;
+    }
+ }

@@ -27,25 +27,175 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SPHERE_USER_H
 
 #include <fclaw_clawpatch.h>
+#include <fclaw_global.h>
 
 #ifdef __cplusplus
 extern "C"
 {
-#if 0
-}
-#endif
 #endif
 
-#define SETAUX_SPHERE FCLAW_F77_FUNC(setaux_sphere,SETAUX_SPHERE)
-void SETAUX_SPHERE(const int* mx, const int* my,const int* mbc,
+#if 0
+/* For syntax highlighting */
+#endif
+
+
+typedef struct user_options
+{
+    int example;
+    double gravity;
+    int mapping;
+
+    int init_cond;
+
+    // In and out values
+    double hin;
+    double hout;
+
+    // Ring
+    double ring_inner;
+    double ring_outer;
+
+    int ring_units; /**< ring units : degrees, radians, meters */
+    sc_keyvalue_t *kv_ring_units; /**< The refinement criteria */
+
+    const char* latitude_string;
+    double *latitude;
+
+    const char* longitude_string;
+    double *longitude;
+
+    /* For ridge */
+    const char* center_string;
+    double *center;
+
+    const char* bathy_string;
+    double *bathy;
+
+    double gravity_ridge;
+    double theta_ridge;
+    double theta_wave;
+    double ampl;
+    double alpha; 
+    double speed;
+
+    int claw_version;
+
+    int is_registered;
+
+} user_options_t;
+
+
+user_options_t* sphere_options_register (fclaw_app_t * app,
+                                          const char *configfile);
+
+void sphere_options_store (fclaw_global_t* glob, user_options_t* user);
+user_options_t* sphere_get_options(fclaw_global_t* glob);
+
+void sphere_link_solvers(fclaw_global_t *glob);
+
+
+#define SPHERE_SETAUX FCLAW_F77_FUNC(sphere_setaux,SPHERE_SETAUX)
+void SPHERE_SETAUX(const int* mx, const int* my,const int* mbc,
                    const double* xlower, const double* ylower,
                    const double* dx, const double* dy,
-                   const int* maux, double aux[],
+                   double area[],
                    double xnormals[], double ynormals[],
                    double xtangents[], double ytangents[],
-                   double surnormals[]);
+                   double surnormals[],double edgelengths[],
+                   double curvature[],
+                   double aux[],int* maux);
 
-void sphere_link_solvers(fclaw_domain_t *domain);
+
+#define SPHERE5_SETAUX FCLAW_F77_FUNC(sphere5_setaux,SPHERE5_SETAUX)
+void SPHERE5_SETAUX(const int* mx, const int* my,const int* mbc,
+                    const double* xlower, const double* ylower,
+                    const double* dx, const double* dy,
+                    double area[],
+                    double xnormals[], double ynormals[],
+                    double xtangents[], double ytangents[],
+                    double surnormals[],double edgelengths[],
+                    double curvature[],
+                    double aux[],int* maux);
+
+
+#define RPN2CONS_UPDATE FCLAW_F77_FUNC(rpn2cons_update, \
+                                       RPN2CONS_UPDATE)
+
+void RPN2CONS_UPDATE(const int* meqn, const int* maux, 
+                     const int* idir, const int* iface,
+                     double q[], double aux_center[], 
+                     double aux_edge[], double flux[]);
+
+
+
+#define USER_EXCEEDS_THRESHOLD \
+                  FCLAW_F77_FUNC(user_exceeds_threshold, \
+                                  USER_EXCEEDS_THRESHOLD)
+int USER_EXCEEDS_THRESHOLD(const int *blockno,
+                                        const int* meqn, 
+                                        const double *qval, 
+                                        const double *qmin, 
+                                        const double *qmax,
+                                        const double quad[], 
+                                        const double *dx, 
+                                        const double *dy, 
+                                        const double *xc, 
+                                        const double *yc, 
+                                        const int* ivar_threshold,
+                                        const double *tag_threshold,
+                                        const int *init_flag,
+                                        const int *is_ghost);
+
+
+#define SPHERE_FORT_WRITE_HEADER FCLAW_F77_FUNC(sphere_fort_write_header,\
+                                                      SPHERE_FORT_WRITE_HEADER)
+void SPHERE_FORT_WRITE_HEADER(int* iframe, double* time, int* meqn, 
+                                    int* maux, int* ngrids);
+
+#define SPHERE_FORT_WRITE_FILE FCLAW_F77_FUNC(sphere_fort_write_file, \
+                                                    SPHERE_FORT_WRITE_FILE)
+void SPHERE_FORT_WRITE_FILE(const int* mx, 
+                                  const int* my, 
+                                  const int* meqn, 
+                                  const int* maux, 
+                                  const int* mbc, 
+                                  const double* xlower, 
+                                  const double* ylower, 
+                                  const double* dx, 
+                                  const double* dy,
+                                  double q[], double aux[], 
+                                  const int* iframe, 
+                                  const int* patch_num, 
+                                  const int* level,
+                                  const int* blockno, 
+                                  const int* mpirank);
+
+
+#define SPHERE5_FORT_WRITE_FILE FCLAW_F77_FUNC(sphere5_fort_write_file, \
+                                                    SPHERE5_FORT_WRITE_FILE)
+void SPHERE5_FORT_WRITE_FILE(const int* mx, 
+                                  const int* my, 
+                                  const int* meqn, 
+                                  const int* maux, 
+                                  const int* mbc, 
+                                  const double* xlower, 
+                                  const double* ylower, 
+                                  const double* dx, 
+                                  const double* dy,
+                                  double q[], double aux[], 
+                                  const int* iframe, 
+                                  const int* patch_num, 
+                                  const int* level,
+                                  const int* blockno, 
+                                  const int* mpirank);
+
+#define RPN2CONS_UPDATE_MANIFOLD FCLAW_F77_FUNC(rpn2cons_update_manifold, \
+                                                 RPN2CONS_UPDATE_MANIFOLD)
+
+void RPN2CONS_UPDATE_MANIFOLD(const int* meqn, const int* maux, const int* idir,
+                               const int* iface,
+                               double q[], double aux_center[], double aux_edge[],
+                               double flux[]);
 
 void sphere_patch_manifold_setup(fclaw_domain_t *domain,
                                   fclaw_patch_t *this_patch,
@@ -59,6 +209,7 @@ double sphere_patch_update(fclaw_domain_t *domain,
                             double t,
                             double dt);
 
+#if 0
 fclaw_map_context_t *
     fclaw2d_map_new_latlong (fclaw_map_context_t* brick,
                              const double scale[],
@@ -69,12 +220,9 @@ fclaw_map_context_t *
 fclaw_map_context_t * fclaw2d_map_new_cubedsphere (const double scale[],
                                                      const double shift[],
                                                      const double rotate[]);
-
+#endif                                                     
 
 #ifdef __cplusplus
-#if 0
-{
-#endif
 }
 #endif
 

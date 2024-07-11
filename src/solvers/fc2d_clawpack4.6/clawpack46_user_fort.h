@@ -99,44 +99,28 @@ void CLAWPACK46_RPN2(const int* ixy,const int* maxm, const int* meqn, const int*
                      double s[], double amdq[], double apdq[]);
 
 #define CLAWPACK46_RPT2    FCLAW_F77_FUNC(clawpack46_rpt2,   CLAWPACK46_RPT2)
-void CLAWPACK46_RPT2(const int* ixy, const int* maxm, const int* meqn, const int* mwaves,
+void CLAWPACK46_RPT2(const int* ixy, const int* maxm, const int* meqn, 
+                     const int* mwaves,
                      const int* mbc, const int* mx, double ql[], double qr[],
                      double aux1[], double aux2[], double aux3[], const int* imp,
                      double dsdq[], double bmasdq[], double bpasdq[]);
 
 
-#if 0
-/* These should actually be called CLAWPATCH46_TAG4REFINEMENT,  
-   CLAWPATCH46_TAG4COARSENING */
-#define CLAWPACK46_TAG4REFINEMENT FCLAW_F77_FUNC(clawpack46_tag4refinement, \
-                                                 CLAWPACK46_TAG4REFINEMENT)
+#define CLAWPACK46_RPN2_FWAVE    FCLAW_F77_FUNC(clawpack46_rpn2_fwave,   \
+                                                CLAWPACK46_RPN2_FWAVE)
+void CLAWPACK46_RPN2_FWAVE(const int* ixy,const int* maxm, const int* meqn, 
+                           const int* mwaves, 
+                           const int* mbc,const int* mx, double ql[], double qr[],
+                           double auxl[], double auxr[], double wave[],
+                           double s[], double amdq[], double apdq[]);
 
-void CLAWPACK46_TAG4REFINEMENT(const int* mx,const int* my,
-                               const int* mbc,const int* meqn,
-                               const double* xlower, const double* ylower,
-                               const double* dx, const double* dy,
-                               const int* blockno,
-                               double q[],
-                               const double* tag_threshold,
-                               const int* init_flag,
-                               int* tag_patch);
-
-
-
-#define CLAWPACK46_TAG4COARSENING FCLAW_F77_FUNC(clawpack46_tag4coarsening, \
-                                                CLAWPACK46_TAG4COARSENING)
-
-void CLAWPACK46_TAG4COARSENING(const int* mx, const int* my,
-                               const int* mbc, const int* meqn,
-                               double xlower[], double ylower[],
-                               const double* dx, const double* dy,
-                               const int* blockno,
-                               double q0[],double q1[],
-                               double q2[],double q3[],
-                               const double* tag_threshold,
-                               const int* initflag,
-                               int* tag_patch);
-#endif
+#define CLAWPACK46_RPT2_FWAVE    FCLAW_F77_FUNC(clawpack46_rpt2_fwave,   \
+                                                CLAWPACK46_RPT2_FWAVE)
+void CLAWPACK46_RPT2_FWAVE(const int* ixy, const int* maxm, const int* meqn, 
+                           const int* mwaves, 
+                           const int* mbc, const int* mx, double ql[], double qr[],
+                           double aux1[], double aux2[], double aux3[], const int* imp,
+                           double dsdq[], double bmasdq[], double bpasdq[]);
 
 #ifdef __cplusplus
 }

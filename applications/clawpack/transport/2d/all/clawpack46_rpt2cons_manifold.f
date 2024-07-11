@@ -1,5 +1,5 @@
       subroutine clawpack46_rpt2cons_manifold(ixy,maxm,meqn,
-     &                       mwaves,maux,mbc,mx,
+     &                       mwaves,mbc,mx,
      &                       ql,qr,aux1,aux2,aux3,imp,asdq,
      &                       bmasdq,bpasdq)
       
@@ -12,9 +12,9 @@
       double precision   asdq(1-mbc:maxm+mbc, meqn)
       double precision bmasdq(1-mbc:maxm+mbc, meqn)
       double precision bpasdq(1-mbc:maxm+mbc, meqn)
-      double precision   aux1(1-mbc:maxm+mbc, maux)
-      double precision   aux2(1-mbc:maxm+mbc, maux)
-      double precision   aux3(1-mbc:maxm+mbc, maux)
+      double precision   aux1(1-mbc:maxm+mbc, *)
+      double precision   aux2(1-mbc:maxm+mbc, *)
+      double precision   aux3(1-mbc:maxm+mbc, *)
 
 
       integer i, i1, idir

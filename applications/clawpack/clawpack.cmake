@@ -91,6 +91,7 @@ add_subdirectory(clawpack/burgers/2d/pwconst)
 ## Shallow
 add_subdirectory(clawpack/shallow/2d/radialdam)
 add_subdirectory(clawpack/shallow/2d/bump)
+add_subdirectory(clawpack/shallow/2d/sphere)
 
 ## Euler
 add_subdirectory(clawpack/euler/2d/shockbubble)

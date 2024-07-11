@@ -77,8 +77,8 @@ c
 
 c     # Include four additional arguments to avoid need for
 c     # global array
-      if (use_fwaves .eq. 0) then
-          call clawpack46_step2(maxm,maxmx,maxmy,meqn,maux, mbc,
+
+      call clawpack46_step2(maxm,maxmx,maxmy,meqn,maux, mbc,
      &          mx,my, qold,aux,dx,dy,dt,
      &          cfl,fm,fp,gm,gp,
      &          work(i0faddm),work(i0faddp),
@@ -86,22 +86,8 @@ c     # global array
      &          work(i0q1d),work(i0dtdx1),work(i0dtdy1),
      &          work(i0aux1),work(i0aux2),work(i0aux3),
      &          work(i0next),mwork1,rpn2,rpt2,flux2,
-     &          mwaves,mcapa,method,mthlim,block_corner_count,ierror)
-      else
-c         // Only difference is that we pass in rpn2fw, rpt2fw
-c         // instead of rpn2 and rpt2 (they have difference signatures). 
-c         // But fortunately, Fortran doesn't require separate 
-c         // signatures 
-          call clawpack46_step2(maxm,maxmx,maxmy,meqn,maux, mbc,
-     &          mx,my, qold,aux,dx,dy,dt,
-     &          cfl,fm,fp,gm,gp,
-     &          work(i0faddm),work(i0faddp),
-     &          work(i0gaddm),work(i0gaddp),
-     &          work(i0q1d),work(i0dtdx1),work(i0dtdy1),
-     &          work(i0aux1),work(i0aux2),work(i0aux3),
-     &          work(i0next),mwork1,rpn2fw,rpt2fw,flux2,
-     &          mwaves,mcapa,method,mthlim,block_corner_count,ierror)
-      endif
+     &          mwaves,mcapa,method,mthlim,block_corner_count,ierror,
+     &          use_fwaves)
 
 c     # update q
       dtdx = dt/dx

@@ -274,11 +274,16 @@ double clawpack46_step2(fclaw_global_t *glob,
 	clawpack_options = fc2d_clawpack46_get_options(glob);
 
 
+	FCLAW_ASSERT(claw46_vt->fort_rpn2 != NULL);
+	if (clawpack_options->order[1] > 0)
+		FCLAW_ASSERT(claw46_vt->fort_rpt2 != NULL);
+
+#if 0
 	if (clawpack_options->use_fwaves)
 	{
-		FCLAW_ASSERT(claw46_vt->fort_rpn2fw != NULL);
+		FCLAW_ASSERT(claw46_vt->fort_rpn2 != NULL);
 		if (clawpack_options->order[1] > 0)
-			FCLAW_ASSERT(claw46_vt->fort_rpt2fw != NULL);
+			FCLAW_ASSERT(claw46_vt->fort_rpt2 != NULL);
 	}
 	else
 	{
@@ -286,7 +291,7 @@ double clawpack46_step2(fclaw_global_t *glob,
 		if (clawpack_options->order[1] > 0)
 			FCLAW_ASSERT(claw46_vt->fort_rpt2 != NULL);
 	}
-
+#endif
 
 
 	int level = patch->level;
@@ -358,8 +363,11 @@ double clawpack46_step2(fclaw_global_t *glob,
 
 	if (claw46_vt->flux2 == NULL)
 	{
+#if 0		
 		claw46_vt->flux2 = (clawpack_options->use_fwaves != 0) ? &CLAWPACK46_FLUX2FW : 
 		                       &CLAWPACK46_FLUX2;	
+#endif		                       
+		claw46_vt->flux2 = &CLAWPACK46_FLUX2;
 	}
 
 	/* NOTE: qold will be overwritten in this step */
@@ -369,7 +377,7 @@ double clawpack46_step2(fclaw_global_t *glob,
 						  &mwaves,&mx, &my, qold, aux, &dx, &dy, &dt, &cflgrid,
 						  work, &mwork, &xlower, &ylower, &level,&t, fp, fm, gp, gm,
 						  claw46_vt->fort_rpn2, claw46_vt->fort_rpt2,
-						  claw46_vt->fort_rpn2fw, claw46_vt->fort_rpt2fw,
+						  claw46_vt->fort_rpn2, claw46_vt->fort_rpt2,
 						  claw46_vt->flux2,
 						  block_corner_count, &ierror, &clawpack_options->use_fwaves);
 	CLAWPACK46_UNSET_BLOCK();
@@ -391,7 +399,6 @@ double clawpack46_step2(fclaw_global_t *glob,
 		                                      cr->gp[0],cr->gp[1],
 		                                      cr->gm[0],cr->gm[1]);
 	}		
-
 
 	FCLAW_FREE(fp);
 	FCLAW_FREE(fm);

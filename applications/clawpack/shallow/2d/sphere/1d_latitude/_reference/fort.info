@@ -1,0 +1,36 @@
+tend =     0.1000D+01
+info =    0
+smallest dt =     0.1774D-03
+largest dt =     0.1000D-01
+last dt =     0.4982D-03
+largest cfl =     0.7894D+00
+last cfl =     0.7083D+00
+steps taken =2435
+
+tend =     0.2000D+01
+info =    0
+smallest dt =     0.4754D-03
+largest dt =     0.5057D-03
+last dt =     0.4754D-03
+largest cfl =     0.7502D+00
+last cfl =     0.1817D+00
+steps taken =2003
+
+tend =     0.3000D+01
+info =    0
+smallest dt =     0.2184D-03
+largest dt =     0.4936D-03
+last dt =     0.4936D-03
+largest cfl =     0.8010D+00
+last cfl =     0.6994D+00
+steps taken =2279
+
+tend =     0.4000D+01
+info =    0
+smallest dt =     0.4936D-03
+largest dt =     0.5353D-03
+last dt =     0.5341D-03
+largest cfl =     0.7500D+00
+last cfl =     0.5407D+00
+steps taken =1894
+
