@@ -15,14 +15,12 @@ set(CMAKE_CXX_STANDARD 17)
 
 # -- check if this being included as a subdirectory
 if(NOT TARGET FORESTCLAW::FORESTCLAW)
-    if(TEST_EXTERNAL_PROJECT)
-        get_filename_component(PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
-        list(APPEND CMAKE_MODULE_PATH ${PARENT_DIR}/scripts/ForestClawExternalProject)
-        include(ForestClawExternalProject)
-        ForestClawExternalProject(REPOSITORY ${TEST_EXTERNAL_PROJECT_REPO}
-                                  TAG ${TEST_EXTERNAL_PROJECT_TAG}
-                                  COMPONENTS ${TEST_EXTERNAL_PROJECT_COMPONENTS})
-
+    if(TEST_FETCH_CONTENT)
+        include(FetchContent)
+        FetchContent_Declare(forestclaw
+                             GIT_REPOSITORY ${TEST_FETCH_CONTENT_REPO}
+                             GIT_TAG ${TEST_FETCH_CONTENT_TAG})
+        FetchContent_MakeAvailable(forestclaw)
     else()
         set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
         find_package(MPI)
@@ -30,6 +28,8 @@ if(NOT TARGET FORESTCLAW::FORESTCLAW)
         # --- get installed ForestClaw package
         find_package(FORESTCLAW REQUIRED)
     endif()
+
+
     if(TARGET FORESTCLAW::CUDACLAW)
         enable_language(CUDA)
     endif()
@@ -47,7 +47,7 @@ endif()
 # Clawpack 4.6 and 5.0 examples
 # --------------------------------------------
 
-if(TARGET FORESTCLAW::CLAWPACK4.6 AND TARGET FORESTCLAW::CLAWPACK5)
+if(FCLAW_ENABLE_CLAWPACK)
 
     include(clawpack/clawpack.cmake)
 
@@ -57,7 +57,7 @@ endif()
 # ThunderEgg solver
 # --------------------------------------------
 
-if(TARGET FORESTCLAW::FC2D_THUNDEREGG)
+if(FCLAW_ENABLE_THUNDEREGG)
 
     include(elliptic/elliptic.cmake)
 
@@ -69,7 +69,7 @@ endif()
 # ----------------------------------
 # Projects under development
 # ----------------------------------
-if(TARGET FORESTCLAW::CLAWPACK4.6 AND TARGET FORESTCLAW::CLAWPACK5)
+if(FCLAW_ENABLE_CLAWPACK)
 
     # Development projects
     #include(development.cmake)
@@ -79,7 +79,7 @@ endif()
 # ----------------------------------
 # Projects for paper
 # ----------------------------------
-if(TARGET FORESTCLAW::CLAWPACK4.6 AND TARGET FORESTCLAW::CLAWPACK5)
+if(FCLAW_ENABLE_CLAWPACK)
 
     #include(paper/paper.cmake)
 
@@ -90,7 +90,7 @@ endif()
 # GeoClaw library and examples
 # ----------------------------------
 
-if(TARGET FORESTCLAW::GEOCLAW)
+if(FCLAW_ENABLE_GEOCLAW)
 
     include(geoclaw/geoclaw.cmake)
 
@@ -133,7 +133,7 @@ endif()
 # ----------------------------------
 # CudaClaw library and examples
 # ----------------------------------
-if(TARGET FORESTCLAW::CUDACLAW)
+if(FCLAW_ENABLE_CUDACLAW)
 
     include(cudaclaw/cudaclaw.cmake)
 
@@ -142,7 +142,7 @@ endif()
 # ----------------------------------
 # clawpack3 library and examples
 # ----------------------------------
-if(TARGET FORESTCLAW::CLAWPACK3_46)
+if(FCLAW_ENABLE_CLAWPACK)
 
     include(clawpack/claw3.cmake)
 
@@ -151,7 +151,7 @@ endif()
 # ----------------------------------
 # demo examples
 # ----------------------------------
-if(TARGET FORESTCLAW::CLAWPACK4.6 AND TARGET FORESTCLAW::CLAWPACK5)
+if(FCLAW_ENABLE_CLAWPACK)
     include(demo/demo.cmake)
 endif()
 

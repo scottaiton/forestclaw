@@ -60,10 +60,9 @@ add_library(forestclaw_c OBJECT
   mappings/fclaw_map_nomap_brick.c
 )
 target_include_directories(forestclaw_c PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include patches/clawpatch)
-target_link_libraries(forestclaw_c PRIVATE P4EST::P4EST SC::SC)
-if(mpi)
-  target_link_libraries(forestclaw_c PRIVATE MPI::MPI_C)
-endif(mpi)
+target_link_libraries(forestclaw_c PRIVATE P4EST::P4EST SC::SC
+$<$<BOOL:${FCLAW_ENABLE_MPI}>:MPI::MPI_C>
+)
 
 # -- fortran library
 add_library(forestclaw_f OBJECT
@@ -89,6 +88,28 @@ add_library(forestclaw_f OBJECT
   fortran_source2d/philim.f
   fortran_source2d/cellave3.f
 )
+
+# -- put together in final library
+
+add_library(forestclaw)
+set_target_properties(forestclaw PROPERTIES EXPORT_NAME FORESTCLAW)
+
+target_sources(forestclaw PRIVATE $<TARGET_OBJECTS:forestclaw_f> $<TARGET_OBJECTS:forestclaw_c>)
+
+target_link_libraries(forestclaw PUBLIC P4EST::P4EST SC::SC ${${PROJECT_NAME}_stdfs_link_flags})
+if(FCLAW_ENABLE_MPI)
+  target_link_libraries(forestclaw PUBLIC MPI::MPI_C INTERFACE MPI::MPI_CXX)
+endif(FCLAW_ENABLE_MPI)
+
+target_include_directories(forestclaw
+  INTERFACE
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+# imported target, for use from FetchContent
+add_library(FORESTCLAW::FORESTCLAW INTERFACE IMPORTED GLOBAL)
+target_link_libraries(FORESTCLAW::FORESTCLAW INTERFACE forestclaw)
 
 install(FILES
   forestclaw.h
@@ -149,6 +170,8 @@ install(FILES
   fclaw3d_wrap.h
   TYPE INCLUDE
 )
+
+install(TARGETS forestclaw EXPORT ${PROJECT_NAME}-targets)
 
 if(BUILD_TESTING)
   add_executable(forestclaw.TEST
