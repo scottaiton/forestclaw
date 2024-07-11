@@ -30,7 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_options.h>
 
 #include <fclaw_gauges.h>
-#include <fclaw_pointer_map.h>
 
 static
 fclaw_diagnostics_vtable_t* diagnostics_vt_new()
@@ -56,7 +55,7 @@ void diagnostics_accumulator_destroy(void* acc)
 fclaw_diagnostics_vtable_t* fclaw_diagnostics_vt(fclaw_global_t* glob)
 {
 	fclaw_diagnostics_vtable_t* diagnostics_vt = (fclaw_diagnostics_vtable_t*) 
-	   							fclaw_pointer_map_get(glob->vtables, "fclaw2d_diagnostics");
+	   							fclaw_global_get_vtable(glob, "fclaw2d_diagnostics");
 	FCLAW_ASSERT(diagnostics_vt != NULL);
 	FCLAW_ASSERT(diagnostics_vt->is_set != 0);
     return diagnostics_vt;
@@ -97,8 +96,7 @@ void fclaw_diagnostics_vtable_initialize(fclaw_global_t* glob)
 
     diag_vt->is_set = 1;
 
-	FCLAW_ASSERT(fclaw_pointer_map_get(glob->vtables,"fclaw2d_diagnostics") == NULL);
-	fclaw_pointer_map_insert(glob->vtables, "fclaw2d_diagnostics", diag_vt, diagnostics_vt_destroy);
+	fclaw_global_vtable_store(glob, "fclaw2d_diagnostics", diag_vt, diagnostics_vt_destroy);
 }
 
 

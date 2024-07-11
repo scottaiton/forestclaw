@@ -35,8 +35,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fclaw2d_metric.h"
 #include "fclaw2d_metric.hpp"
 
-#include <fclaw_pointer_map.h>
-
 #include <fclaw_global.h>
 #include <fclaw_patch.h>  
 
@@ -311,7 +309,7 @@ void metric_vt_destroy(void* vt)
 fclaw2d_metric_vtable_t* fclaw2d_metric_vt(fclaw_global_t* glob)
 {
 	fclaw2d_metric_vtable_t* metric_vt = (fclaw2d_metric_vtable_t*) 
-	   							fclaw_pointer_map_get(glob->vtables, METRIC_VTABLE_NAME);
+	   							fclaw_global_get_vtable(glob, METRIC_VTABLE_NAME);
 	FCLAW_ASSERT(metric_vt != NULL);
 	FCLAW_ASSERT(metric_vt->is_set != 0);
 	return metric_vt;
@@ -336,11 +334,7 @@ void fclaw2d_metric_vtable_initialize(fclaw_global_t* glob)
 
     metric_vt->is_set = 1;
 
-	if(fclaw_pointer_map_get(glob->vtables,METRIC_VTABLE_NAME) != NULL)
-    {
-        fclaw_abortf("Metric vtable %s already set\n",METRIC_VTABLE_NAME);
-    }
-	fclaw_pointer_map_insert(glob->vtables,METRIC_VTABLE_NAME, metric_vt, metric_vt_destroy);
+	fclaw_global_vtable_store(glob, METRIC_VTABLE_NAME, metric_vt, metric_vt_destroy);
 }
 
 

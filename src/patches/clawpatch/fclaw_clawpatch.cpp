@@ -66,8 +66,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw_map_query.h>
 
-#include <fclaw_pointer_map.h>
-
 
 
 /* ------------------------------- Static function defs ------------------------------- */
@@ -1952,12 +1950,7 @@ void fclaw_clawpatch_vtable_initialize(fclaw_global_t* glob,
 
     clawpatch_vt->is_set = 1;
 
-    if(fclaw_pointer_map_get(glob->vtables, "fclaw_clawpatch") != NULL)
-    {
-        fclaw_abortf("fclaw_clawpatch_vtable_initialize : " \
-                    "fclaw_clawpatch already initialized\n");
-    }
-    fclaw_pointer_map_insert(glob->vtables, "fclaw_clawpatch", clawpatch_vt, clawpatch_vt_destroy);
+    fclaw_global_vtable_store(glob, "fclaw_clawpatch", clawpatch_vt, clawpatch_vt_destroy);
 }
 
 /* ------------------------------- Public access functions ---------------------------- */
@@ -1975,7 +1968,7 @@ fclaw_clawpatch_vtable_t* fclaw_clawpatch_vt(fclaw_global_t* glob)
 {
 
     fclaw_clawpatch_vtable_t* clawpatch_vt = (fclaw_clawpatch_vtable_t*) 
-                          fclaw_pointer_map_get(glob->vtables, "fclaw_clawpatch");
+                          fclaw_global_get_vtable(glob, "fclaw_clawpatch");
     FCLAW_ASSERT(clawpatch_vt != nullptr);
     FCLAW_ASSERT(clawpatch_vt->is_set != 0);
     return clawpatch_vt;

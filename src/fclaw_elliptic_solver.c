@@ -23,8 +23,6 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <fclaw_pointer_map.h>
-
 #include <fclaw_elliptic_solver.h>
 #include <fclaw_global.h>
 
@@ -142,8 +140,7 @@ void fclaw_elliptic_vtable_initialize(fclaw_global_t* glob)
     /* User should set the setup, rhs and solve routines */
     elliptic_vt->is_set = 1;
 
-	FCLAW_ASSERT(fclaw_pointer_map_get(glob->vtables,"fclaw2d_elliptic") == NULL);
-	fclaw_pointer_map_insert(glob->vtables, "fclaw2d_elliptic", elliptic_vt, elliptic_vt_destroy);
+	fclaw_global_vtable_store(glob, "fclaw2d_elliptic", elliptic_vt, elliptic_vt_destroy);
 }
 
 /*----------------------------------- Access functions -------------------------------- */
@@ -151,7 +148,7 @@ void fclaw_elliptic_vtable_initialize(fclaw_global_t* glob)
 fclaw_elliptic_vtable_t* fclaw_elliptic_vt(fclaw_global_t* glob)
 {
 	fclaw_elliptic_vtable_t* elliptic_vt = (fclaw_elliptic_vtable_t*) 
-	   							fclaw_pointer_map_get(glob->vtables, "fclaw2d_elliptic");
+	   							fclaw_global_get_vtable(glob, "fclaw2d_elliptic");
 	FCLAW_ASSERT(elliptic_vt != NULL);
 	FCLAW_ASSERT(elliptic_vt->is_set != 0);
 	return elliptic_vt;
