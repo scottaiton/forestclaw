@@ -68,6 +68,7 @@ fclaw_global_t* global_new (void)
     glob->count_elliptic_grids = 0;
     glob->curr_time = 0;
     glob->cont = NULL;
+    glob->user = NULL;
 
     return glob;
 }
