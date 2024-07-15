@@ -31,6 +31,7 @@ static void
 mark_refine (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
              int blockno, int patchno, void *user)
 {
+    /* refine only some processes to ensure repartitioning */
     if (domain->mpirank == 1 || domain->mpirank == 3)
     {
         fclaw2d_patch_mark_refine (domain, blockno, patchno);
@@ -50,6 +51,7 @@ static void
 set_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                 int blockno, int patchno, void *user)
 {
+    /* set artificial patch data that allows tracking rank of origin and treeid */
     double *patch_data = (double *) patch->user;
     *patch_data = (double) domain->mpirank * 1000 + blockno * 100 + patchno;
 };
@@ -78,6 +80,7 @@ transfer_patch_data (fclaw2d_domain_t * old_domain,
     double *old_patch_data = (double *) old_patch->user;
     double *new_patch_data = (double *) new_patch->user;
 
+    /* simply copy patch data from old to new location */
     *new_patch_data = *old_patch_data;
 }
 
