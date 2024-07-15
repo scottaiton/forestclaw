@@ -836,10 +836,13 @@ typedef void (*fclaw2d_pack_callback_t) (fclaw2d_domain_t * domain,
                                          void *user);
 
 /** Start asynchronous transfer of patch data after partition.
- * The function iterates over all local patches of old partition and determines
+ * The function iterates over the local patches of old partition and determines
  * patches that have to be packed by use of \b patch_pack and send to the new
- * partition.
- * It must be followed by a call to \ref fclaw2d_domain_iterate_unpack.
+ * partition. If skip_local is set to false in the domain, \b patch_pack is
+ * called for every local patch. If skip_local is true (default), \b patch_pack
+ * is called only for local patches that are sent to a different process during
+ * partitioning.
+ * This function must be followed by a call to \ref fclaw2d_domain_iterate_unpack.
  * \param [in,out] domain       The domain before partitioning.
  * \param [in] data_size        The number of bytes of user data that has to be
  *                              packed and send per patch.
