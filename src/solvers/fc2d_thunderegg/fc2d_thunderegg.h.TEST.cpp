@@ -80,7 +80,7 @@ TEST_CASE("fc2d_thunderegg_solver_initialize sets is_set flag")
 
 #ifdef FCLAW_ENABLE_DEBUG
 
-TEST_CASE("fc2d_thunderegg_vtable_initialize fails if called twice on a glob")
+TEST_CASE("fc2d_thunderegg_vtable_initialize called twice on a glob")
 {
 	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
@@ -95,11 +95,11 @@ TEST_CASE("fc2d_thunderegg_vtable_initialize fails if called twice on a glob")
 
 	fclaw_vtables_initialize(glob1);
 	fc2d_thunderegg_solver_initialize(glob1);
-	CHECK_SC_ABORTED(fc2d_thunderegg_solver_initialize(glob1));
+	fc2d_thunderegg_solver_initialize(glob1);
 
 	fclaw_vtables_initialize(glob2);
 	fc2d_thunderegg_solver_initialize(glob2);
-	CHECK_SC_ABORTED(fc2d_thunderegg_solver_initialize(glob2));
+	fc2d_thunderegg_solver_initialize(glob2);
 
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob1);

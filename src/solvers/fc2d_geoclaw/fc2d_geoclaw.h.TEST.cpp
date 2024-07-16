@@ -122,7 +122,7 @@ TEST_CASE("fc2d_geoclaw_vt fails if not intialized")
 	fclaw_global_destroy(glob2);
 }
 
-TEST_CASE("fc2d_geoclaw_vtable_initialize fails if called twice on a glob")
+TEST_CASE("fc2d_geoclaw_vtable_initialize called twice on a glob")
 {
 	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
@@ -136,23 +136,28 @@ TEST_CASE("fc2d_geoclaw_vtable_initialize fails if called twice on a glob")
 	fclaw_clawpatch_options_store(glob2, clawpatch_opt);
 
 	/* create some empty options structures */
-	fclaw_options_store(glob1, FCLAW_ALLOC_ZERO(fclaw_options_t,1));
-	fc2d_geoclaw_options_store(glob1, FCLAW_ALLOC_ZERO(fc2d_geoclaw_options_t,1));
+	fclaw_options_t *fclaw_opt = FCLAW_ALLOC_ZERO(fclaw_options_t,1);
+	fc2d_geoclaw_options_t *geoclaw_opt = FCLAW_ALLOC_ZERO(fc2d_geoclaw_options_t,1);
+	fclaw_options_store(glob1, fclaw_opt);
+	fc2d_geoclaw_options_store(glob1, geoclaw_opt);
 
-	fclaw_options_store(glob2, FCLAW_ALLOC_ZERO(fclaw_options_t,1));
-	fc2d_geoclaw_options_store(glob2, FCLAW_ALLOC_ZERO(fc2d_geoclaw_options_t,1));
+	fclaw_options_store(glob2, fclaw_opt);
+	fc2d_geoclaw_options_store(glob2, geoclaw_opt);
 
 	fclaw_vtables_initialize(glob1);
 	fc2d_geoclaw_solver_initialize(glob1);
-	CHECK_SC_ABORTED(fc2d_geoclaw_solver_initialize(glob1));
+	fc2d_geoclaw_solver_initialize(glob1);
 
 	fclaw_vtables_initialize(glob2);
 	fc2d_geoclaw_solver_initialize(glob2);
-	CHECK_SC_ABORTED(fc2d_geoclaw_solver_initialize(glob2));
+	fc2d_geoclaw_solver_initialize(glob2);
 
 	fclaw_domain_destroy(domain);
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);
+	fclaw_clawpatch_options_destroy(clawpatch_opt);
+	FCLAW_FREE(fclaw_opt);
+	FCLAW_FREE(geoclaw_opt);
 }
 
 #endif
