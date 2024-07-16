@@ -54,15 +54,15 @@ TEST_CASE("fclaw_diagnostics_vtable_initialize sets is_set flag")
 
 #ifdef FCLAW_ENABLE_DEBUG
 
-TEST_CASE("fclaw_diagnostics_vtable_initialize fails if called twice on a glob")
+TEST_CASE("fclaw_diagnostics_vtable_initialize called twice on a glob")
 {
 	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_diagnostics_vtable_initialize(glob1);
-	CHECK_SC_ABORTED(fclaw_diagnostics_vtable_initialize(glob1));
+	fclaw_diagnostics_vtable_initialize(glob1);
 	fclaw_diagnostics_vtable_initialize(glob2);
-	CHECK_SC_ABORTED(fclaw_diagnostics_vtable_initialize(glob2));
+	fclaw_diagnostics_vtable_initialize(glob2);
 
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);

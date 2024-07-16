@@ -28,8 +28,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fc2d_thunderegg_physical_bc.h"
 #include "fc2d_thunderegg_fort.h"
 
-#include <fclaw_pointer_map.h>
-
 #include <fclaw_elliptic_solver.h>
 
 #include <fclaw_clawpatch.h>
@@ -194,8 +192,7 @@ void fc2d_thunderegg_solver_initialize(fclaw_global_t* glob)
 
 	mg_vt->is_set = 1;
 
-	FCLAW_ASSERT(fclaw_pointer_map_get(glob->vtables,"fc2d_thunderegg") == NULL);
-	fclaw_pointer_map_insert(glob->vtables, "fc2d_thunderegg", mg_vt, thunderegg_vt_destroy);
+	fclaw_global_vtable_store(glob, "fc2d_thunderegg", mg_vt, thunderegg_vt_destroy);
 }
 
 
@@ -204,7 +201,7 @@ void fc2d_thunderegg_solver_initialize(fclaw_global_t* glob)
 fc2d_thunderegg_vtable_t* fc2d_thunderegg_vt(fclaw_global_t* glob)
 {
 	fc2d_thunderegg_vtable_t* thunderegg_vt = (fc2d_thunderegg_vtable_t*) 
-	   							fclaw_pointer_map_get(glob->vtables, "fc2d_thunderegg");
+	   							fclaw_global_get_vtable(glob, "fc2d_thunderegg");
 	FCLAW_ASSERT(thunderegg_vt != NULL);
 	FCLAW_ASSERT(thunderegg_vt->is_set != 0);
 	return thunderegg_vt;

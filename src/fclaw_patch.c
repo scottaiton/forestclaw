@@ -23,8 +23,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <fclaw_pointer_map.h>
-
 #include <fclaw_patch.h>
 #include <fclaw_global.h>
 #include <fclaw_domain.h>
@@ -915,8 +913,7 @@ void fclaw_patch_vtable_initialize(fclaw_global_t* glob)
 
 	patch_vt->is_set = 1;
 
-	FCLAW_ASSERT(fclaw_pointer_map_get(glob->vtables,"fclaw2d_patch") == NULL);
-	fclaw_pointer_map_insert(glob->vtables, "fclaw2d_patch", patch_vt, patch_vt_destroy);
+	fclaw_global_vtable_store(glob, "fclaw2d_patch", patch_vt, patch_vt_destroy);
 }
 
 /* ------------------------------ User access functions ------------------------------- */
@@ -924,7 +921,7 @@ void fclaw_patch_vtable_initialize(fclaw_global_t* glob)
 fclaw_patch_vtable_t* fclaw_patch_vt(fclaw_global_t* glob)
 {
 	fclaw_patch_vtable_t* patch_vt = (fclaw_patch_vtable_t*) 
-	   							fclaw_pointer_map_get(glob->vtables, "fclaw2d_patch");
+	   							fclaw_global_get_vtable(glob, "fclaw2d_patch");
 	FCLAW_ASSERT(patch_vt != NULL);
 	FCLAW_ASSERT(patch_vt->is_set != 0);
 	return patch_vt;

@@ -28,8 +28,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fc2d_geoclaw_fort.h"
 #include "fc2d_geoclaw_output_ascii.h"
 
-#include <fclaw_pointer_map.h>
-
 #include <fclaw_gauges.h>
 #include "fc2d_geoclaw_gauges_default.h"
 
@@ -821,7 +819,7 @@ void fc2d_geoclaw_vt_destroy(void* vt)
 fc2d_geoclaw_vtable_t* fc2d_geoclaw_vt(fclaw_global_t* glob)
 {
 	fc2d_geoclaw_vtable_t* geoclaw_vt = (fc2d_geoclaw_vtable_t*) 
-	   							fclaw_pointer_map_get(glob->vtables, "fc2d_geoclaw");
+	   							fclaw_global_get_vtable(glob, "fc2d_geoclaw");
 	FCLAW_ASSERT(geoclaw_vt != NULL);
 	FCLAW_ASSERT(geoclaw_vt->is_set != 0);
 	return geoclaw_vt;
@@ -909,7 +907,6 @@ void fc2d_geoclaw_solver_initialize(fclaw_global_t* glob)
 
     geoclaw_vt->is_set = 1;
 
-	FCLAW_ASSERT(fclaw_pointer_map_get(glob->vtables,"fc2d_geoclaw") == NULL);
-	fclaw_pointer_map_insert(glob->vtables, "fc2d_geoclaw", geoclaw_vt, fc2d_geoclaw_vt_destroy);
+	fclaw_global_vtable_store(glob, "fc2d_geoclaw", geoclaw_vt, fc2d_geoclaw_vt_destroy);
 }
 

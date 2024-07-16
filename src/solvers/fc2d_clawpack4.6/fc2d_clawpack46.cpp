@@ -46,8 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_options.h>
 #include <fclaw2d_defs.h>
 
-#include <fclaw_pointer_map.h>
-
 
 /* --------------------- Clawpack solver functions (required) ------------------------- */
 
@@ -550,8 +548,7 @@ void fc2d_clawpack46_solver_initialize(fclaw_global_t* glob)
 
 	claw46_vt->is_set = 1;
 
-	FCLAW_ASSERT(fclaw_pointer_map_get(glob->vtables,"fc2d_clawpack46") == NULL);
-	fclaw_pointer_map_insert(glob->vtables, "fc2d_clawpack46", claw46_vt, clawpack46_vt_destroy);
+	fclaw_global_vtable_store(glob, "fc2d_clawpack46", claw46_vt, clawpack46_vt_destroy);
 }
 
 
@@ -563,7 +560,7 @@ void fc2d_clawpack46_solver_initialize(fclaw_global_t* glob)
 fc2d_clawpack46_vtable_t* fc2d_clawpack46_vt(fclaw_global_t* glob)
 {
 	fc2d_clawpack46_vtable_t* claw46_vt = (fc2d_clawpack46_vtable_t*) 
-	   							fclaw_pointer_map_get(glob->vtables, "fc2d_clawpack46");
+	   							fclaw_global_get_vtable(glob, "fc2d_clawpack46");
 	FCLAW_ASSERT(claw46_vt != NULL);
 	FCLAW_ASSERT(claw46_vt->is_set != 0);
 	return claw46_vt;

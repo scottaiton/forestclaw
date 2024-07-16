@@ -23,7 +23,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <fclaw_pointer_map.h>
 #include <fclaw_vtable.h>
 #include <fclaw_output.h>
 #include <fclaw_global.h>
@@ -45,7 +44,7 @@ void vt_destroy(void* vt)
 fclaw_vtable_t* fclaw_vt(fclaw_global_t *glob)
 {
 	fclaw_vtable_t* vt = (fclaw_vtable_t*) 
-	   							fclaw_pointer_map_get(glob->vtables, "fclaw2d");
+	   							fclaw_global_get_vtable(glob, "fclaw2d");
 	FCLAW_ASSERT(vt != NULL);
 	FCLAW_ASSERT(vt->is_set != 0);
 	return vt;
@@ -69,6 +68,5 @@ void fclaw_vtable_initialize(fclaw_global_t *glob)
 
     vt->is_set = 1;
 
-	FCLAW_ASSERT(fclaw_pointer_map_get(glob->vtables,"fclaw2d") == NULL);
-	fclaw_pointer_map_insert(glob->vtables, "fclaw2d", vt, vt_destroy);
+    fclaw_global_vtable_store(glob, "fclaw2d", vt, vt_destroy);
 }

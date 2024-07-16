@@ -31,8 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdlib.h>  /* For size_t */
 
-#include <fclaw_pointer_map.h>
-
 #include <fclaw_global.h>
 #include <fclaw_vtable.h>
 #include <fclaw_update_single_step.h>  
@@ -460,8 +458,7 @@ void fc2d_cudaclaw_solver_initialize(fclaw_global_t* glob)
 
     cudaclaw_vt->is_set = 1;
 
-	FCLAW_ASSERT(fclaw_pointer_map_get(glob->vtables,"fc2d_cudaclaw") == NULL);
-	fclaw_pointer_map_insert(glob->vtables, "fc2d_cudaclaw", cudaclaw_vt, cudaclaw_vt_destroy);
+	fclaw_global_vtable_store(glob, "fc2d_cudaclaw", cudaclaw_vt, cudaclaw_vt_destroy);
 }
 
 
@@ -473,7 +470,7 @@ void fc2d_cudaclaw_solver_initialize(fclaw_global_t* glob)
 fc2d_cudaclaw_vtable_t* fc2d_cudaclaw_vt(fclaw_global_t *glob)
 {
 	fc2d_cudaclaw_vtable_t* cudaclaw_vt = (fc2d_cudaclaw_vtable_t*) 
-	   							fclaw_pointer_map_get(glob->vtables, "fc2d_cudaclaw");
+	   							fclaw_global_get_vtable(glob, "fc2d_cudaclaw");
 	FCLAW_ASSERT(cudaclaw_vt != NULL);
 	FCLAW_ASSERT(cudaclaw_vt->is_set != 0);
 	return cudaclaw_vt;
