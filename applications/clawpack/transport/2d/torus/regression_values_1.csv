@@ -5,3 +5,4 @@ count_amr_regrid,9
 global_count_single_step,9694
 global_count_grids,1458
 count_ghost_exchange,81
+global_count_elliptic_grids,0
