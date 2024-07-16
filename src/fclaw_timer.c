@@ -171,13 +171,13 @@ fclaw2d_timer_report(fclaw_global_t *glob)
     FCLAW_STATS_SET (stats, glob, EXTRA4);
 
     int d = glob->count_grids_per_proc;
-    glob->count_grids_per_proc = (d > 0) ? d : 1;   /* To avoid division by zero */
+    int count_grids_per_proc = (d > 0) ? d : 1;   /* To avoid division by zero */
     d = glob->count_amr_advance;
-    glob->count_amr_advance = (d > 0) ? d : 1;   /* To avoid division by zero */
+    int count_amr_advance = (d > 0) ? d : 1;   /* To avoid division by zero */
 
-    double gpp = glob->count_grids_per_proc/       glob->count_amr_advance;
-    double glb = glob->count_grids_local_boundary/ glob->count_amr_advance;
-    double grb = glob->count_grids_remote_boundary/glob->count_amr_advance;
+    double gpp = count_grids_per_proc/             count_amr_advance;
+    double glb = glob->count_grids_local_boundary/ count_amr_advance;
+    double grb = glob->count_grids_remote_boundary/count_amr_advance;
     double gint = gpp - glb;
 
     /* compute arithmetic mean of total advance steps per processor */
