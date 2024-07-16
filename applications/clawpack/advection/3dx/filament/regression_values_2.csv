@@ -2,6 +2,6 @@ count_amr_advance,20
 global_num_patches,77
 count_amr_new_domain,14
 count_amr_regrid,20
-global_count_single_step,104
-global_count_grids,292
+global_count_single_step,5384
+global_count_grids,1744
 count_ghost_exchange,94
