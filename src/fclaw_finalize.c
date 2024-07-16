@@ -118,6 +118,12 @@ DEFINE_READ_AND_WRITE(long int,long_int,ld)
 static void 
 output_expected_values(fclaw_global_t* glob, const char* filename)
 {
+    int global_count_single_step;
+    sc_MPI_Gather(&glob->count_single_step, 1, MPI_INT, &global_count_single_step, 1, MPI_INT, 0, glob->mpicomm);
+
+    int global_count_grids;
+    sc_MPI_Gather(&glob->count_grids_per_proc, 1, MPI_INT, &global_count_grids, 1, MPI_INT, 0, glob->mpicomm);
+
     if(glob->mpirank == 0)
     {
         // open file to get expected results
@@ -132,6 +138,10 @@ output_expected_values(fclaw_global_t* glob, const char* filename)
         num_failures += read_input_and_check_int(file, "count_amr_advance", glob->count_amr_advance);
         num_failures += read_input_and_check_long_int(file, "global_num_patches", glob->domain->global_num_patches);
         num_failures += read_input_and_check_int(file, "count_amr_new_domain", glob->count_amr_new_domain);
+        num_failures += read_input_and_check_int(file, "count_amr_regrid", glob->count_amr_regrid);;
+        num_failures += read_input_and_check_int(file, "global_count_single_step", global_count_single_step);
+        num_failures += read_input_and_check_int(file, "global_count_grids", global_count_grids);
+        num_failures += read_input_and_check_int(file, "count_ghost_exchange", glob->count_ghost_exchange);
 
         // close file
         fclose(file);
@@ -154,6 +164,10 @@ output_expected_values(fclaw_global_t* glob, const char* filename)
             write_output_int(file, "count_amr_advance", glob->count_amr_advance);
             write_output_long_int(file, "global_num_patches", glob->domain->global_num_patches);
             write_output_int(file, "count_amr_new_domain", glob->count_amr_new_domain);
+            write_output_int(file, "count_amr_regrid", glob->count_amr_regrid);
+            write_output_int(file, "global_count_single_step", global_count_single_step);
+            write_output_int(file, "global_count_grids", global_count_grids);
+            write_output_int(file, "count_ghost_exchange", glob->count_ghost_exchange);
 
             //close file
             fclose(file);
