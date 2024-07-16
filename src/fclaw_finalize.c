@@ -124,6 +124,9 @@ output_expected_values(fclaw_global_t* glob, const char* filename)
     int global_count_grids;
     sc_MPI_Reduce(&glob->count_grids_per_proc, &global_count_grids, 1, sc_MPI_INT, sc_MPI_SUM, 0, glob->mpicomm);
 
+    int global_count_elliptic_grids;
+    sc_MPI_Reduce(&glob->count_elliptic_grids, &global_count_elliptic_grids, 1, sc_MPI_INT, sc_MPI_SUM, 0, glob->mpicomm);
+
     if(glob->mpirank == 0)
     {
         // open file to get expected results
@@ -142,6 +145,7 @@ output_expected_values(fclaw_global_t* glob, const char* filename)
         num_failures += read_input_and_check_int(file, "global_count_single_step", global_count_single_step);
         num_failures += read_input_and_check_int(file, "global_count_grids", global_count_grids);
         num_failures += read_input_and_check_int(file, "count_ghost_exchange", glob->count_ghost_exchange);
+        num_failures += read_input_and_check_int(file, "global_count_elliptic_grids", global_count_elliptic_grids);
 
         // close file
         fclose(file);
@@ -168,6 +172,7 @@ output_expected_values(fclaw_global_t* glob, const char* filename)
             write_output_int(file, "global_count_single_step", global_count_single_step);
             write_output_int(file, "global_count_grids", global_count_grids);
             write_output_int(file, "count_ghost_exchange", glob->count_ghost_exchange);
+            write_output_int(file, "global_count_elliptic_grids", global_count_elliptic_grids);
 
             //close file
             fclose(file);
