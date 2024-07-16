@@ -1405,7 +1405,7 @@ fclaw2d_domain_set_partitioning (fclaw2d_domain_t * domain,
 {
     p4est_wrap_t *wrap = (p4est_wrap_t *) domain->pp;
 
-    p4est_wrap_set_partitioning (wrap, partition_for_coarsening);
+    wrap->params.partition_for_coarsening = partition_for_coarsening;
     domain->p.skip_local = skip_local;
 }
 
