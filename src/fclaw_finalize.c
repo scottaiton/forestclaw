@@ -119,10 +119,10 @@ static void
 output_expected_values(fclaw_global_t* glob, const char* filename)
 {
     int global_count_single_step;
-    sc_MPI_Gather(&glob->count_single_step, 1, sc_MPI_INT, &global_count_single_step, 1, sc_MPI_INT, 0, glob->mpicomm);
+    sc_MPI_Reduce(&glob->count_single_step, &global_count_single_step, 1, sc_MPI_INT, sc_MPI_SUM, 0, glob->mpicomm);
 
     int global_count_grids;
-    sc_MPI_Gather(&glob->count_grids_per_proc, 1, sc_MPI_INT, &global_count_grids, 1, sc_MPI_INT, 0, glob->mpicomm);
+    sc_MPI_Reduce(&glob->count_grids_per_proc, &global_count_grids, 1, sc_MPI_INT, sc_MPI_SUM, 0, glob->mpicomm);
 
     if(glob->mpirank == 0)
     {
