@@ -84,10 +84,10 @@ void torus_link_solvers(fclaw_global_t *glob)
         /* Solve conservative equation using cell-centered velocity */
         /* Fwaves give best accuracy */
         claw46_opt->use_fwaves = 1;
-        claw46_vt->fort_rpn2fw = CLAWPACK46_RPN2CONS_FW_MANIFOLD; 
+        claw46_vt->fort_rpn2 = CLAWPACK46_RPN2CONS_FW_MANIFOLD; 
 
         /* Transverse solver : Conservative form */
-        claw46_vt->fort_rpt2fw  = &CLAWPACK46_RPT2CONS_MANIFOLD;  
+        claw46_vt->fort_rpt2  = &CLAWPACK46_RPT2CONS_MANIFOLD;  
 
         /* Flux function (for conservative fix) */
          claw46_vt->fort_rpn2_cons = &RPN2CONS_UPDATE_MANIFOLD;

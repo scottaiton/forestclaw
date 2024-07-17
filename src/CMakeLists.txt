@@ -27,6 +27,7 @@ add_library(forestclaw_c OBJECT
   fclaw_physical_bc.c
   fclaw_ghost_fill.c
   fclaw_output.c
+  fclaw_restart.c
   fclaw_run.c
   fclaw_diagnostics.c
   fclaw_rays.c
@@ -43,6 +44,8 @@ add_library(forestclaw_c OBJECT
   fclaw_edge_neighbors.c
   fclaw_face_neighbors.c
   fclaw_farraybox.cpp
+  fclaw_file.c
+  fclaw_context.c
   fclaw2d_convenience.c
   fclaw2d_output_tikz.c
   fclaw2d_file.c
@@ -57,10 +60,9 @@ add_library(forestclaw_c OBJECT
   mappings/fclaw_map_nomap_brick.c
 )
 target_include_directories(forestclaw_c PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include patches/clawpatch)
-target_link_libraries(forestclaw_c PRIVATE P4EST::P4EST SC::SC)
-if(mpi)
-  target_link_libraries(forestclaw_c PRIVATE MPI::MPI_C)
-endif(mpi)
+target_link_libraries(forestclaw_c PRIVATE P4EST::P4EST SC::SC
+$<$<BOOL:${FCLAW_ENABLE_MPI}>:MPI::MPI_C>
+)
 
 # -- fortran library
 add_library(forestclaw_f OBJECT
@@ -87,6 +89,28 @@ add_library(forestclaw_f OBJECT
   fortran_source2d/cellave3.f
 )
 
+# -- put together in final library
+
+add_library(forestclaw)
+set_target_properties(forestclaw PROPERTIES EXPORT_NAME FORESTCLAW)
+
+target_sources(forestclaw PRIVATE $<TARGET_OBJECTS:forestclaw_f> $<TARGET_OBJECTS:forestclaw_c>)
+
+target_link_libraries(forestclaw PUBLIC P4EST::P4EST SC::SC ${${PROJECT_NAME}_stdfs_link_flags})
+if(FCLAW_ENABLE_MPI)
+  target_link_libraries(forestclaw PUBLIC MPI::MPI_C INTERFACE MPI::MPI_CXX)
+endif(FCLAW_ENABLE_MPI)
+
+target_include_directories(forestclaw
+  INTERFACE
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+# imported target, for use from FetchContent
+add_library(FORESTCLAW::FORESTCLAW INTERFACE IMPORTED GLOBAL)
+target_link_libraries(FORESTCLAW::FORESTCLAW INTERFACE forestclaw)
+
 install(FILES
   forestclaw.h
   fclaw_convenience.h
@@ -112,6 +136,7 @@ install(FILES
 	fclaw_patch.h
 	fclaw_vtable.h
 	fclaw_output.h
+	fclaw_restart.h
 	fclaw_time_sync.h
 	fclaw_update_single_step.h
 	fclaw_physical_bc.h
@@ -129,6 +154,8 @@ install(FILES
 	fclaw_map_query.h
 	fclaw_map_query_defs.h
 	fclaw_diagnostics.h
+  fclaw_file.h
+  fclaw_context.h
 	forestclaw2d.h
 	fp_exception_glibc_extension.h
   fclaw2d_convenience.h
@@ -144,6 +171,8 @@ install(FILES
   TYPE INCLUDE
 )
 
+install(TARGETS forestclaw EXPORT ${PROJECT_NAME}-targets)
+
 if(BUILD_TESTING)
   add_executable(forestclaw.TEST
       fclaw_gauges.h.TEST.cpp
@@ -155,6 +184,7 @@ if(BUILD_TESTING)
       fclaw_options.h.TEST.cpp
       fclaw_patch.h.TEST.cpp
       fclaw_vtable.h.TEST.cpp
+      fclaw_context.h.TEST.cpp
   )
 
   target_link_libraries(forestclaw.TEST testutils forestclaw)

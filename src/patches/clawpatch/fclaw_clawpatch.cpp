@@ -66,8 +66,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw_map_query.h>
 
-#include <fclaw_pointer_map.h>
-
 
 
 /* ------------------------------- Static function defs ------------------------------- */
@@ -1550,6 +1548,53 @@ void clawpatch_partition_unpack(fclaw_global_t *glob,
     cp->griddata.copyFromMemory((double*)unpack_data_from_here);
 }
 
+/* ---------------------------- Restart ----------------------------------------------- */
+
+static
+int restart_num_pointers(fclaw_global_t *glob)
+{
+    return 1;
+}
+
+static
+void restart_pointer_sizes(fclaw_global_t *glob,
+                           size_t sizes[])
+{
+    fclaw_clawpatch_options_t* opts = fclaw_clawpatch_get_options(glob);
+    sizes[0] = sizeof(double)*opts->meqn;
+    if(opts->patch_dim == 2)
+    {
+        sizes[0] *= (opts->mx+2*opts->mbc)*(opts->my+2*opts->mbc);
+    }
+    else
+    {
+        sizes[0] *= (opts->mx+2*opts->mbc)*(opts->my+2*opts->mbc)*(opts->mz+2*opts->mbc);
+    }
+}
+static 
+void restart_names(fclaw_global_t *glob,
+                   const char *names[])
+{
+    names[0] = "q";
+}
+
+static
+void *get_pointer(fclaw_global_t *glob,
+                  fclaw_patch_t *patch,
+                  int blockno,
+                  int patchno,
+                  int pointerno)
+{
+    if (pointerno == 0)
+    {
+        return fclaw_clawpatch_get_q(glob,patch);
+    }
+    else
+    {
+        SC_ABORT_NOT_REACHED();
+    }
+}
+
 /* ------------------------------------ Virtual table  -------------------------------- */
 
 static
@@ -1850,6 +1895,12 @@ void fclaw_clawpatch_vtable_initialize(fclaw_global_t* glob,
     patch_vt->partition_pack       = clawpatch_partition_pack;
     patch_vt->partition_unpack     = clawpatch_partition_unpack;
 
+    /* restart */
+    patch_vt->checkpoint_num_pointers = restart_num_pointers;
+    patch_vt->checkpoint_pointer_sizes = restart_pointer_sizes;
+    patch_vt->checkpoint_names        = restart_names;
+    patch_vt->checkpoint_get_pointer  = get_pointer;
+
     /* output functions */
     clawpatch_vt->time_header_ascii  = fclaw_clawpatch_time_header_ascii;
     clawpatch_vt->cb_output_ascii    = cb_clawpatch_output_ascii; 
@@ -1899,12 +1950,7 @@ void fclaw_clawpatch_vtable_initialize(fclaw_global_t* glob,
 
     clawpatch_vt->is_set = 1;
 
-    if(fclaw_pointer_map_get(glob->vtables, "fclaw_clawpatch") != NULL)
-    {
-        fclaw_abortf("fclaw_clawpatch_vtable_initialize : " \
-                    "fclaw_clawpatch already initialized\n");
-    }
-    fclaw_pointer_map_insert(glob->vtables, "fclaw_clawpatch", clawpatch_vt, clawpatch_vt_destroy);
+    fclaw_global_vtable_store(glob, "fclaw_clawpatch", clawpatch_vt, clawpatch_vt_destroy);
 }
 
 /* ------------------------------- Public access functions ---------------------------- */
@@ -1922,7 +1968,7 @@ fclaw_clawpatch_vtable_t* fclaw_clawpatch_vt(fclaw_global_t* glob)
 {
 
     fclaw_clawpatch_vtable_t* clawpatch_vt = (fclaw_clawpatch_vtable_t*) 
-                          fclaw_pointer_map_get(glob->vtables, "fclaw_clawpatch");
+                          fclaw_global_get_vtable(glob, "fclaw_clawpatch");
     FCLAW_ASSERT(clawpatch_vt != nullptr);
     FCLAW_ASSERT(clawpatch_vt->is_set != 0);
     return clawpatch_vt;

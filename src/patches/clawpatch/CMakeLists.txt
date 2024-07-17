@@ -94,7 +94,7 @@ add_library(clawpatch
   ${metric}/fclaw3d_metric.cpp
   ${metric}/fclaw3d_metric_default.c
 )
-if(hdf5)
+if(FCLAW_ENABLE_HDF5)
 target_sources(clawpatch PRIVATE
   fclaw_clawpatch_output_hdf5.c
 )
@@ -110,7 +110,7 @@ target_include_directories(clawpatch
 )
 
 target_link_libraries(clawpatch PUBLIC forestclaw)
-if(hdf5)
+if(FCLAW_ENABLE_HDF5)
   target_link_libraries(clawpatch PRIVATE HDF5::HDF5)
 endif()
 
@@ -146,20 +146,19 @@ install(FILES
   ${metric}/fclaw3d_metric_default_fort.h
   TYPE INCLUDE
 )
-if(hdf5)
+if(FCLAW_ENABLE_HDF5)
 install(FILES
   fclaw_clawpatch_output_hdf5.h
   TYPE INCLUDE
 )
 endif()
 
-install(TARGETS clawpatch
-  EXPORT ${PROJECT_NAME}-targets)
+install(TARGETS clawpatch EXPORT ${PROJECT_NAME}-targets)
 
 # -- export name
-set_target_properties(clawpatch PROPERTIES EXPORT_NAME CLAWPATCH)
+set_property(TARGET clawpatch PROPERTY EXPORT_NAME CLAWPATCH)
 
-# -- imported target, for use from FetchContent
+# -- imported target, for use from parent project
 add_library(FORESTCLAW::CLAWPATCH INTERFACE IMPORTED GLOBAL)
 target_link_libraries(FORESTCLAW::CLAWPATCH INTERFACE clawpatch)
 

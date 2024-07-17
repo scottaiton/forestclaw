@@ -29,8 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 TEST_CASE("fclaw_patch_vtable_initialize stores two seperate vtables in two seperate globs")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_patch_vtable_initialize(glob1);
 	fclaw_patch_vtable_initialize(glob2);
@@ -43,7 +43,7 @@ TEST_CASE("fclaw_patch_vtable_initialize stores two seperate vtables in two sepe
 
 TEST_CASE("fclaw_patch_vtable_initialize sets is_set flag")
 {
-	fclaw_global_t* glob = fclaw_global_new();
+	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_patch_vtable_initialize(glob);
 
@@ -54,15 +54,15 @@ TEST_CASE("fclaw_patch_vtable_initialize sets is_set flag")
 
 #ifdef FCLAW_ENABLE_DEBUG
 
-TEST_CASE("fclaw_patch_vtable_initialize fails if called twice on a glob")
+TEST_CASE("fclaw_patch_vtable_initialize called twice on a glob")
 {
-	fclaw_global_t* glob1 = fclaw_global_new();
-	fclaw_global_t* glob2 = fclaw_global_new();
+	fclaw_global_t* glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 	fclaw_patch_vtable_initialize(glob1);
-	CHECK_SC_ABORTED(fclaw_patch_vtable_initialize(glob1));
+	fclaw_patch_vtable_initialize(glob1);
 	fclaw_patch_vtable_initialize(glob2);
-	CHECK_SC_ABORTED(fclaw_patch_vtable_initialize(glob2));
+	fclaw_patch_vtable_initialize(glob2);
 
 	fclaw_global_destroy(glob1);
 	fclaw_global_destroy(glob2);

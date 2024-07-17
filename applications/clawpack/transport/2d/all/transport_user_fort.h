@@ -99,11 +99,13 @@ void RPN2CONS_UPDATE_MANIFOLD(const int* meqn, const int* maux,
 #define CLAWPACK46_RPN2CONS_FW_MANIFOLD FCLAW_F77_FUNC( \
                           clawpack46_rpn2cons_fw_manifold, \
                           CLAWPACK46_RPN2CONS_FW_MANIFOLD)
-void CLAWPACK46_RPN2CONS_FW_MANIFOLD(const int* ixy, const int* maxm, const int* meqn, 
-                          const int* mwaves, 
-                          const int* mbc, const int* mx, double ql[], double qr[],
-                          double auxl[], double auxr[], double fwave[],
-                          double s[], double amdq[], double apdq[], const int* maux);
+void CLAWPACK46_RPN2CONS_FW_MANIFOLD(const int* ixy, const int* maxm, 
+                                     const int* meqn, const int* mwaves, 
+                                     const int* mbc, const int* mx, 
+                                     double ql[], double qr[],
+                                     double auxl[], double auxr[], 
+                                     double fwave[], double s[], 
+                                     double amdq[], double apdq[]);
 
 
 #define CLAWPACK46_RPT2CONS_MANIFOLD FCLAW_F77_FUNC( \
@@ -112,11 +114,12 @@ void CLAWPACK46_RPN2CONS_FW_MANIFOLD(const int* ixy, const int* maxm, const int*
 
 void CLAWPACK46_RPT2CONS_MANIFOLD(const int* ixy, const int* maxm, 
                                   const int* meqn, const int* mwaves,
-                                  const int* maux, const int* mbc, const int* mx, 
+                                  const int* mbc, const int* mx, 
                                   double ql[], double qr[],
                                   double aux1[], double aux2[], 
                                   double aux3[], const int* imp,
-                                  double dsdq[], double bmasdq[], double bpasdq[]);
+                                  double dsdq[], double bmasdq[], 
+                                  double bpasdq[]);
 
 #define CLAWPACK5_RPN2CONS_MANIFOLD    FCLAW_F77_FUNC( \
                             clawpack5_rpn2cons_manifold,\

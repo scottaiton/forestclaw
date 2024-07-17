@@ -26,6 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FC2D_CLAWPACK_FORT_H
 #define FC2D_CLAWPACK_FORT_H
 
+#include "fc2d_clawpack46.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -176,7 +178,7 @@ void CLAWPACK46_STEP2_WRAP(const int* maxm, const int* meqn, const int* maux,
 							const double* t, 
 							double fp[], double fm[], double gp[], double gm[],
 							clawpack46_fort_rpn2_t rpn2,     clawpack46_fort_rpt2_t rpt2,
-							clawpack46_fort_rpn2fw_t rpn2fw, clawpack46_fort_rpt2fw_t rpt2fw,
+							clawpack46_fort_rpn2_t rpn2fw, clawpack46_fort_rpt2_t rpt2fw,
 							clawpack46_fort_flux2_t flux2,
 							int block_corner_count[],int* ierror, const int* use_fwaves);
 

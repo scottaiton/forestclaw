@@ -54,13 +54,6 @@ fclaw_options_t* fclaw_options_register (fclaw_app_t * a,
                                          const char *section,
                                          const char *configfile);
 
-/**
- * @brief Get the packing vtable for the options
- * 
- * @return const fclaw_packing_vtable_t* the vtable
- */
-const fclaw_packing_vtable_t* fclaw_options_get_packing_vtable();
-
 /* These can be called from external routines (in torthem, for example?) */
 fclaw_exit_type_t 
 fclaw_options_postprocess (fclaw_options_t * fclaw_opt);
@@ -228,6 +221,12 @@ struct fclaw_options
     int verbosity;              /**< TODO: Do we have guidelines here? */
 
     int output;                    
+    int checkpoint;                    
+
+    int restart;                    
+    const char * restart_file; /**< filename of restart file */
+    const char * partition_file; /**< filename of partition file */
+
     int tikz_out;      /* Boolean */
 
     const char *tikz_figsize_string;

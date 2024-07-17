@@ -1,4 +1,10 @@
-cmake_minimum_required(VERSION 3.14...3.28)
+cmake_minimum_required(VERSION 3.15...3.28)
+
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+  message(FATAL_ERROR "please use out-of-source build
+  cmake -Bbuild
+  ")
+endif()
 
 include(cmake/GitVersionGen.cmake)
 
@@ -13,67 +19,65 @@ include(CTest)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
+file(GENERATE OUTPUT .gitignore CONTENT "*")
+
 set(CMAKE_CXX_STANDARD 17)
 
 # --- user options
 
 include(cmake/options.cmake)
-message(STATUS "${PROJECT_NAME} ${PROJECT_VERSION}  install prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "${PROJECT_NAME} ${PROJECT_VERSION}  install prefix: ${CMAKE_INSTALL_PREFIX}  CMake ${CMAKE_VERSION}  Toolchain ${CMAKE_TOOLCHAIN_FILE}")
 
 # --- external libs
 
-if(mpi)
-  find_package(MPI COMPONENTS C CXX REQUIRED)
-endif()
-
-if(cudaclaw)
+if(FCLAW_ENABLE_CUDACLAW)
   enable_language(CUDA)
   set(CMAKE_CUDA_STANDARD 14)
   find_package(CUDAToolkit REQUIRED)
 endif()
 
-#find_package(LAPACK)
-#find_package(BLAS)
-find_package(ZLIB)
-
 # --- p4est, sc
+include(cmake/GitSubmodule.cmake)
 
-set(CMAKE_FIND_PACKAGE_PREFER_CONFIG true)
+if(FCLAW_ENABLE_SUBMODULES)
 
-if(NOT sc_external)
-  find_package(SC HINTS ${THUNDEREGG_ROOT} ${P4EST_ROOT})
+  git_submodule(${CMAKE_CURRENT_SOURCE_DIR}/p4est)
+  set(P4EST_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  set(SC_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  add_subdirectory(p4est)
+
+else()
+
+  find_package(P4EST CONFIG REQUIRED)
+
 endif()
-if(NOT TARGET SC::SC)
-  include(cmake/sc.cmake)
-endif()
-
-
-if(NOT p4est_external)
-  find_package(P4EST HINTS ${THUNDEREGG_ROOT})
-endif()
-if(NOT TARGET P4EST::P4EST)
-  include(cmake/p4est.cmake)
-endif()
-
-
 
 # --- ThunderEgg
-if(thunderegg)
-  if(NOT thunderegg_external)
-    find_package(ThunderEgg HINTS ${THUNDEREGG_ROOT})
-  endif()
-  if(NOT TARGET ThunderEgg::ThunderEgg)
-    include(cmake/ThunderEgg.cmake)
-  endif()
-endif(thunderegg)
+if(FCLAW_ENABLE_THUNDEREGG)
+  if(FCLAW_ENABLE_SUBMODULES)
 
+    git_submodule(${CMAKE_CURRENT_SOURCE_DIR}/thunderegg)
+    add_subdirectory(thunderegg)
 
-if(cudaclaw)
-endif(cudaclaw)
+  else()
+
+    find_package(ThunderEgg REQUIRED)
+
+  endif()
+endif()
+
 # --- configure
 
-if(hdf5 AND NOT TARGET HDF5::HDF5)
-  include(cmake/hdf5.cmake)
+if(FCLAW_ENABLE_HDF5 AND NOT TARGET HDF5::HDF5)
+  if(FCLAW_ENABLE_SUBMODULES)
+
+    include(cmake/hdf5.cmake)
+
+  else()
+
+    find_package(HDF5 REQUIRED)
+
+  endif()
 endif()
 
 include(cmake/config.cmake)
@@ -89,108 +93,57 @@ endif(BUILD_TESTING)
 # --- ForestClaw
 add_subdirectory(src)
 
-
-
 # --- Clawpatch
-if(clawpatch)
-
-  add_subdirectory(src/patches/clawpatch)
-
-endif(clawpatch)
-
+add_subdirectory(src/patches/clawpatch)
 
 
 # --- Clawpack 4.6
-if(clawpack4.6)
+if(FCLAW_ENABLE_CLAWPACK)
 
   add_subdirectory(src/solvers/fc2d_clawpack4.6)
-
-endif(clawpack4.6)
-
-
-
-# --- Clawpack 5
-if(clawpack5)
-
   add_subdirectory(src/solvers/fc2d_clawpack5)
+  add_subdirectory(src/solvers/fc3d_clawpack46)
 
-endif(clawpack5)
+endif(FCLAW_ENABLE_CLAWPACK)
 
 
 
 # --- geoclaw
-if(geoclaw)
+if(FCLAW_ENABLE_GEOCLAW)
 
   add_subdirectory(src/solvers/fc2d_geoclaw)
 
-endif(geoclaw)
+endif(FCLAW_ENABLE_GEOCLAW)
 
 
 
 # --- cudaclaw
-if(cudaclaw)
+if(FCLAW_ENABLE_CUDACLAW)
 
   add_subdirectory(src/solvers/fc2d_cudaclaw)
 
-endif(cudaclaw)
+endif(FCLAW_ENABLE_CUDACLAW)
 
 
 
 # --- ThunderEgg
-if(thunderegg)
+if(FCLAW_ENABLE_THUNDEREGG)
 
   add_subdirectory(src/solvers/fc2d_thunderegg)
 
-endif(thunderegg)
+endif(FCLAW_ENABLE_THUNDEREGG)
 # --- package
 
 
-# --- clawpack3
-if(clawpack3_46)
-
-  add_subdirectory(src/solvers/fc3d_clawpack46)
-
-endif(clawpack3_46)
-
 # -- put together in final library
-
-add_library(forestclaw)
-set_target_properties(forestclaw PROPERTIES EXPORT_NAME FORESTCLAW)
-
-target_sources(forestclaw PRIVATE $<TARGET_OBJECTS:forestclaw_f> $<TARGET_OBJECTS:forestclaw_c>)
-
-target_link_libraries(forestclaw PRIVATE ZLIB::ZLIB)
-target_link_libraries(forestclaw PUBLIC P4EST::P4EST SC::SC ${${PROJECT_NAME}_stdfs_link_flags})
-if(mpi)
-  target_link_libraries(forestclaw PUBLIC MPI::MPI_C INTERFACE MPI::MPI_CXX)
-endif(mpi)
-
-target_include_directories(forestclaw
-  INTERFACE
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-
-# imported target, for use from FetchContent
-add_library(FORESTCLAW::FORESTCLAW INTERFACE IMPORTED GLOBAL)
-target_link_libraries(FORESTCLAW::FORESTCLAW INTERFACE forestclaw)
-
-install(TARGETS forestclaw
-  EXPORT ${PROJECT_NAME}-targets)
-
 
 include(cmake/pkgconf.cmake)
 include(cmake/install.cmake)
 
 
 # --- examples
-if(applications)
+if(FCLAW_ENABLE_APPLICATIONS)
   add_subdirectory(applications)
-endif(applications)
+endif()
 
 include(cmake/documentation.cmake)
-
-# --- auto-ignore build directory
-if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
-  file(GENERATE OUTPUT .gitignore CONTENT "*")
-endif()

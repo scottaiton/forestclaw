@@ -103,6 +103,16 @@ void CLAWPACK5_RPN2(const int* ixy,const int* maxm, const int* meqn,
                     double ql[], double qr[], double auxl[], double auxr[],
                     double wave[], double s[],double amdq[], double apdq[]);
 
+
+/* Riemann solvers */
+#define CLAWPACK5_RPN2_FWAVE    FCLAW_F77_FUNC(clawpack5_rpn2_fwave,  \
+                                               CLAWPACK5_RPN2_FWAVE)
+void CLAWPACK5_RPN2_FWAVE(const int* ixy,const int* maxm, const int* meqn,
+                    const int* mwaves, const int* maux,
+                    const int* mbc,const int* mx,
+                    double ql[], double qr[], double auxl[], double auxr[],
+                    double fwave[], double s[],double amdq[], double apdq[]);
+
 #define CLAWPACK5_RPT2    FCLAW_F77_FUNC(clawpack5_rpt2,    CLAWPACK5_RPT2)
 void CLAWPACK5_RPT2(const int* ixy, const int* imp,
                     const int* maxm, const int* meqn,
@@ -112,6 +122,17 @@ void CLAWPACK5_RPT2(const int* ixy, const int* imp,
                     double aux1[], double aux2[],
                     double aux3[],  double asdq[],
                     double bmasdq[], double bpasdq[]);
+
+#define CLAWPACK5_RPT2_FWAVE    FCLAW_F77_FUNC(clawpack5_rpt2_fwave, \
+                                               CLAWPACK5_RPT2_FWAVE)
+void CLAWPACK5_RPT2_FWAVE(const int* ixy, const int* imp,
+                          const int* maxm, const int* meqn,
+                          const int* mwaves, const int* maux,
+                          const int* mbc,const int* mx,
+                          double ql[], double qr[],
+                          double aux1[], double aux2[],
+                          double aux3[],  double asdq[],
+                          double bmasdq[], double bpasdq[]);
 
 
 #if 0

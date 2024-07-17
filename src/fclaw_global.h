@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_map.h>   /* Needed to store the map context */
 
 #include <fclaw_timer.h>   /* Needed to create statically allocated array of timers */
+#include <fclaw_pointer_map.h>  /* Needed to store vtables and options */
 
 #ifdef __cplusplus
 extern "C"
@@ -79,21 +80,13 @@ struct fclaw_global
     /** Solver packages for internal use. */
     struct fclaw_package_container *pkg_container;
 
-    struct fclaw_pointer_map *vtables;    /**< Vtables */
-    struct fclaw_pointer_map *options;    /**< options */
+    fclaw_pointer_map_t *vtables;    /**< Vtables */
+    fclaw_pointer_map_t *options;    /**< options */
+
+    fclaw_pointer_map_t *attributes; /**< attributes */
 
     struct fclaw_map_context* cont;
     struct fclaw_domain *domain;
-
-    /* CB: is this a good place for the accumulator?
-           Would it be possible to add and retrieve it as an anonymous
-           object that does not need to be known to this file? */
-    struct fclaw_diagnostics_accumulator *acc;
-
-    /* CB: this is application specific.
-           Would it not be cleaner to add the gauges in a way to global
-           that this file does not need to know about gauges at all? */
-    struct fclaw_gauge_info* gauge_info;
 
     void *user;
 };
@@ -115,11 +108,17 @@ struct fclaw_package_container;
 struct fclaw_diagnostics_accumulator;
 
 /** Allocate a new global structure. */
-fclaw_global_t* fclaw_global_new (void);
+fclaw_global_t* fclaw_global_new (fclaw_app_t * app);
 
 fclaw_global_t* fclaw_global_new_comm (sc_MPI_Comm mpicomm,
                                            int mpisize, int mpirank);
 
+/**
+ * @brief Destroy a global structure.
+ * This will not destroy the domain or map.
+ * 
+ * @param glob the global structure
+ */
 void fclaw_global_destroy (fclaw_global_t * glob);
 
 void fclaw_global_store_domain (fclaw_global_t* glob,
@@ -143,7 +142,7 @@ struct fclaw_map_context* fclaw_map_get(fclaw_global_t* glob);
  * @param buffer the buffer to write to
  * @return size_t number of bytes written
  */
-size_t fclaw2d_global_pack(const fclaw_global_t * glob, char* buffer);
+size_t fclaw_global_pack(fclaw_global_t * glob, char* buffer);
 
 /**
  * @brief Get the number of bytes needed to pack the global structure
@@ -151,16 +150,16 @@ size_t fclaw2d_global_pack(const fclaw_global_t * glob, char* buffer);
  * @param glob the structure
  * @return size_t the number of bytes needed to store structure
  */
-size_t fclaw2d_global_packsize(const fclaw_global_t * glob);
+size_t fclaw_global_packsize(fclaw_global_t * glob);
 
 /**
  * @brief Unpack global structure from buffer
  * 
  * @param buffer the buffer to read from
- * @param glob newly create global structure
+ * @param glob glob structure to write to
  * @return size_t number of bytes read
  */
-size_t fclaw2d_global_unpack(char* buffer, fclaw_global_t** glob);
+size_t fclaw_global_unpack(char* buffer, fclaw_global_t* glob);
 
 void fclaw_global_iterate_level (fclaw_global_t * glob, int level,
                                    fclaw_patch_callback_t pcb, void *user);
@@ -200,6 +199,58 @@ void fclaw_global_options_store (fclaw_global_t* glob, const char* key, void* op
  * @return void* the options
  */
 void* fclaw_global_get_options (fclaw_global_t* glob, const char* key);
+
+/**
+ * @brief Store an attribute structure in the glob
+ * 
+ * @param glob the global context
+ * @param key the key to store the attribute under
+ * @param attribute the attribute structure
+ * @param packing_vtable_key The key to the packing vtable, NULL if not needed
+ *                           The packing vtable is expected to be of type fclaw_packing_vtable_t
+ * @param destroy the callback to destroy the attribute, NULL if not needed
+ */
+void 
+fclaw_global_attribute_store (fclaw_global_t * glob, 
+                              const char * key, 
+                              void* attribute,
+                              const char * packing_vtable_key, 
+                              fclaw_pointer_map_value_destroy_t destroy);
+
+/**
+ * @brief Get an attribute structure from the glob
+ * 
+ * @param glob the global context
+ * @param key the key to retrieve the attribute from
+ * @return void* the attribute, NULL if not found
+ */
+void * 
+fclaw_global_get_attribute (fclaw_global_t* glob, const char* key);
+
+
+/**
+ * @brief Store a vtable
+ *
+ * @param glob the global context
+ * @param key the key
+ * @param vtable the vtable
+ * @param destroy the callback to destroy the vtable, NULL if not needed
+ */
+void 
+fclaw_global_vtable_store(fclaw_global_t * glob, 
+                          const char * key, 
+                          void * vtable,
+                          fclaw_pointer_map_value_destroy_t destroy);
+
+/**
+ * @brief Get a vtable
+ * 
+ * @param glob the global context
+ * @param key the key
+ * @return void* the vtable
+ */
+void * 
+fclaw_global_get_vtable(fclaw_global_t * glob, const char * key);
 
 /**
  * @brief Store a glob variable in static memory

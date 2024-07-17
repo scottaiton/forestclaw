@@ -206,59 +206,6 @@ fclaw_clawpatch_options_destroy (fclaw_clawpatch_options_t *clawpatch_opt)
     FCLAW_FREE(clawpatch_opt);
 }
 
-static void
-clawpatch_destroy_void(void *clawpatch_opt)
-{
-    fclaw_clawpatch_options_destroy ((fclaw_clawpatch_options_t *) clawpatch_opt);
-}
-
-static size_t 
-options_packsize(void* user)
-{
-    return sizeof(fclaw_clawpatch_options_t);
-}
-
-static size_t 
-options_pack(void* user, char* buffer)
-{
-    char* buffer_start = buffer;
-    fclaw_clawpatch_options_t* opts = (fclaw_clawpatch_options_t*) user;
-
-    //pack entire struct
-    buffer += FCLAW_PACK(*opts,buffer);
-
-    return buffer - buffer_start;
-}
-
-static size_t 
-options_unpack(char* buffer, void** user)
-{
-    char* buffer_start = buffer;
-    fclaw_clawpatch_options_t** opts_ptr = (fclaw_clawpatch_options_t**) user;
-
-    *opts_ptr = FCLAW_ALLOC(fclaw_clawpatch_options_t,1);
-
-    buffer += FCLAW_UNPACK(buffer,*opts_ptr);
-
-    (*opts_ptr)->kv_refinement_criteria = kv_refinement_criterea_new();
-
-    return buffer - buffer_start;
-}
-
-static fclaw_packing_vtable_t packing_vt = 
-{
-	options_pack,
-	options_unpack,
-	options_packsize,
-	clawpatch_destroy_void
-};
-
-const fclaw_packing_vtable_t* 
-fclaw_clawpatch_options_get_packing_vtable()
-{
-    return &packing_vt;
-}
-
 /* ------------------------------------------------------------------------
   Generic functions - these call the functions above
   ------------------------------------------------------------------------ */
@@ -272,8 +219,6 @@ options_register(fclaw_app_t * a, void *optpkg, sc_options_t * opt)
 
     fclaw_clawpatch_options_t *clawpatch_opt = 
                                (fclaw_clawpatch_options_t *) optpkg;
-
-    fclaw_app_register_options_packing_vtable("clawpatch", &packing_vt);
 
     return clawpatch_register(clawpatch_opt,opt);
 }

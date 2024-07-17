@@ -1,0 +1,79 @@
+name: Fetch Content Tests
+
+on:
+  push:
+    paths-ignore:
+       - '.github/workflows/*.yml'
+       - '!.github/workflows/ci_fetch_content.yml'
+  pull_request:
+  release:
+    types: [published]
+
+
+jobs:
+
+  linux:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 60
+    env:
+      CTEST_PARALLEL_LEVEL: 2
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - name:            "Serial Minimal"
+          flags:           ""
+          ubuntu_packages: ""
+
+        - name:            "Serial With Clawpack"
+          flags:           "-Dclawpack=ON"
+          ubuntu_packages: ""
+
+        - name:            "Serial With GeoClaw"
+          flags:           "-Dgeoclaw=ON"
+          ubuntu_packages: ""
+
+        - name:            "Serial With CudaClaw"
+          flags:           "-Dcudaclaw=ON"
+          ubuntu_packages: "nvidia-cuda-toolkit"
+          cuda:            true
+
+        - name:            "MPI Minimal"
+          flags:           "-Dmpi=ON"
+          ubuntu_packages: "libopenmpi-dev openmpi-bin"
+
+        - name:            "MPI With Clawpack"
+          flags:           "-Dmpi=ON -Dclawpack=ON"
+          ubuntu_packages: "libopenmpi-dev openmpi-bin"
+
+        - name:            "MPI With GeoClaw"
+          flags:           "-Dmpi=ON -Dgeoclaw=ON"
+          ubuntu_packages: "libopenmpi-dev openmpi-bin"
+
+        - name:            "MPI With CudaClaw"
+          flags:           "-Dmpi=ON -Dcudaclaw=ON"
+          ubuntu_packages: "libopenmpi-dev openmpi-bin nvidia-cuda-toolkit"
+          cuda:            true
+
+        - name:            "MPI With ThunderEgg"
+          flags:           "-Dmpi=ON -Dthunderegg=ON"
+          ubuntu_packages: "libopenmpi-dev openmpi-bin libfftw3-dev"
+
+    name: External ${{ matrix.name }} Build on Linux
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout source code
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update -yq
+        sudo apt-get install -yq --no-install-recommends \
+            ninja-build ${{ matrix.ubuntu_packages }}
+
+    - name: CMake configure examples
+      run: cmake -B applications/build -S applications --preset ci -DTEST_FETCH_CONTENT=true ${{ matrix.flags }} -DTEST_FETCH_CONTENT_TAG="`git rev-parse HEAD`" -DTEST_FETCH_CONTENT_REPO="`pwd`"
+
+    - name: CMake build examples
+      working-directory: applications
+      run: cmake --build --preset ci

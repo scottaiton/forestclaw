@@ -3,15 +3,17 @@ OutputDir = './';            % Default (reassign them here anyway)
 
 ForestClaw = 1;     % Plot using ForestClaw preferences.
 
-PlotType = 1;                % type of plot to produce:
-			     % 1 = pseudo-color (pcolor)
+PlotType = 4;    % type of plot to produce:
+		         % 1 = pseudo-color (pcolor)
+             % type of plot to produce:
+		     % 1 = pseudo-color (pcolor)
 			     % 2 = contour
 			     % 3 = Schlieren
 			     % 4 = scatter plot of q vs. r
 
-mq = 1;                      % which component of q to plot
+mq = 5;                      % which component of q to plot
 UserVariable = 0;            % set to 1 to specify a user-defined variable
-UserVariableFile = ' ';      % name of m-file mapping data to q
+UserVariableFile = '';      % name of m-file mapping data to q
 MappedGrid = 0;              % set to 1 if mapc2p.m exists for nonuniform grid
 Manifold = 1;
 ReadBlockNumber = 1;
@@ -30,7 +32,11 @@ PlotGridEdges = ones(1,MaxLevels);  % Plot edges of patches of each grid at
 ContourValues = [];
 %---------------------------------
 
-
 ShowUnderOverShoots = 0;
 
 PlotParallelPartitions=0;
+
+x0 = 1;
+y0 = 0;
+ScatterStyle = {'r.','y.','r.','c.','b.', 'm.'};
+UserMap1d = 1;

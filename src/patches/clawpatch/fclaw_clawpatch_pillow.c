@@ -38,8 +38,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw3d_metric.h>
 
-#include <fclaw_pointer_map.h>
-
 struct fclaw_patch_transform_data;  /* Not used here, so we leave it incomplete */
 
 static
@@ -267,9 +265,7 @@ void fclaw_clawpatch_pillow_vtable_initialize(fclaw_global_t* glob,
 
     pillow_vt->is_set = 1;
 
-    FCLAW_ASSERT(fclaw_pointer_map_get(glob->vtables, "fclaw_clawpatch_pillow_vtable") == NULL);
-    fclaw_pointer_map_insert(glob->vtables, "fclaw_clawpatch_pillow_vtable", pillow_vt, pillow_vt_destroy);
-
+    fclaw_global_vtable_store(glob, "fclaw_clawpatch_pillow_vtable", pillow_vt, pillow_vt_destroy);
 }
 
 /* ------------------------------- Public access functions ---------------------------- */
@@ -279,8 +275,8 @@ fclaw_clawpatch_pillow_vtable_t* fclaw_clawpatch_pillow_vt(fclaw_global_t* glob)
 {
 
     fclaw_clawpatch_pillow_vtable_t* pillow_vt = (fclaw_clawpatch_pillow_vtable_t*) 
-        fclaw_pointer_map_get(glob->vtables, 
-                              "fclaw_clawpatch_pillow_vtable");
+        fclaw_global_get_vtable(glob, 
+                                "fclaw_clawpatch_pillow_vtable");
 
     FCLAW_ASSERT(pillow_vt != NULL);
     FCLAW_ASSERT(pillow_vt->is_set != 0);

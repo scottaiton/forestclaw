@@ -6,7 +6,8 @@ c     ==========================================================
      &     mx,my,qold,aux,dx,dy,dt,cflgrid,fm,fp,gm,gp,
      &     faddm,faddp,gaddm,gaddp,q1d,dtdx1d,dtdy1d,
      &     aux1,aux2,aux3,work,mwork,rpn2,rpt2,flux2,
-     &     mwaves,mcapa,method,mthlim, block_corner_count, ierror)
+     &     mwaves,mcapa,method,mthlim, block_corner_count, ierror,
+     &     use_fwaves)
 c     ==========================================================
       implicit none
 
@@ -14,7 +15,7 @@ c     ==========================================================
 
       integer :: maxm, maxmx, maxmy, meqn, maux, mbc, mx, my, mwork
       double precision :: dx, dy, dt, cflgrid
-      integer :: mwaves, mcapa, method(7), mthlim(mwaves)
+      integer :: mwaves, mcapa, method(7), mthlim(mwaves), use_fwaves
       integer :: block_corner_count(0:3)
       integer :: ierror
 
@@ -46,8 +47,6 @@ c     ==========================================================
       double precision :: dtdx, dtdy, cfl1d
       integer :: m,i,j, ma, ixy
       integer :: sweep_dir
-
-      integer :: blockno, fc2d_clawpack46_get_block
 
       ierror = 0
 c     
@@ -101,15 +100,13 @@ c        # no capa array:
 c     # Cubed sphere : Set corners for an x-sweep
 c     # This does nothing for non-cubed-sphere grids. 
       sweep_dir = 0
-      call clawpack46_fix_corners(mx,my,mbc,meqn,qold,sweep_dir,
-     &     block_corner_count)
+      call clawpack46_fix_corners(mx,my,mbc,meqn,qold,
+     &         maux,aux,sweep_dir,block_corner_count)
 
 
 c     # perform x-sweeps
 c     ==================
 c     
-      blockno = fc2d_clawpack46_get_block()
-c      write(6,*) 'Doing x=sweep : blockno = ', blockno
       do  j = 2-mbc,my+mbc-1
 c     
 c        # copy data along a slice into 1d arrays:
@@ -148,7 +145,7 @@ c        # compute modifications fadd and gadd to fluxes along this slice:
      &        faddm,faddp,gaddm,gaddp,cfl1d,
      &        work(i0wave),work(i0s),work(i0amdq),work(i0apdq),
      &        work(i0cqxx),work(i0bmadq),work(i0bpadq),rpn2,rpt2,
-     &        mwaves,mcapa,method,mthlim)
+     &        mwaves,mcapa,method,mthlim, use_fwaves)
 
          cflgrid = dmax1(cflgrid,cfl1d)
 c     
@@ -175,8 +172,8 @@ c
 c     # Cubed sphere : Set corners for an y-sweep
 c     # This does nothing for non-cubed-sphere grids. 
       sweep_dir = 1
-      call clawpack46_fix_corners(mx,my,mbc,meqn,qold,sweep_dir,
-     &     block_corner_count)
+      call clawpack46_fix_corners(mx,my,mbc,meqn,qold,
+     &     maux, aux, sweep_dir, block_corner_count)
 
 c     
       do  i = 2-mbc, mx+mbc-1
@@ -217,7 +214,7 @@ c     # compute modifications fadd and gadd to fluxes along this slice:
      &        faddm,faddp,gaddm,gaddp,cfl1d,
      &        work(i0wave),work(i0s),work(i0amdq),work(i0apdq),
      &        work(i0cqxx),work(i0bmadq),work(i0bpadq),rpn2,rpt2,
-     &        mwaves,mcapa,method,mthlim)
+     &        mwaves,mcapa,method,mthlim,use_fwaves)
 
          cflgrid = dmax1(cflgrid,cfl1d)
 c     
@@ -239,13 +236,14 @@ c
       end
 
 c     #  See 'cubed_sphere_corners.ipynb'
-      subroutine clawpack46_fix_corners(mx,my,mbc,meqn,q,sweep_dir,
-     &     block_corner_count)
+      subroutine clawpack46_fix_corners(mx,my,mbc,meqn,q,maux,aux,
+     &     sweep_dir,block_corner_count)
       implicit none
 
-      integer :: mx,my,mbc,meqn,sweep_dir
+      integer :: mx,my,mbc,meqn,sweep_dir,maux
       integer :: block_corner_count(0:3)
       double precision :: q(1-mbc:mx+mbc,1-mbc:my+mbc,meqn)
+      double precision :: aux(1-mbc:mx+mbc,1-mbc:my+mbc,maux)
 
       integer :: k,m,idata,jdata
       double precision :: ihat(0:3),jhat(0:3)
@@ -302,9 +300,12 @@ c                 # Transform involves B.transpose()
                endif 
                do m = 1,meqn
                   q(i1,j1,m) = q(idata,jdata,m)
-               end do           !! jbc
+               end do           
+               do m = 1,maux
+                  aux(i1,j1,m) = aux(idata,jdata,m)
+               end do           
             end do              !! ibc
-         end do                 !! corner 'k' loop
-      end do                    !! meqn loop
+         end do                 !! jbc
+      end do                    !! corner 'k' loop
 
       end

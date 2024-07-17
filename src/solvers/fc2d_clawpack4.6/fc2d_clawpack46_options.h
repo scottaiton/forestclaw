@@ -94,13 +94,6 @@ void fc2d_clawpack46_options_store (struct fclaw_global* glob, fc2d_clawpack46_o
 
 void fc2d_clawpack46_output(struct fclaw_global *glob, int iframe);
 
-/**
- * @brief Get the packing vtable for fc2d_clawpack46_options_t
- * 
- * @return const fclaw_packing_vtable_t* the vtable
- */
-const fclaw_packing_vtable_t* fc2d_clawpack46_options_get_packing_vtable();
-
 #ifdef __cplusplus
 #if 0
 {

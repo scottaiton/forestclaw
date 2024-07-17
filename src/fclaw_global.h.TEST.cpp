@@ -32,62 +32,57 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <initializer_list>
 #include <vector>
-
-TEST_CASE("fclaw2d_global_pack with no options")
+TEST_CASE("fclaw_global_new default options")
 {
-
-	for(double curr_time : {1.0, 1.2})
-	for(double curr_dt : {1.0, 1.2})
-	{
-		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
-		glob1->curr_time                    = curr_time;
-		glob1->curr_dt                      = curr_dt;
-
-		size_t packsize = fclaw2d_global_packsize(glob1);
-
-		REQUIRE_GT(packsize, 0);
-
-		char buffer[packsize];
-
-		size_t bytes_written = fclaw2d_global_pack(glob1, buffer);
-
-		REQUIRE_EQ(bytes_written, packsize);
-
-		fclaw_global_t* glob2;
-		size_t bytes_read = fclaw2d_global_unpack(buffer, &glob2);
-
-		REQUIRE_EQ(bytes_read, packsize);
-
-		CHECK_EQ(glob1->curr_time, glob2->curr_time);
-		CHECK_EQ(glob1->curr_dt,   glob2->curr_dt);
-
-		CHECK_EQ(fclaw_pointer_map_size(glob2->options), 0);
+    fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
 
-		fclaw_global_destroy(glob1);
-		fclaw_global_destroy(glob2);
-	}
+	CHECK_EQ(glob->curr_time, 0.0);
+	CHECK_EQ(glob->curr_dt, 0.0);
+
+	CHECK_EQ(glob->count_amr_advance, 0);
+	CHECK_EQ(glob->count_ghost_exchange, 0);
+	CHECK_EQ(glob->count_amr_regrid, 0);
+	CHECK_EQ(glob->count_amr_new_domain, 0);
+	CHECK_EQ(glob->count_single_step, 0);
+	CHECK_EQ(glob->count_elliptic_grids, 0);
+	CHECK_EQ(glob->count_multiproc_corner, 0);
+	CHECK_EQ(glob->count_grids_per_proc, 0);
+	CHECK_EQ(glob->count_grids_remote_boundary, 0);
+	CHECK_EQ(glob->count_grids_local_boundary, 0);
+
+	CHECK_EQ(glob->mpisize, 1);
+	CHECK_EQ(glob->mpirank, 0);
+
+	CHECK_EQ(fclaw_pointer_map_size(glob->vtables), 0);
+	CHECK_EQ(fclaw_pointer_map_size(glob->options), 0);
+	CHECK_EQ(fclaw_pointer_map_size(glob->attributes), 0);
+	CHECK(glob->cont == nullptr);
+	CHECK(glob->domain == nullptr);
+	CHECK(glob->user == nullptr);
+
+
+	fclaw_global_destroy(glob);
 }
 
 namespace
 {
 
-struct dummy_options
+struct dummy_attribute
 {
 	size_t size;
 	char value;
 
-	dummy_options(size_t size_in, char value_in)
+	dummy_attribute(size_t size_in, char value_in)
 		:size(size_in),value(value_in)
 	{
 		//nothing to do
 	}
 };
 
-size_t pack_dummy_options(void* user, char* buffer)
+size_t pack_dummy_options(fclaw_global_t *glob, void *user, char *buffer)
 {
-	dummy_options* options = (dummy_options*) user;
+	dummy_attribute* options = (dummy_attribute*) user;
 
 	char* buffer_start = buffer;
 	buffer += fclaw_pack_size_t(options->size, buffer);
@@ -98,8 +93,9 @@ size_t pack_dummy_options(void* user, char* buffer)
 
 	return buffer-buffer_start;
 };
-size_t unpack_dummy_options(char* buffer, void** user)
+size_t unpack_dummy_options(fclaw_global_t *glob, char* buffer, void* user)
 {
+	dummy_attribute* attribute = (dummy_attribute*) user;
 
 	char* buffer_start = buffer;
 
@@ -111,161 +107,220 @@ size_t unpack_dummy_options(char* buffer, void** user)
 	}
 	buffer += size;
 
-	*user = new dummy_options(size,value);
+	attribute->size = size;
+	attribute->value = value;
 
 	return buffer-buffer_start;
 };
-size_t packsize_dummy_options(void* user)
+size_t packsize_dummy_attribute(fclaw_global_t *glob, void* user)
 {
-	dummy_options* options = (dummy_options*) user;
+	dummy_attribute* options = (dummy_attribute*) user;
 	return sizeof(size_t) + options->size;
 };
-
-void destroy_dummy_options(void* user){
-	delete (dummy_options*) user;
+void * new_dummy_attribute(fclaw_global_t *glob){
+	return new dummy_attribute(0,0);
+}
+void destroy_dummy_attribute(void* user){
+	delete (dummy_attribute*) user;
 }
 
 fclaw_packing_vtable_t dummy_opts_vt =
 {
 	pack_dummy_options,
 	unpack_dummy_options,
-	packsize_dummy_options,
-	destroy_dummy_options
+	packsize_dummy_attribute,
+	new_dummy_attribute,
+	destroy_dummy_attribute
 };
 
 }
-TEST_CASE("fclaw_global_pack with no options structure")
+TEST_CASE("fclaw_global_pack with no packed attributes")
 {
-
+	for(bool extra_non_packed_attribute : {true, false})
 	for(double curr_time : {1.0, 1.2})
 	for(double curr_dt : {1.0, 1.2})
 	{
 		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
+    	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
-		size_t packsize = fclaw2d_global_packsize(glob1);
+		if(extra_non_packed_attribute)
+		{
+			dummy_attribute* attribute = new dummy_attribute(40, 'b');
+			fclaw_global_attribute_store(glob1, "dummy_not_packed", attribute, NULL, destroy_dummy_attribute);
+		}
+
+		size_t packsize = fclaw_global_packsize(glob1);
 		REQUIRE_GT(packsize, 0);
 
 		char buffer[packsize];
 
-		size_t bytes_written = fclaw2d_global_pack(glob1, buffer);
+		size_t bytes_written = fclaw_global_pack(glob1, buffer);
 
 		REQUIRE_EQ(bytes_written, packsize);
 
-		fclaw_global_t* glob2;
-		size_t bytes_read = fclaw2d_global_unpack(buffer, &glob2);
+		fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+		size_t bytes_read = fclaw_global_unpack(buffer, glob2);
 
 		REQUIRE_EQ(bytes_read, packsize);
 
 		CHECK_EQ(glob1->curr_time, glob2->curr_time);
 		CHECK_EQ(glob1->curr_dt,   glob2->curr_dt);
 
-		REQUIRE_EQ(fclaw_pointer_map_size(glob2->options), 0);
+		REQUIRE_EQ(fclaw_pointer_map_size(glob2->attributes), 0);
 
 		fclaw_global_destroy(glob1);
 		fclaw_global_destroy(glob2);
 	}
 }
-TEST_CASE("fclaw_global_pack with a single options structure")
+TEST_CASE("fclaw_global_pack with a single packed attribute")
 {
 
+	for(bool extra_non_packed_attribute : {true, false})
+	for(bool already_stored_attribute : {true, false})
 	for(double curr_time : {1.0, 1.2})
 	for(double curr_dt : {1.0, 1.2})
 	{
 		char dummy[] = "dummy1";
 		std::vector<char*> args = {dummy};
-		char ** argv = args.data();
-		int argc = 1;
 		//fclaw_app_t* app = fclaw_app_new_on_comm(sc_MPI_COMM_WORLD,&argc,&argv,NULL);
 		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
+    	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+		fclaw_global_vtable_store(glob1, "dummy1_vtable",  &dummy_opts_vt, NULL);
+
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
-		dummy_options* options = new dummy_options(20, 'a');
-		fclaw_app_register_options_packing_vtable("dummy1",  &dummy_opts_vt);
-		fclaw_pointer_map_insert(glob1->options, "dummy1", options, destroy_dummy_options);
+		dummy_attribute* attribute1 = new dummy_attribute(20, 'a');
+		fclaw_global_attribute_store(glob1, "dummy1", attribute1, "dummy1_vtable", destroy_dummy_attribute);
 
-		size_t packsize = fclaw2d_global_packsize(glob1);
+		if(extra_non_packed_attribute)
+		{
+			dummy_attribute* attribute = new dummy_attribute(40, 'b');
+			fclaw_global_attribute_store(glob1, "dummy_not_packed", attribute, NULL, destroy_dummy_attribute);
+		}
+
+		size_t packsize = fclaw_global_packsize(glob1);
 		REQUIRE_GT(packsize, 0);
 
 		char buffer[packsize];
 
-		size_t bytes_written = fclaw2d_global_pack(glob1, buffer);
+		size_t bytes_written = fclaw_global_pack(glob1, buffer);
 
 		REQUIRE_EQ(bytes_written, packsize);
 
-		fclaw_global_t* glob2;
-		size_t bytes_read = fclaw2d_global_unpack(buffer, &glob2);
+		fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+		fclaw_global_vtable_store(glob2, "dummy1_vtable",  &dummy_opts_vt, NULL);
+
+		dummy_attribute* attribute2 = NULL;
+		if(already_stored_attribute)
+		{
+			attribute2 = new dummy_attribute(99, 'z');
+			fclaw_global_attribute_store(glob2, "dummy1", attribute2, "dummy1_vtable", destroy_dummy_attribute);
+		}
+
+		size_t bytes_read = fclaw_global_unpack(buffer, glob2);
+
+		if(!already_stored_attribute)
+		{
+			attribute2 = (dummy_attribute*)(fclaw_global_get_attribute(glob2, "dummy1"));
+			REQUIRE_NE(attribute2, nullptr);
+		}
 
 		REQUIRE_EQ(bytes_read, packsize);
 
 		CHECK_EQ(glob1->curr_time, glob2->curr_time);
 		CHECK_EQ(glob1->curr_dt,   glob2->curr_dt);
 
-		REQUIRE_EQ(fclaw_pointer_map_size(glob2->options), 1);
+		REQUIRE_EQ(fclaw_pointer_map_size(glob2->attributes), 1);
 
-		dummy_options* options_unpacked = (dummy_options*) fclaw_pointer_map_get(glob2->options, "dummy1");
-		REQUIRE(options_unpacked != nullptr);
-
-		CHECK_EQ(options_unpacked->size, options->size);
-		CHECK_EQ(options_unpacked->value, options->value);
-
-
+		CHECK_EQ(attribute2->size, attribute1->size);
+		CHECK_EQ(attribute2->value, attribute1->value);
 
 		fclaw_global_destroy(glob1);
 		fclaw_global_destroy(glob2);
 	}
 }
-TEST_CASE("fclaw_global_pack with two options structure")
+TEST_CASE("fclaw_global_pack with two packed attributes")
 {
 
+	for(bool extra_non_packed_attribute : {true, false})
+	for(bool already_stored_attribute_1 : {true, false})
+	for(bool already_stored_attribute_2 : {true, false})
 	for(double curr_time : {1.0, 1.2})
 	for(double curr_dt : {1.0, 1.2})
 	{
 		fclaw_global_t* glob1;
-    	glob1 = fclaw_global_new();
+    	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+		fclaw_global_vtable_store(glob1, "dummy1",  &dummy_opts_vt, NULL);
+		fclaw_global_vtable_store(glob1, "dummy2",  &dummy_opts_vt, NULL);
 		glob1->curr_time                    = curr_time;
 		glob1->curr_dt                      = curr_dt;
 
-		dummy_options* options = new dummy_options(20, 'a');
-		dummy_options* options2 = new dummy_options(40, 'b');
-		fclaw_app_register_options_packing_vtable("dummy1",  &dummy_opts_vt);
-		fclaw_pointer_map_insert(glob1->options, "dummy1", options, destroy_dummy_options);
-		fclaw_app_register_options_packing_vtable("dummy2",  &dummy_opts_vt);
-		fclaw_pointer_map_insert(glob1->options, "dummy2", options2, destroy_dummy_options);
+		dummy_attribute* attribute1_1 = new dummy_attribute(20, 'a');
+		dummy_attribute* attribute1_2 = new dummy_attribute(40, 'b');
 
-		size_t packsize = fclaw2d_global_packsize(glob1);
+		fclaw_global_attribute_store(glob1, "dummy1", attribute1_1, "dummy1", destroy_dummy_attribute);
+		fclaw_global_attribute_store(glob1, "dummy2", attribute1_2, "dummy2", destroy_dummy_attribute);
+
+		if(extra_non_packed_attribute)
+		{
+			dummy_attribute* attribute = new dummy_attribute(40, 'b');
+			fclaw_global_attribute_store(glob1, "dummy_not_packed", attribute, NULL, destroy_dummy_attribute);
+		}
+
+		size_t packsize = fclaw_global_packsize(glob1);
 		REQUIRE_GT(packsize, 0);
 
 		char buffer[packsize];
 
-		size_t bytes_written = fclaw2d_global_pack(glob1, buffer);
+		size_t bytes_written = fclaw_global_pack(glob1, buffer);
 
 		REQUIRE_EQ(bytes_written, packsize);
 
-		fclaw_global_t* glob2;
-		size_t bytes_read = fclaw2d_global_unpack(buffer, &glob2);
+		fclaw_global_t* glob2 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+		fclaw_global_vtable_store(glob2, "dummy1",  &dummy_opts_vt, NULL);
+		fclaw_global_vtable_store(glob2, "dummy2",  &dummy_opts_vt, NULL);
+
+		dummy_attribute* attribute2_1 = NULL;
+		dummy_attribute* attribute2_2 = NULL;
+		if(already_stored_attribute_1)
+		{
+			attribute2_1 = new dummy_attribute(99, 'z');
+			fclaw_global_attribute_store(glob2, "dummy1", attribute2_1, "dummy1", destroy_dummy_attribute);
+		}
+		if(already_stored_attribute_2)
+		{
+			attribute2_2 = new dummy_attribute(99, 'z');
+			fclaw_global_attribute_store(glob2, "dummy2", attribute2_2, "dummy2", destroy_dummy_attribute);
+		}
+
+		size_t bytes_read = fclaw_global_unpack(buffer, glob2);
+
+		if(!already_stored_attribute_1)
+		{
+			attribute2_1 = (dummy_attribute*)(fclaw_global_get_attribute(glob2, "dummy1"));
+			REQUIRE_NE(attribute2_1, nullptr);
+		}
+		if(!already_stored_attribute_2)
+		{
+			attribute2_2 = (dummy_attribute*)(fclaw_global_get_attribute(glob2, "dummy2"));
+			REQUIRE_NE(attribute2_2, nullptr);
+		}
 
 		REQUIRE_EQ(bytes_read, packsize);
 
 		CHECK_EQ(glob1->curr_time, glob2->curr_time);
 		CHECK_EQ(glob1->curr_dt,   glob2->curr_dt);
 
-		REQUIRE_EQ(fclaw_pointer_map_size(glob2->options), 2);
+		REQUIRE_EQ(fclaw_pointer_map_size(glob2->attributes), 2);
 
-		dummy_options* options_unpacked = (dummy_options*) fclaw_pointer_map_get(glob2->options, "dummy1");
-		dummy_options* options_unpacked2 = (dummy_options*) fclaw_pointer_map_get(glob2->options, "dummy2");
-		REQUIRE(options_unpacked != nullptr);
-		REQUIRE(options_unpacked2 != nullptr);
+		CHECK_EQ(attribute2_1->size, attribute1_1->size);
+		CHECK_EQ(attribute2_1->value, attribute1_1->value);
 
-		CHECK_EQ(options_unpacked->size, options->size);
-		CHECK_EQ(options_unpacked->value, options->value);
-
-		CHECK_EQ(options_unpacked2->size, options2->size);
-		CHECK_EQ(options_unpacked2->value, options2->value);
+		CHECK_EQ(attribute2_2->size, attribute1_2->size);
+		CHECK_EQ(attribute2_2->value, attribute1_2->value);
 
 		fclaw_global_destroy(glob1);
 		fclaw_global_destroy(glob2);
@@ -274,54 +329,55 @@ TEST_CASE("fclaw_global_pack with two options structure")
 TEST_CASE("fclaw_global_pack aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
-   	glob1 = fclaw_global_new();
+   	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	glob1->curr_time                    = 100;
 	glob1->curr_dt                      = 200;
 
-	dummy_options* options = new dummy_options(20, 'a');
-	fclaw_pointer_map_insert(glob1->options, "dummy1", options, destroy_dummy_options);
+	dummy_attribute* attribute = new dummy_attribute(20, 'a');
+	fclaw_global_attribute_store(glob1, "dummy1", attribute, "pack_dummy1", destroy_dummy_attribute);
 
-	char buffer[100];
-	CHECK_SC_ABORTED(fclaw2d_global_pack(glob1, buffer));
+	char buffer[BUFSIZ];
+	CHECK_SC_ABORTED(fclaw_global_pack(glob1, buffer));
 }
-TEST_CASE("fclaw2d_global_packsize aborts with unregistered vtable")
+TEST_CASE("fclaw_global_packsize aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
-   	glob1 = fclaw_global_new();
+   	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	glob1->curr_time                    = 100;
 	glob1->curr_dt                      = 200;
 
-	dummy_options* options = new dummy_options(20, 'a');
-	fclaw_pointer_map_insert(glob1->options, "dummy1", options, destroy_dummy_options);
+	dummy_attribute* attribute = new dummy_attribute(20, 'a');
+	fclaw_global_attribute_store(glob1, "dummy1", attribute, "pack_dummy1", destroy_dummy_attribute);
 
-	CHECK_SC_ABORTED(fclaw2d_global_packsize(glob1));
+	CHECK_SC_ABORTED(fclaw_global_packsize(glob1));
 }
-TEST_CASE("fclaw_global_unppack aborts with unregistered vtable")
+TEST_CASE("fclaw_global_unpack aborts with unregistered vtable")
 {
 	fclaw_global_t* glob1;
-   	glob1 = fclaw_global_new();
+   	glob1 = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 	glob1->curr_time                    = 1;
 	glob1->curr_dt                      = 1;
 
-	dummy_options* options = new dummy_options(20, 'a');
-	fclaw_app_register_options_packing_vtable("dummy1",  &dummy_opts_vt);
-	fclaw_pointer_map_insert(glob1->options, "dummy1", options, destroy_dummy_options);
+	dummy_attribute* attribute = new dummy_attribute(20, 'a');
+	fclaw_global_vtable_store(glob1, "pack_dummy1",  &dummy_opts_vt, NULL);
+	fclaw_global_attribute_store(glob1, "dummy1", attribute, "pack_dummy1", destroy_dummy_attribute);
 
-	size_t packsize = fclaw2d_global_packsize(glob1);
+	size_t packsize = fclaw_global_packsize(glob1);
 	REQUIRE_GT(packsize, 0);
 
 	char buffer[packsize];
 
-	size_t bytes_written = fclaw2d_global_pack(glob1, buffer);
+	size_t bytes_written = fclaw_global_pack(glob1, buffer);
 
 	REQUIRE_EQ(bytes_written, packsize);
 
-	fclaw_global_t* glob2=nullptr;
-	fclaw_app_register_options_packing_vtable("dummy1",  nullptr);
-	CHECK_SC_ABORTED(fclaw2d_global_unpack(buffer, &glob2));
+	fclaw_global_t* glob2=fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+	//no vtables in glob2
+	CHECK_SC_ABORTED(fclaw_global_unpack(buffer, glob2));
 }
+
 TEST_CASE("fclaw_global_options_store and fclaw_global_get_options test") {
-    fclaw_global_t* glob = fclaw_global_new();
+    fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
 
     // Test with an integer
     int option1 = 10;
@@ -339,10 +395,11 @@ TEST_CASE("fclaw_global_options_store and fclaw_global_get_options test") {
     const char** retrieved_option2 = static_cast<const char**>(fclaw_global_get_options(glob, key2));
     CHECK_EQ(retrieved_option2, &option2);
 
-#ifdef FCLAW_ENABLE_DEBUG
     // TEST inserting twice
-    CHECK_SC_ABORTED(fclaw_global_options_store(glob, key2, &option2));
-#endif
+	const char* option3 = "Test string 2";
+	fclaw_global_options_store(glob, key2, &option3);
+	CHECK_EQ(fclaw_global_get_options(glob, key2), &option3);
+
     // Test with a non-existing key
     const char* key3 = "non-existing key";
 #ifdef FCLAW_ENABLE_DEBUG
@@ -355,7 +412,7 @@ TEST_CASE("fclaw_global_options_store and fclaw_global_get_options test") {
     fclaw_global_destroy(glob);
 }
 
-TEST_CASE("fclaw2d_global_set_global")
+TEST_CASE("fclaw_global_set_global")
 {
     fclaw_global_t* glob = (fclaw_global_t*)123;
     fclaw_global_set_static(glob);
@@ -377,7 +434,7 @@ TEST_CASE("fclaw_global_clear_static")
 
 #ifdef FCLAW_ENABLE_DEBUG
 
-TEST_CASE("fclaw2d_global_set_global twice fails")
+TEST_CASE("fclaw_global_set_global twice fails")
 {
     fclaw_global_t* glob = (fclaw_global_t*)123;
     fclaw_global_set_static(glob);
@@ -385,14 +442,85 @@ TEST_CASE("fclaw2d_global_set_global twice fails")
     fclaw_global_clear_static();
 }
 
-TEST_CASE("fclaw2d_global_unset_global assert fails when NULL")
+TEST_CASE("fclaw_global_unset_global assert fails when NULL")
 {
     CHECK_SC_ABORTED(fclaw_global_clear_static());
 }
 
-TEST_CASE("fclaw2d_global_get_global assert fails when NULL")
+TEST_CASE("fclaw_global_get_global assert fails when NULL")
 {
     CHECK_SC_ABORTED(fclaw_global_get_static_global());
 }
 
 #endif
+
+TEST_CASE("fclaw_global_vtable_store and fclaw_global_get_vtable test") {
+	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+
+	// Test with an integer
+	int vtable1 = 10;
+	const char* key1 = "vtable1";
+	fclaw_global_vtable_store(glob, key1, &vtable1,  nullptr);
+
+	int* retrieved_vtable1 = static_cast<int*>(fclaw_global_get_vtable(glob, key1));
+	CHECK_EQ(*retrieved_vtable1, vtable1);
+
+	// Test with a string
+	const char* vtable2 = "Test string";
+	const char* key2 = "vtable2";
+	fclaw_global_vtable_store(glob, key2, &vtable2,  nullptr);
+
+	const char** retrieved_vtable2 = static_cast<const char**>(fclaw_global_get_vtable(glob, key2));
+	CHECK_EQ(*retrieved_vtable2, vtable2);
+
+	// Test with a non-existing key
+	const char* key3 = "non-existing key";
+	void* retrieved_vtable3 = fclaw_global_get_vtable(glob, key3);
+	CHECK_EQ(retrieved_vtable3, nullptr);
+
+	// Test with a destroy callback
+	int* vtable4 = new int(20);
+	const char* key4 = "vtable4";
+	fclaw_global_vtable_store(glob, key4, vtable4, [](void* ptr) { delete static_cast<int*>(ptr); });
+
+	int* retrieved_vtable4 = static_cast<int*>(fclaw_global_get_vtable(glob, key4));
+	CHECK_EQ(*retrieved_vtable4, *vtable4);
+
+	fclaw_global_destroy(glob);
+}
+
+TEST_CASE("fclaw_global_attribute_store and fclaw_global_get_attribute test") {
+	fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);;
+
+	// Test with an integer
+	int attribute1 = 10;
+	const char* key1 = "attribute1";
+	fclaw_global_attribute_store(glob, key1, &attribute1, nullptr, nullptr);
+
+	int* retrieved_attribute1 = static_cast<int*>(fclaw_global_get_attribute(glob, key1));
+	CHECK_EQ(*retrieved_attribute1, attribute1);
+
+	// Test with a string
+	const char* attribute2 = "Test string";
+	const char* key2 = "attribute2";
+	fclaw_global_attribute_store(glob, key2, &attribute2, nullptr, nullptr);
+
+	const char** retrieved_attribute2 = static_cast<const char**>(fclaw_global_get_attribute(glob, key2));
+	CHECK_EQ(*retrieved_attribute2, attribute2);
+
+	// Test with a non-existing key
+	const char* key3 = "non-existing key";
+	void* retrieved_attribute3 = fclaw_global_get_attribute(glob, key3);
+	CHECK_EQ(retrieved_attribute3, nullptr);
+
+	// Test with a destroy callback
+	int* attribute4 = new int(20);
+	const char* key4 = "attribute4";
+	fclaw_global_attribute_store(glob, key4, attribute4, nullptr, [](void* ptr) { delete static_cast<int*>(ptr); });
+
+	int* retrieved_attribute4 = static_cast<int*>(fclaw_global_get_attribute(glob, key4));
+	CHECK_EQ(*retrieved_attribute4, *attribute4);
+
+	fclaw_global_destroy(glob);
+}
+

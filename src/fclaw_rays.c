@@ -30,8 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw_convenience.h>
 
-#include <fclaw_pointer_map.h>
-
 
 //static fclaw2d_ray_vtable_t s_ray_vt;
 
@@ -311,8 +309,7 @@ void fclaw_ray_vtable_initialize(fclaw_global_t *glob)
 
     fclaw_ray_vtable_t* rays_vt = fclaw2d_ray_vt_new(); 
 
-    FCLAW_ASSERT(fclaw_pointer_map_get(glob->vtables,"fclaw2d_rays") == NULL);
-    fclaw_pointer_map_insert(glob->vtables, "fclaw2d_rays", rays_vt, fclaw2d_ray_vt_destroy);
+    fclaw_global_vtable_store(glob, "fclaw2d_rays", rays_vt, fclaw2d_ray_vt_destroy);
 
     rays_vt->is_set = 1;
 }
@@ -324,7 +321,7 @@ void fclaw_ray_vtable_initialize(fclaw_global_t *glob)
 fclaw_ray_vtable_t* fclaw_ray_vt(fclaw_global_t* glob)
 {
     fclaw_ray_vtable_t* ray_vt = (fclaw_ray_vtable_t*) 
-                                fclaw_pointer_map_get(glob->vtables, "fclaw2d_rays");
+                                fclaw_global_get_vtable(glob, "fclaw2d_rays");
     FCLAW_ASSERT(ray_vt != NULL);
     FCLAW_ASSERT(ray_vt->is_set != 0);
     return ray_vt;

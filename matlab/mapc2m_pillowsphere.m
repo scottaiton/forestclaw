@@ -4,12 +4,10 @@ function [xp,yp,zp] = mapc2m_pillowsphere(xc1,yc1)
 % determine sign of z-coordinate.
 %
 
-global notpillowsphere;
-
 comp_grid = false;
 
 % First, get into [-1 1] from [0,1]
-[xc,yc,zc] = mapc2m_cart(xc1,yc1);
+[xc,yc,~] = mapc2m_cart(xc1,yc1);
 
 r1 = 1;
 
@@ -43,13 +41,9 @@ mghost = (abs(xc) > 1) | (abs(yc) > 1);
 
 zp(mghost) = -zp(mghost);          % negate z in lower hemisphere
 
-if (~notpillowsphere)
-    if (blockno == 1)
-        zp = -zp;
-    end
+if (blockno == 1)
+    zp = -zp;
 end
-
-% [xp,yp,zp] = rotate_map(xp,yp,zp);
 
 
 % ----------------------------------------------------------------
@@ -101,4 +95,4 @@ else
   xp = Rz(1,:)';
   yp = Rz(2,:)';
   zp = Rz(3,:)';
-end;
+end

@@ -31,7 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static const char *fclaw_configdir = ".forestclaw";
 static const char *fclaw_env_configdir = "FCLAW_INI_DIR";
 static int fclaw_package_id = -1;
-static fclaw_pointer_map_t* packing_vtables = NULL;
 
 int
 fclaw_app_exit_type_to_status (fclaw_exit_type_t vexit)
@@ -172,14 +171,14 @@ fclaw_debugf (const char *fmt, ...)
 static int logging_rank = 0;
 static const char* logging_prefix = NULL;
 
-void 
+void
 fclaw_set_logging_prefix(const char* new_name)
 {
     if(new_name == NULL || strcmp(new_name, "") == 0)
     {
         logging_prefix=NULL;
-    } 
-    else 
+    }
+    else
     {
         logging_prefix=new_name;
     }
@@ -209,8 +208,13 @@ log_handler (const char *name, FILE * log_stream, const char *filename, int line
         char                bn[BUFSIZ], *bp;
 
         snprintf (bn, BUFSIZ, "%s", filename);
+#ifdef SC_HAVE_LIBGEN_H
         bp = basename (bn);
+#else
+        bp = bn;
+#endif
         fprintf (log_stream, "%s:%d ", bp, lineno);
+
     }
 
     fputs (msg, log_stream);
@@ -332,10 +336,6 @@ fclaw_app_destroy (fclaw_app_t * a)
     FCLAW_ASSERT (a->opt_pkg != NULL);
     FCLAW_ASSERT (a->opt != NULL);
 
-    /* destroy central structures */
-    sc_keyvalue_destroy (a->attributes);
-    sc_options_destroy (a->opt);
-
     /* let the options packages clean up their memory */
     for (zz = a->opt_pkg->elem_count; zz > 0; --zz)
     {
@@ -350,9 +350,11 @@ fclaw_app_destroy (fclaw_app_t * a)
     }
     sc_array_destroy (a->opt_pkg);
 
-    FCLAW_FREE (a);
+    /* destroy central structures */
+    sc_keyvalue_destroy (a->attributes);
+    sc_options_destroy (a->opt);
 
-    if(packing_vtables!=NULL) fclaw_pointer_map_destroy(packing_vtables);
+    FCLAW_FREE (a);
 
     sc_finalize ();
 
@@ -583,11 +585,11 @@ fclaw_app_options_register_core (fclaw_app_t * a, const char *configfile)
 void fclaw_app_print_options(fclaw_app_t *app)
 {
         sc_options_print_summary (fclaw_get_package_id (),
-                                  FCLAW_VERBOSITY_ESSENTIAL, app->opt);    
+                                  FCLAW_VERBOSITY_ESSENTIAL, app->opt);
 }
 
 int get_keys(const char *key,
-            const sc_keyvalue_entry_type_t type, 
+            const sc_keyvalue_entry_type_t type,
             void *entry,
             const void *u)
 {
@@ -668,7 +670,7 @@ check_sections_in_files(fclaw_app_t* a, sc_array_t* filenames){
             // if there are keys in an unexpected file, print a warning
             if(strcmp(filename, ao->configfile) != 0 && iniparser_find_entry(ini, section))
             {
-                fclaw_global_productionf("Unexpected section [%s] was found in file %s.\n", 
+                fclaw_global_productionf("Unexpected section [%s] was found in file %s.\n",
                                          section, filename);
             }
         }
@@ -773,7 +775,7 @@ fclaw_app_options_parse (fclaw_app_t * a, int *first_arg,
     for(size_t i = 0; i < filenames->elem_count; i++)
     {
         const char* filename = *(const char**) sc_array_index(filenames, i);
-        int retval = sc_options_load (fclaw_package_id, FCLAW_VERBOSITY_ESSENTIAL, 
+        int retval = sc_options_load (fclaw_package_id, FCLAW_VERBOSITY_ESSENTIAL,
                                       a->opt, filename);
         if (retval > 0)
         {
@@ -928,22 +930,6 @@ fclaw_app_get_options (fclaw_app_t * a)
     return a->opt;
 }
 
-
-void fclaw_app_register_options_packing_vtable(const char*name,fclaw_packing_vtable_t* vtable){
-    if(packing_vtables == NULL)
-    {
-        packing_vtables = fclaw_pointer_map_new();
-    }
-    fclaw_pointer_map_insert(packing_vtables, name, vtable, NULL);
-}
-
-fclaw_packing_vtable_t* fclaw_app_get_options_packing_vtable(const char*name){
-    if(packing_vtables == NULL)
-    {
-        packing_vtables = fclaw_pointer_map_new();
-    }
-    return (fclaw_packing_vtable_t*) fclaw_pointer_map_get(packing_vtables,name);
-}
 
 void
 fclaw_abortf(const char *fmt, ...){

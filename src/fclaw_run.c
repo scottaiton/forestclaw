@@ -33,6 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_output.h>
 #include <fclaw_diagnostics.h>
 #include <fclaw_vtable.h>
+#include <fclaw_context.h>
+#include <fclaw_packing.h>
 
 #include "fclaw_math.h"
 
@@ -111,7 +113,6 @@ static void outstyle_0(fclaw_global_t *glob)
 
 }
 
-
 /* -------------------------------------------------------------------------------
    Output style 1
    Output times are at times [0,dT, 2*dT, 3*dT,...,Tfinal], where dT = tfinal/nout
@@ -120,6 +121,8 @@ static
 void outstyle_1(fclaw_global_t *glob)
 {
     fclaw_domain_t** domain = &glob->domain;
+    /* get context object from glob, if there is none, a new one will be created */
+    fclaw_context_t *ctx = fclaw_context_get(glob, "fclaw_run_outstyle1_ctx");
 
     /* Set error to 0 */
     int init_flag = 1;  /* Store anything that needs to be stored */
@@ -127,6 +130,7 @@ void outstyle_1(fclaw_global_t *glob)
     init_flag = 0;
 
     int iframe = 0;
+    fclaw_context_get_int(ctx, "iframe", &iframe);
     fclaw_output_frame(glob,iframe);
 
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
@@ -136,15 +140,19 @@ void outstyle_1(fclaw_global_t *glob)
     double initial_dt = fclaw_opt->initial_dt;
     int level_factor = pow_int(2,fclaw_opt->maxlevel - fclaw_opt->minlevel);
     double dt_minlevel = initial_dt;
+    fclaw_context_get_double(ctx, "dt_minlevel", &dt_minlevel);
 
     double t0 = 0;
 
     double dt_outer = (final_time-t0)/((double) nout);
     double t_curr = t0;
+    fclaw_context_get_double(ctx, "t_curr", &t_curr);
     int n_inner = 0;
+    fclaw_context_get_int(ctx, "n_inner", &n_inner);
 
-    int n;
-    for(n = 0; n < nout; n++)
+    int n = 0;
+    fclaw_context_get_int(ctx, "n", &n);
+    while(n < nout)
     {
         double tstart = t_curr;
 
@@ -293,6 +301,15 @@ void outstyle_1(fclaw_global_t *glob)
         glob->curr_time = t_curr;
         iframe++;
         fclaw_output_frame(glob,iframe);
+
+        /* increment n before checkpoint since we want to start at next
+           iteration when restarting */
+        n++;
+
+        /* save context values */
+        fclaw_context_save(ctx);
+        /* output checkpoint */
+        fclaw_output_checkpoint(glob, iframe);
     }
 }
 
@@ -308,12 +325,15 @@ static
 void outstyle_3(fclaw_global_t *glob)
 {
     fclaw_domain_t** domain = &glob->domain;
+    /* get context object from glob, if there is none, a new one will be created */
+    fclaw_context_t *ctx = fclaw_context_get(glob, "fclaw_run_outstyle3_ctx");
 
     int init_flag = 1;
     fclaw_diagnostics_gather(glob,init_flag);
     init_flag = 0;
 
     int iframe = 0;
+    fclaw_context_get_int(ctx, "iframe", &iframe);
     fclaw_output_frame(glob,iframe);
 
 
@@ -325,6 +345,7 @@ void outstyle_3(fclaw_global_t *glob)
 
     double t0 = 0;
     double dt_minlevel = initial_dt;
+    fclaw_context_get_double(ctx, "dt_minlevel", &dt_minlevel);
     glob->curr_time = t0;
     int nstep_outer = fclaw_opt->nout;
     int nstep_inner = fclaw_opt->nstep;
@@ -348,7 +369,9 @@ void outstyle_3(fclaw_global_t *glob)
     }
 
     int n = 0;
+    fclaw_context_get_int(ctx, "n", &n);
     double t_curr = t0;
+    fclaw_context_get_double(ctx, "t_curr", &t_curr);
     while (n < nstep_outer)
     {
         double dt_step = dt_minlevel;
@@ -441,6 +464,11 @@ void outstyle_3(fclaw_global_t *glob)
             iframe++;
             fclaw_diagnostics_gather(glob,init_flag);
             fclaw_output_frame(glob,iframe);
+
+            /* save context values */
+            fclaw_context_save(ctx);
+            /* output checkpoint */
+            fclaw_output_checkpoint(glob, iframe);
         }
     }
 }
@@ -449,9 +477,12 @@ void outstyle_3(fclaw_global_t *glob)
 static
 void outstyle_4(fclaw_global_t *glob)
 {
+    /* get context object from glob, if there is none, a new one will be created */
+    fclaw_context_t *ctx = fclaw_context_get(glob, "fclaw_run_outstyle4_ctx");
 
     /* Write out an initial time file */
     int iframe = 0;
+    fclaw_context_get_int(ctx, "iframe", &iframe);
     fclaw_output_frame(glob,iframe);
 
     int init_flag = 1;
@@ -466,8 +497,10 @@ void outstyle_4(fclaw_global_t *glob)
 
     double t0 = 0;
     double t_curr = t0;
+    fclaw_context_get_double(ctx, "t_curr", &t_curr);
     glob->curr_time = t_curr;
     int n = 0;
+    fclaw_context_get_int(ctx, "n", &n);
     while (n < nstep_outer)
     {
         /* Get current domain data since it may change during regrid */
@@ -504,6 +537,11 @@ void outstyle_4(fclaw_global_t *glob)
             fclaw_diagnostics_gather(glob,init_flag);
             iframe++;
             fclaw_output_frame(glob,iframe);
+
+            /* save context values */
+            fclaw_context_save(ctx);
+            /* output checkpoint */
+            fclaw_output_checkpoint(glob, iframe);
         }
     }
 }
