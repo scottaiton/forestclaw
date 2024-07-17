@@ -6,7 +6,7 @@ applications_demo_2d_partitioning_partitioning_SOURCES = \
 	applications/demo/2d/partitioning/partitioning.cpp
 
 ## Include headers and libraries needed to build this application
-##  -- Only really need AM_CPPFLAGS and LDADD (since these include all the other 
+##  -- Only really need AM_CPPFLAGS and LDADD (since these include all the other
 ##     variables).  But others are included here for completeness
 applications_demo_2d_partitioning_partitioning_CPPFLAGS = \
         $(AM_CPPFLAGS) \
