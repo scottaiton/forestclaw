@@ -100,12 +100,11 @@ print_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                   int blockno, int patchno, void *user)
 {
     double *patch_data = (double *) patch->user;
-//    printf ("%d: entering patch with patchno %d.\n", domain->mpirank, patchno);
     if (patch_data == NULL)
     {
         return;
     }
-//    printf ("%d: we have patch_data %f.\n", domain->mpirank, *patch_data);
+    fclaw_infof ("Patch %d has patch data %f.\n", patchno, *patch_data);
 };
 
 static void
@@ -118,6 +117,10 @@ delete_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
 int
 main (int argc, char **argv)
 {
+    /* This demo highlights the effects of the different partitioning options
+     * on the patch data partitioning. In particular, they differ in the amount
+     * of patch_pack callback calls that have to be performed. */
+
     /* Initialize application */
     fclaw_app_t *app = fclaw_app_new (&argc, &argv, NULL);
 
@@ -129,6 +132,8 @@ main (int argc, char **argv)
 
     fclaw2d_domain_t *domain, *refined_domain, *partitioned_domain;
 
+    /* iterate through the different partitioning strategies for patch data */
+    int output_patch_data = 0;
     for (int test_case = 0; test_case < 2; test_case++)
     {
         domain = fclaw2d_domain_new_brick (mpicomm, 2, 2, 0, 0, 2);
@@ -146,9 +151,11 @@ main (int argc, char **argv)
                                             NULL);
             fclaw2d_domain_iterate_patches (refined_domain, set_patch_data,
                                             NULL);
-            fclaw2d_domain_iterate_patches (refined_domain, print_patch_data,
-                                            NULL);
-
+            if (output_patch_data)
+            {
+                fclaw2d_domain_iterate_patches (refined_domain,
+                                                print_patch_data, NULL);
+            }
             partitioned_domain = fclaw2d_domain_partition (refined_domain, 0);
 
             fclaw_global_productionf
@@ -172,8 +179,11 @@ main (int argc, char **argv)
                                              transfer_patch_data, NULL);
             fclaw2d_domain_partition_free (p);
 
-            fclaw2d_domain_iterate_patches (partitioned_domain,
-                                            print_patch_data, NULL);
+            if (output_patch_data)
+            {
+                fclaw2d_domain_iterate_patches (partitioned_domain,
+                                                print_patch_data, NULL);
+            }
 
             fclaw2d_domain_complete (partitioned_domain);
 
