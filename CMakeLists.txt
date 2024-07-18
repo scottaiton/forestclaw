@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15...3.28)
+cmake_minimum_required(VERSION 3.19...3.30)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(FATAL_ERROR "please use out-of-source build
@@ -67,6 +67,14 @@ if(FCLAW_ENABLE_THUNDEREGG)
 endif()
 
 # --- configure
+
+# Conda's HDF5 never works with the system compiler
+if(DEFINED ENV{CONDA_PREFIX})
+  list(APPEND CMAKE_IGNORE_PREFIX_PATH $ENV{CONDA_PREFIX})
+  list(APPEND CMAKE_IGNORE_PATH $ENV{CONDA_PREFIX}/bin)
+  # need CMAKE_IGNORE_PATH for CMake < 3.23
+  # and to ensure system env var PATH doesn't interfere despite CMAKE_IGNORE_PREFIX_PATH
+endif()
 
 if(FCLAW_ENABLE_HDF5 AND NOT TARGET HDF5::HDF5)
   if(FCLAW_ENABLE_SUBMODULES)

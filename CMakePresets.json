@@ -105,6 +105,7 @@
     "verbosity": "default"
   },
   "execution": {
+    "scheduleRandom": true,
     "noTestsAction": "error",
     "stopOnFailure": false}
 }
