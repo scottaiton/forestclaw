@@ -67,6 +67,7 @@ fclaw_global_t* global_new (void)
     glob->count_single_step = 0;
     glob->count_elliptic_grids = 0;
     glob->curr_time = 0;
+    glob->curr_dt = 0;
     glob->cont = NULL;
     glob->user = NULL;
 
