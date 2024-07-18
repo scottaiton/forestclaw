@@ -91,13 +91,15 @@ fclaw_context_t* fclaw_context_get(fclaw_global_t *glob, const char *name);
 
 /**
  * @brief Get an integer value from the context object.
- *        If the value does not exist, the current value does not change.
  *
- * If the context isn't new and the value does not exist, an error message is printed and the program aborts.
+ * This function retrieves an integer value from the context object. If the value does not exist in the context,
+ * the current value remains unchanged. The only case where this function modifies the value is if the context object
+ * already existed in the global context and this is the first call after fclaw_context_get().
+ * If the context is not new and the value does not exist, an error message is printed and the program aborts.
  * 
  * @param context the context object
  * @param name the name of the value
- * @param value a pointer the value, if the value does not exist, the value is not changed
+ * @param value a pointer to the value
  */
 void fclaw_context_get_int(fclaw_context_t *context, 
                            const char *name,
@@ -105,13 +107,15 @@ void fclaw_context_get_int(fclaw_context_t *context,
 
 /**
  * @brief Get a double value from the context object. 
- *        If the value does not exist, the current value does not change.
- * 
- * If the context isn't new and the value does not exist, an error message is printed and the program aborts.
- * 
+ *
+ * This function retrieves an integer value from the context object. If the value does not exist in the context,
+ * the current value remains unchanged. The only case where this function modifies the value is if the context object
+ * already existed in the global context and this is the first call after fclaw_context_get().
+ * If the context is not new and the value does not exist, an error message is printed and the program aborts.
+ *
  * @param context the context object
  * @param name the name of the value
- * @param value a pointer the value, if the value does not exist, the value is not changed
+ * @param value a pointer to the value
  */
 void fclaw_context_get_double(fclaw_context_t *context, 
                               const char *name, 
