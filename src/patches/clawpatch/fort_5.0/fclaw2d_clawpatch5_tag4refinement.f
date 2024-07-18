@@ -20,33 +20,41 @@ c--------------------------------------------------------------------
       double precision q(meqn,1-mbc:mx+mbc,1-mbc:my+mbc)
 
       integer i,j, mq, ii, jj
-      double precision qmin, qmax, xc,yc,quad(-1:1,-1:1)
+      double precision qmin(meqn), qmax(meqn)
+      double precision :: xc,yc,quad(-1:1,-1:1,meqn), qval(meqn)
       integer :: fclaw2d_clawpatch_tag_criteria, exceeds_th
 
-      logical(kind=4) :: is_ghost, fclaw2d_clawpatch5_is_ghost
+      logical :: is_ghost, fclaw2d_clawpatch5_is_ghost
 
       tag_patch = 0
 
 c     # Refine based only on first variable in system.
       mq = 1
-      qmin = q(mq,1,1)
-      qmax = q(mq,1,1)
+      do mq = 1,meqn
+         qmin(mq) = q(mq,1,1)
+         qmax(mq) = q(mq,1,1)
+      end do
       do j = 1-mbc,my+mbc
          do i = 1-mbc,mx+mbc
             xc = xlower + (i-0.5)*dx
             yc = ylower + (j-0.5)*dy
-            qmin = min(q(mq,i,j),qmin)
-            qmax = max(q(mq,i,j),qmax)            
+            do mq = 1,meqn
+               qval(mq) = q(mq,i,j)
+               qmin(mq) = min(qmin(mq),q(mq,i,j))
+               qmax(mq) = max(qmax(mq),q(mq,i,j))            
+            end do
             is_ghost = fclaw2d_clawpatch5_is_ghost(i,j,mx,my)
             if (.not. is_ghost) then
                do ii = -1,1
                   do jj = -1,1
-                     quad(ii,jj) = q(mq,i+ii,j+jj)
+                     do mq = 1,meqn
+                        quad(ii,jj,mq) = q(mq,i+ii,j+jj)
+                     end do
                   end do
                end do
             endif
             exceeds_th = fclaw2d_clawpatch_tag_criteria(
-     &             blockno, q(mq,i,j),qmin,qmax,quad, dx,dy,xc,yc,
+     &             blockno, qval, qmin,qmax,quad, dx,dy,xc,yc,
      &             tag_threshold,init_flag,is_ghost)
             
 c           # -1 : Not conclusive (possibly ghost cell); don't tag for refinement
@@ -73,11 +81,11 @@ c> @param[in] i,j the index
 c> @param[in] mx,my dimensions of grid
 c> @return if the index is a ghost index
 c--------------------------------------------------------------------
-      logical(kind=4) function fclaw2d_clawpatch5_is_ghost(i,j,mx,my)
+      logical function fclaw2d_clawpatch5_is_ghost(i,j,mx,my)
          implicit none
 
          integer i, j, mx, my
-         logical(kind=4) is_ghost
+         logical is_ghost
 
          is_ghost = .false.
          if (i .lt. 1 .or. j .lt. 1) then

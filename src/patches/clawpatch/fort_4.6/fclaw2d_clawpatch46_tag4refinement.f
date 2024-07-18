@@ -19,15 +19,12 @@ c--------------------------------------------------------------------
       double precision tag_threshold
       double precision q(1-mbc:mx+mbc,1-mbc:my+mbc,meqn)      
 
-
-      integer i,j, mq
+      integer i,j, mq, ii, jj
       double precision qmin(meqn), qmax(meqn)
-
-      integer exceeds_th, fclaw2d_clawpatch_tag_criteria
-      integer ii,jj
       double precision xc,yc,quad(-1:1,-1:1,meqn), qval(meqn)
+      integer exceeds_th, fclaw2d_clawpatch_tag_criteria
 
-      logical(kind=4) :: is_ghost, fclaw2d_clawpatch46_is_ghost
+      logical :: is_ghost, fclaw2d_clawpatch46_is_ghost
 
 c     # Assume that we won't refine      
       tag_patch = 0
@@ -85,11 +82,11 @@ c> @param[in] i,j the index
 c> @param[in] mx,my dimensions of grid
 c> @return if the index is a ghost index
 c--------------------------------------------------------------------
-      logical(kind=4) function fclaw2d_clawpatch46_is_ghost(i,j,mx,my)
+      logical function fclaw2d_clawpatch46_is_ghost(i,j,mx,my)
          implicit none
 
          integer i, j, mx, my
-         logical(kind=4) :: is_ghost
+         logical :: is_ghost
 
          is_ghost = .false.
          if (i .lt. 1 .or. j .lt. 1) then

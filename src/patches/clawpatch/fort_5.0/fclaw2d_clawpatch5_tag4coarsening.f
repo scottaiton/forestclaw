@@ -97,7 +97,7 @@ c--------------------------------------------------------------------
 
       integer i,j, ii, jj, mq
 
-      logical(kind=4) is_ghost, fclaw2d_clawpatch5_is_ghost
+      logical is_ghost, fclaw2d_clawpatch5_is_ghost
 
       do i = 1-mbc,mx+mbc
          do j = 1-mbc,my+mbc
