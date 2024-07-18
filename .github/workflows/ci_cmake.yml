@@ -9,14 +9,17 @@ on:
   release:
     types: [published]
 
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  CTEST_NO_TESTS_ACTION: "error"
+  CMAKE_INSTALL_PREFIX: ~/local
+  CMAKE_PREFIX_PATH: ~/local
 
 jobs:
 
   linux:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
-    env:
-      CTEST_PARALLEL_LEVEL: 2
 
     strategy:
       fail-fast: false
@@ -90,21 +93,20 @@ jobs:
         sudo apt-get -y install cuda-toolkit-11-3
 
     - name: CMake configure
-      run: ${{ matrix.configure_environment }} cmake --preset ci -DCMAKE_INSTALL_PREFIX=~ ${{ matrix.configure_flags }}
+      run: ${{ matrix.configure_environment }} cmake --preset ci ${{ matrix.configure_flags }}
 
     - name: CMake build
       run: cmake --build --preset ci
 
     - name: CMake test
       if: ${{ !matrix.cuda }}
-      run: ctest --parallel 2 --output-on-failure
-      working-directory: build
+      run: ctest --preset default
 
     - name: CMake install (for examples)
       run: cmake --install build
 
     - name: CMake configure examples
-      run: ${{ matrix.configure_environment }} cmake -B applications/build -S applications --preset ci -DFORESTCLAW_ROOT=~
+      run: ${{ matrix.configure_environment }} cmake -B applications/build -S applications --preset ci
 
     - name: CMake build examples
       run: cmake --build applications/build
@@ -115,7 +117,7 @@ jobs:
 
     - name: Upload package
       if: github.event.action == 'published'
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: binary-archive
         path: build/package
@@ -126,7 +128,6 @@ jobs:
     name: CMake build on MacOS
     env:
       HOMEBREW_NO_INSTALL_CLEANUP: 1
-      CTEST_PARALLEL_LEVEL: 3
       CC: gcc-11
       CXX: g++-11
       FC: gfortran-11
@@ -139,20 +140,19 @@ jobs:
       run: brew install open-mpi ninja fftw
 
     - name: CMake configure
-      run: cmake --preset mac -DCMAKE_INSTALL_PREFIX=~ -Dclawpack=on -Dgeoclaw=on -Dthunderegg=on
+      run: cmake --preset mac -Dclawpack=on -Dgeoclaw=on -Dthunderegg=on
 
     - name: CMake build
-      run: cmake --build build
+      run: cmake --build --preset default
 
     - name: CMake test
-      run: ctest --parallel 2 --output-on-failure
-      working-directory: build
+      run: ctest --preset default
 
     - name: CMake install (for examples)
       run: cmake --install build
 
     - name: CMake configure examples
-      run: cmake -B applications/build -S applications -DFORESTCLAW_ROOT=~
+      run: cmake -B applications/build -S applications
 
     - name: CMake build examples
       run: cmake --build applications/build
@@ -163,7 +163,7 @@ jobs:
 
     - name: Upload package
       if: github.event.action == 'published'
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: binary-archive
         path: build/package
