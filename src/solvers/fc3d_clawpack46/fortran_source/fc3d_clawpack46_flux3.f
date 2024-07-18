@@ -272,7 +272,7 @@ c         -----------------------------------------------------------
      
 c     # apply limiter to waves:
       if (limit) then 
-         call clawpack46_inlinelimiter(maxm,meqn,mwaves,
+         call fc3d_clawpack46_inlinelimiter(maxm,meqn,mwaves,
      &                  mbc,mx,wave,s,mthlim)
       endif
      

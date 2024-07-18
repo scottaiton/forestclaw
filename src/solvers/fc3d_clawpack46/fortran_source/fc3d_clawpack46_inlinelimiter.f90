@@ -1,4 +1,4 @@
-subroutine clawpack46_inlinelimiter(maxm,meqn,mwaves,mbc, & 
+subroutine fc3d_clawpack46_inlinelimiter(maxm,meqn,mwaves,mbc, & 
            mx,wave,s,mthlim)
 !!     =====================================================
 
@@ -122,4 +122,4 @@ subroutine clawpack46_inlinelimiter(maxm,meqn,mwaves,mbc, &
     end do wave_loop
 
     return
-end subroutine clawpack46_inlinelimiter
+end subroutine fc3d_clawpack46_inlinelimiter
