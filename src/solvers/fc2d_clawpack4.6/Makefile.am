@@ -16,7 +16,6 @@ libclawpack4_6_compiled_sources = \
 	src/solvers/fc2d_clawpack4.6/fortran_source/clawpack46_block.f \
 	src/solvers/fc2d_clawpack4.6/fortran_source/clawpack46_bc2_default.f \
 	src/solvers/fc2d_clawpack4.6/fortran_source/clawpack46_flux2.f \
-	src/solvers/fc2d_clawpack4.6/fortran_source/clawpack46_flux2fw.f \
 	src/solvers/fc2d_clawpack4.6/fortran_source/clawpack46_step2.f \
 	src/solvers/fc2d_clawpack4.6/fortran_source/clawpack46_step2_wrap.f
 

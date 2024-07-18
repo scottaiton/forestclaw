@@ -56,7 +56,7 @@ c
 c
       implicit none
 
-      integer ixy, maxm, meqn, mbc, mx, maux, use_fwaves, ierror
+      integer ixy, maxm, meqn, mbc, mx, maux, use_fwaves
       integer mwaves, mcapa, method(7), mthlim(mwaves)
 
       external rpn2, rpt2
@@ -113,8 +113,9 @@ c
 c     # solve Riemann problem at each interface and compute Godunov updates
 c     ---------------------------------------------------------------------
 c
+c     !! # We pass in maux, even though the typdef does not require it.      
       call rpn2(ixy,maxm,meqn,mwaves,mbc,mx,q1d,q1d,
-     &          aux2,aux2,wave,s,amdq,apdq)
+     &          aux2,aux2,wave,s,amdq,apdq,maux)
 
 c
 c     # Set fadd for the donor-cell upwind method (Godunov)
@@ -197,9 +198,11 @@ c         --------------------------------------------
 
 
 c         # split the left-going flux difference into down-going and up-going:
+c         # !! Pass in maux, even though it is not in typedef. This works only
+c         # !! because maux is last argument
           ilr = 1
           call rpt2(ixy,maxm,meqn,mwaves,mbc,mx, q1d,q1d,
-     &          aux1,aux2,aux3, ilr,amdq,bmasdq,bpasdq)
+     &          aux1,aux2,aux3, ilr,amdq,bmasdq,bpasdq,maux)
 
 c         # modify flux below and above by B^- A^- Delta q and  B^+ A^- Delta q:
           do m=1,meqn
@@ -218,7 +221,7 @@ c         # split the right-going flux difference into down-going and up
 c              -going:
           ilr = 2
           call rpt2(ixy,maxm,meqn,mwaves,mbc,mx, q1d,q1d,
-     &               aux1,aux2,aux3, ilr,apdq,bmasdq,bpasdq)
+     &               aux1,aux2,aux3, ilr,apdq,bmasdq,bpasdq,maux)
 
 c         # modify flux below and above by B^- A^+ Delta q and  B^+ A^+ Delta q:
           do m=1,meqn
