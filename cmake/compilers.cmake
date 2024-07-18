@@ -15,6 +15,5 @@ if (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
 elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
   add_compile_options(
     "$<$<COMPILE_LANGUAGE:Fortran>:-Wall>"
-    "$<$<COMPILE_LANGUAGE:Fortran>:-Wno-unused-dummy-argument,-Wno-unused-variable,-Wno-unused-label>"
     )
 endif()
