@@ -30,31 +30,40 @@ c     # the left or right.  The norm of the projections onto the wave are then
 c     # given by dotl/wnorm2 and dotr/wnorm2, where wnorm2 is the 2-norm
 c     # of wave.
 c
-      implicit double precision (a-h,o-z)
-      dimension mthlim(mwaves)
-      dimension wave(1-mbc:maxm+mbc,meqn,mwaves)
-      dimension    s(1-mbc:maxm+mbc,mwaves)
+      implicit none
+
+      integer maxm, meqn,mwaves,mbc, mx
+      integer mthlim(mwaves)
+      double precision wave(1-mbc:maxm+mbc,meqn,mwaves)
+      double precision    s(1-mbc:maxm+mbc,mwaves)
+
+      integer mw, i, m
+      double precision wnorm2, dotl, dotr
+      double precision r, wlimitr, th, c
 c
 c
-      do 200 mw=1,mwaves
-         if (mthlim(mw) .eq. 0) go to 200
+      do mw=1,mwaves
+         if (mthlim(mw) .eq. 0) then
+            cycle
+         end if
          dotr = 0.d0
-         do 190 i = 0, mx+1
+         do i = 0, mx+1
             wnorm2 = 0.d0
             dotl = dotr
             dotr = 0.d0
-            do 5 m=1,meqn
+            do m=1,meqn
                wnorm2 = wnorm2 + wave(i,m,mw)**2
                dotr = dotr + wave(i,m,mw)*wave(i+1,m,mw)
-    5          continue
-            if (i .eq. 0) go to 190
-            if (wnorm2 .eq. 0.d0) go to 190
+            end do
+            if (i .eq. 0 .or. wnorm2 .eq. 0) then
+               cycle
+            endif
 c
             if (s(i,mw) .gt. 0.d0) then
                 r = dotl / wnorm2
-              else
+            else
                 r = dotr / wnorm2
-              endif
+            endif
 c
             go to (10,20,30,40,50,60) mthlim(mw)
 c
@@ -98,7 +107,7 @@ c
 c           ------------------------------
 c           # Generalized minmod
 c           ------------------------------
-            th = 1.3
+            th = 1.3d0
             wlimitr = dmax1(0.d0, dmin1(th*r,(1+r)/2.d0,th));
             go to 170
 c
@@ -107,12 +116,12 @@ c
 c
 c           # apply limiter to waves:
 c
-            do 180 m=1,meqn
+            do m=1,meqn
                wave(i,m,mw) = wlimitr * wave(i,m,mw)
-  180          continue
+            end do
 
-  190       continue
-  200    continue
-c
+         end do
+      end do
+
       return
       end

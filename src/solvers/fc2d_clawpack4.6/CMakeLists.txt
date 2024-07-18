@@ -6,7 +6,6 @@ add_library(clawpack4.6_f OBJECT
   fortran_source/clawpack46_block.f
   fortran_source/clawpack46_bc2_default.f
   fortran_source/clawpack46_flux2.f
-  fortran_source/clawpack46_flux2fw.f
   fortran_source/clawpack46_step2.f
   fortran_source/clawpack46_step2_wrap.f
 )
