@@ -159,6 +159,9 @@ typedef struct fclaw3d_domain_persist
                                      the desired refinement level to neighbors. */
     int smooth_level;           /**< The minimum level that refinement smoothing
                                      is enabled on.  Use 0 for al levels. */
+    int skip_local;             /**< Boolean: If true the patch data of patches
+                                     that stay local is not packed during
+                                     partitioning. */
 }
 fclaw3d_domain_persist_t;
 
@@ -798,9 +801,13 @@ void fclaw3d_domain_set_refinement (fclaw3d_domain_t * domain,
  * \param [in] partition_for_coarsening Boolean:  If true, all future partitions
  *                              of the domain allow one level of coarsening.
  *                              Suggested default: 1.
+ * \param [in] skip_local       Boolean: If true, the patch data of patches that
+ *                              stay local are not packed during partitioning.
+ *                              Suggested default: 1.
  */
 void fclaw3d_domain_set_partitioning (fclaw3d_domain_t * domain,
-                                      int partition_for_coarsening);
+                                      int partition_for_coarsening,
+                                      int skip_local);
 
 /** Mark a patch for refinement.
  * This must ONLY be called for local patches.
@@ -924,7 +931,9 @@ void fclaw3d_domain_iterate_partitioned (fclaw3d_domain_t * old_domain,
 typedef struct fclaw3d_domain_partition
 {
     sc_array_t *src_data; /**< The patch data to send */
+    sc_array_t *src_sizes; /**< The patch data sizes to send */
     sc_array_t *dest_data; /**< The patch data to receive */
+    sc_array_t *dest_sizes; /**< The patch data sizes to receive */
     /** Temporary storage required for asynchronous patch data transfer.
      * It is allocated and freed by the begin/end calls below.
      */
@@ -950,10 +959,13 @@ typedef void (*fclaw3d_pack_callback_t) (fclaw3d_domain_t * domain,
                                          void *user);
 
 /** Start asynchronous transfer of patch data after partition.
- * The function iterates over all local patches of old partition and determines
+ * The function iterates over the local patches of old partition and determines
  * patches that have to be packed by use of \b patch_pack and send to the new
- * partition.
- * It must be followed by a call to \ref fclaw3d_domain_iterate_unpack.
+ * partition. If skip_local is set to false in the domain, \b patch_pack is
+ * called for every local patch. If skip_local is true (default), \b patch_pack
+ * is called only for local patches that are sent to a different process during
+ * partitioning.
+ * This function must be followed by a call to \ref fclaw3d_domain_iterate_unpack.
  * \param [in,out] domain       The domain before partitioning.
  * \param [in] data_size        The number of bytes of user data that has to be
  *                              packed and send per patch.

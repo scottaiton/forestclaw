@@ -1400,11 +1400,13 @@ fclaw2d_domain_set_refinement (fclaw2d_domain_t * domain,
 
 void
 fclaw2d_domain_set_partitioning (fclaw2d_domain_t * domain,
-                                 int partition_for_coarsening)
+                                 int partition_for_coarsening,
+                                 int skip_local)
 {
     p4est_wrap_t *wrap = (p4est_wrap_t *) domain->pp;
 
-    p4est_wrap_set_partitioning (wrap, partition_for_coarsening);
+    wrap->params.partition_for_coarsening = partition_for_coarsening;
+    domain->p.skip_local = skip_local;
 }
 
 void
@@ -1716,47 +1718,142 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
 {
     fclaw2d_domain_partition_t *p;
     p4est_wrap_t *wrap = (p4est_wrap_t *) domain->pp;
-    int blockno, patchno;
-    size_t zz;
+    p4est_t *p4est = wrap->p4est;
+    int mpirank = p4est->mpirank;
+    int blockno, patchno, *size, i;
+    int num_dest, num_src, pul, old_puf, new_puf, old_lnp, new_lnp, bnpb;
+    p4est_gloidx_t *old_gfq, *new_gfq;
     fclaw2d_block_t *block;
     fclaw2d_patch_t *patch;
 
     /* this routine should only be called for changed partitions */
-    P4EST_ASSERT (!domain->pp_owned);
-    P4EST_ASSERT (wrap->old_global_first_quadrant != NULL);
-    P4EST_ASSERT (domain->local_num_patches == (int)
-                  wrap->old_global_first_quadrant[wrap->p4est->mpirank + 1] -
-                  wrap->old_global_first_quadrant[wrap->p4est->mpirank]);
+    FCLAW_ASSERT (!domain->pp_owned);
+    FCLAW_ASSERT (wrap->old_global_first_quadrant != NULL);
+    old_gfq = wrap->old_global_first_quadrant;
+    old_lnp = domain->local_num_patches;
+    FCLAW_ASSERT (old_lnp == old_gfq[mpirank + 1] - old_gfq[mpirank]);
+    new_gfq = p4est->global_first_quadrant;
+    new_lnp = p4est->local_num_quadrants;
+    FCLAW_ASSERT (new_lnp == new_gfq[mpirank + 1] - new_gfq[mpirank]);
 
-    p = FCLAW_ALLOC (fclaw2d_domain_partition_t, 1);
-    p->dest_data =
-        sc_array_new_count (data_size,
-                            (size_t) wrap->p4est->local_num_quadrants);
+    p = FCLAW_ALLOC_ZERO (fclaw2d_domain_partition_t, 1);
 
-    /* pack patches into src_data array */
-    p->src_data =
-        sc_array_new_count (data_size, (size_t) domain->local_num_patches);
-    for (zz = 0, blockno = 0; blockno < domain->num_blocks; ++blockno)
+    /* compute partition_unchanged data from gfq arrays */
+    pul = (int) SC_MAX (SC_MIN (old_gfq[mpirank + 1], new_gfq[mpirank + 1]) -
+                        SC_MAX (old_gfq[mpirank], new_gfq[mpirank]), 0);
+    old_puf = (int) SC_MAX (0, new_gfq[mpirank] - old_gfq[mpirank]);
+    new_puf = (int) SC_MAX (0, old_gfq[mpirank] - new_gfq[mpirank]);
+
+    /* allocate destination arrays */
+    if (domain->p.skip_local)
     {
-        block = domain->blocks + blockno;
-        for (patchno = 0; patchno < block->num_patches; ++zz, ++patchno)
+        /* we only receive data for patches that were not local before partition */
+        num_dest = new_lnp - pul;
+        p->dest_sizes = sc_array_new_count (sizeof (int), (size_t) new_lnp);
+        sc_array_memset (p->dest_sizes, 0);
+        /* set data size for newly received patches */
+        for (i = 0; i < new_puf; i++)
         {
-            FCLAW_ASSERT (zz ==
-                          (size_t) (block->num_patches_before + patchno));
-            patch = block->patches + patchno;
-            patch_pack (domain, patch, blockno, patchno,
-                        sc_array_index (p->src_data, zz), user);
+            size = (int *) sc_array_index_int (p->dest_sizes, i);
+            *size = data_size;
+        }
+        for (i = new_puf + pul; i < new_lnp; i++)
+        {
+            size = (int *) sc_array_index_int (p->dest_sizes, i);
+            *size = data_size;
         }
     }
-    FCLAW_ASSERT (zz == (size_t) domain->local_num_patches);
+    else
+    {
+        num_dest = new_lnp;
+    }
+    p->dest_data = sc_array_new_count (data_size, num_dest);
+
+    /* allocate source arrays */
+    if (domain->p.skip_local)
+    {
+        num_src = old_lnp - pul;
+        p->src_sizes = sc_array_new_count (sizeof (int), old_lnp);
+        sc_array_memset (p->src_sizes, 0);
+        /* set data size for patches that have to be sent */
+        for (i = 0; i < old_puf; i++)
+        {
+            size = (int *) sc_array_index (p->src_sizes, i);
+            *size = data_size;
+        }
+        for (i = old_puf + pul; i < old_lnp; i++)
+        {
+            size = (int *) sc_array_index (p->src_sizes, i);
+            *size = data_size;
+        }
+    }
+    else
+    {
+        num_src = old_lnp;
+    }
+    p->src_data = sc_array_new_count (data_size, num_src);
+
+    /* pack patches into src_data array */
+    for (i = 0, blockno = 0; blockno < domain->num_blocks; ++blockno)
+    {
+        block = domain->blocks + blockno;
+        bnpb = block->num_patches_before;
+
+        /* iterate over patches before partition-unchanged range */
+        for (patchno = 0;
+             patchno < SC_MIN (old_puf - bnpb, block->num_patches);
+             ++i, ++patchno)
+        {
+            patch = block->patches + patchno;
+            patch_pack (domain, patch, blockno, patchno,
+                        sc_array_index_int (p->src_data, i), user);
+        }
+
+        if (!domain->p.skip_local)
+        {
+            /* iterate over patches in partition-unchanged range */
+            for (patchno = SC_MAX (old_puf - bnpb, 0);
+                 patchno < SC_MIN (old_puf + pul - bnpb, block->num_patches);
+                 ++i, ++patchno)
+            {
+                patch = block->patches + patchno;
+                patch_pack (domain, patch, blockno, patchno,
+                            sc_array_index_int (p->src_data, i), user);
+            }
+        }
+
+        /* iterate over patches after partition-unchanged range */
+        for (patchno = SC_MAX (old_puf + pul - bnpb, 0);
+             patchno < block->num_patches; ++i, ++patchno)
+        {
+            patch = block->patches + patchno;
+            patch_pack (domain, patch, blockno, patchno,
+                        sc_array_index_int (p->src_data, i), user);
+        }
+    }
+    FCLAW_ASSERT (i == num_src);
 
     /* start transfering patch data according to the new partition */
-    p->async_state = (void *)
-        p4est_transfer_fixed_begin (wrap->p4est->global_first_quadrant,
-                                    wrap->old_global_first_quadrant,
-                                    domain->mpicomm, COMM_TAG_FIXED,
-                                    p->dest_data->array, p->src_data->array,
-                                    data_size);
+    if (!domain->p.skip_local)
+    {
+        /* we packed all patches resulting in a fixed data size */
+        p->async_state = (void *)
+            p4est_transfer_fixed_begin (new_gfq, old_gfq,
+                                        domain->mpicomm, COMM_TAG_FIXED,
+                                        p->dest_data->array,
+                                        p->src_data->array, data_size);
+    }
+    else
+    {
+        /* we packed only patches that are sent, resulting in custom data sizes */
+        p->async_state = (void *)
+            p4est_transfer_custom_begin (new_gfq, old_gfq,
+                                         domain->mpicomm, COMM_TAG_CUSTOM,
+                                         p->dest_data->array,
+                                         (const int *) p->dest_sizes->array,
+                                         p->src_data->array,
+                                         (const int *) p->src_sizes->array);
+    }
     p->inside_async = 1;
 
     return p;
@@ -1774,8 +1871,8 @@ fclaw2d_domain_iterate_transfer (fclaw2d_domain_t * old_domain,
     int dpuf, dpul, bnpb;
 
     /* this routine should only be called for a changed partition */
-    P4EST_ASSERT (!old_domain->pp_owned);
-    P4EST_ASSERT (new_domain->pp_owned);
+    FCLAW_ASSERT (!old_domain->pp_owned);
+    FCLAW_ASSERT (new_domain->pp_owned);
 
     /* unpack patches from dest_data array */
     dpuf = new_domain->partition_unchanged_first;
@@ -1818,11 +1915,19 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
 
     /* this routine should only be called for the new domain of a changed
      * partition */
-    P4EST_ASSERT (domain->pp_owned);
-    P4EST_ASSERT (p->inside_async);
+    FCLAW_ASSERT (domain->pp_owned);
+    FCLAW_ASSERT (p->inside_async);
 
     /* wait for transfer of patch data to complete */
-    p4est_transfer_fixed_end ((p4est_transfer_context_t *) p->async_state);
+    if (!domain->p.skip_local)
+    {
+        p4est_transfer_fixed_end ((p4est_transfer_context_t *) p->async_state);
+    }
+    else
+    {
+        p4est_transfer_custom_end ((p4est_transfer_context_t *) p->async_state);
+    }
+
     p->async_state = NULL;
     p->inside_async = 0;
 
@@ -1844,8 +1949,8 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
                           sc_array_index (p->dest_data, zz), user);
         }
 
-        /* we skip the local patches for unpacking */
-        if (zz == (size_t) dpuf)
+        /* if skip_local is disabled, we have to skip the local patches in dest_data */
+        if (zz == (size_t) dpuf && !domain->p.skip_local)
         {
             zz += dpul;
         }
@@ -1859,7 +1964,7 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
                           sc_array_index (p->dest_data, zz), user);
         }
     }
-    FCLAW_ASSERT (zz == (size_t) domain->local_num_patches);
+    FCLAW_ASSERT (zz == p->dest_data->elem_count);
 }
 
 void
@@ -1868,7 +1973,12 @@ fclaw2d_domain_partition_free (fclaw2d_domain_partition_t * p)
     P4EST_ASSERT (!p->inside_async);
     sc_array_destroy (p->src_data);
     sc_array_destroy (p->dest_data);
-
+    if (p->src_sizes != NULL)
+    {
+        FCLAW_ASSERT (p->dest_sizes != NULL);
+        sc_array_destroy_null (&p->src_sizes);
+        sc_array_destroy_null (&p->dest_sizes);
+    }
     FCLAW_FREE (p);
 }
 
@@ -2624,7 +2734,7 @@ fclaw2d_domain_is_meta (fclaw2d_domain_t * domain)
 void
 fclaw2d_domain_init_meta (fclaw2d_domain_t * domain, int mpirank)
 {
-    FCLAW_ASSERT(domain != NULL);
+    FCLAW_ASSERT (domain != NULL);
 
     /* initialize to -1 and set pointers to NULL */
     memset (domain, -1, sizeof (fclaw2d_domain_t));
