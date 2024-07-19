@@ -54,8 +54,8 @@ c            bpasdq =   the up-going transverse flux difference B^+ A^* Delta q
 c        where A^* represents either A^- or A^+.
 c
 c
-      use clawpack5_amr_module, only : mwaves, mcapa, method, 
-     &       mthlim, use_fwaves
+      use clawpack5_amr_module, only : mwaves, method, mthlim, 
+     &       use_fwaves
       implicit none
 
       external rpn2, rpt2
