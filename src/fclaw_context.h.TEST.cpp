@@ -95,6 +95,26 @@ TEST_CASE("fclaw_context_get_int new context")
 	}
 }
 
+TEST_CASE("fclaw_context_get_int called twice on new context")
+{
+	for(int default_value : {-100, 0, 42})
+	for(int changed_value : {-100, 0, 42})
+	{
+		fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
+		fclaw_context_t *context = fclaw_context_get(glob, "test");
+
+		int value = default_value;
+		fclaw_context_get_int(context, "test", &value);
+		CHECK_EQ(value, default_value);
+
+		value = changed_value;
+		fclaw_context_get_int(context, "test", &value);
+		CHECK_EQ(value, changed_value);
+
+		fclaw_global_destroy(glob);
+	}
+}
+
 TEST_CASE("fclaw_context_get_int new context two values")
 {
 	for(int default_value1 : {-100, 0, 42})
@@ -126,12 +146,18 @@ TEST_CASE("fclaw_context_get_int existing context")
 		CHECK_EQ(value1, default_value);
 
 		fclaw_context_save(context);
+
+		context = fclaw_context_get(glob, "test");
+
 		int value2 = 0;
 		fclaw_context_get_int(context, "test", &value2);
 		CHECK_EQ(value2, default_value);
 
 		value2 = changed_value;
 		fclaw_context_save(context);
+
+		context = fclaw_context_get(glob, "test");
+
 		int value3 = 0;
 		fclaw_context_get_int(context, "test", &value3);
 		CHECK_EQ(value3, changed_value);
@@ -232,6 +258,26 @@ TEST_CASE("fclaw_context_get_double new context")
 	}
 }
 
+TEST_CASE("fclaw_context_get_double called twice on new context")
+{
+	for(double default_value : {-100, 0, 42})
+	for(double changed_value : {-100, 0, 42})
+	{
+		fclaw_global_t* glob = fclaw_global_new_comm(sc_MPI_COMM_SELF, 1, 0);
+		fclaw_context_t *context = fclaw_context_get(glob, "test");
+
+		double value = default_value;
+		fclaw_context_get_double(context, "test", &value);
+		CHECK_EQ(value, default_value);
+
+		value = changed_value;
+		fclaw_context_get_double(context, "test", &value);
+		CHECK_EQ(value, changed_value);
+
+		fclaw_global_destroy(glob);
+	}
+}
+
 TEST_CASE("fclaw_context_get_double new context two values")
 {
 	for(double default_value1 : {-100, 0, 42})
@@ -263,12 +309,19 @@ TEST_CASE("fclaw_context_get_double existing context")
 		CHECK_EQ(value, default_value);
 
 		fclaw_context_save(context);
+
+		context = fclaw_context_get(glob, "test");
+
 		double value2 = 0;
 		fclaw_context_get_double(context, "test", &value2);
 		CHECK_EQ(value2, default_value);
 
 		value2 = changed_value;
+
 		fclaw_context_save(context);
+
+		context = fclaw_context_get(glob, "test");
+
 		double value3 = 0;
 		fclaw_context_get_double(context, "test", &value3);
 		CHECK_EQ(value3, changed_value);
@@ -297,6 +350,9 @@ TEST_CASE("fclaw_context_get_double existing context two values")
 		CHECK_EQ(value2, default_value2);
 
 		fclaw_context_save(context);
+
+		context = fclaw_context_get(glob, "test");
+
 		value = 0; value2 = 0;
 
 		fclaw_context_get_double(context, "test1", &value);
@@ -309,6 +365,9 @@ TEST_CASE("fclaw_context_get_double existing context two values")
 		value2 = changed_value2;
 
 		fclaw_context_save(context);
+
+		context = fclaw_context_get(glob, "test");
+
 		value = 0; value2 = 0;
 
 		fclaw_context_get_double(context, "test1", &value);
@@ -375,6 +434,9 @@ TEST_CASE("fclaw_context_get_double and fclaw_context_get_int called for same va
 		CHECK_EQ(value_double, default_double);
 
 		fclaw_context_save(context);
+		
+		context = fclaw_context_get(glob, "test");
+
 		value = 0; value_double = 0;
 
 		fclaw_context_get_int(context, "test", &value);

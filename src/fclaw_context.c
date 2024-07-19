@@ -44,6 +44,8 @@ typedef struct value
         double d;
     } value;
 
+    int initializing;
+
     void *pointer;
 
 } value_t;
@@ -81,10 +83,11 @@ context_destroy(void *data)
 }
 
 static void
-reset_pointers(const char *key, void *data, void *user)
+reset_values(const char *key, void *data, void *user)
 {
     value_t *value = (value_t *)data;
     value->pointer = NULL;
+    value->initializing = 1;
 }
 
 fclaw_context_t* fclaw_context_get(fclaw_global_t *glob, const char *name)
@@ -105,7 +108,7 @@ fclaw_context_t* fclaw_context_get(fclaw_global_t *glob, const char *name)
             fclaw_abortf("fclaw_context_get: Context needs to be saved before it can be retrieved again\n");
         }
         context->saved = 0;
-        fclaw_pointer_map_iterate(context->values, reset_pointers, NULL);
+        fclaw_pointer_map_iterate(context->values, reset_values, NULL);
     }
 
     return context;
@@ -123,12 +126,17 @@ void fclaw_context_get_int(fclaw_context_t *context,
         {
             fclaw_abortf("fclaw_context_get_int: Value %s is not an int\n", name);
         }
-        *value = v->value.i;
+        if(v->initializing)
+        {
+            *value = v->value.i;
+            v->initializing = 0;
+        }
     }
     else if (context->initializing)
     {
         v = FCLAW_ALLOC(value_t, 1);
         v->type = FCLAW_CONTEXT_INT;
+        v->initializing = 0;
         fclaw_pointer_map_insert(context->values, name, v, value_destroy);
     }
     else
@@ -150,12 +158,17 @@ void fclaw_context_get_double(fclaw_context_t *context,
         {
             fclaw_abortf("fclaw_context_get_double: Value %s is not a double\n", name);
         }
-        *value = v->value.d;
+        if(v->initializing)
+        {
+            *value = v->value.d;
+            v->initializing = 0;
+        }
     }
     else if(context->initializing)
     {
         v = FCLAW_ALLOC(value_t, 1);
         v->type = FCLAW_CONTEXT_DOUBLE;
+        v->initializing = 0;
         fclaw_pointer_map_insert(context->values, name, v, value_destroy);
     }
     else
@@ -290,6 +303,7 @@ size_t context_unpack(fclaw_global_t *glob, char *buffer, void *data)
         {
             SC_ABORT_NOT_REACHED();
         }
+        value->initializing = 1;
         value->pointer = NULL;
         fclaw_pointer_map_insert(context->values, key, value, value_destroy);
         FCLAW_FREE(key);
