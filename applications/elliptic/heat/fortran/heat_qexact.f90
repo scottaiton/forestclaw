@@ -70,6 +70,11 @@ SUBROUTINE heat_qexact_complete(x,y,q,qlap,grad,flag)
     double precision q1, qx1, qy1, qlap1, x0p,y0p
     integer id
 
+    q = 0
+    qx = 0
+    qy = 0
+    qlap = 0        
+
     if (example .eq. 0) then
         q = x
         qx = 1
@@ -125,15 +130,14 @@ SUBROUTINE heat_qexact_complete(x,y,q,qlap,grad,flag)
         endif
     elseif (example .eq. 4) then
         q = 0
-        qx = 0
-        qy = 0
-        qlap = 0
         do id = 1,m_polar
             x0p = x0_polar(id)
             y0p = y0_polar(id)
             r = sqrt((x-x0p)**2 + (y-y0p)**2)
             theta = atan2(y-y0p,x-x0p)        
             q1 = 1 - hsmooth(id,r,theta)
+            qlap1 = 0
+            qx1 = 0
             if (flag .ge. 1) then
                 !! Assume mapping is T(r,theta)
                 t1(1) = cos(theta)
@@ -152,9 +156,13 @@ SUBROUTINE heat_qexact_complete(x,y,q,qlap,grad,flag)
                 endif
             endif
             q = q + q1
-            qx = qx + qx1
-            qy = qy + qy1
-            qlap = qlap + qlap1
+            if (flag .ge. 1) then
+                qx = qx + qx1
+                qy = qy + qy1
+                if (flag .eq. 2) then
+                    qlap = qlap + qlap1
+                endif
+            endif
         enddo
     endif
     if (flag .ge. 1) then
@@ -185,6 +193,8 @@ subroutine heat_fort_beta(x,y,b,grad)
 
     DOUBLE PRECISION bx, by
 
+    bx = 0
+    by = 0
     if (beta_choice .eq. 0) then
         b = 1
         bx = 0
