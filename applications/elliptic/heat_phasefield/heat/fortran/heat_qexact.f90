@@ -70,6 +70,9 @@ SUBROUTINE heat_qexact_complete(x,y,q,qlap,grad,flag)
     double precision q1, qx1, qy1, qlap1, x0p,y0p
     integer id
 
+    qx = 0
+    qy = 0
+    qlap = 0
     if (example .eq. 0) then
         q = x
         qx = 1
@@ -152,9 +155,13 @@ SUBROUTINE heat_qexact_complete(x,y,q,qlap,grad,flag)
                 endif
             endif
             q = q + q1
-            qx = qx + qx1
-            qy = qy + qy1
-            qlap = qlap + qlap1
+            if (flag .eq. 1) then
+                qx = qx + qx1
+                qy = qy + qy1
+                if (flag .eq. 2) then
+                    qlap = qlap + qlap1
+                endif
+            endif
         enddo
     endif
     if (flag .ge. 1) then
@@ -197,6 +204,9 @@ subroutine heat_fort_beta(x,y,b,grad)
         b = 1 + x*y
         bx = y
         by = x
+    else
+        write(6,*) 'heat_fort_beta : beta choice is invalid'
+        stop
     endif
 
     grad(1) = bx
