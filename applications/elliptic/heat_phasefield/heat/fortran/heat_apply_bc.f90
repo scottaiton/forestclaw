@@ -53,8 +53,6 @@ subroutine heat_fort_apply_bc(blockno, mx, my,mbc,mfields,xlower,ylower, &
 
 
         !! Assume Dirichlet BCs to suppress compiler warnings.
-        a = 1
-        b = 0
         do iface = 0,3
             if (intersects_bc(iface) .ne. 0) then
                 idir = iface/2   !! direction : 0 or 1
@@ -66,6 +64,9 @@ subroutine heat_fort_apply_bc(blockno, mx, my,mbc,mfields,xlower,ylower, &
                 elseif (bctype(iface) .eq. 2) then
                     a = 0
                     b = 1
+                else
+                    write(6,*) 'heat_apply_bc : bctype(iface) is not valid'
+                    stop
                 endif
 
                 if (idir == 0) then
