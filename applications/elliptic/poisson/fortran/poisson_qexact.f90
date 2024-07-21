@@ -79,6 +79,9 @@ SUBROUTINE poisson_qexact_complete(example,x,y,q,qlap,grad,flag)
     double precision q1, qx1, qy1, qlap1, x0p,y0p
     integer id
 
+    qlap = 0
+    qx = 0
+    qy = 0
     if (example .eq. 0) then
         q = x**2 + y**2
         qx = 2*x
@@ -161,9 +164,13 @@ SUBROUTINE poisson_qexact_complete(example,x,y,q,qlap,grad,flag)
                 endif
             endif
             q = q + q1
-            qx = qx + qx1
-            qy = qy + qy1
-            qlap = qlap + qlap1
+            if (flag .ge. 1) then
+                qx = qx + qx1
+                qy = qy + qy1
+                if (flag .eq. 2) then
+                    qlap = qlap + qlap1
+                endif
+            endif
         enddo
     endif
     if (flag .ge. 1) then
@@ -206,6 +213,9 @@ subroutine poisson_fort_beta(x,y,b,grad)
         b = 1 + x*y
         bx = y
         by = x
+    else
+        write(6,*) 'poisson_qexact : Invalid beta choice'
+        stop
     endif
 
     grad(1) = bx
