@@ -92,6 +92,9 @@ int find_edge(int corner, int intersects[], int faces[])
             face_0 = faces[0];
             face_1 = faces[1];
             break;
+        default:
+            fclaw_global_essentialf("fclaw_corner_neighbors : face_X not initialized");
+            exit(0);
     }
     FCLAW_ASSERT(face_0 != non_intersecting_face);
     FCLAW_ASSERT(face_1 != non_intersecting_face);
