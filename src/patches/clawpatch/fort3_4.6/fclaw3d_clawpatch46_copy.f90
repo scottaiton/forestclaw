@@ -22,8 +22,6 @@ subroutine fclaw3d_clawpatch46_fort_copy_face(mx,my,mz,mbc, &
     integer mq, k
     integer i,j
 
-    integer a(2,2), f(2)
-
     !!call fclaw3d_clawpatch_build_transform_same(transform_ptr, a, f)
 
     if (iface .eq. 0) then
