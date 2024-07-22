@@ -40,10 +40,6 @@ subroutine clawpack46_step3_wrap(maxm, meqn, maux, mbc, &
     double precision :: dtcom, dxcom,dycom,dzcom, tcom
     integer :: icom, jcom, kcom
     common /comxyzt/ dtcom,dxcom,dycom,dzcom, tcom,icom,jcom, kcom
-
-    integer jfix, kfix
-    double precision kappa
-
     ierror = 0
 
     !! This should be set to actual time, in case the user wants it
