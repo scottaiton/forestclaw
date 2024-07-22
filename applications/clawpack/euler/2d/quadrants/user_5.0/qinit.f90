@@ -54,10 +54,18 @@ SUBROUTINE clawpack5_qinit(meqn,mbc,mx,my, &
      xcell = xlower + (i-0.5d0)*dx
      DO j = 1-mbc,my+mbc
         ycell = ylower + (j-0.5d0)*dy
-        IF (xcell.GE.xs .AND. ycell.GE.ys) iq = 1
-        IF (xcell.LT.xs .AND. ycell.GE.ys) iq = 2
-        IF (xcell.LT.xs .AND. ycell.LT.ys) iq = 3
-        IF (xcell.GE.xs .AND. ycell.LT.ys) iq = 4
+        IF (xcell.GE.xs .AND. ycell.GE.ys) then
+            iq = 1        
+        ELSEIF (xcell.LT.xs .AND. ycell.GE.ys) then 
+            iq = 2
+        ELSEIF (xcell.LT.xs .AND. ycell.LT.ys) then 
+            iq = 3
+        ELSEIF (xcell.GE.xs .AND. ycell.LT.ys) then 
+            iq = 4
+        ELSE
+            write(6,*) 'qinit : (xs,ys) not in domain'
+            stop
+        ENDIF
         q(1,i,j) = rpr(iq)
         q(2,i,j) = rpr(iq)*rpu(iq)
         q(3,i,j) = rpr(iq)*rpv(iq)
