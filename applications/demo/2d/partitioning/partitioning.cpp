@@ -139,7 +139,8 @@ main (int argc, char **argv)
         domain = fclaw2d_domain_new_brick (mpicomm, 2, 2, 0, 0, 2);
 
         /* set partitioning options */
-        fclaw2d_domain_set_partitioning (domain, 1, (test_case % 2));
+        fclaw2d_domain_set_partitioning (domain, 1, (test_case % 2),
+                                         (test_case / 2));
 
         if (domain->mpisize != 1)
         {

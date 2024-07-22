@@ -1401,12 +1401,15 @@ fclaw2d_domain_set_refinement (fclaw2d_domain_t * domain,
 void
 fclaw2d_domain_set_partitioning (fclaw2d_domain_t * domain,
                                  int partition_for_coarsening,
-                                 int skip_local)
+                                 int skip_local, int skip_refined)
 {
     p4est_wrap_t *wrap = (p4est_wrap_t *) domain->pp;
 
     wrap->params.partition_for_coarsening = partition_for_coarsening;
     domain->p.skip_local = skip_local;
+    domain->p.skip_refined = skip_refined;
+    /* store recently adapted patches, if skip_refined is enabled */
+    wrap->params.store_adapted = skip_refined;
 }
 
 void

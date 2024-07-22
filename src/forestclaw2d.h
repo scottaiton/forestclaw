@@ -159,6 +159,21 @@ typedef struct fclaw2d_domain_persist
     int skip_local;             /**< Boolean: If true the patch data of patches
                                      that stay local is not packed during
                                      partitioning. */
+    int skip_refined;           /**< Boolean: If true, the patch data of patches
+                                     that were refined during the most recent
+                                     call to \ref fclaw2d_domain_adapt is only
+                                     packed for the patches with child id 0 in
+                                     \ref fclaw2d_domain_iterate_pack. The
+                                     unpack callback in
+                                     \ref fclaw2d_domain_iterate_unpack will
+                                     be invoked for all children of a recently
+                                     refined patch. The provided data will be
+                                     the data packed by the patch with
+                                     child id 0.
+                                     For this partitioning method to work as
+                                     desired skip_refined has to be set before
+                                     the most recent call to
+                                     \ref fclaw2d_domain_adapt. */
 }
 fclaw2d_domain_persist_t;
 
@@ -681,10 +696,23 @@ void fclaw2d_domain_set_refinement (fclaw2d_domain_t * domain,
  * \param [in] skip_local       Boolean: If true, the patch data of patches that
  *                              stay local are not packed during partitioning.
  *                              Suggested default: 1.
+ * \param [in] skip_refined     Boolean: If true, the patch data of patches that
+ *                              were refined during the most recent call to
+ *                              \ref fclaw2d_domain_adapt is only packed for the
+ *                              patches with child id 0 in
+ *                              \ref fclaw2d_domain_iterate_pack. The unpack
+ *                              callback in \ref fclaw2d_domain_iterate_unpack
+ *                              will be invoked for all children of a recently
+ *                              refined patch. The provided data will be the
+ *                              data packed by the patch with child id 0.
+ *                              For this partitioning method to work as desired
+ *                              skip_refined has to be set \b before the most
+ *                              recent call to \ref fclaw2d_domain_adapt .
+ *                              Suggested default: 0.
  */
 void fclaw2d_domain_set_partitioning (fclaw2d_domain_t * domain,
                                       int partition_for_coarsening,
-                                      int skip_local);
+                                      int skip_local, int skip_refined);
 
 /** Mark a patch for refinement.
  * This must ONLY be called for local patches.

@@ -218,7 +218,8 @@ void fclaw_initialize_domain_flags(fclaw_global_t *glob)
          fclaw_opt->coarsen_delay);
 
     /* set partitioning */
-    fclaw_domain_set_partitioning(glob->domain,  fclaw_opt->partition_for_coarsening, 1);
+    fclaw_domain_set_partitioning (glob->domain,
+                                   fclaw_opt->partition_for_coarsening, 1, 0);
 }
 
 static void
