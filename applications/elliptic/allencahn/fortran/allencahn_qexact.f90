@@ -70,6 +70,8 @@ SUBROUTINE allencahn_qexact_complete(x,y,q,qlap,grad,flag)
     double precision q1, qx1, qy1, qlap1, x0p,y0p
     integer id
 
+    qx = 0
+    qy = 0
     if (example .eq. 0) then
         q = x**2 + y**2
         qx = 2*x
@@ -127,13 +129,13 @@ SUBROUTINE allencahn_qexact_complete(x,y,q,qlap,grad,flag)
         q = 0
         qx = 0
         qy = 0
-        qlap = 0
+        qlap = 0        
         do id = 1,m_polar
             x0p = x0_polar(id)
             y0p = y0_polar(id)
             r = sqrt((x-x0p)**2 + (y-y0p)**2)
             theta = atan2(y-y0p,x-x0p)        
-            q1 = 1 - hsmooth(id,r,theta)
+            q1 = 1 - hsmooth(id,r,theta)            
             if (flag .ge. 1) then
                 !! Assume mapping is T(r,theta)
                 t1(1) = cos(theta)
@@ -152,10 +154,17 @@ SUBROUTINE allencahn_qexact_complete(x,y,q,qlap,grad,flag)
                 endif
             endif
             q = q + q1
-            qx = qx + qx1
-            qy = qy + qy1
-            qlap = qlap + qlap1
+            if (flag .ge. 1) then
+                qx = qx + qx1
+                qy = qy + qy1
+                if (flag .eq. 2) then
+                    qlap = qlap + qlap1
+                endif
+            endif
         enddo
+    else
+        write(6,*) 'allencahn_qexact : Invalid example choice'
+        stop
     endif
     if (flag .ge. 1) then
         grad(1) = qx
@@ -197,6 +206,9 @@ subroutine allencahn_fort_beta(x,y,b,grad)
         b = 1 + x*y
         bx = y
         by = x
+    else
+        write(6,*) 'allencahn_beta : Invalid beta choice'
+        stop
     endif
 
     grad(1) = bx
