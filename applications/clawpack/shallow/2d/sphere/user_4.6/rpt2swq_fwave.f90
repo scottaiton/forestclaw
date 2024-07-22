@@ -40,9 +40,8 @@ subroutine clawpack46_rpt2_fwave(ixy,maxm,meqn,mwaves,mbc,mx, &
     common /comxyt/ dtcom,dxcom,dycom,tcom,icom,jcom
 
     double precision delta(4)
-    double precision a1, a2, a3, dx, dy, bn
-    double precision erx, ery, erz 
-    integer i, j, m, i1, mw, ioff, ix1, ixm1
+    double precision a1, a2, a3, dx
+    integer i, m, i1, mw, ioff, ix1, ixm1
 
 
     if (ixy .eq. 1) then

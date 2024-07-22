@@ -33,12 +33,10 @@ subroutine clawpack5_qinit(meqn,mbc,mx,my, &
     double precision xc,yc,xlow,ylow,xp,yp,zp, w, qval
 
     double precision phi, phi0, width
-    double precision theta, q1, R, u0, Rsphere, d
+    double precision theta, q1, R, u0, d
 
     integer blockno, fc2d_clawpack5_get_block
     integer*8 cont, fclaw_map_get_context
-
-    character(len=12) :: fname
 
 
     cont = fclaw_map_get_context()

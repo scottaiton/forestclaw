@@ -27,7 +27,7 @@ subroutine clawpack5_rpn2(ixy,maxm,meqn,mwaves,maux, mbc,mx,&
     double precision amn, erx, ery, erz, apn
     integer ioff, m, mw, i
 
-    double precision dx, dy, qn
+    double precision dx, dy
 
 
     double precision grav

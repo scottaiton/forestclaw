@@ -42,14 +42,12 @@ SUBROUTINE clawpack5_rpn2_fwave(ixy,maxm,meqn,mwaves, maux, &
 
     integer :: i, m, mw, mq, ioff
     double precision :: enx, eny, enz, etx,ety,etz
-    double precision :: hunl, hunr, hutl, hutr
-    double precision :: gamma, amn, apn, df, dy, qn
+    double precision :: hunl, hunr
+    double precision :: gamma, amn, apn, df, dy
     double precision :: erx, ery, erz, h1, h3, hi, him1, hu1, hu3
     double precision :: s0, s03, s1, s3, sfract
 
     double precision :: hL, hR, huL, huR, bL, bR, hvL, hvR
-    double precision :: uL, vL, uR, vR, phiR, phiL, sL, sR
-    double precision :: uhat, chat
     double precision :: sw(mwaves), fw(meqn,mwaves)
     double precision szm(3), szp(3), z, sdk
 
