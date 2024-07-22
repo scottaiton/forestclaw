@@ -243,9 +243,6 @@ subroutine clawpack46_rpt3_mapped(ixyz,icoor,ilr,maxm,meqn,mwaves,maux,mbc, &
 
     enddo  !! end of i loop
 
-108     format(A,'ixyz=',I2,'; icoor=',I2,'; ilr = ',I2,';  i=',I2)
-109     format(5E24.16)
-
 1001    format(A,3E24.16)
 1002    format(A,I5)
 1003    format('icom = ',I5,'; jcom = ',I5,'; kcom = ',I5)
