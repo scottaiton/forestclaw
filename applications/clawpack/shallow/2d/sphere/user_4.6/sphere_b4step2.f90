@@ -8,7 +8,6 @@ subroutine clawpack46_b4step2(maxmx,maxmy,mbc,mx,my,meqn,q, &
    double precision  q(1-mbc:maxmx+mbc,1-mbc:maxmy+mbc, meqn)
    double precision aux(1-mbc:maxmx+mbc,1-mbc:maxmy+mbc, maux)
 
-   double precision xlow,ylow
    double precision erx, ery, erz, qn
 
    integer i,j
