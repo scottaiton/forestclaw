@@ -1723,10 +1723,12 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     p4est_wrap_t *wrap = (p4est_wrap_t *) domain->pp;
     p4est_t *p4est = wrap->p4est;
     int mpirank = p4est->mpirank;
+    int mpisize = p4est->mpisize;
     int blockno, patchno, *size, i, nri, num_nr;
     int skip_refined;
     int num_dest, num_src, pul, old_puf, new_puf, old_lnp, new_lnp, bnpb,
         next_refined;
+    int first_receiver, last_receiver, ri;
     p4est_gloidx_t *old_gfq, *new_gfq;
     fclaw2d_block_t *block;
     fclaw2d_patch_t *patch;
@@ -1786,7 +1788,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
         /* get first newly refined index, if skip_refined is enabled */
         nri = 0;
         num_nr = skip_refined ? (int) wrap->newly_refined->elem_count : -1;
-        next_refined = skip_refined ?
+        next_refined = (num_nr > 0) ?
             *(int *) sc_array_index_int (wrap->newly_refined, nri++) :
             old_lnp;
 
@@ -1822,6 +1824,36 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
             }
         }
         FCLAW_ASSERT (!skip_refined || nri == num_nr);
+
+        /* adapt to newly refined families across process boundaries */
+        if (skip_refined && !wrap->params.partition_for_coarsening)
+        {
+            /* find range of receiving processes */
+            first_receiver =
+                p4est_bsearch_partition (old_gfq[mpirank], new_gfq, mpisize);
+            P4EST_ASSERT (0 <= first_receiver && first_receiver < mpisize);
+            last_receiver =
+                p4est_bsearch_partition (old_gfq[mpirank + 1] - 1,
+                                         &new_gfq[first_receiver],
+                                         mpisize - first_receiver) +
+                first_receiver;
+            FCLAW_ASSERT (first_receiver <= last_receiver
+                          && last_receiver < mpisize);
+
+            /* the first patch for each process has to contain data */
+            for (ri = first_receiver; ri <= last_receiver; ri++)
+            {
+                size = (int *) sc_array_index_int (p->src_sizes,
+                                                   SC_MAX (0,
+                                                           new_gfq[ri] -
+                                                           old_gfq[mpirank]));
+                if (*size == 0)
+                {
+                    num_src++; /* one more patch to pack than expected */
+                }
+                *size = data_size;
+            }
+        }
     }
     p->src_data = sc_array_new_count (data_size, num_src);
 
