@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012-2023 Carsten Burstedde, Donna Calhoun, Scott Aiton
+Copyright (c) 2012-2024 Carsten Burstedde, Donna Calhoun, Scott Aiton
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -161,7 +161,7 @@ main (int argc, char **argv)
 
         /* MPI COMMs */
         int size, rank;
-        sc_MPI_Comm mpicomm = fclaw_app_get_mpi_size_rank (app, &size, &rank);
+        fclaw_app_get_mpi_size_rank (app, &size, &rank);
 
         /* Globs */
         fclaw_global_t *filament_glob = fclaw_global_new_comm (subcomm, size, rank);

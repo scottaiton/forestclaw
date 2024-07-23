@@ -19,7 +19,6 @@ add_executable(swirl_restart
   swirl_user.cpp 
   swirl.cpp 
   swirl_options.c
-  swirl_ray.c
   $<TARGET_OBJECTS:swirl_f>
 )
 

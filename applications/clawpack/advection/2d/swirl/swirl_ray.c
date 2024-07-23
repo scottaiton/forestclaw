@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2022 Carsten Burstedde, Donna Calhoun, Scott Aiton
+  Copyright (c) 2012-2024 Carsten Burstedde, Donna Calhoun, Scott Aiton
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -218,7 +218,8 @@ int swirl_intersect_ray (fclaw_domain_t *domain,
             }
             /* Four cases */
             int found_intersection = 0;
-            point_t pstart, pend;
+            point_t pstart = {0,0};
+            point_t pend = {0,0};
             if (istart < 0 && iend < 0)
             {
                 /* No intersection found */

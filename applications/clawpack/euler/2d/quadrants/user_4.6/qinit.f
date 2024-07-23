@@ -63,10 +63,18 @@ c
          xcell = xlower + (i-0.5d0)*dx
          do j = 1-mbc,my+mbc
             ycell = ylower + (j-0.5d0)*dy
-            if (xcell.ge.xs .and. ycell.ge.ys) iq = 1
-            if (xcell.lt.xs .and. ycell.ge.ys) iq = 2
-            if (xcell.lt.xs .and. ycell.lt.ys) iq = 3
-            if (xcell.ge.xs .and. ycell.lt.ys) iq = 4
+            if (xcell .ge. xs .and. ycell .ge. ys) then
+                  iq = 1
+            elseif (xcell .lt. xs .and. ycell .ge. ys) then
+                  iq = 2
+            elseif (xcell .lt. xs .and. ycell .lt. ys) then 
+                  iq = 3
+            elseif (xcell .ge. xs .and. ycell .lt. ys) then
+                  iq = 4
+            else
+                  write(6,*) "qinit.f : invalid point value"
+                  stop
+            endif
             q(i,j,1) = rpr(iq)
             q(i,j,2) = rpr(iq)*rpu(iq)
             q(i,j,3) = rpr(iq)*rpv(iq)

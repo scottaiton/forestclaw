@@ -50,7 +50,6 @@ SUBROUTINE fclaw3dx_clawpatch46_fort_average_face(mx,my,mz,mbc,meqn, &
     INTEGER :: rr2
     PARAMETER(rr2 = 4)
     INTEGER, DIMENSION(0:rr2-1) :: i2, j2
-    !! DOUBLE PRECISION :: kc
 
     LOGICAL :: fclaw2d_clawpatch_is_valid_average, skip_this_grid
     DOUBLE PRECISION :: vf_sum
@@ -192,7 +191,7 @@ subroutine fclaw3dx_clawpatch46_fort_average_corner(mx,my,mz,mbc,meqn, &
     INTEGER :: i2(0:rr2-1),j2(0:rr2-1)
 
     INTEGER :: i1,j1,m, k
-    DOUBLE PRECISION :: vf_sum, kc
+    DOUBLE PRECISION :: vf_sum
 
     r2 = refratio*refratio
     if (r2 .ne. rr2) then

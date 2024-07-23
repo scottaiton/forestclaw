@@ -46,7 +46,6 @@ subroutine fclaw3d_clawpatch46_fort_interpolate_face &
     integer :: rr3
     parameter(rr3 = 8)
     integer :: i2(0:rr3-1),j2(0:rr3-1),k2(0:rr3-1)
-    logical :: fclaw3d_clawpatch_is_valid_interp
     logical :: skip_this_grid
 
     integer :: a(3,3), f(3)
@@ -385,11 +384,8 @@ subroutine fclaw3d_clawpatch46_fort_interpolate2fine &
 
     integer :: ii, jj, kk, i,j,k, i1, i2, j1, j2, k1, k2, ig, jg, kg, mq, mth
     integer :: ic,jc,kc,ic_add, jc_add, kc_add, ifine, jfine, kfine
-    integer :: i_start_fine, j_start_fine, k_start_fine
     double precision :: qc, shiftx, shifty, shiftz, sl, sr, gradx, grady, gradz
     double precision :: fclaw2d_clawpatch_compute_slopes
-
-    logical :: lower_x, lower_y, lower_z
 
     integer :: p8est_refineFactor,refratio
 

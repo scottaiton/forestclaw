@@ -24,6 +24,9 @@ double precision function poisson_fort_eval_bc(iface,t,x,y)
     elseif (bctype(iface) .eq. 2) then
         a = 0
         b = 1
+    else
+        write(6,*) 'poisson_eval_bc : Invalid choice for bctype'
+        stop
     endif
 
     poisson_fort_eval_bc = a*q + b*qn

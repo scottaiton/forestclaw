@@ -14,7 +14,7 @@ SUBROUTINE clawpack5_step2(maxm,meqn,maux,mbc,mx,my,qold,aux,dx,dy,dt, &
 !     Converted to f90 2012-1-04 (KTM)
 !
 
-    use clawpack5_amr_module, only : mwaves, mcapa, method,mthlim
+    use clawpack5_amr_module, only : mwaves, mcapa
 
 
     implicit none

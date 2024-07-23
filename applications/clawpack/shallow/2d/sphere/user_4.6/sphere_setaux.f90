@@ -25,7 +25,7 @@ subroutine sphere_setaux(mx,my,mbc,xlower,ylower, &
     common /swe_example/ example
 
    integer i,j,m
-   double precision dxdy, xc, yc, xp, yp,zp, rp
+   double precision dxdy, xc, yc
    double precision bmount
 
    integer blockno, fc2d_clawpack46_get_block

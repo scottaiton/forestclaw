@@ -32,6 +32,9 @@ subroutine thunderegg_fort_apply_bc_default(blockno, mx, my,mbc,meqn,xlower,ylow
             elseif (bctype(iface) .eq. 2) then
                 a = 0
                 b = 1
+            else
+                write(6,*) 'thunderegg_apply_bc_default : bctype(iface) is not valid'
+                stop
             endif
 
             if (idir == 0) then
@@ -53,6 +56,9 @@ subroutine thunderegg_fort_apply_bc_default(blockno, mx, my,mbc,meqn,xlower,ylow
                 elseif (iface .eq. 1) then
                     i1 = mx+1
                     ig = mx+1
+                else
+                    write(6,*) 'thunderegg_fort_apply_bc_default : i1, ig not initialized'
+                    stop
                 endif
                 !! location at interface
                 x = xlower + (i1 - 1)*dx    
@@ -73,6 +79,9 @@ subroutine thunderegg_fort_apply_bc_default(blockno, mx, my,mbc,meqn,xlower,ylow
                 elseif (iface .eq. 3) then
                     j1 = my+1
                     jg = my+1
+                else
+                    write(6,*) 'thunderegg_fort_apply_bc_default : j1, jg not initialized'
+                    stop
                 endif
                 !! location at interface
                 y = ylower + (j1 - 1)*dy

@@ -5,7 +5,7 @@
       
       implicit none
 
-      integer ixy, maxm, meqn,mwaves,mbc,mx,imp, maux
+      integer ixy, maxm, meqn,mwaves,mbc,mx,imp
 
       double precision     ql(1-mbc:maxm+mbc, meqn)
       double precision     qr(1-mbc:maxm+mbc, meqn)

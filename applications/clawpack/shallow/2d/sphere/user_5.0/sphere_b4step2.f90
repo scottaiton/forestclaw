@@ -8,14 +8,9 @@ subroutine clawpack5_b4step2(mbc,mx,my,meqn,q, &
    double precision   q(meqn,1-mbc:mx+mbc,1-mbc:my+mbc)
    double precision aux(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
 
-   double precision xlow,ylow
    double precision erx, ery, erz, qn
 
    integer i,j
-
-   !! # We may not even need this if we project out the correct surface
-   !! # normal from the velocities.
-   return
 
    do i=1,mx
       do j=1,my

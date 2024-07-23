@@ -5,7 +5,6 @@ bin_PROGRAMS += applications/demo/2d/swirl_restart/swirl
 applications_demo_2d_swirl_restart_swirl_SOURCES = \
 	applications/demo/2d/swirl_restart/swirl_user.cpp \
 	applications/demo/2d/swirl_restart/swirl_user.h \
-	applications/demo/2d/swirl_restart/swirl_ray.c \
 	applications/demo/2d/swirl_restart/swirl_options.c \
 	applications/demo/2d/swirl_restart/swirl.cpp \
 	applications/demo/2d/swirl_restart/psi.f \

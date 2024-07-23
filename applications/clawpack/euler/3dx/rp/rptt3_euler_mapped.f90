@@ -81,27 +81,11 @@ subroutine clawpack46_rptt3_mapped(ixyz,icoor,ilr,impt,maxm,meqn,mwaves,&
     common /comxyzt/ dtcom,dxcom,dycom,dzcom,tcom,icom,jcom,kcom
 
     double precision wave(5,3),s_rot(3), bsasdq(5), uvw(3)
-    double precision uvw_cart(3), rot(9), wave_cart(5,3)
+    double precision uvw_cart(3), rot(9)
 
     integer i, j, mws, m, i1, info
     double precision uvw2, pres, enth, area
     integer locrot, locarea, irot
-
-!!    integer mv,mu,mw
-
-!!    IF(ixyz == 1)THEN
-!!       mu = 2
-!!       mv = 3
-!!       mw = 4
-!!    ELSE IF(ixyz == 2)THEN
-!!       mu = 3
-!!       mv = 4
-!!       mw = 2
-!!    ELSE
-!!       mu = 4
-!!       mv = 2
-!!       mw = 3
-!!    ENDIF
 
     call get_aux_locations_tt(ixyz,icoor,mcapa,locrot,locarea,irot)
 

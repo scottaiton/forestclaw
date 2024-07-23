@@ -312,21 +312,7 @@ subroutine clawpack46_rpn3_mapped(ixyz,maxm,meqn,mwaves,maux,mbc,mx,&
             apdq_cart(m,i) = area*apdq(m)
             amdq_cart(m,i) = area*amdq(m)
         end do
-
-
-!!        do m=1,meqn
-!!            amdq_cart(m,i) = 0.d0
-!!            apdq_cart(m,i) = 0.d0
-!!            do  mws = 1,mwaves
-!!                amdq_cart(m,i) = amdq_cart(m,i) + min(s(mws,i),0.d0)*wave(m,mws)
-!!                apdq_cart(m,i) = apdq_cart(m,i) + max(s(mws,i),0.d0)*wave(m,mws)
-!!            enddo
-!!        enddo
-
     enddo  !! end of i loop over 1d sweep array
-
-108     format(A,'ixyz=',I2,'; i = ',I2)
-109     format(5E24.16)
 
     return
 end subroutine clawpack46_rpn3_mapped

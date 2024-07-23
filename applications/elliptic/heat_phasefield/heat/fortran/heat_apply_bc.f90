@@ -51,6 +51,8 @@ subroutine heat_fort_apply_bc(blockno, mx, my,mbc,mfields,xlower,ylower, &
             end do
         end do
 
+
+        !! Assume Dirichlet BCs to suppress compiler warnings.
         do iface = 0,3
             if (intersects_bc(iface) .ne. 0) then
                 idir = iface/2   !! direction : 0 or 1
@@ -62,6 +64,9 @@ subroutine heat_fort_apply_bc(blockno, mx, my,mbc,mfields,xlower,ylower, &
                 elseif (bctype(iface) .eq. 2) then
                     a = 0
                     b = 1
+                else
+                    write(6,*) 'heat_apply_bc : bctype(iface) is not valid'
+                    stop
                 endif
 
                 if (idir == 0) then
@@ -99,6 +104,9 @@ subroutine heat_fort_apply_bc(blockno, mx, my,mbc,mfields,xlower,ylower, &
                         ic = mx  !! cell center
                         i1 = mx+1
                         ig = mx+1
+                    else
+                        write(6,*) 'heat_apply_bc : ic, i1, ig may not be initialized'
+                        stop
                     endif
                     !! location at interface
                     x = xlower + (i1 - 1)*dx    
@@ -125,6 +133,9 @@ subroutine heat_fort_apply_bc(blockno, mx, my,mbc,mfields,xlower,ylower, &
                         jc = my
                         j1 = my+1
                         jg = my+1
+                    else
+                        write(6,*) 'heat_apply_bc : jc, j1, jg may not be initialized'
+                        stop
                     endif
                     !! location at interface
                     y = ylower + (j1 - 1)*dy

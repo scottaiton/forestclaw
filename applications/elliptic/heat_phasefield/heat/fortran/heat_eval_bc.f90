@@ -18,6 +18,10 @@ double precision function heat_fort_eval_bc(iface,t,x,y)
     qn = normals(iface,1)*grad(1) + normals(iface,2)*grad(2)
 
     !! bc_type is set in options .ini file as [multigrid] boundary_conditions
+
+    !! Assume Dirichlet conditions (to suppress compiler warnings)
+    a = 1
+    b = 0
     if (bctype(iface) .eq. 1) then
         a = 1
         b = 0
