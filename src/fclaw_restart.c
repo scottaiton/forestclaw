@@ -658,7 +658,7 @@ checkpoint_output_frame (fclaw_global_t * glob, int iframe)
                                      free_used_ini);
     }
 
-    size_t used_ini_length = strlen(used_ini);
+    size_t used_ini_length = strlen(used_ini)+1;
     sc_array_init_data(&array, &used_ini_length, sizeof(size_t), 1);
 
     fc = fclaw_file_write_block(fc, "used_ini_length", sizeof(size_t), &array, &errcode);
