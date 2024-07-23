@@ -1709,6 +1709,7 @@ fclaw2d_domain_iterate_partitioned (fclaw2d_domain_t * old_domain,
 
 typedef enum comm_tag
 {
+    COMM_TAG_SIZES,
     COMM_TAG_FIXED,
     COMM_TAG_CUSTOM,
     COMM_TAG_LAST
@@ -1754,32 +1755,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     old_puf = (int) SC_MAX (0, new_gfq[mpirank] - old_gfq[mpirank]);
     new_puf = (int) SC_MAX (0, old_gfq[mpirank] - new_gfq[mpirank]);
 
-    /* allocate destination arrays */
-    if (domain->p.skip_local)
-    {
-        /* we only receive data for patches that were not local before partition */
-        num_dest = new_lnp - pul;
-        p->dest_sizes = sc_array_new_count (sizeof (int), (size_t) new_lnp);
-        sc_array_memset (p->dest_sizes, 0);
-        /* set data size for newly received patches */
-        for (i = 0; i < new_puf; i++)
-        {
-            size = (int *) sc_array_index_int (p->dest_sizes, i);
-            *size = data_size;
-        }
-        for (i = new_puf + pul; i < new_lnp; i++)
-        {
-            size = (int *) sc_array_index_int (p->dest_sizes, i);
-            *size = data_size;
-        }
-    }
-    else
-    {
-        num_dest = new_lnp;
-    }
-    p->dest_data = sc_array_new_count (data_size, num_dest);
-
-    /* allocate source arrays */
+    /* compute source sizes */
     num_src = old_lnp;
     if (domain->p.skip_local || skip_refined)
     {
@@ -1849,15 +1825,28 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
                                                            old_gfq[mpirank]));
                 if (*size == 0)
                 {
-                    num_src++; /* one more patch to pack than expected */
+                    num_src++;  /* one patch more to pack than expected */
                 }
                 *size = data_size;
             }
         }
+
+        /* start sending source data sizes, if necessary */
+        p->dest_sizes = sc_array_new_count (sizeof (int), (size_t) new_lnp);
+        sc_array_memset (p->dest_sizes, 0);
+        if (skip_refined)
+        {
+            p->async_state = (void *)
+                p4est_transfer_fixed_begin (new_gfq, old_gfq,
+                                            domain->mpicomm, COMM_TAG_SIZES,
+                                            p->dest_sizes->array,
+                                            p->src_sizes->array,
+                                            sizeof (int));
+        }
     }
-    p->src_data = sc_array_new_count (data_size, num_src);
 
     /* pack patches into src_data array */
+    p->src_data = sc_array_new_count (data_size, num_src);
     for (i = 0, blockno = 0; blockno < domain->num_blocks; ++blockno)
     {
         block = domain->blocks + blockno;
@@ -1897,7 +1886,41 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     }
     FCLAW_ASSERT (i == num_src);
 
+    /* compute destination sizes */
+    num_dest = new_lnp;
+    if (skip_refined)
+    {
+        p4est_transfer_fixed_end ((p4est_transfer_context_t *) p->
+                                  async_state);
+        /* update num_dest */
+        for (i = 0; i < new_lnp; i++)
+        {
+            size = (int *) sc_array_index_int (p->dest_sizes, i);
+            if (*size == 0)
+            {
+                num_dest--;     /* one patch less than expected */
+            }
+        }
+    }
+    else if (domain->p.skip_local)
+    {
+        /* we only receive data for patches that were not local before partition */
+        num_dest -= pul;
+        /* set data size for newly received patches */
+        for (i = 0; i < new_puf; i++)
+        {
+            size = (int *) sc_array_index_int (p->dest_sizes, i);
+            *size = data_size;
+        }
+        for (i = new_puf + pul; i < new_lnp; i++)
+        {
+            size = (int *) sc_array_index_int (p->dest_sizes, i);
+            *size = data_size;
+        }
+    }
+
     /* start transfering patch data according to the new partition */
+    p->dest_data = sc_array_new_count (data_size, num_dest);
     if (!domain->p.skip_local)
     {
         /* we packed all patches resulting in a fixed data size */
