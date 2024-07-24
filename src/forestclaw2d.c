@@ -1727,7 +1727,8 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     int mpisize = p4est->mpisize;
     int blockno, patchno, *size, i, si, nri, num_nr;
     int skip_refined;
-    int num_dest, num_src, pul, old_puf, new_puf, old_lnp, new_lnp, next_refined;
+    int num_dest, num_src, pul, old_puf, new_puf, old_lnp, new_lnp,
+        next_refined;
     int first_receiver, last_receiver, ri;
     p4est_gloidx_t *old_gfq, *new_gfq;
     fclaw2d_block_t *block;
@@ -1774,16 +1775,16 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
             {
                 i += pul;       /* skip patches that stay local */
                 num_src -= pul; /* no data for patches that stay local */
+                if (i == old_lnp)
+                {
+                    break;      /* jumped to end of array */
+                }
                 while (skip_refined && next_refined < i)
                 {
                     /* skip newly refined patches that stay local */
                     next_refined = (nri == num_nr) ? old_lnp :
                         *(int *) sc_array_index_int (wrap->newly_refined,
                                                      nri++);
-                }
-                if (i == old_lnp)
-                {
-                    continue;   /* jumped to end of array */
                 }
             }
 
