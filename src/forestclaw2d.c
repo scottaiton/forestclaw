@@ -1819,6 +1819,10 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
             /* the first patch for each process has to contain data */
             for (ri = first_receiver; ri <= last_receiver; ri++)
             {
+                if (ri == mpirank)
+                {
+                    continue;
+                }
                 size = (int *) sc_array_index_int (p->src_sizes,
                                                    SC_MAX (0,
                                                            new_gfq[ri] -
