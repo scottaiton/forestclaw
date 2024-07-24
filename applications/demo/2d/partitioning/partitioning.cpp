@@ -117,6 +117,15 @@ print_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
 };
 
 static void
+compute_checksum (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+                  int blockno, int patchno, void *user)
+{
+    double *patch_data = (double *) patch->user;
+    int *checksum = (int *) user;
+    *checksum += (int) *patch_data;
+};
+
+static void
 delete_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                    int blockno, int patchno, void *user)
 {
@@ -144,6 +153,7 @@ main (int argc, char **argv)
 
     /* iterate through the different partitioning strategies for patch data */
     int output_patch_data = 0;
+    int checksums[4] = { 0, 0, 0, 0 };
     for (int test_case = 0; test_case < 4; test_case++)
     {
         domain = fclaw2d_domain_new_brick (mpicomm, 2, 2, 0, 0, 1);
@@ -220,6 +230,13 @@ main (int argc, char **argv)
                 fclaw2d_domain_iterate_patches (partitioned_domain,
                                                 print_patch_data, NULL);
             }
+
+            fclaw2d_domain_iterate_patches (partitioned_domain,
+                                            compute_checksum,
+                                            &checksums[test_case]);
+            /* checksum should only be affected by partition_for_coarsening */
+            P4EST_ASSERT ((test_case % 4) == 0 ||
+                          checksums[test_case - 1] == checksums[test_case]);
 
             fclaw2d_domain_complete (partitioned_domain);
 
