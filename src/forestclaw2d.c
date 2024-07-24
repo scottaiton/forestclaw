@@ -1903,8 +1903,8 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     num_dest = new_lnp;
     if (skip_refined)
     {
-        p4est_transfer_fixed_end ((p4est_transfer_context_t *) p->
-                                  async_state);
+        p4est_transfer_fixed_end ((p4est_transfer_context_t *)
+                                  p->async_state);
         /* update num_dest */
         for (i = 0; i < new_lnp; i++)
         {
@@ -1934,7 +1934,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
 
     /* start transfering patch data according to the new partition */
     p->dest_data = sc_array_new_count (data_size, num_dest);
-    if (!domain->p.skip_local)
+    if (!domain->p.skip_local && !skip_refined)
     {
         /* we packed all patches resulting in a fixed data size */
         p->async_state = (void *)
@@ -2009,23 +2009,29 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
 {
     int blockno, patchno;
     size_t zz;
+    p4est_wrap_t *wrap = (p4est_wrap_t *) domain->pp;
     fclaw2d_block_t *block;
     fclaw2d_patch_t *patch;
     int dpuf, dpul, bnpb;
+    int skip_refined;
 
     /* this routine should only be called for the new domain of a changed
      * partition */
     FCLAW_ASSERT (domain->pp_owned);
     FCLAW_ASSERT (p->inside_async);
 
+    skip_refined = domain->p.skip_refined && wrap->newly_refined != NULL;
+
     /* wait for transfer of patch data to complete */
-    if (!domain->p.skip_local)
+    if (!domain->p.skip_local && !skip_refined)
     {
-        p4est_transfer_fixed_end ((p4est_transfer_context_t *) p->async_state);
+        p4est_transfer_fixed_end ((p4est_transfer_context_t *) p->
+                                  async_state);
     }
     else
     {
-        p4est_transfer_custom_end ((p4est_transfer_context_t *) p->async_state);
+        p4est_transfer_custom_end ((p4est_transfer_context_t *) p->
+                                   async_state);
     }
 
     p->async_state = NULL;
