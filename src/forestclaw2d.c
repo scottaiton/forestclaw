@@ -2008,11 +2008,11 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
                                void *user)
 {
     int blockno, patchno;
-    size_t zz;
     p4est_wrap_t *wrap = (p4est_wrap_t *) domain->pp;
     fclaw2d_block_t *block;
     fclaw2d_patch_t *patch;
-    int dpuf, dpul, bnpb;
+    int dpuf, dpul;
+    int si, i, *size;
     int skip_refined;
 
     /* this routine should only be called for the new domain of a changed
@@ -2041,36 +2041,70 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
     dpuf = domain->partition_unchanged_first;
     dpul = domain->partition_unchanged_length;
 
-    for (zz = 0, blockno = 0; blockno < domain->num_blocks; ++blockno)
+    si = 0;
+    for (i = 0, blockno = 0; blockno < domain->num_blocks; ++blockno)
     {
         block = domain->blocks + blockno;
-        bnpb = block->num_patches_before;
 
-        /* iterate over new patches before unchanged section */
-        for (patchno = 0; patchno < SC_MIN (dpuf - bnpb, block->num_patches);
-             ++zz, ++patchno)
+        /* iterate over patches before partition-unchanged range */
+        for (patchno = 0; patchno < block->num_patches; ++i, ++patchno)
         {
+            if (i == dpuf)
+            {
+                i += dpul;      /* skip patches that stay local */
+                if (i == domain->local_num_patches)
+                {
+                    patchno = block->num_patches;
+                    blockno = domain->num_blocks;
+                    break;      /* jumped to end of array */
+                }
+
+                /* update blockno and patchno accordingly */
+                while (block->num_patches_before + block->num_patches <= i)
+                {
+                    blockno++;
+                    block = domain->blocks + blockno;
+                }
+                patchno = i - block->num_patches_before;
+                P4EST_ASSERT (0 <= patchno && patchno < block->num_patches);
+
+                /* update dest data index accordingly */
+                if (!domain->p.skip_local && !skip_refined)
+                {
+                    si += dpul; /* we have patch data for all local patches */
+                }
+                else if (!domain->p.skip_local)
+                {
+                    FCLAW_ASSERT (skip_refined);
+                    for (i = dpuf; i < dpuf + dpul; i++)
+                    {
+                        size = (int *) sc_array_index_int (p->dest_sizes, i);
+                        if (*size != 0)
+                        {
+                            si++;       /* we have patch data, whenever size != 0 */
+                        }
+                    }
+                }               /* if domain->p.skip_local, we do not need to update si */
+            }
+
+            /* unpack patch from previous patch data, if indicated */
+            if (skip_refined)
+            {
+                size = (int *) sc_array_index_int (p->dest_sizes, i);
+                if (*size == 0)
+                {
+                    si--;       /* we will use the previous patch data entry again */
+                }
+            }
+
+            /* pack patch into source data array */
             patch = block->patches + patchno;
             patch_unpack (domain, patch, blockno, patchno,
-                          sc_array_index (p->dest_data, zz), user);
-        }
+                          sc_array_index_int (p->dest_data, si++), user);
 
-        /* if skip_local is disabled, we have to skip the local patches in dest_data */
-        if (zz == (size_t) dpuf && !domain->p.skip_local)
-        {
-            zz += dpul;
-        }
-
-        /* iterate over new patches after unchanged section */
-        for (patchno = SC_MAX (0, dpuf + dpul - bnpb);
-             patchno < block->num_patches; ++patchno, ++zz)
-        {
-            patch = block->patches + patchno;
-            patch_unpack (domain, patch, blockno, patchno,
-                          sc_array_index (p->dest_data, zz), user);
         }
     }
-    FCLAW_ASSERT (zz == p->dest_data->elem_count);
+    FCLAW_ASSERT (i == domain->local_num_patches);
 }
 
 void
