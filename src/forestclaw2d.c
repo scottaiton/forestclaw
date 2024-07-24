@@ -1725,10 +1725,9 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     p4est_t *p4est = wrap->p4est;
     int mpirank = p4est->mpirank;
     int mpisize = p4est->mpisize;
-    int blockno, patchno, *size, i, nri, num_nr;
+    int blockno, patchno, *size, i, si, nri, num_nr;
     int skip_refined;
-    int num_dest, num_src, pul, old_puf, new_puf, old_lnp, new_lnp, bnpb,
-        next_refined;
+    int num_dest, num_src, pul, old_puf, new_puf, old_lnp, new_lnp, next_refined;
     int first_receiver, last_receiver, ri;
     p4est_gloidx_t *old_gfq, *new_gfq;
     fclaw2d_block_t *block;
@@ -1847,44 +1846,53 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
 
     /* pack patches into src_data array */
     p->src_data = sc_array_new_count (data_size, num_src);
+    si = 0;
     for (i = 0, blockno = 0; blockno < domain->num_blocks; ++blockno)
     {
         block = domain->blocks + blockno;
-        bnpb = block->num_patches_before;
 
         /* iterate over patches before partition-unchanged range */
-        for (patchno = 0;
-             patchno < SC_MIN (old_puf - bnpb, block->num_patches);
-             ++i, ++patchno)
+        for (patchno = 0; patchno < block->num_patches; ++i, ++patchno)
         {
-            patch = block->patches + patchno;
-            patch_pack (domain, patch, blockno, patchno,
-                        sc_array_index_int (p->src_data, i), user);
-        }
-
-        if (!domain->p.skip_local)
-        {
-            /* iterate over patches in partition-unchanged range */
-            for (patchno = SC_MAX (old_puf - bnpb, 0);
-                 patchno < SC_MIN (old_puf + pul - bnpb, block->num_patches);
-                 ++i, ++patchno)
+            if (i == old_puf && domain->p.skip_local)
             {
-                patch = block->patches + patchno;
-                patch_pack (domain, patch, blockno, patchno,
-                            sc_array_index_int (p->src_data, i), user);
-            }
-        }
+                i += pul;       /* skip patches that stay local */
+                if (i == old_lnp)
+                {
+                    patchno = block->num_patches;
+                    blockno = domain->num_blocks;
+                    break;      /* jumped to end of array */
+                }
 
-        /* iterate over patches after partition-unchanged range */
-        for (patchno = SC_MAX (old_puf + pul - bnpb, 0);
-             patchno < block->num_patches; ++i, ++patchno)
-        {
+                /* update blockno and patchno accordingly */
+                while (block->num_patches_before + block->num_patches <= i)
+                {
+                    blockno++;
+                    block = domain->blocks + blockno;
+                }
+                patchno = i - block->num_patches_before;
+                P4EST_ASSERT (0 <= patchno && patchno < block->num_patches);
+            }
+
+            /* do not pack patch if source size is 0 */
+            if (skip_refined)
+            {
+                size = (int *) sc_array_index_int (p->src_sizes, i);
+                if (*size == 0)
+                {
+                    continue;
+                }
+            }
+
+            /* pack patch into source data array */
             patch = block->patches + patchno;
             patch_pack (domain, patch, blockno, patchno,
-                        sc_array_index_int (p->src_data, i), user);
+                        sc_array_index_int (p->src_data, si++), user);
+
         }
     }
-    FCLAW_ASSERT (i == num_src);
+    FCLAW_ASSERT (si == num_src);
+    FCLAW_ASSERT (i == old_lnp);
 
     /* compute destination sizes */
     num_dest = new_lnp;
