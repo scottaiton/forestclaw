@@ -154,22 +154,25 @@ main (int argc, char **argv)
                                          (test_case % 2),
                                          (test_case % 4 / 2));
 
-
         if (domain->mpisize != 1)
         {
             /* refine all patches uniformly, to ensure the skip_refined option can
              * distinguish the most recent refinement from other refinement */
-            fclaw2d_domain_iterate_patches (domain, mark_refine_uniform, NULL);
+            fclaw2d_domain_iterate_patches (domain, mark_refine_uniform,
+                                            NULL);
             refined_domain = fclaw2d_domain_adapt (domain);
             fclaw2d_domain_destroy (domain);
 
             /* partition the resulting domain */
             partitioned_domain = fclaw2d_domain_partition (refined_domain, 0);
-            if (partitioned_domain != NULL) {
+            if (partitioned_domain != NULL)
+            {
                 fclaw2d_domain_destroy (refined_domain);
                 fclaw2d_domain_complete (partitioned_domain);
                 domain = partitioned_domain;
-            } else {
+            }
+            else
+            {
                 domain = refined_domain;
             }
             refined_domain = partitioned_domain = NULL;
