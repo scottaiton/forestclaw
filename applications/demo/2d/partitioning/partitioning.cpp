@@ -27,9 +27,18 @@
 #include <p4est_wrap.h>         /* just for testing */
 #include <fclaw2d_convenience.h>
 
+/* mark all patches for refinement */
 static void
-mark_refine (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
-             int blockno, int patchno, void *user)
+mark_refine_uniform (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+                     int blockno, int patchno, void *user)
+{
+    fclaw2d_patch_mark_refine (domain, blockno, patchno);
+}
+
+/* mark all patches on rank 1 and 3 for refinement */
+static void
+mark_refine_rank (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+                  int blockno, int patchno, void *user)
 {
     /* refine only some processes to ensure repartitioning */
     if (domain->mpirank == 1 || domain->mpirank == 3)
@@ -144,8 +153,25 @@ main (int argc, char **argv)
 
         if (domain->mpisize != 1)
         {
-            fclaw2d_domain_iterate_patches (domain, mark_refine, NULL);
+            /* refine all patches uniformly, to ensure the skip_refined option can
+             * distinguish the most recent refinement from other refinement */
+            fclaw2d_domain_iterate_patches (domain, mark_refine_uniform, NULL);
+            refined_domain = fclaw2d_domain_adapt (domain);
+            fclaw2d_domain_destroy (domain);
 
+            /* partition the resulting domain */
+            partitioned_domain = fclaw2d_domain_partition (refined_domain, 0);
+            if (partitioned_domain != NULL) {
+                fclaw2d_domain_destroy (refined_domain);
+                fclaw2d_domain_complete (partitioned_domain);
+                domain = partitioned_domain;
+            } else {
+                domain = refined_domain;
+            }
+            refined_domain = partitioned_domain = NULL;
+
+            /* refine only on a few processes to ensure repartitioning */
+            fclaw2d_domain_iterate_patches (domain, mark_refine_rank, NULL);
             refined_domain = fclaw2d_domain_adapt (domain);
 
             fclaw2d_domain_iterate_patches (refined_domain, alloc_patch_data,
