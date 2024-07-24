@@ -140,16 +140,20 @@ main (int argc, char **argv)
     fclaw_global_t *glob = fclaw_global_new_comm (mpicomm, size, rank);
 
     fclaw2d_domain_t *domain, *refined_domain, *partitioned_domain;
+    p4est_wrap_t *wrap;
 
     /* iterate through the different partitioning strategies for patch data */
     int output_patch_data = 0;
-    for (int test_case = 0; test_case < 2; test_case++)
+    for (int test_case = 0; test_case < 4; test_case++)
     {
-        domain = fclaw2d_domain_new_brick (mpicomm, 2, 2, 0, 0, 2);
+        domain = fclaw2d_domain_new_brick (mpicomm, 2, 2, 0, 0, 1);
+        wrap = (p4est_wrap_t *) domain->pp;
 
         /* set partitioning options */
-        fclaw2d_domain_set_partitioning (domain, 1, (test_case % 2),
-                                         (test_case / 2));
+        fclaw2d_domain_set_partitioning (domain, !(test_case / 4),
+                                         (test_case % 2),
+                                         (test_case % 4 / 2));
+
 
         if (domain->mpisize != 1)
         {
@@ -186,8 +190,10 @@ main (int argc, char **argv)
             partitioned_domain = fclaw2d_domain_partition (refined_domain, 0);
 
             fclaw_global_productionf
-                ("Starting partitioning with skip_local = %d.\n",
-                 domain->p.skip_local);
+                ("Starting partitioning with skip_local = %d,"
+                 " skip_refined = %d and partition_for_coarsening = %d.\n",
+                 domain->p.skip_local, domain->p.skip_refined,
+                 wrap->params.partition_for_coarsening);
             fclaw2d_domain_iterate_patches (partitioned_domain,
                                             alloc_patch_data, NULL);
 
