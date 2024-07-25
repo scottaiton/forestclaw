@@ -8,6 +8,7 @@ add_library(forestclaw_c OBJECT
   fclaw_options.c
   fclaw_filesystem.cpp
   fclaw_gauges.c
+  fclaw_regions.c
   fclaw_package.c
   fclaw_packing.c
   fclaw_pointer_map.c
@@ -121,7 +122,7 @@ install(FILES
 	fclaw_pointer_map.h
 	fclaw_filesystem.h
 	fclaw_options.h
-	fclaw_gauges.h
+	fclaw_regions.h
 	fclaw_mpi.h
 	fclaw_math.h
   fclaw_wrap.h

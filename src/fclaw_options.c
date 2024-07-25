@@ -151,6 +151,12 @@ fclaw_register (fclaw_options_t* fclaw_opt, sc_options_t * opt)
                        &fclaw_opt->gauge_buffer_length, 1,
                        "Number of lines of gauge output to buffer before printing [1]");
 
+
+    /* -------------------------------------- Regions  --------------------------------- */
+    /* Gauge options */
+    sc_options_add_bool (opt, 0, "use-regions", &fclaw_opt->use_regions, 0,
+                            "Use regions with tagging [F]");
+
     /* ---------------------------------------- Rays  --------------------------------- */
     /* Gauge options */
     sc_options_add_bool (opt, 0, "output-rays", &fclaw_opt->output_rays, 0,

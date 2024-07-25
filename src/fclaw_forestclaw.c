@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012-2022 Carsten Burstedde, Donna Calhoun, Scott Aiton
+Copyright (c) 2012-2024 Carsten Burstedde, Donna Calhoun, Scott Aiton
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_vtable.h>
 #include <fclaw_diagnostics.h>
 #include <fclaw_gauges.h>
+#include <fclaw_regions.h>
 #include <fclaw_rays.h>
 #include <fclaw_context.h>
 
@@ -41,6 +42,7 @@ void fclaw_vtables_initialize(fclaw_global_t *glob)
     fclaw_patch_vtable_initialize(glob);
     fclaw_diagnostics_vtable_initialize(glob);
     fclaw_elliptic_vtable_initialize(glob);
+    fclaw_regions_vtable_initialize(glob);
     fclaw_gauges_vtable_initialize(glob);
     fclaw_ray_vtable_initialize(glob);
     fclaw_context_vtable_initialize(glob);
