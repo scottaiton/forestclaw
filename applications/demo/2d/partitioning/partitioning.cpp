@@ -273,8 +273,8 @@ main (int argc, char **argv)
 
     /* iterate through the different partitioning strategies for patch data */
     int output_patch_data = 0;
-    int checksums[4] = { 0, 0, 0, 0 };
-    for (int test_case = 0; test_case < 4; test_case++)
+    int checksums[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    for (int test_case = 0; test_case < 8; test_case++)
     {
         domain = fclaw2d_domain_new_brick (mpicomm, 2, 2, 0, 0, 1);
         wrap = (p4est_wrap_t *) domain->pp;
