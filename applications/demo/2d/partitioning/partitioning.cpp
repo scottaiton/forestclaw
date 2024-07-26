@@ -27,6 +27,15 @@
 #include <p4est_wrap.h>         /* just for testing */
 #include <fclaw2d_convenience.h>
 
+typedef struct partitioning_patch_data
+{
+    double xlower, xupper;
+    double area;
+    int level;
+    int index;
+}
+patch_data_t;
+
 /* mark all patches for refinement */
 static void
 mark_refine_uniform (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
@@ -51,18 +60,31 @@ static void
 alloc_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                   int blockno, int patchno, void *user)
 {
-    patch->user = FCLAW_ALLOC (double, 1);
-    double *patch_data = (double *) patch->user;
-    *patch_data = (double) -1;
+    patch->user = FCLAW_ALLOC_ZERO (patch_data_t, 1);
+}
+
+static void
+compute_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
+                    int blockno, int patchno, patch_data_t * patch_data)
+{
+    /* compute artificial patch data that allows tracking rank and treeid */
+    patch_data->xlower = patch->xlower;
+    patch_data->xupper = patch->xupper;
+    patch_data->area = (patch->xupper - patch->xlower) *
+        (patch->ylower - patch->ylower);
+    FCLAW_ASSERT (patch_data->area >= 0.);
+    patch_data->level = patch->level;
+    FCLAW_ASSERT (patch_data->level >= 0
+                  && patch_data->level < P4EST_QMAXLEVEL);
+    patch_data->index = domain->mpirank * 1000 + blockno * 100 + patchno;
 }
 
 static void
 set_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                 int blockno, int patchno, void *user)
 {
-    /* set artificial patch data that allows tracking rank of origin and treeid */
-    double *patch_data = (double *) patch->user;
-    *patch_data = (double) domain->mpirank * 1000 + blockno * 100 + patchno;
+    compute_patch_data (domain, patch, blockno, patchno,
+                        (patch_data_t *) patch->user);
 };
 
 static int num_patches_packed;
@@ -72,11 +94,17 @@ pack_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                  int blockno, int patchno, void *pack_data_here, void *user)
 {
     FCLAW_ASSERT (patch != NULL);
-    num_patches_packed++;
-    double *pack_double_here = (double *) pack_data_here;
-    double *patch_data = (double *) patch->user;
+    num_patches_packed++;       /* keep track of number of callback calls */
 
-    *pack_double_here = *patch_data;
+    /* copy the pack_data into contiguous memory */
+    char *pdh = (char *) pack_data_here;
+    patch_data_t *patch_data = (patch_data_t *) patch->user;
+    memcpy (pdh, &patch_data->xlower, sizeof (double));
+    memcpy (pdh + sizeof (double), &patch_data->xupper, sizeof (double));
+    memcpy (pdh + 2 * sizeof (double), &patch_data->area, sizeof (double));
+    memcpy (pdh + 3 * sizeof (double), &patch_data->level, sizeof (int));
+    memcpy (pdh + 3 * sizeof (double) + sizeof (int), &patch_data->index,
+            sizeof (int));
 }
 
 static void
@@ -86,11 +114,11 @@ transfer_patch_data (fclaw2d_domain_t * old_domain,
                      fclaw2d_patch_t * new_patch, int blockno,
                      int old_patchno, int new_patchno, void *user)
 {
-    double *old_patch_data = (double *) old_patch->user;
-    double *new_patch_data = (double *) new_patch->user;
+    patch_data_t *old_patch_data = (patch_data_t *) old_patch->user;
+    patch_data_t *new_patch_data = (patch_data_t *) new_patch->user;
 
     /* simply copy patch data from old to new location */
-    *new_patch_data = *old_patch_data;
+    memcpy (new_patch_data, old_patch_data, sizeof (patch_data_t));
 }
 
 static void
@@ -98,31 +126,36 @@ unpack_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                    int blockno, int patchno, void *unpack_data_from_here,
                    void *user)
 {
-    double *unpack_double_from_here = (double *) unpack_data_from_here;
-    double *patch_data = (double *) patch->user;
-
-    *patch_data = *unpack_double_from_here;
+    char *udfh = (char *) unpack_data_from_here;
+    patch_data_t *patch_data = (patch_data_t *) patch->user;
+    memcpy (&patch_data->xlower, udfh, sizeof (double));
+    memcpy (&patch_data->xupper, udfh + sizeof (double), sizeof (double));
+    memcpy (&patch_data->area, udfh + 2 * sizeof (double), sizeof (double));
+    memcpy (&patch_data->level, udfh + 3 * sizeof (double), sizeof (int));
+    memcpy (&patch_data->index, udfh + 3 * sizeof (double) + sizeof (int),
+            sizeof (int));
 }
 
 static void
 print_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                   int blockno, int patchno, void *user)
 {
-    double *patch_data = (double *) patch->user;
+    patch_data_t *patch_data = (patch_data_t *) patch->user;
     if (patch_data == NULL)
     {
         return;
     }
-    fclaw_infof ("Patch %d has patch data %f.\n", patchno, *patch_data);
+    fclaw_infof ("Patch %d has patch data index %d.\n", patchno,
+                 patch_data->index);
 };
 
 static void
 compute_checksum (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                   int blockno, int patchno, void *user)
 {
-    double *patch_data = (double *) patch->user;
+    patch_data_t *patch_data = (patch_data_t *) patch->user;
     int *checksum = (int *) user;
-    *checksum += (int) *patch_data;
+    *checksum += patch_data->index;
 };
 
 static void
@@ -207,12 +240,17 @@ main (int argc, char **argv)
                  " skip_refined = %d and partition_for_coarsening = %d.\n",
                  domain->p.skip_local, domain->p.skip_refined,
                  wrap->params.partition_for_coarsening);
+
+            /* partitioned domain will have proper patch data everywhere
+             * (unlike refined domain for skip_refined == 1) */
             fclaw2d_domain_iterate_patches (partitioned_domain,
                                             alloc_patch_data, NULL);
 
             num_patches_packed = 0;
             fclaw2d_domain_partition_t *p;
-            p = fclaw2d_domain_iterate_pack (refined_domain, sizeof (double),
+            p = fclaw2d_domain_iterate_pack (refined_domain,
+                                             3 * sizeof (double) +
+                                             2 * sizeof (int),
                                              pack_patch_data, NULL);
             fclaw_infof ("Packed %d of %d local patches.\n",
                          num_patches_packed,
