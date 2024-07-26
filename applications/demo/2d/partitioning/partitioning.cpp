@@ -80,6 +80,22 @@ compute_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
 }
 
 static void
+compute_child_patch_data (patch_data_t * parent_data,
+                          patch_data_t * child_data, int childid)
+{
+    double xshift = (parent_data->xupper - parent_data->xlower) / 2.;
+    child_data->xlower = parent_data->xlower + (childid % 2) ? xshift : 0.;
+    child_data->xupper = parent_data->xupper - (childid % 2) ? 0 : xshift;
+    child_data->area = parent_data->area / (double) P4EST_CHILDREN;
+    child_data->level = parent_data->level + 1;
+
+    /* we assume either all or no patches were refined,
+     * so child_patchno = parent_patchno * 4 + childid */
+    int parent_patchno = parent_data->index % 100;
+    child_data->index = parent_data->index + parent_patchno * 3 + childid;
+}
+
+static void
 set_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
                 int blockno, int patchno, void *user)
 {
@@ -118,7 +134,18 @@ transfer_patch_data (fclaw2d_domain_t * old_domain,
     patch_data_t *new_patch_data = (patch_data_t *) new_patch->user;
 
     /* simply copy patch data from old to new location */
-    memcpy (new_patch_data, old_patch_data, sizeof (patch_data_t));
+    if (old_patch->level == old_patch_data->level)
+    {
+        memcpy (new_patch_data, old_patch_data, sizeof (patch_data_t));
+    }
+    else
+    {
+        /* we reference the parent's patch data in the skip_refined case */
+        FCLAW_ASSERT (old_patch->level == old_patch_data->level + 1);
+        FCLAW_ASSERT (new_domain->p.skip_refined);
+        compute_child_patch_data (old_patch_data, new_patch_data,
+                                  fclaw2d_patch_childid (new_patch));
+    }
 }
 
 static void
@@ -134,6 +161,21 @@ unpack_patch_data (fclaw2d_domain_t * domain, fclaw2d_patch_t * patch,
     memcpy (&patch_data->level, udfh + 3 * sizeof (double), sizeof (int));
     memcpy (&patch_data->index, udfh + 3 * sizeof (double) + sizeof (int),
             sizeof (int));
+    if (patch->level != patch_data->level)
+    {
+        /* we reference the parent's patch data in the skip_refined case */
+        FCLAW_ASSERT (patch->level == patch_data->level + 1);
+        FCLAW_ASSERT (domain->p.skip_refined);
+
+        /* compute child patch data from unpacked parent patch data */
+        patch_data_t *child_patch_data = FCLAW_ALLOC_ZERO (patch_data_t, 1);
+        compute_child_patch_data (patch_data, child_patch_data,
+                                  fclaw2d_patch_childid (patch));
+
+        /* store child patch data in the patch's user data */
+        memcpy (patch_data, child_patch_data, sizeof (patch_data_t));
+        FCLAW_FREE (child_patch_data);
+    }
 }
 
 static void
@@ -336,8 +378,8 @@ main (int argc, char **argv)
                                             compute_checksum,
                                             &checksums[test_case]);
             /* checksum should only be affected by partition_for_coarsening */
-            //          P4EST_ASSERT ((test_case % 4) == 0 ||
-            //                        checksums[test_case - 1] == checksums[test_case]);
+            FCLAW_ASSERT ((test_case % 4) == 0 ||
+                          checksums[test_case - 1] == checksums[test_case]);
 
             fclaw2d_domain_complete (partitioned_domain);
 
