@@ -821,13 +821,13 @@ void fclaw3d_domain_set_refinement (fclaw3d_domain_t * domain,
  *                              Suggested default: 1.
  * \param [in] skip_refined     Boolean: If true, the patch data of patches that
  *                              were refined during the most recent call to
- *                              \ref fclaw3d_domain_adapt is only packed for the
- *                              patches with child id 0 in
+ *                              \ref fclaw3d_domain_adapt is only packed for one
+ *                              of the siblings by invoking
  *                              \ref fclaw3d_domain_iterate_pack. The unpack
  *                              callback in \ref fclaw3d_domain_iterate_unpack
  *                              will be invoked for all children of a recently
  *                              refined patch. The provided data will be the
- *                              data packed by the patch with child id 0.
+ *                              data packed previously by one of the siblings.
  *                              For this partitioning method to work as desired
  *                              skip_refined has to be set \b before the most
  *                              recent call to \ref fclaw3d_domain_adapt .

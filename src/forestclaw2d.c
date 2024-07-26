@@ -1747,7 +1747,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
 
     p = FCLAW_ALLOC_ZERO (fclaw2d_domain_partition_t, 1);
 
-    /* only skip_refined quadrants, if it was enabled before most recent adapt */
+    /* only skip refined quadrants, if it was enabled before most recent adapt */
     skip_refined = domain->p.skip_refined && wrap->newly_refined != NULL;
 
     /* compute partition_unchanged data from gfq arrays */
@@ -1773,6 +1773,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
         /* set data size for patches that have to be sent */
         for (i = 0; i < old_lnp; i++)
         {
+            /* skip patches that stay local */
             if (!already_skipped && i >= old_puf)
             {
                 /* we check for i > old_puf, since we may skip old_puf in the
@@ -1796,6 +1797,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
             size = (int *) sc_array_index_int (p->src_sizes, i);
             *size = data_size;
 
+            /* only pack first patch of recently refined families */
             if (skip_refined && next_refined == i)
             {
                 i += P4EST_CHILDREN - 1;        /* skip the sibling patches */
@@ -1806,7 +1808,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
         }
         FCLAW_ASSERT (!skip_refined || nri == num_nr);
 
-        /* adapt to newly refined families across process boundaries */
+        /* adapt to recently refined families that cross process boundaries */
         if (skip_refined && !wrap->params.partition_for_coarsening)
         {
             /* find range of receiving processes */
@@ -1826,7 +1828,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
             {
                 if (ri == mpirank)
                 {
-                    continue;
+                    continue;   /* not necessary for local patches */
                 }
                 size = (int *) sc_array_index_int (p->src_sizes,
                                                    SC_MAX (0,
@@ -1861,9 +1863,9 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     {
         block = domain->blocks + blockno;
 
-        /* iterate over patches before partition-unchanged range */
         for (patchno = 0; patchno < block->num_patches; ++i, ++patchno)
         {
+            /* skip patches that stay local */
             if (i == old_puf && domain->p.skip_local)
             {
                 i += pul;       /* skip patches that stay local */
@@ -1908,6 +1910,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     num_dest = new_lnp;
     if (skip_refined)
     {
+        /* receive destination sizes from source processes */
         p4est_transfer_fixed_end ((p4est_transfer_context_t *)
                                   p->async_state);
         /* update num_dest */
@@ -1979,7 +1982,6 @@ fclaw2d_domain_iterate_transfer (fclaw2d_domain_t * old_domain,
     FCLAW_ASSERT (!old_domain->pp_owned);
     FCLAW_ASSERT (new_domain->pp_owned);
 
-    /* unpack patches from dest_data array */
     dpuf = new_domain->partition_unchanged_first;
     dpul = new_domain->partition_unchanged_length;
 
@@ -2051,9 +2053,9 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
     {
         block = domain->blocks + blockno;
 
-        /* iterate over patches before partition-unchanged range */
         for (patchno = 0; patchno < block->num_patches; ++i, ++patchno)
         {
+            /* skip patches that stay local */
             if (i == dpuf)
             {
                 i += dpul;      /* skip patches that stay local */
@@ -2102,7 +2104,7 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
                 }
             }
 
-            /* pack patch into source data array */
+            /* unpack patch from destination data array */
             patch = block->patches + patchno;
             patch_unpack (domain, patch, blockno, patchno,
                           sc_array_index_int (p->dest_data, si++), user);
