@@ -55,14 +55,19 @@ typedef struct fclaw_region
     double zupper;
     /** @} */
 
+    int min_level;
+    int max_level;
+
     /** @brief Tstart */
     double t1;
+
     /** @brief Tend */
     double t2;
-    /** @brief Region number */
+
+    /** @brief Region ID */
     int num;
 
-    /** @brief region dimension */
+    /** @brief region dimension (2 or 3) */
     int dim;
 
     /** @brief User data */
@@ -73,14 +78,13 @@ typedef struct fclaw_region
 struct fclaw_global;
 struct fclaw_patch;
 struct fclaw_block;
-struct fclaw_gauge;
 
 /**
- * @brief Sets the data for each gauge
+ * @brief Sets the data for each region
  * 
  * @param[in] glob the global context
- * @param[in,out] gauges the array of gauges
- * @param[in] num_gauges the number of gauges
+ * @param[in,out] regions the array of regions
+ * @param[in] num_regions the number of regions
  */
 typedef void (*fclaw_region_set_data_t)(struct fclaw_global *glob, 
                                        struct fclaw_region **regions, 
@@ -91,7 +95,7 @@ typedef void (*fclaw_region_set_data_t)(struct fclaw_global *glob,
  * @brief Maps region to normalized coordinates in a global [0,1]x[0,1]  domain.
  * 
  * @param[in] glob the global context
- * @param[in] block the block that the gauge is in
+ * @param[in] block the block that the region is in
  * @param[in] blockno the block number that the region is in
  * @param[in] r the region
  * @param[out] xlower,xupper,ylower,yupper,zlower,zupper the normalized coordinates
@@ -105,7 +109,7 @@ typedef void (*fclaw_region_normalize_t)(struct fclaw_global *glob,
                                        double *zlower, double *zupper);
 
 /**
- * @brief vtable for gauges
+ * @brief vtable for regions
  */
 typedef struct fclaw_regions_vtable
 {
@@ -145,7 +149,7 @@ fclaw_regions_vtable_t* fclaw_regions_vt(struct fclaw_global *glob);
 
 
 
-/* ------------------------ Virtualized gauge functions ------------------------------- */
+/* ------------------------ Virtualized region functions ------------------------------- */
 
 /**
  * @brief Set the data for each region
@@ -181,6 +185,23 @@ void fclaw_region_normalize_coordinates(struct fclaw_global *glob,
 /* ---------------------------------- Regions ------------------------------------------ */
 
 /**
+ * @brief Test whether patch is in set of regions
+ * 
+ * @param[in] glob Global context
+ * @param[in] patch Patch to check
+ * @param[in] regions List of regions
+ * @param[in] num_regions Number of regions
+ * @param[in] t Current time
+ * @param[in] refine_flag Flag determining whether we are refining or
+ *                        coarsening.
+ */
+
+int fclaw2d_regions_test(struct fclaw_global *glob, 
+                         struct fclaw_patch *patch,
+                         double t, int refine_flag);
+
+
+/**
  * @brief Allocate region structures
  * 
  * @param[in] glob the global context
@@ -207,6 +228,7 @@ void fclaw_region_set_data(struct fclaw_global *glob,
                           double xlower, double xupper, 
                           double ylower, double yupper, 
                           double zlower, double zupper, 
+                          int min_level, int max_level,
                           double  t1, double t2);
 
 
@@ -221,12 +243,13 @@ void fclaw_region_set_data(struct fclaw_global *glob,
  * @param[out] t2 Tend
  */
 void fclaw_region_get_data(struct fclaw_global *glob, 
-                             struct fclaw_region *g,                             
-                             int *num, int *dim,
-                             double *xlower, double *xupper, 
-                             double *ylower, double *yupper, 
-                             double *zlower, double *zupper, 
-                             double  *t1, double *t2);
+                           struct fclaw_region *r,                             
+                           int *num, int *dim,
+                           double *xlower, double *xupper, 
+                           double *ylower, double *yupper, 
+                           double *zlower, double *zupper, 
+                           int *min_level, int *max_level,
+                           double  *t1, double *t2);
 
 /**
  * @brief Get the region number (index the the region array)

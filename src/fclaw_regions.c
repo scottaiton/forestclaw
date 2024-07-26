@@ -27,6 +27,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw_options.h>
 #include <fclaw_global.h>
+#include <fclaw_clawpatch.h>
+
 //#include <fclaw_convenience.h>  /* Needed to get search function for gaugess */
 //#include <fclaw_diagnostics.h>
 
@@ -94,6 +96,175 @@ void fclaw_regions_initialize(fclaw_global_t* glob)
 }
 
 
+// This the old style region tagging and does not yet check
+// the rectangular regions from 'flagregions.f90' in geoclaw.
+static
+int P_intersects_R(fclaw_global_t *glob,
+                   fclaw_patch_t *patch,
+                   fclaw_region_t *r,
+                   double t,
+                   int refine_flag)
+{   
+    int rmin,rmax,num,dim;
+    double xlower_reg, xupper_reg;
+    double ylower_reg, yupper_reg;
+    double zlower_reg, zupper_reg;
+    double t1, t2;
+    fclaw_region_get_data(glob,r,&num,&dim,
+                          &xlower_reg, &xupper_reg, 
+                          &ylower_reg, &yupper_reg, 
+                          &zlower_reg, &zupper_reg, 
+                          &rmin, &rmax,
+                          &t1, &t2);
+
+    /* Do a quick check */
+    if (t < t1 || t > t2)        
+        return 0;
+
+    // Time is in time interval;  now check geometric intervals
+    int mx,my,mbc;
+    double xlower,ylower,dx,dy;
+    double xupper, yupper;
+    if (refine_flag != 0)
+    {
+        // We are refining and only passed in a single patch
+        fclaw_clawpatch_2d_grid_data(glob,patch,&mx,&my,&mbc,
+                                     &xlower,&ylower,&dx,&dy);
+        xupper = xlower + mx*dx;
+        yupper = ylower + my*dy;
+    }
+    else
+    {
+        /* We are passed in a family of four or eight patches
+           for possible coarsening.
+          
+            ---------
+            | 2 | 3 |   // Get xlower from patch 2
+            ---------
+            | 0 | 1 |   // Get ylower from patch 1
+            ---------
+        */
+        double xlower1;  // Don't use this
+        fclaw_clawpatch_2d_grid_data(glob,&patch[1],&mx,&my,&mbc,
+                                     &xlower1,&ylower,&dx,&dy);
+        xupper = xlower1 + mx*dx;
+
+        // xlower unchanged on this call. 
+        double ylower2;
+        fclaw_clawpatch_2d_grid_data(glob,&patch[2],&mx,&my,&mbc,
+                                     &xlower,&ylower2,&dx,&dy);
+        yupper = ylower2 + my*dy;
+
+    }
+
+    if (xupper < xupper_reg || xlower > xlower_reg)
+        return 0;
+
+    if (yupper < yupper_reg || ylower > ylower_reg)
+        return 0;
+
+    return 1;
+}
+
+int fclaw2d_regions_test(fclaw_global_t *glob, 
+                         fclaw_patch_t *patch,
+                         double t, int refine_flag)
+{
+    fclaw_region_info_t* region_info = 
+        (fclaw_region_info_t *) fclaw_global_get_attribute(glob,"region_info");
+
+    fclaw_region_t *regions = region_info->regions;
+    int num_regions = region_info->num_regions;
+    int tag_patch = -1;
+
+    // Get list of regions that this patch intersects
+    // If we are coarsening, the "patch" dimensions are the dimensions of the 
+    // quadrant occupied by parent quadrant, i.e. the coarsened patch.  But 'level'
+    // is the level of the four siblings.
+    int inregion[num_regions];
+    int region_found = 0;
+    for(int m = 0; m < num_regions; m++)
+    {
+        inregion[m] = P_intersects_R(glob,patch, 
+                                     &regions[m],
+                                     t,refine_flag);
+        if (inregion[m])
+            region_found = 1;
+    }
+
+    if (!region_found)
+    {
+        // Patch does not intersect any region, and so  
+        // refinement is based on usual tagging criteria.
+        int tag_patch = -1;
+        return tag_patch;
+    }
+
+    /* Find minimum and maximum levels for regions intersected by this patch
+       1. We want to find the most restrictive minimum level this patch
+       intersects. This means that we look for the region with the largest
+       minimum level.  If this region says we should refine, then we refine.
+       Criteria for smaller min_level values will automatically be 
+       satisfied. 
+
+       2.  We find the smallest max_level value of all regions intersecting
+       this patch.  If we do not refine beyond this value, all larger max_level
+       criteria will be satisfied.
+    */
+
+    int min_level = 0;    // larger than any possible number of levels
+    int max_level = 100;
+    for(int m = 0; m < num_regions; m++)
+    {
+        if (inregion[m])
+        {
+            int rmin,rmax,num,dim;
+            double xlower,xupper,ylower,yupper,zlower,zupper;
+            double t1, t2;
+            fclaw_region_get_data(glob,&regions[m],&num,&dim,
+                           &xlower, &xupper, 
+                           &ylower, &yupper, 
+                           &zlower, &zupper, 
+                           &rmin, &rmax,
+                           &t1, &t2);
+
+            min_level = fmax(min_level,rmin);
+            max_level = fmin(max_level,rmax);
+        }
+    }
+
+    // Determine if we are allowed to refine or coarsen, based on regions above.
+    if (refine_flag != 0)
+    {
+        // We are tagging for refinement
+        if (patch->level < min_level)
+        {
+            // At least one region says we have to refine.
+            tag_patch = 1;      
+        }
+        else if (patch->level >= max_level)
+        {
+            // At least one region says we cannot refine
+            tag_patch = 0;
+        }
+    }
+    else
+    {
+        // We are tagging for coarsening
+        if (patch->level <= min_level)
+        {
+            // At least one region says we cannot coarsen below
+            // patch->level
+            tag_patch = 0;
+        }
+        else if (patch->level > max_level)
+        {
+            // At least one region says we have to coarsen
+            tag_patch = 1;            
+        }
+    }
+    return tag_patch;
+}
 
 
 /* ---------------------------------- Virtual table  ---------------------------------- */
@@ -181,6 +352,7 @@ void fclaw_region_set_data(fclaw_global_t *glob,
                              double xlower, double xupper, 
                              double ylower, double yupper, 
                              double zlower, double zupper, 
+                             int min_level, int max_level,
                              double  t1, double t2)
 {
     r->num = num;
@@ -191,6 +363,8 @@ void fclaw_region_set_data(fclaw_global_t *glob,
     r->yupper = yupper;
     r->zlower = zlower;
     r->zupper = zupper;
+    r->min_level = min_level;
+    r->max_level = max_level;
     r->t1 = t1;
     r->t2 = t2;
 }
@@ -201,13 +375,19 @@ void fclaw_region_get_data(fclaw_global_t *glob,
                           double *xlower, double *xupper, 
                           double *ylower, double *yupper, 
                           double *zlower, double *zupper, 
+                          int *min_level, int *max_level,
                           double  *t1, double *t2)
 {
     *num = r->num;
     *dim = r->dim;
     *xlower  = r->xlower;
+    *xupper  = r->xupper;
     *ylower  = r->ylower;
+    *yupper  = r->yupper;
     *zlower  = r->zlower;
+    *zupper  = r->zupper;
+    *min_level = r->min_level;
+    *max_level = r->max_level;
     *t1  = r->t1;
     *t2  = r->t2;
 }
