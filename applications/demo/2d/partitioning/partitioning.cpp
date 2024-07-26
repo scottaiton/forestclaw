@@ -273,16 +273,26 @@ main (int argc, char **argv)
 
     /* iterate through the different partitioning strategies for patch data */
     int output_patch_data = 0;
-    int checksums[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-    for (int test_case = 0; test_case < 8; test_case++)
+    int checksums[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    for (int test_case = 0; test_case < 9; test_case++)
     {
         domain = fclaw2d_domain_new_brick (mpicomm, 2, 2, 0, 0, 1);
         wrap = (p4est_wrap_t *) domain->pp;
 
         /* set partitioning options */
-        fclaw2d_domain_set_partitioning (domain, !(test_case / 4),
-                                         (test_case % 2),
-                                         (test_case % 4 / 2));
+        if (test_case < 8)
+        {
+            fclaw2d_domain_set_partitioning (domain, !(test_case / 4),
+                                             (test_case % 2),
+                                             (test_case % 4 / 2));
+
+        }
+        else
+        {
+            /* check case that skip_refined is enabled to late */
+            FCLAW_ASSERT (test_case == 8);
+            fclaw2d_domain_set_partitioning (domain, 0, 1, 0);
+        }
 
         if (domain->mpisize != 1)
         {
@@ -338,11 +348,24 @@ main (int argc, char **argv)
             }
             partitioned_domain = fclaw2d_domain_partition (refined_domain, 0);
 
-            fclaw_global_productionf
-                ("Starting partitioning with skip_local = %d,"
-                 " skip_refined = %d and partition_for_coarsening = %d.\n",
-                 domain->p.skip_local, domain->p.skip_refined,
-                 wrap->params.partition_for_coarsening);
+            if (test_case < 8)
+            {
+                fclaw_global_productionf
+                    ("Starting partitioning with skip_local = %d,"
+                     " skip_refined = %d and partition_for_coarsening = %d.\n",
+                     domain->p.skip_local, domain->p.skip_refined,
+                     wrap->params.partition_for_coarsening);
+            }
+            else
+            {
+                fclaw_global_productionf
+                    ("Starting partitioning with skip_local = %d,"
+                     " partition_for_coarsening = %d and"
+                     "skip_refined being enabled to late.\n",
+                     domain->p.skip_local,
+                     wrap->params.partition_for_coarsening);
+                fclaw2d_domain_set_partitioning (domain, 0, 1, 1);
+            }
 
             /* partitioned domain will have proper patch data everywhere
              * (unlike refined domain for skip_refined == 1) */
