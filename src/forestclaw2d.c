@@ -1730,6 +1730,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     int num_dest, num_src, pul, old_puf, new_puf, old_lnp, new_lnp,
         next_refined;
     int first_receiver, last_receiver, ri;
+    int already_skipped;
     p4est_gloidx_t *old_gfq, *new_gfq;
     fclaw2d_block_t *block;
     fclaw2d_patch_t *patch;
@@ -1757,6 +1758,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
 
     /* compute source sizes */
     num_src = old_lnp;
+    already_skipped = domain->p.skip_local ? 0 : 1;
     if (domain->p.skip_local || skip_refined)
     {
         p->src_sizes = sc_array_new_count (sizeof (int), old_lnp);
@@ -1771,14 +1773,12 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
         /* set data size for patches that have to be sent */
         for (i = 0; i < old_lnp; i++)
         {
-            if (i == old_puf && domain->p.skip_local)
+            if (!already_skipped && i >= old_puf)
             {
-                i += pul;       /* skip patches that stay local */
-                num_src -= pul; /* no data for patches that stay local */
-                if (i == old_lnp)
-                {
-                    break;      /* jumped to end of array */
-                }
+                /* we check for i > old_puf, since we may skip old_puf in the
+                 * skip_refined && next_refined == i case below */
+                num_src -= old_puf + pul - i;   /* no data for patches that stay local */
+                i = old_puf + pul;      /* skip patches that stay local */
                 while (skip_refined && next_refined < i)
                 {
                     /* skip newly refined patches that stay local */
@@ -1786,6 +1786,11 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
                         *(int *) sc_array_index_int (wrap->newly_refined,
                                                      nri++);
                 }
+                if (i == old_lnp)
+                {
+                    break;      /* jumped to end of array */
+                }
+                already_skipped = 1;
             }
 
             size = (int *) sc_array_index_int (p->src_sizes, i);
