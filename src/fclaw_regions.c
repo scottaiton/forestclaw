@@ -29,14 +29,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_global.h>
 #include <fclaw_clawpatch.h>
 
-//#include <fclaw_convenience.h>  /* Needed to get search function for gaugess */
-//#include <fclaw_diagnostics.h>
-
-/* Some mapping functions */
-// #include <fclaw_map_brick.h>
-// #include <fclaw_map.h>
-// #include <fclaw_map_query.h>
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -44,7 +36,7 @@ extern "C"
 
 /* -------------------------------------------------------------------------------------*/
 
-/* This is only used for blocks */
+/* Data structure to store in the glob */
 typedef struct fclaw_region_info
 {
     fclaw_region_t *regions;
@@ -63,12 +55,6 @@ void fclaw_regions_initialize(fclaw_global_t* glob)
 {
     const fclaw_options_t * fclaw_opt = fclaw_get_options(glob);
 
-    /* ------------------------------------------------------------------
-       These two calls are the only calls that should worry about the format
-       GeoClaw of the files regions.data (created with make_data.py) and 
-       region output files (e.g. region00123.txt)
-       ---------------------------------------------------------------- */
- 
     fclaw_region_info_t *region_info = FCLAW_ALLOC_ZERO(fclaw_region_info_t,1);
 
     int num_regions, region_dim;
@@ -222,11 +208,11 @@ int fclaw2d_regions_test(fclaw_global_t *glob,
             double xlower,xupper,ylower,yupper,zlower,zupper;
             double t1, t2;
             fclaw_region_get_data(glob,&regions[m],&num,&dim,
-                           &xlower, &xupper, 
-                           &ylower, &yupper, 
-                           &zlower, &zupper, 
-                           &rmin, &rmax,
-                           &t1, &t2);
+                                  &xlower, &xupper, 
+                                  &ylower, &yupper, 
+                                  &zlower, &zupper, 
+                                  &rmin, &rmax,
+                                  &t1, &t2);
 
             min_level = fmax(min_level,rmin);
             max_level = fmin(max_level,rmax);

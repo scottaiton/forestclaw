@@ -35,8 +35,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_vtable.h>
 #include <fclaw_context.h>
 #include <fclaw_packing.h>
-#include <fclaw_regions.h>
-
 
 #include "fclaw_math.h"
 
@@ -134,8 +132,6 @@ void outstyle_1(fclaw_global_t *glob)
     int iframe = 0;
     fclaw_context_get_int(ctx, "iframe", &iframe);
     fclaw_output_frame(glob,iframe);
-
-    fclaw_regions_initialize(glob);
 
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
 
