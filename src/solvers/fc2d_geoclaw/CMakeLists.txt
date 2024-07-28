@@ -43,7 +43,6 @@ add_library(geoclaw_f OBJECT
     fclaw2d_source/fc2d_geoclaw_output_ascii_fort.f
     fclaw2d_source/fc2d_geoclaw_tag4refinement_fort.f90
     fclaw2d_source/fc2d_geoclaw_tag4coarsening_fort.f90
-    fclaw2d_source/fc2d_geoclaw_test_regions.f90
     fclaw2d_source/fc2d_geoclaw_flag2refine_fort.f90
     fclaw2d_source/fc2d_geoclaw_local_ghost_pack_fort.f
     fclaw2d_source/fc2d_geoclaw_local_ghost_pack_aux_fort.f
@@ -66,6 +65,7 @@ target_sources(geoclaw PRIVATE
     fc2d_geoclaw.cpp
     fc2d_geoclaw_options.c
     fc2d_geoclaw_gauges_default.c
+    fc2d_geoclaw_regions_default.c
     fc2d_geoclaw_run.c
     fc2d_geoclaw_output_ascii.c
 )
