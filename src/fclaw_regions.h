@@ -101,12 +101,21 @@ typedef void (*fclaw_region_set_data_t)(struct fclaw_global *glob,
  * @param[out] xlower,xupper,ylower,yupper,zlower,zupper the normalized coordinates
  */
 typedef void (*fclaw_region_normalize_t)(struct fclaw_global *glob, 
-                                       struct fclaw_block *block,
-                                       int blockno, 
-                                       struct fclaw_region *r,
-                                       double *xlower, double *xupper, 
-                                       double *ylower, double *yupper, 
-                                       double *zlower, double *zupper);
+                                         struct fclaw_block *block,
+                                         int blockno, 
+                                         struct fclaw_region *r,
+                                         double *xlower, double *xupper, 
+                                         double *ylower, double *yupper, 
+                                         double *zlower, double *zupper);
+
+
+typedef int (*fclaw_region_intersects_patch_t)(struct fclaw_global *glob,
+                                               struct fclaw_patch *patch,
+                                               int blockno, int patchno,
+                                               struct fclaw_region *r,
+                                               double t,
+                                               int refine_flag);
+
 
 /**
  * @brief vtable for regions
@@ -119,6 +128,10 @@ typedef struct fclaw_regions_vtable
     /** @brief Maps region to normalized coordinates in a 
         global [0,1]x[0,1] (x[0,1]) domain. */
     fclaw_region_normalize_t     normalize_coordinates;
+
+    /** @brief Routine to determine if patch intersections a 
+        region.  */
+    fclaw_region_intersects_patch_t   patch_intersects_region;
 
     /** @brief true if vtable has been set */
     int is_set;
@@ -182,6 +195,13 @@ void fclaw_region_normalize_coordinates(struct fclaw_global *glob,
                                       double *ylower, double *yupper, 
                                       double *zlower, double *zupper);
 
+
+int fclaw_region_intersects_patch(struct fclaw_global *glob,
+                                  struct fclaw_patch *patch,
+                                  int blockno, int patchno,
+                                  struct fclaw_region *r,
+                                  double t, int refine_flag);
+
 /* ---------------------------------- Regions ------------------------------------------ */
 
 /**
@@ -198,6 +218,7 @@ void fclaw_region_normalize_coordinates(struct fclaw_global *glob,
 
 int fclaw2d_regions_test(struct fclaw_global *glob, 
                          struct fclaw_patch *patch,
+                         int blockno, int patchno,
                          double t, int refine_flag);
 
 
