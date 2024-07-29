@@ -59,7 +59,7 @@ SUBROUTINE fc2d_geoclaw_test_coarsen(blockno, mx,my,mbc,meqn,maux,xlower,ylower,
     DOUBLE PRECISION :: aux(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
 
     INTEGER :: i,j,m
-    DOUBLE PRECISION :: xc,yc, xupper, yupper, qvec(meqn), auxvec(maux)
+    DOUBLE PRECISION :: xc,yc, qvec(meqn), auxvec(maux)
 
     LOGICAL :: is_coarsening
 

@@ -436,14 +436,14 @@ contains
         character(len=80) :: str
 
         ! NetCDF Support
-        character(len=10) :: direction, x_dim_name, x_var_name, y_dim_name, &
-            y_var_name, z_var_name, var_name
-        ! character(len=1) :: axis_string
-        real(kind=8), allocatable :: nc_buffer(:, :), xlocs(:), ylocs(:)
-        integer(kind=4) :: x_var_id, y_var_id, z_var_id, x_dim_id, y_dim_id
-        integer(kind=4) :: xstart(1), ystart(1), mx_tot, my_tot
-        integer(kind=4) :: ios, nc_file, dim_ids(2), num_dims, &
-            var_type, num_vars, num_dims_tot, z_dim_ids(2)
+        !!character(len=10) :: direction, x_dim_name, x_var_name, y_dim_name, &
+        !!    y_var_name, z_var_name, var_name
+        !!! character(len=1) :: axis_string
+        !!real(kind=8), allocatable :: nc_buffer(:, :), xlocs(:), ylocs(:)
+        !!integer(kind=4) :: x_var_id, y_var_id, z_var_id, x_dim_id, y_dim_id
+        !!integer(kind=4) :: xstart(1), ystart(1), mx_tot, my_tot
+        !!integer(kind=4) :: ios, nc_file, dim_ids(2), num_dims, &
+        !!    var_type, num_vars, num_dims_tot, z_dim_ids(2)
 
         print *, ' '
         print *, 'Reading topography file  ', fname
@@ -504,7 +504,7 @@ contains
                                 topo(i) = topo_missing
                                 ! uncomment next line to print row i
                                 ! write(6,600) i
- 600                            format('*** missing data, i = ',i6)
+! 600                            format('*** missing data, i = ',i6)
                             endif
                         enddo
                     case(3)
@@ -517,8 +517,8 @@ contains
                                     ! uncomment next line to print row j
                                     ! and element i that are missing.
                                     ! write(6,601) i,j
- 601                                format('*** missing data, i = ',i6, &
-                                           '  j = ',i6)
+! 601                                format('*** missing data, i = ',i6, &
+!                                           '  j = ',i6)
                                 endif
                             enddo
                         enddo
@@ -734,14 +734,14 @@ contains
         ! character(len=1) :: axis_string
         ! character(len=6) :: convention_string
         ! integer(kind=4) :: convention_version
-        integer(kind=4) :: nc_file
-        real(kind=8), allocatable :: xlocs(:),ylocs(:)
-        logical, allocatable :: x_in_dom(:),y_in_dom(:)
-        integer(kind=4) :: dim_ids(2), num_dims, var_type, num_vars, num_dims_tot
-        integer(kind=4), allocatable :: var_ids(:)
-        character(len=10) :: var_name, x_var_name, y_var_name, z_var_name
-        character(len=10) :: x_dim_name, y_dim_name
-        integer(kind=4) :: x_var_id, y_var_id, z_var_id, x_dim_id, y_dim_id
+        !! integer(kind=4) :: nc_file
+        !! real(kind=8), allocatable :: xlocs(:),ylocs(:)
+        !! logical, allocatable :: x_in_dom(:),y_in_dom(:)
+        !! integer(kind=4) :: dim_ids(2), num_dims, var_type, num_vars, num_dims_tot
+        !! integer(kind=4), allocatable :: var_ids(:)
+        !! character(len=10) :: var_name, x_var_name, y_var_name, z_var_name
+        !! character(len=10) :: x_dim_name, y_dim_name
+        !! integer(kind=4) :: x_var_id, y_var_id, z_var_id, x_dim_id, y_dim_id
 
         verbose = .false.
 
@@ -987,6 +987,7 @@ contains
         ! Arguments
         real(kind=8), intent(in) :: x
 
+        topography = topo_left !! avoid compiler warnings
         if (test_topography == 1) then
             if (x < topo_location) then
                 topography = topo_left
@@ -1039,7 +1040,7 @@ contains
 
         ! Locals
         integer, parameter :: iunit = 79
-        integer :: itopo,finer_than,rank
+        integer :: finer_than,rank
         real(kind=8) :: area_i,area_j
         integer :: i,j
 

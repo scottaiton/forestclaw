@@ -420,30 +420,23 @@ int geoclaw_patch_tag4refinement(fclaw_global_t *glob,
     double t = glob->curr_time;
 
     int tag_patch;
-#if 0    
-    /* First check to see if we are forced to refine based on regions 
-       If patch intersects a region (including time interval), this routine
-       returns :  
+    /* Check to see how region affect refinement.
 
-          -- level >= maximum level allowed by any region 
-             this patch intersects with. (tag_patch = 0)
+       If patch intersects one or more regions (including time interval), 
+       this routine returns :  
 
-          -- level < minimum level required by any region
-             this patch intersects with. (tag_patch = 1)
+          -- tag_patch = 0 : level >= maximum level allowed by any region 
+             intersected by this patch (no refinement allowed)
 
-        Otherwise, tag_patch = -1 and we should refine using usual criteria.
+          -- tag_patch = 1 : level < minimum level required by any region
+             intersected by this patch (force refinement)
+
+          -- tag_patch = -1 : Refine using usual threshold criteria.
     */
-    double xupper = xlower + mx*dx;
-    double yupper = ylower + my*dy;
-    int refine = 1;  /* We are tagging for refinement */
-    FC2D_GEOCLAW_TEST_REGIONS(&level,&xlower,&ylower,&xupper,&yupper,
-                              &t,&refine, &tag_patch);
-#else
-    int refine_flag = 1;
+    int refine_flag = 1;  /* Indicates we are tagging for refinement */
     tag_patch = fclaw2d_regions_test(glob,patch,
                                      blockno, patchno, 
                                      t,refine_flag);
-#endif                             
 
     if (tag_patch < 0)
     {
@@ -483,25 +476,28 @@ int geoclaw_patch_tag4coarsening(fclaw_global_t *glob,
 
     int level = fine_patches[0].level;
     double t = glob->curr_time;
-    int tag_patch;
-#if 0    
 
+    int tag_patch;
     /* Test parent quadrant : If any of the four sibling patches are in the 
        region, we consider that an intersection.  Assume Morton ordering
-       on the sibling patches (0=ll, 1=lr, 2=ul, 3=ur) */
-    double xupper = xlower[1] + mx*dx;
-    double yupper = ylower[2] + my*dy;
-    int refine = 0;  /* We are tagging for refinement */
-    FC2D_GEOCLAW_TEST_REGIONS(&level,&xlower[0],&ylower[0],&xupper,&yupper,
-                              &t,&refine, &tag_patch);
+       on the sibling patches (0=ll, 1=lr, 2=ul, 3=ur) 
 
-#else 
-    int refine_flag = 0;
+       If a sibling patch intersects one or more regions (including 
+       time interval),  this routine returns :  
+
+          -- tag_patch = 0 : level <= minimum level allowed by any region 
+             intersected by this patch (no coarsening is allowed)
+
+          -- tag_patch = 1 : level > maximum level required by any region
+             intersected by this patch (force coarsening)
+
+          -- tag_patch = -1 : Coarsen using usual threshold criteria.
+
+       */
+    int refine_flag = 0; /* we are tagging for coarsening */
     tag_patch = fclaw2d_regions_test(glob,fine_patches,
                                      blockno,patchno,
                                      t,refine_flag);
-#endif   
-
     if (tag_patch < 0) 
     {
         /* Region tagging places no restrictions on where to coarsen */

@@ -52,12 +52,14 @@ c     # user-specified boundary conditions go here in place of error output
 c
   110 continue
 c     # zero-order extrapolation:
-      do 115 j = 1-mbc, my+mbc
-         do 115 ibc=1,mbc
+      do j = 1-mbc, my+mbc
+         do ibc=1,mbc
             aux(1,1-ibc,j) = aux(1,1,j)
-            do 115 m=1,meqn
+            do m=1,meqn
                q(m,1-ibc,j) = q(m,1,j)
-  115       continue
+            end do
+         end do
+      end do
       go to 199
 
   120 continue
@@ -66,17 +68,20 @@ c     # periodic: Handled by p4est
 
   130 continue
 c     # solid wall (assumes 2'nd component is velocity or momentum in x):
-      do 135 j = 1-mbc, my+mbc
-         do 135 ibc=1,mbc
+      do j = 1-mbc, my+mbc
+         do ibc=1,mbc
             aux(1,1-ibc,j) = aux(1,ibc,j)
-            do 135 m=1,meqn
+            do m=1,meqn
                q(m,1-ibc,j) = q(m,ibc,j)
-  135       continue
+            end do
+         end do
+      end do
 c     # negate the normal velocity:
-      do 136 j = 1-mbc, my+mbc
-         do 136 ibc=1,mbc
+      do j = 1-mbc, my+mbc
+         do ibc=1,mbc
             q(2,1-ibc,j) = -q(2,ibc,j)
-  136    continue
+         end do
+      end do
       go to 199
 
   199 continue
@@ -95,12 +100,14 @@ c     # user-specified boundary conditions go here in place of error output
 
   210 continue
 c     # zero-order extrapolation:
-      do 215 j = 1-mbc, my+mbc
-         do 215 ibc=1,mbc
+      do j = 1-mbc, my+mbc
+         do ibc=1,mbc
             aux(1,mx+ibc,j) = aux(1,mx,j)
-            do 215 m=1,meqn
+            do m=1,meqn
                q(m,mx+ibc,j) = q(m,mx,j)
-  215       continue
+            end do
+         end do
+      end do
       go to 299
 
   220 continue
@@ -109,17 +116,20 @@ c     # periodic : Handled elsewhere
 
   230 continue
 c     # solid wall (assumes 2'nd component is velocity or momentum in x):
-      do 235 j = 1-mbc, my+mbc
-         do 235 ibc=1,mbc
+      do j = 1-mbc, my+mbc
+         do ibc=1,mbc
             aux(1,mx+ibc,j) = aux(1,mx+1-ibc,j)
-            do 235 m=1,meqn
+            do m=1,meqn
                q(m,mx+ibc,j) = q(m,mx+1-ibc,j)
-  235       continue
+            end do
+         end do
+      end do
 c     # negate the normal velocity:
-      do 236 j = 1-mbc, my+mbc
-         do 236 ibc=1,mbc
+      do j = 1-mbc, my+mbc
+         do ibc=1,mbc
             q(2,mx+ibc,j) = -q(2,mx+1-ibc,j)
-  236    continue
+         end do
+      end do
       go to 299
 
   299 continue
@@ -138,12 +148,14 @@ c     # user-specified boundary conditions go here in place of error output
 c
   310 continue
 c     # zero-order extrapolation:
-      do 315 jbc=1,mbc
-         do 315 i = 1-mbc, mx+mbc
+      do jbc=1,mbc
+         do i = 1-mbc, mx+mbc
             aux(1,i,1-jbc) = aux(1,i,1)
-            do 315 m=1,meqn
+            do m=1,meqn
                q(m,i,1-jbc) = q(m,i,1)
-  315       continue
+            end do
+         end do
+      end do
       go to 399
 
   320 continue
@@ -152,17 +164,20 @@ c     # periodic: Handled elsewhere
 
   330 continue
 c     # solid wall (assumes 3'rd component is velocity or momentum in y):
-      do 335 jbc=1,mbc
-         do 335 i = 1-mbc, mx+mbc
+      do jbc=1,mbc
+         do i = 1-mbc, mx+mbc
             aux(1,i,1-jbc) = aux(1,i,jbc)
-            do 335 m=1,meqn
+            do m=1,meqn
                q(m,i,1-jbc) = q(m,i,jbc)
-  335       continue
+            end do
+         end do
+      end do
 c     # negate the normal velocity:
-      do 336 jbc=1,mbc
-         do 336 i = 1-mbc, mx+mbc
+      do jbc=1,mbc
+         do i = 1-mbc, mx+mbc
             q(3,i,1-jbc) = -q(3,i,jbc)
-  336    continue
+         end do
+      end do
       go to 399
 
   399 continue
@@ -181,12 +196,14 @@ c     # user-specified boundary conditions go here in place of error output
 
   410 continue
 c     # zero-order extrapolation:
-      do 415 jbc=1,mbc
-         do 415 i = 1-mbc, mx+mbc
+      do jbc=1,mbc
+         do i = 1-mbc, mx+mbc
             aux(1,i,my+jbc) = aux(1,i,my)
-            do 415 m=1,meqn
+            do m=1,meqn
                q(m,i,my+jbc) = q(m,i,my)
-  415       continue
+            end do
+         end do
+      end do
       go to 499
 
   420 continue
@@ -195,17 +212,20 @@ c     # periodic: Handled elsewhere
 
   430 continue
 c     # solid wall (assumes 3'rd component is velocity or momentum in y):
-      do 435 jbc=1,mbc
-         do 435 i = 1-mbc, mx+mbc
+      do jbc=1,mbc
+         do i = 1-mbc, mx+mbc
             aux(1,i,my+jbc) = aux(1,i,my+1-jbc)
-            do 435 m=1,meqn
+            do m=1,meqn
                q(m,i,my+jbc) = q(m,i,my+1-jbc)
-  435       continue
+            end do
+         end do
+      end do
 c     # negate the normal velocity:
-      do 436 jbc=1,mbc
-         do 436 i = 1-mbc, mx+mbc
+      do jbc=1,mbc
+         do i = 1-mbc, mx+mbc
             q(3,i,my+jbc) = -q(3,i,my+1-jbc)
-  436    continue
+         end do
+      end do
       go to 499
 
   499 continue

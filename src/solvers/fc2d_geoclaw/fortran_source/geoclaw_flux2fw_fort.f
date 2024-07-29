@@ -80,7 +80,7 @@ c     The only change is in loop 40
 c     to revert to the original version, set relimit = .false.
 c---------------------last modified 1/04/05-----------------------------
 
-      use amr_module, only: use_fwaves, mwaves, method
+      use amr_module, only: mwaves, method
       use amr_module, only: mthlim
       use geoclaw_module, only: coordinate_system, earth_radius, deg2rad
 
@@ -166,14 +166,15 @@ c   # Set fadd for the donor-cell upwind method (Godunov)
 c
 c     # compute maximum wave speed for checking Courant number:
       cfl1d = 0.d0
-      do 50 mw=1,mwaves
-         do 50 i=1,mx+1
+      do mw=1,mwaves
+         do i=1,mx+1
 c          # if s>0 use dtdx1d(i) to compute CFL,
 c          # if s<0 use dtdx1d(i-1) to compute CFL:
             cfl1d = dmax1(cfl1d, dtdx1d(i)*s(mw,i),
      &                          -dtdx1d(i-1)*s(mw,i))
+         end do
+      end do
 
-   50       continue
 c
       if (method(2).eq.1) go to 130
 c
@@ -185,25 +186,25 @@ c     # apply limiter to fwaves:
      &      call fc2d_geoclaw_limiter(maxm,meqn,mwaves,
      &                                mbc,mx,fwave,s,mthlim)
 c
-      do 120 i = 1, mx+1
+      do i = 1, mx+1
 c
 c        # For correction terms below, need average of dtdx in cell
 c        # i-1 and i.  Compute these and overwrite dtdx1d:
 c
          dtdx1d(i-1) = 0.5d0 * (dtdx1d(i-1) + dtdx1d(i))
 c
-         do 120 m=1,meqn
+         do m=1,meqn
             cqxx(m,i) = 0.d0
-            do 119 mw=1,mwaves
+            do mw=1,mwaves
 c
 c              # second order corrections:
                cqxx(m,i) = cqxx(m,i) + dsign(1.d0,s(mw,i))
      &            * (1.d0 - dabs(s(mw,i))*dtdx1d(i-1)) * fwave(m,mw,i)
-c
-  119          continue
+            end do
             faddm(m,i) = faddm(m,i) + 0.5d0 * cqxx(m,i)
             faddp(m,i) = faddp(m,i) + 0.5d0 * cqxx(m,i)
-  120       continue
+         end do
+      end do
 c
 c
   130  continue
@@ -212,12 +213,13 @@ c
 c
        if (method(2).gt.1 .and. method(3).eq.2) then
 c         # incorporate cqxx into amdq and apdq so that it is split also.
-          do 150 i = 1, mx+1
-             do 150 m=1,meqn
+          do i = 1, mx+1
+             do m=1,meqn
                 amdq(m,i) = amdq(m,i) + cqxx(m,i)
                 apdq(m,i) = apdq(m,i) - cqxx(m,i)
-  150           continue
-          endif
+             end do
+          end do
+      endif
 c
 c
 c      # modify G fluxes for transverse propagation
@@ -230,8 +232,8 @@ c     # split the left-going flux difference into down-going and up-going:
      &          amdq,bmasdq,bpasdq)
 c
 c     # modify flux below and above by B^- A^- Delta q and  B^+ A^- Delta q:
-      do 160 i = 1, mx+1
-         do 160 m=1,meqn
+      do i = 1, mx+1
+         do m=1,meqn
                gupdate = 0.5d0*dtdx1d(i-1) * bmasdq(m,i)
                gaddm(m,i-1,1) = gaddm(m,i-1,1) - gupdate
                gaddp(m,i-1,1) = gaddp(m,i-1,1) - gupdate
@@ -239,7 +241,8 @@ c
                gupdate = 0.5d0*dtdx1d(i-1) * bpasdq(m,i)
                gaddm(m,i-1,2) = gaddm(m,i-1,2) - gupdate
                gaddp(m,i-1,2) = gaddp(m,i-1,2) - gupdate
-  160          continue
+            end do
+         end do
 c
 c     # split the right-going flux difference into down-going and up-going:
       call rpt2(ixy,2,maxm,meqn,mwaves,maux,mbc,mx,
@@ -247,8 +250,8 @@ c     # split the right-going flux difference into down-going and up-going:
      &          apdq,bmasdq,bpasdq)
 c
 c     # modify flux below and above by B^- A^+ Delta q and  B^+ A^+ Delta q:
-      do 180 i = 1, mx+1
-          do 180 m=1,meqn
+      do i = 1, mx+1
+          do m=1,meqn
                gupdate = 0.5d0*dtdx1d(i-1) * bmasdq(m,i)
                gaddm(m,i,1) = gaddm(m,i,1) - gupdate
                gaddp(m,i,1) = gaddp(m,i,1) - gupdate
@@ -256,7 +259,8 @@ c
                gupdate = 0.5d0*dtdx1d(i-1) * bpasdq(m,i)
                gaddm(m,i,2) = gaddm(m,i,2) - gupdate
                gaddp(m,i,2) = gaddp(m,i,2) - gupdate
-  180          continue
+            end do
+         end do
 c
   999 continue
       return

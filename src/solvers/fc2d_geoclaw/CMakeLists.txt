@@ -3,7 +3,6 @@ add_library(geoclaw_f OBJECT
     amrlib_source/amr_module.f90
     geolib_source/utility_module.f90
     geolib_source/geoclaw_module.f90
-    amrlib_source/regions_module.f90
     geolib_source/topo_module.f90
     geolib_source/qinit_module.f90
     geolib_source/fixedgrids_module.f90
@@ -95,7 +94,6 @@ install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/include/model_storm_module.mod
   ${CMAKE_CURRENT_BINARY_DIR}/include/qinit_module.mod
   ${CMAKE_CURRENT_BINARY_DIR}/include/refinement_module.mod
-  ${CMAKE_CURRENT_BINARY_DIR}/include/regions_module.mod
   ${CMAKE_CURRENT_BINARY_DIR}/include/storm_module.mod
   ${CMAKE_CURRENT_BINARY_DIR}/include/topo_module.mod
   ${CMAKE_CURRENT_BINARY_DIR}/include/utility_module.mod
