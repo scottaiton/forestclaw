@@ -17,7 +17,7 @@ except:
     raise Exception("*** Must first set FCLAW enviornment variable")
 
 # Scratch directory for storing topo and dtopo files:
-scratch_dir = os.path.join(FCLAW, 'applications','geoclaw', 'scratch')
+scratch_dir = os.path.join(FCLAW, 'forestclaw','applications','geoclaw', 'scratch')
 
 
 #------------------------------
@@ -413,7 +413,8 @@ def setgeo(rundata):
     #   [minlev, maxlev, fname]
 
     # == setfixedgrids.data values ==
-    fixed_grids = rundata.fixed_grid_data
+    # fixed_grids = rundata.fixed_grid_data
+    fixed_grids = rundata.fgout_data
     # for fixed grids append lines of the form
     # [t1,t2,noutput,x1,x2,y1,y2,xpoints,ypoints,\
     #  ioutarrivaltimes,ioutsurfacemax]
