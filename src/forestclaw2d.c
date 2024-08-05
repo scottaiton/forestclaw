@@ -1726,11 +1726,11 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     int mpirank = p4est->mpirank;
     int mpisize = p4est->mpisize;
     int blockno, patchno, *size, i, si, nri, num_nr;
-    int skip_refined;
+    int skip_local, skip_refined;
     int num_dest, num_src, pul, old_puf, new_puf, old_lnp, new_lnp,
         next_refined;
     int first_receiver, last_receiver, ri;
-    int already_skipped;
+    int already_skipped_local;
     p4est_gloidx_t *old_gfq, *new_gfq;
     fclaw2d_block_t *block;
     fclaw2d_patch_t *patch;
@@ -1748,6 +1748,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     p = FCLAW_ALLOC_ZERO (fclaw2d_domain_partition_t, 1);
 
     /* only skip refined quadrants, if it was enabled before most recent adapt */
+    skip_local = domain->p.skip_local;
     skip_refined = domain->p.skip_refined && wrap->newly_refined != NULL;
 
     /* compute partition_unchanged data from gfq arrays */
@@ -1758,8 +1759,8 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
 
     /* compute source sizes */
     num_src = old_lnp;
-    already_skipped = domain->p.skip_local ? 0 : 1;
-    if (domain->p.skip_local || skip_refined)
+    already_skipped_local = skip_local ? 0 : 1;
+    if (skip_local || skip_refined)
     {
         p->src_sizes = sc_array_new_count (sizeof (int), old_lnp);
         sc_array_memset (p->src_sizes, 0);
@@ -1774,10 +1775,10 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
         for (i = 0; i < old_lnp; i++)
         {
             /* skip patches that stay local */
-            if (!already_skipped && i >= old_puf)
+            if (!already_skipped_local && i >= old_puf)
             {
-                /* we check for i > old_puf, since we may skip old_puf in the
-                 * skip_refined && next_refined == i case below */
+                /* we check for i > old_puf, since we may skip i == old_puf in
+                 * the skip_refined && next_refined == i case below */
                 num_src -= old_puf + pul - i;   /* no data for patches that stay local */
                 i = old_puf + pul;      /* skip patches that stay local */
                 while (skip_refined && next_refined < i)
@@ -1791,7 +1792,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
                 {
                     break;      /* jumped to end of array */
                 }
-                already_skipped = 1;
+                already_skipped_local = 1;
             }
 
             size = (int *) sc_array_index_int (p->src_sizes, i);
@@ -1866,7 +1867,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
         for (patchno = 0; patchno < block->num_patches; ++i, ++patchno)
         {
             /* skip patches that stay local */
-            if (i == old_puf && domain->p.skip_local)
+            if (i == old_puf && skip_local)
             {
                 i += pul;       /* skip patches that stay local */
                 if (i == old_lnp)
@@ -1923,7 +1924,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
             }
         }
     }
-    else if (domain->p.skip_local)
+    else if (skip_local)
     {
         /* we only receive data for patches that were not local before partition */
         num_dest -= pul;
@@ -1942,7 +1943,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
 
     /* start transfering patch data according to the new partition */
     p->dest_data = sc_array_new_count (data_size, num_dest);
-    if (!domain->p.skip_local && !skip_refined)
+    if (!skip_local && !skip_refined)
     {
         /* we packed all patches resulting in a fixed data size */
         p->async_state = (void *)
@@ -2020,17 +2021,19 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
     fclaw2d_patch_t *patch;
     int dpuf, dpul;
     int si, i, *size;
-    int skip_refined;
+    int skip_local, skip_refined;
 
     /* this routine should only be called for the new domain of a changed
      * partition */
     FCLAW_ASSERT (domain->pp_owned);
     FCLAW_ASSERT (p->inside_async);
 
+    /* only skip refined quadrants, if it was enabled before most recent adapt */
+    skip_local = domain->p.skip_local;
     skip_refined = domain->p.skip_refined && wrap->newly_refined != NULL;
 
     /* wait for transfer of patch data to complete */
-    if (!domain->p.skip_local && !skip_refined)
+    if (!skip_local && !skip_refined)
     {
         p4est_transfer_fixed_end ((p4est_transfer_context_t *) p->
                                   async_state);
@@ -2076,11 +2079,11 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
                 P4EST_ASSERT (0 <= patchno && patchno < block->num_patches);
 
                 /* update dest data index accordingly */
-                if (!domain->p.skip_local && !skip_refined)
+                if (!skip_local && !skip_refined)
                 {
                     si += dpul; /* we have patch data for all local patches */
                 }
-                else if (!domain->p.skip_local)
+                else if (!skip_local)
                 {
                     FCLAW_ASSERT (skip_refined);
                     for (i = dpuf; i < dpuf + dpul; i++)
@@ -2091,7 +2094,7 @@ fclaw2d_domain_iterate_unpack (fclaw2d_domain_t * domain,
                             si++;       /* we have patch data, whenever size != 0 */
                         }
                     }
-                }               /* if domain->p.skip_local, we do not need to update si */
+                }               /* if skip_local, we do not need to update si */
             }
 
             /* unpack patch from previous patch data, if indicated */
