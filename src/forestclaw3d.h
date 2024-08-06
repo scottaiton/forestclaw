@@ -821,13 +821,16 @@ void fclaw3d_domain_set_refinement (fclaw3d_domain_t * domain,
  *                              Suggested default: 1.
  * \param [in] skip_refined     Boolean: If true, the patch data of patches that
  *                              were refined during the most recent call to
- *                              \ref fclaw3d_domain_adapt is only packed for one
- *                              of the siblings by invoking
+ *                              \ref fclaw3d_domain_adapt is only packed for the
+ *                              first sibling by invoking
  *                              \ref fclaw3d_domain_iterate_pack. The unpack
  *                              callback in \ref fclaw3d_domain_iterate_unpack
  *                              will be invoked for all children of a recently
  *                              refined patch. The provided data will be the
  *                              data packed previously by one of the siblings.
+ *                              For each first patch sent to a specific process,
+ *                              \ref fclaw3d_domain_iterate_pack will be invoked
+ *                              regardless of its child id.
  *                              For this partitioning method to work as desired
  *                              skip_refined has to be set \b before the most
  *                              recent call to \ref fclaw3d_domain_adapt .
@@ -971,8 +974,9 @@ typedef struct fclaw3d_domain_partition
 fclaw3d_domain_partition_t;
 
 /** Callback to pack patch data after partitioning.
- * We traverse every local patch in the old partition. If that patch has to be
- * packed for the new partition, we invoke this callback.
+ * The function \ref fclaw3d_domain_iterate_pack traverses every local patch in
+ * the old partition. If that patch has to be packed for the new partition, it
+ * invokes this callback.
  * \param [in,out] domain   Domain before partition.
  * \param [in,out] patch    Patch from the domain. Its user data should be
                             packed into \b pack_data_here.
@@ -987,12 +991,10 @@ typedef void (*fclaw3d_pack_callback_t) (fclaw3d_domain_t * domain,
                                          void *user);
 
 /** Start asynchronous transfer of patch data after partition.
- * The function iterates over the local patches of old partition and determines
- * patches that have to be packed by use of \b patch_pack and send to the new
- * partition. If skip_local is set to false in the domain, \b patch_pack is
- * called for every local patch. If skip_local is true (default), \b patch_pack
- * is called only for local patches that are sent to a different process during
- * partitioning.
+ * This function iterates over the local patches of old partition and determines
+ * patches that have to be packed by use of \b patch_pack based on the options
+ * skip_local, skip_refined and partition_for_coarsening (see
+ * \ref fclaw3d_domain_set_partitioning). Then, the patches are packed and sent.
  * This function must be followed by a call to \ref fclaw3d_domain_iterate_unpack.
  * \param [in,out] domain       The domain before partitioning.
  * \param [in] data_size        The number of bytes of user data that has to be
@@ -1010,9 +1012,9 @@ fclaw3d_domain_partition_t
                                    void *user);
 
 /** Transfer data of patches still local after partition.
- * The function iterates over all pairs of local patches in the domain before
+ * This function iterates over all pairs of local patches in the domain before
  * and after partitioning and invokes the transfer of their user-data via
- * \ref patch_transfer.
+ * \b patch_transfer.
  * It may be called before, between or after \ref fclaw3d_domain_iterate_pack
  * and \ref fclaw3d_domain_iterate_unpack. It is recommended to call it between
  * packing and unpacking, to overlap communication with computation.
@@ -1029,7 +1031,8 @@ void fclaw3d_domain_iterate_transfer (fclaw3d_domain_t * old_domain,
                                       patch_transfer, void *user);
 
 /** Callback to unpack patch data after partitioning.
- * We traverse every local patch, that was not local before partitioning.
+ * The function \ref fclaw3d_domain_iterate_unpack traverses every local patch,
+ * that was not local before partitioning and invokes this callback.
  * \param [in,out] domain   Domain after partition.
  * \param [in,out] patch    Patch from the domain. Its user data should be
                             unpacked from \b unpack_data_from_here.
@@ -1046,8 +1049,10 @@ typedef void (*fclaw3d_unpack_callback_t) (fclaw3d_domain_t * domain,
                                            void *user);
 
 /** Complete asynchronous transfer of patch data after partition.
- * The function iterates over all local patches of new partition and determines
- * patches that have to be unpacked by use of \b patch_unpack.
+ * This function iterates over all local patches of the new partition and
+ * determines patches that have to be unpacked by use of \b patch_unpack based
+ * on the options skip_local, skip_refined and partition_for_coarsening (see
+ * \ref fclaw3d_domain_set_partitioning).
  * It must be preceded by a call to \ref fclaw3d_domain_iterate_unpack and
  * provided with the corresponding \ref fclaw3d_domain_partition_t \b p.
  * \param [in,out] domain       The domain after partitioning.
