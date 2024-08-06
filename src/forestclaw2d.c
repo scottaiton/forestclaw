@@ -1728,7 +1728,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     int blockno, patchno, *size, i, si, nri, num_nr;
     int skip_local, skip_refined;
     int num_dest, num_src, pul, old_puf, new_puf, old_lnp, new_lnp,
-        next_refined;
+        next_refined, unext;
     int first_receiver, last_receiver, ri;
     int already_skipped_local;
     p4est_gloidx_t *old_gfq, *new_gfq;
@@ -1752,10 +1752,22 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
     skip_refined = domain->p.skip_refined && wrap->newly_refined != NULL;
 
     /* compute partition_unchanged data from gfq arrays */
-    pul = (int) SC_MAX (SC_MIN (old_gfq[mpirank + 1], new_gfq[mpirank + 1]) -
-                        SC_MAX (old_gfq[mpirank], new_gfq[mpirank]), 0);
-    old_puf = (int) SC_MAX (0, new_gfq[mpirank] - old_gfq[mpirank]);
-    new_puf = (int) SC_MAX (0, old_gfq[mpirank] - new_gfq[mpirank]);
+    old_puf = pul = new_puf = 0;
+    if (old_gfq[mpirank] < new_gfq[mpirank + 1]
+        && new_gfq[mpirank] < old_gfq[mpirank + 1])
+    {
+        unext = SC_MIN (old_gfq[mpirank + 1], new_gfq[mpirank + 1]);
+        if (old_gfq[mpirank] <= new_gfq[mpirank])
+        {
+            old_puf = (int) (new_gfq[mpirank] - old_gfq[mpirank]);
+            pul = (int) (unext - new_gfq[mpirank]);
+        }
+        else
+        {
+            new_puf = (int) (old_gfq[mpirank] - new_gfq[mpirank]);
+            pul = (int) (unext - old_gfq[mpirank]);
+        }
+    }
 
     /* compute source sizes */
     num_src = old_lnp;
