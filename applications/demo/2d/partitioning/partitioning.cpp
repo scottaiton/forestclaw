@@ -361,7 +361,7 @@ main (int argc, char **argv)
                 fclaw_global_productionf
                     ("Starting partitioning with skip_local = %d,"
                      " partition_for_coarsening = %d and"
-                     "skip_refined being enabled to late.\n",
+                     " skip_refined being enabled to late.\n",
                      domain->p.skip_local,
                      wrap->params.partition_for_coarsening);
                 fclaw2d_domain_set_partitioning (domain, 0, 1, 1);
@@ -382,11 +382,11 @@ main (int argc, char **argv)
                          num_patches_packed,
                          refined_domain->local_num_patches);
 
-            fclaw2d_domain_iterate_unpack (partitioned_domain, p,
-                                           unpack_patch_data, NULL);
             fclaw2d_domain_iterate_transfer (refined_domain,
                                              partitioned_domain,
                                              transfer_patch_data, NULL);
+            fclaw2d_domain_iterate_unpack (partitioned_domain, p,
+                                           unpack_patch_data, NULL);
             fclaw2d_domain_partition_free (p);
 
             /* output patch data if required */
