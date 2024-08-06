@@ -1798,9 +1798,14 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
                 {
                     break;      /* jumped to end of array */
                 }
+                /* skip newly refined patches that stay local */
                 while (skip_refined && next_refined < i)
                 {
-                    /* skip newly refined patches that stay local */
+                    if (next_refined + P4EST_CHILDREN > i) {
+                        /* i is a newly refined sibling patch */
+                        num_src -= next_refined + P4EST_CHILDREN - i;
+                        i = next_refined + P4EST_CHILDREN;
+                    }
                     next_refined = (nri == num_nr) ? old_lnp :
                         *(int *) sc_array_index_int (wrap->newly_refined,
                                                      nri++);
