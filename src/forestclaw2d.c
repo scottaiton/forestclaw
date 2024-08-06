@@ -1781,6 +1781,11 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
                  * the skip_refined && next_refined == i case below */
                 num_src -= old_puf + pul - i;   /* no data for patches that stay local */
                 i = old_puf + pul;      /* skip patches that stay local */
+                already_skipped_local = 1;
+                if (i == old_lnp)
+                {
+                    break;      /* jumped to end of array */
+                }
                 while (skip_refined && next_refined < i)
                 {
                     /* skip newly refined patches that stay local */
@@ -1788,11 +1793,7 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
                         *(int *) sc_array_index_int (wrap->newly_refined,
                                                      nri++);
                 }
-                if (i == old_lnp)
-                {
-                    break;      /* jumped to end of array */
-                }
-                already_skipped_local = 1;
+
             }
 
             size = (int *) sc_array_index_int (p->src_sizes, i);
@@ -1807,7 +1808,9 @@ fclaw2d_domain_iterate_pack (fclaw2d_domain_t * domain, size_t data_size,
                     *(int *) sc_array_index_int (wrap->newly_refined, nri++);
             }
         }
-        FCLAW_ASSERT (!skip_refined || nri == num_nr);
+        FCLAW_ASSERT (!skip_refined || nri == num_nr
+                      || old_puf + pul == old_lnp);
+        FCLAW_ASSERT (already_skipped_local);
 
         /* adapt to recently refined families that cross process boundaries */
         if (skip_refined && !wrap->params.partition_for_coarsening)
