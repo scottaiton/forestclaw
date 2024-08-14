@@ -32,6 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_domain.h>
 #include <fclaw_forestclaw.h>
 
+#include <fclaw_regions.h>
+
 /**
  *  This macro defines two utility functions for reading and writing CSV data of a specified type,
  *  typename, to a file. The generated functions are named read_input_and_check_<extension>
@@ -172,7 +174,9 @@ void fclaw_finalize(fclaw_global_t* glob)
     const fclaw_options_t *gparms = fclaw_get_options(glob);
 
     fclaw_global_essentialf("Finalizing run\n");
-    fclaw_diagnostics_finalize(glob);
+    fclaw_diagnostics_finalize(glob); // This kills any gauges
+    fclaw_regions_finalize(glob);
+
     if (glob->cont != NULL) {
         fclaw_map_destroy(glob->cont);
     }

@@ -272,12 +272,25 @@ int fclaw_region_intersects_patch(struct fclaw_global *glob,
 
 /* ---------------------------- Get Access Functions ---------------------------------- */
 
-void fclaw_region_allocate(fclaw_global_t *glob, 
+void fclaw_regions_allocate(fclaw_global_t *glob, 
                            int num_regions,
                            fclaw_region_t **r)
 {
     *r = (fclaw_region_t*) FCLAW_ALLOC(fclaw_region_t,num_regions);
 }
+
+void fclaw_regions_finalize(fclaw_global_t *glob)
+{
+    fclaw_region_info_t* region_info = 
+        (fclaw_region_info_t *) fclaw_global_get_attribute(glob,"region_info");
+
+    fclaw_region_t *regions = region_info->regions;
+    FCLAW_FREE(regions);
+    FCLAW_FREE(region_info);
+    region_info = NULL;
+    regions = NULL;
+}
+
 
 void fclaw_region_set_data(fclaw_global_t *glob, 
                              fclaw_region_t *r,

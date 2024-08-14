@@ -102,7 +102,7 @@ void geoclaw_read_regions_data_default(fclaw_global_t *glob,
     }
     else
     {
-        fclaw_region_allocate(glob,*num_regions,regions);
+        fclaw_regions_allocate(glob,*num_regions,regions);
 
         int *num = FCLAW_ALLOC(int,   *num_regions);
         double *xlower  = FCLAW_ALLOC(double,*num_regions);
@@ -119,8 +119,8 @@ void geoclaw_read_regions_data_default(fclaw_global_t *glob,
         {                        
             char *next;
             fgets(line,max_line_len, f_regions_data);
-            num[i] = i; //strtod(line,&next);
-            min_level[i] = strtod(next,&next);
+            num[i] = i; // Regions are not given IDs (unlike gauges)
+            min_level[i] = strtod(line,&next);
             max_level[i] = strtod(next,&next);
             t1[i] = strtod(next,&next);
             t2[i] = strtod(next,&next);

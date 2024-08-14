@@ -4,14 +4,14 @@
 !    for specific implementations of storms such as the Holland model.
 ! ==============================================================================
 !                   Copyright (C) Clawpack Developers 2017
-!  Distributed under the terms of the Berkeley Software Distribution (BSD) 
+!  Distributed under the terms of the Berkeley Software Distribution (BSD)
 !  license
 !                     http://www.opensource.org/licenses/
 ! ==============================================================================
 
 module storm_module
 
-    use model_storm_module, only: model_storm_type
+    use model_storm_module, only: model_storm_type, rotation
     use data_storm_module, only: data_storm_type
 
     implicit none
@@ -26,7 +26,7 @@ module storm_module
 
     ! Locations of wind and pressure fields
     integer :: wind_index, pressure_index
-    
+
     ! Source term control and parameters
     logical :: wind_forcing, pressure_forcing
 
@@ -37,7 +37,7 @@ module storm_module
             real(kind=8), intent(in) :: speed, theta
         end function drag_function
     end interface
-        
+
     ! Function pointer to wind drag requested
     procedure (drag_function), pointer :: wind_drag
 
@@ -49,6 +49,9 @@ module storm_module
     real(kind=8) :: landfall = 0.d0
     type(model_storm_type), save :: model_storm
     type(data_storm_type), save :: data_storm
+
+    ! Wind drag limit
+    real(kind=8) :: WIND_DRAG_LIMIT = 3.5d-3
 
     ! Interface to each of the parameterized models
     abstract interface
@@ -103,8 +106,13 @@ contains
 
         use model_storm_module, only: set_model_storm => set_storm
         use model_storm_module, only: set_holland_1980_fields
+        use model_storm_module, only: set_holland_2008_fields
         use model_storm_module, only: set_holland_2010_fields
         use model_storm_module, only: set_CLE_fields
+        use model_storm_module, only: set_SLOSH_fields
+        use model_storm_module, only: set_rankine_fields
+        use model_storm_module, only: set_modified_rankine_fields
+        use model_storm_module, only: set_deMaria_fields
 
         ! use data_storm_module, only: set_data_storm => set_storm
         use data_storm_module, only: set_HWRF_fields
@@ -112,15 +120,15 @@ contains
         use utility_module, only: get_value_count
 
         implicit none
-        
+
         ! Input arguments
         character(len=*), optional, intent(in) :: data_file
-        
+
         ! Locals
         integer, parameter :: unit = 13
-        integer :: i, drag_law
+        integer :: i, drag_law, rotation_override
         character(len=200) :: storm_file_path, line
-        
+
         if (.not.module_setup) then
 
             ! Open file
@@ -138,13 +146,24 @@ contains
                 case(0)
                     wind_drag => no_wind_drag
                 case(1)
-                    wind_drag => garret_wind_drag
+                    wind_drag => garratt_wind_drag
                 case(2)
                     wind_drag => powell_wind_drag
                 case default
                     stop "*** ERROR *** Invalid wind drag law."
             end select
             read(unit,*) pressure_forcing
+            read(unit,*) rotation_override
+            select case(rotation_override)
+                case(0)
+                    rotation => hemisphere_rotation
+                case(1)
+                    rotation => N_rotation
+                case(2)
+                    rotation => S_rotation
+                case default
+                    stop " *** ERROR *** Roation override invalid."
+            end select
             read(unit,*)
 
             ! Set some parameters
@@ -152,7 +171,7 @@ contains
             read(unit, '(i2)') pressure_index
             read(unit, *) display_landfall_time
             read(unit, *)
-            
+
             ! AMR parameters
             read(unit,'(a)') line
             if (line(1:1) == "F") then
@@ -171,11 +190,11 @@ contains
                 read(line,*) (R_refine(i),i=1,size(R_refine,1))
             end if
             read(unit,*)
-            
+
             ! Storm Setup
             read(unit, "(i1)") storm_specification_type
             read(unit, *) storm_file_path
-            
+
             close(unit)
 
             ! Print log messages
@@ -190,14 +209,25 @@ contains
 
             ! Use parameterized storm model
             if (0 < storm_specification_type .and.              &
-                    storm_specification_type <=3) then
+                    storm_specification_type <= 3               &
+                .or. storm_specification_type == 8) then
                 select case(storm_specification_type)
                     case(1) ! Holland 1980 model
                         set_model_fields => set_holland_1980_fields
+                    case(8) ! Holland 2008 model
+                        set_model_fields => set_holland_2008_fields
                     case(2) ! Holland 2010 model
                         set_model_fields => set_holland_2010_fields
-                    case(3) ! Chavas, Lin, Emmanuel model
+                    case(3) ! Chavas, Lin, Emanuel model
                         set_model_fields => set_CLE_fields
+                    case(4) ! SLOSH model
+                        set_model_fields => set_SLOSH_fields
+                    case(5) ! rankine model
+                        set_model_fields => set_rankine_fields
+                    case(6) ! modified_ankine model
+                        set_model_fields => set_modified_rankine_fields
+                    case(7) ! deMaria model
+                        set_model_fields => set_deMaria_fields
                 end select
                 call set_model_storm(storm_file_path, model_storm,         &
                                      storm_specification_type, log_unit)
@@ -231,7 +261,7 @@ contains
     !   real(kind=8) function *_wind_drag(wind_speed)
     ! ========================================================================
     !  Calculates the drag coefficient for wind given the given wind speed.
-    !  
+    !
     !  Input:
     !      wind_speed = Magnitude of the wind in the cell
     !      theta = Angle with primary hurricane direciton
@@ -243,8 +273,8 @@ contains
     !    wave direction interaction with wind.  This implementation is based on
     !    the parameterization used in ADCIRC.  For more information see
     !
-    !    M.D. Powell (2006). “Final Report to the National Oceanic and 
-    !      Atmospheric Administration (NOAA) Joint Hurricane Testbed (JHT) 
+    !    M.D. Powell (2006). “Final Report to the National Oceanic and
+    !      Atmospheric Administration (NOAA) Joint Hurricane Testbed (JHT)
     !      Program.” 26 pp.
     !
     real(kind=8) pure function powell_wind_drag(wind_speed, theta)     &
@@ -259,7 +289,12 @@ contains
         real(kind=8) :: weight(3), drag(3)
 
         weight = 0.d0
-        drag = garret_wind_drag_limit(wind_speed, 3.5d-3)
+
+        ! Calculate Garratt speeds for use in sector- and speed-specific Cd
+        ! calculation. Note that WIND_DRAG_LIMIT is not binding in this case
+        ! because there are stricter upper bounds imposed in the
+        ! sector-specfic drag below
+        drag = garratt_wind_drag_limit(wind_speed, WIND_DRAG_LIMIT)
 
         ! Calculate sector weights
         if (0.d0 <= theta .and. theta <= 40.d0) then
@@ -323,25 +358,24 @@ contains
 
 
     ! ========================
-    !  Garret Based Wind Drag
+    !  Garratt Based Wind Drag
     ! ========================
     !  This version is a simple limited version of the wind drag
-    real(kind=8) pure function garret_wind_drag(wind_speed, theta) result(wind_drag)
-    
+    real(kind=8) pure function garratt_wind_drag(wind_speed, theta) result(wind_drag)
+
         implicit none
-        
+
         ! Input
         real(kind=8), intent(in) :: wind_speed, theta
-  
-        wind_drag = garret_wind_drag_limit(wind_speed, 2.d-3)
-    
-    end function garret_wind_drag
+
+        wind_drag = garratt_wind_drag_limit(wind_speed, WIND_DRAG_LIMIT)
+
+    end function garratt_wind_drag
 
 
     ! ===================================
-    !  Helper for Garret Based Wind Drag
-    ! ===================================
-    real(kind=8) pure function garret_wind_drag_limit(wind_speed,      &
+    !  Helper for Garratt==================
+    real(kind=8) pure function garratt_wind_drag_limit(wind_speed,      &
                                                       wind_drag_limit) &
                                                result(wind_drag)
 
@@ -353,7 +387,7 @@ contains
         wind_drag = min(wind_drag_limit,                               &
                         1.d-3 * (0.75d0 + 0.067d0 * wind_speed))
 
-    end function garret_wind_drag_limit
+    end function garratt_wind_drag_limit
 
 
     ! ==================================================================
@@ -397,9 +431,9 @@ contains
     end function storm_location
 
     real(kind=8) function storm_direction(t) result(theta)
-        
+
         use amr_module, only: rinfinity
-        use model_storm_module, only: model_direction => storm_direction 
+        use model_storm_module, only: model_direction => storm_direction
         use data_storm_module, only: data_direction => storm_direction
 
         implicit none
@@ -447,14 +481,36 @@ contains
         implicit none
 
         real(kind=8), intent(in) :: t
-        
+
         ! We open this here so that the file flushes and writes to disk
         open(unit=track_unit,file="fort.track",action="write",position='append')
 
         write(track_unit,"(4e26.16)") t, storm_location(t), storm_direction(t)
-        
+
         close(track_unit)
 
     end subroutine output_storm_location
 
+    ! ==========================================================================
+    ! Default to assuming y is a latitude and if y >= 0 we are want to spin
+    ! counter-clockwise
+    ! ==========================================================================
+    logical pure function hemisphere_rotation(x, y) result(rotation)
+        implicit none
+        real(kind=8), intent(in) :: x, y
+        rotation = (y >= 0.d0)
+    end function hemisphere_rotation
+    ! This version just returns the user defined direction
+    logical pure function N_rotation(x, y) result(rotation)
+        implicit none
+        real(kind=8), intent(in) :: x, y
+        rotation = .true.
+    end function N_rotation
+    ! This version just returns the user defined direction
+    logical pure function S_rotation(x, y) result(rotation)
+        implicit none
+        real(kind=8), intent(in) :: x, y
+        rotation = .false.
+    end function S_rotation
+    
 end module storm_module

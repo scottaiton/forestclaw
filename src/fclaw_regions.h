@@ -229,9 +229,17 @@ int fclaw2d_regions_test(struct fclaw_global *glob,
  * @param[in] num_regions the number of regions
  * @param[out] r allocated array of regions 
  */
-void fclaw_region_allocate(struct fclaw_global *glob, 
+void fclaw_regions_allocate(struct fclaw_global *glob, 
                            int num_regions,
                            struct fclaw_region **r);
+
+
+/**
+ * @brief Deallocate region structures
+ * 
+ * @param[in] glob the global context
+ */
+void fclaw_regions_finalize(struct fclaw_global *glob);
 
 /**
  * @brief Set the data for a single region in 2d/3d
