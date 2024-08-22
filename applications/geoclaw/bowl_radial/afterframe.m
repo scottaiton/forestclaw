@@ -3,15 +3,15 @@ zmin = 80;
 ep = 0.01;
 
 if (PlotType == 1)
-    showpatchborders;
-    setpatchborderprops('linewidth',2);
+    % showpatchborders;
+    % setpatchborderprops('linewidth',2);
     cv = linspace(qmin,qmax,20);
     % drawcontourlines(cv);
     set(gca,'zlim',[-20,0]);   % Need so that all patchborders show up
     
     colormap(parula);
     tol = 1;
-    caxis([-tol,tol])
+    clim([-tol,tol])
     daspect([20,20,1]);
     colorbar
     
