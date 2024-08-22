@@ -921,6 +921,7 @@ void fc2d_geoclaw_solver_initialize(fclaw_global_t* glob)
     fclaw_regions_vtable_t*  regions_vt = fclaw_regions_vt(glob);
     regions_vt->set_region_data        = geoclaw_read_regions_data_default;
     regions_vt->normalize_coordinates  = geoclaw_region_normalize_coordinates;
+    regions_vt->patch_intersects_region = geoclaw_patch_intersects_region_default;
 
     geoclaw_vt->is_set = 1;
 

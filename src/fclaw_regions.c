@@ -61,9 +61,9 @@ void fclaw_regions_initialize(fclaw_global_t* glob)
     if (!fclaw_opt->use_regions)
     {
         /* User does not want any region output, so no point in creating regions */
-        region_info = NULL;
+        region_info->regions = NULL;
         num_regions = 0;
-        region_dim = -1;
+        region_dim = -1;  
     }
     else
     {
