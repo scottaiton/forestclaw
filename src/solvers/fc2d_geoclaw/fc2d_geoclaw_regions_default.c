@@ -260,10 +260,10 @@ int geoclaw_patch_intersects_region_default(fclaw_global_t *glob,
 
     }
 
-    if (xupper < xupper_reg || xlower > xlower_reg)
+    if (xlower > xupper_reg || xupper < xlower_reg)
         return 0;
 
-    if (yupper < yupper_reg || ylower > ylower_reg)
+    if (ylower > yupper_reg || yupper < ylower_reg)
         return 0;
 
     return 1;
