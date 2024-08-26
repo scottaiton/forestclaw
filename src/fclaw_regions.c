@@ -41,14 +41,13 @@ typedef struct fclaw_region_info
 {
     fclaw_region_t *regions;
     int num_regions;
+    int region_dim;
 } fclaw_region_info_t;
 
 
 static
 void region_set_data(fclaw_global_t* glob, 
-                    fclaw_region_t **regions, 
-                    int *num_regions,
-                    int* dim);
+                    fclaw_region_info_t *region_info);
 
 
 void fclaw_regions_initialize(fclaw_global_t* glob)
@@ -57,13 +56,12 @@ void fclaw_regions_initialize(fclaw_global_t* glob)
 
     fclaw_region_info_t *region_info = FCLAW_ALLOC_ZERO(fclaw_region_info_t,1);
 
-    int num_regions, region_dim;
     if (!fclaw_opt->use_regions)
     {
         /* User does not want any region output, so no point in creating regions */
         region_info->regions = NULL;
-        num_regions = 0;
-        region_dim = -1;  
+        region_info->num_regions = 0;
+        region_info->region_dim = -1;  
     }
     else
     {
@@ -71,7 +69,7 @@ void fclaw_regions_initialize(fclaw_global_t* glob)
             Read custom regions file (e.g. regions.data).  After this call, all
             regions have current data 
         */
-        region_set_data(glob, &region_info->regions, &num_regions, &region_dim);
+        region_set_data(glob, region_info);
     }
 
     fclaw_global_attribute_store(glob,
@@ -92,7 +90,6 @@ int fclaw2d_regions_test(fclaw_global_t *glob,
 
     fclaw_region_t *regions = region_info->regions;
     int num_regions = region_info->num_regions;
-    int tag_patch = -1;
 
     // Get list of regions that this patch intersects
     // If we are coarsening, the "patch" dimensions are the dimensions of the 
@@ -110,11 +107,11 @@ int fclaw2d_regions_test(fclaw_global_t *glob,
             region_found = 1;
     }
 
+    int tag_patch = -1;
     if (!region_found)
     {
         // Patch does not intersect any region, and so  
         // refinement is based on usual tagging criteria.
-        int tag_patch = -1;
         return tag_patch;
     }
 
@@ -131,7 +128,7 @@ int fclaw2d_regions_test(fclaw_global_t *glob,
     */
 
     int min_level = 0;    // larger than any possible number of levels
-    int max_level = 100;
+    int max_level = 0;
     for(int m = 0; m < num_regions; m++)
     {
         if (inregion[m])
@@ -147,11 +144,11 @@ int fclaw2d_regions_test(fclaw_global_t *glob,
                                   &t1, &t2);
 
             min_level = fmax(min_level,rmin);
-            max_level = fmin(max_level,rmax);
+            max_level = fmax(max_level,rmax);
         }
     }
 
-    // Determine if we are allowed to refine or coarsen, based on regions above.
+    // Determine if we are allowed to refine based on regions above.
     if (refine_flag != 0)
     {
         // We are tagging for refinement
@@ -221,21 +218,14 @@ void fclaw_regions_vtable_initialize(fclaw_global_t* glob)
 
 static
 void region_set_data(fclaw_global_t* glob, 
-                     fclaw_region_t **regions, 
-                     int *num_regions,
-                     int *dim)
-    {
+                     fclaw_region_info_t *region_info)
+{
     const fclaw_regions_vtable_t* region_vt = fclaw_regions_vt(glob);
-    if (region_vt->set_region_data == NULL)
-    {
-        *regions = NULL;
-        *num_regions = 0;
-        *dim = 0;
-    }
-    else
-    {
-        region_vt->set_region_data(glob, regions, num_regions,dim);  
-    }
+    FCLAW_ASSERT(region_vt->set_region_data != NULL);    
+    region_vt->set_region_data(glob, 
+                               &region_info->regions, 
+                               &region_info->num_regions,
+                               &region_info->region_dim);  
 }
 
 void fclaw_region_normalize_coordinates(fclaw_global_t *glob, 
