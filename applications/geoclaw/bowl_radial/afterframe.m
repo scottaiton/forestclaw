@@ -3,11 +3,11 @@ zmin = 80;
 ep = 0.01;
 
 if (PlotType == 1)
-    % showpatchborders;
-    % setpatchborderprops('linewidth',2);
+    showpatchborders;
+    setpatchborderprops('linewidth',1);
     cv = linspace(qmin,qmax,20);
     % drawcontourlines(cv);
-    set(gca,'zlim',[-20,0]);   % Need so that all patchborders show up
+    set(gca,'zlim',[-20,1]);   % Need so that all patchborders show up
     
     colormap(parula);
     tol = 1;
@@ -22,15 +22,16 @@ if (PlotType == 1)
     th = linspace(0,2*pi,500);
     plot(w*cos(th),w*sin(th),'k','linewidth',2);
     
-    add_gauges();
+%     add_gauges();
     add_regions(t);
     
     hold off;
     
-    s = 1e-2;
-    axis([-100 100 -100 100])
+    s = 2;
+    axis([-100-s 100+s -100-s 100+s])
     daspect([1 1 1]);
     set(gca,'fontsize',16);
+    set(gca,'color','#56971C')  % Make background green
     axis on;
     
 elseif (PlotType == 4)
@@ -66,6 +67,3 @@ if (prt)
 end
 
 shg
-
-clear afterframe;
-clear mapc2m;

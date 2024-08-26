@@ -9,7 +9,8 @@
 1.15                 =: rho_air              # (Density of air kg/m^3) 
 101300.0             =: ambient_pressure     # (Nominal atmospheric pressure Pa) 
 6367500.0            =: earth_radius         # (Radius of the earth m) 
-1                    =: coordinate_system   
+1                    =: coordinate_system    # (1=meters, 2=lon-lat) 
+1                    =: sphere_source        # (0=none, 1=only in mass eqn, 2=all) 
 0.0                  =: sea_level           
 
 F                    =: coriolis_forcing    
