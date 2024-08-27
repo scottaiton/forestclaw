@@ -48,13 +48,9 @@ typedef struct fclaw_region_info
     int region_dim;
 } fclaw_region_info_t;
 
-#if 0
-static
-void regions_read_data_default(fclaw_global_t *glob, 
-                               fclaw_region_t **regions,
-                               int *num_regions,
-                               int *dim);
-#endif                               
+
+
+/* ---------------------------- Virtualized Functions --------------------------------- */
 
 static
 void fclaw_region_initialize_data(fclaw_global_t *glob, 
@@ -70,25 +66,6 @@ void fclaw_region_initialize_data(fclaw_global_t *glob,
                                 &region_info->num_regions,
                                 &region_info->region_dim);  
 }
-
-#if 0
-static
-void fclaw_region_normalize_coordinates(fclaw_global_t *glob, 
-                                      fclaw_block_t *block,
-                                      int blockno, 
-                                      fclaw_region_t *r,
-                                      double *xlower, double *xupper, 
-                                      double *ylower, double *yupper, 
-                                      double *zlower, double *zupper) 
-{
-    const fclaw_regions_vtable_t* region_vt = fclaw_regions_vt(glob);
-    FCLAW_ASSERT(region_vt->normalize_coordinates != NULL);
-    region_vt->normalize_coordinates(glob, block,blockno,r,
-                                     xlower,xupper,
-                                     ylower,yupper,
-                                     zlower,zupper);    
-}
-#endif
 
 /* ------------------------------- Initializaion -------------------------------------- */
 /* 
@@ -147,7 +124,7 @@ int fclaw_regions_test(fclaw_global_t *glob,
     int region_found = 0;
     for(int m = 0; m < num_regions; m++)
     {
-        /* Virtualized function */
+        /* Virtualized patch function */
         inregion[m] = fclaw_patch_intersects_region(glob,patch, 
                                                     blockno, patchno,
                                                     &regions[m],
@@ -361,42 +338,6 @@ void regions_read_data_default(fclaw_global_t *glob,
     fclose(f_regions_data);    
 }
 
-#if 0
-void region_normalize_coordinates_default(fclaw_global_t *glob, 
-                                          fclaw_block_t *block,
-                                          int blockno, 
-                                          fclaw_region_t *r,
-                                          double *xlower, double *xupper, 
-                                          double *ylower, double *yupper,
-                                          double *zlower, double *zupper)
-{
-    /*  
-       Map region to normalized coordinates in a global [0,1]x[0,1]  domain.
-
-       Gauge coordinates (g->xc,g->yc) are whatever the user supplied above 
-
-       Return normalized (xlower,xupper)x(ylower,yupper) coordinates for region.
-    */
-
-    fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
-
-    double ax = fclaw_opt->ax;
-    double bx = fclaw_opt->bx;
-    double ay = fclaw_opt->ay;
-    double by = fclaw_opt->by;
-    double az = fclaw_opt->az;
-    double bz = fclaw_opt->bz;
-
-    /* Map region to global [0,1]x[0,1] space */
-    *xlower = (r->xlower - ax)/(bx-ax);
-    *xupper = (r->xupper - ax)/(bx-ax);
-    *ylower = (r->ylower - ay)/(by-ay);
-    *yupper = (r->yupper - ay)/(by-ay);
-    *zlower = (r->zlower - az)/(bz-az);
-    *zupper = (r->zupper - bz)/(bz-az);
-}
-#endif
-
 
 /* ---------------------------------- Virtual table  ---------------------------------- */
 static
@@ -426,33 +367,12 @@ void fclaw_regions_vtable_initialize(fclaw_global_t* glob)
     fclaw_regions_vtable_t* regions_vt = fclaw_regions_vt_new();
 
     regions_vt->init_region_data        = regions_read_data_default;
-    //regions_vt->normalize_coordinates   = region_normalize_coordinates_default;
 
     regions_vt->is_set = 1;
 
 	fclaw_global_vtable_store(glob, "fclaw_regions", regions_vt, 
                               fclaw_regions_vt_destroy);
 }
-
-/* ---------------------------- Virtualized Functions --------------------------------- */
-
-
-#if 0
-int fclaw_region_intersects_patch(struct fclaw_global *glob,
-                                  struct fclaw_patch *patch,
-                                  int blockno, int patchno,
-                                  struct fclaw_region *r,
-                                  double t, int refine_flag)
-{
-    const fclaw_regions_vtable_t* region_vt = fclaw_regions_vt(glob);
-    FCLAW_ASSERT(region_vt->patch_intersects_region != NULL);    
-    int in_region = region_vt->patch_intersects_region(glob,patch,
-                                                       blockno,patchno,
-                                                       r,t,refine_flag);
-    return in_region;
-}
-#endif
-
 
 /* -------------------------------- Access Functions ---------------------------------- */
 

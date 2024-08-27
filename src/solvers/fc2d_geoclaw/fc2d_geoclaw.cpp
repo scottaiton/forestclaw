@@ -434,7 +434,7 @@ int geoclaw_patch_tag4refinement(fclaw_global_t *glob,
           -- tag_patch = -1 : Refine using usual threshold criteria.
     */
     int refine_flag = 1;  /* Indicates we are tagging for refinement */
-    tag_patch = fclaw2d_regions_test(glob,patch,
+    tag_patch = fclaw_regions_test(glob,patch,
                                      blockno, patchno, 
                                      t,refine_flag);
 
@@ -495,9 +495,9 @@ int geoclaw_patch_tag4coarsening(fclaw_global_t *glob,
 
        */
     int refine_flag = 0; /* we are tagging for coarsening */
-    tag_patch = fclaw2d_regions_test(glob,fine_patches,
-                                     blockno,patchno,
-                                     t,refine_flag);
+    tag_patch = fclaw_regions_test(glob,fine_patches,
+                                   blockno,patchno,
+                                   t,refine_flag);
     if (tag_patch < 0) 
     {
         /* Region tagging places no restrictions on where to coarsen */
@@ -917,11 +917,13 @@ void fc2d_geoclaw_solver_initialize(fclaw_global_t* glob)
     gauges_vt->update_gauge            = geoclaw_gauge_update_default;
     gauges_vt->print_gauge_buffer      = geoclaw_print_gauges_default;
 
+#if 0
     /* Regions */
     fclaw_regions_vtable_t*  regions_vt = fclaw_regions_vt(glob);
     regions_vt->set_region_data        = geoclaw_read_regions_data_default;
     regions_vt->normalize_coordinates  = geoclaw_region_normalize_coordinates;
     regions_vt->patch_intersects_region = geoclaw_patch_intersects_region_default;
+#endif    
 
     geoclaw_vt->is_set = 1;
 
