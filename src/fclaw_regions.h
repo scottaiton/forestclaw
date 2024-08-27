@@ -86,10 +86,10 @@ struct fclaw_block;
  * @param[in,out] regions the array of regions
  * @param[in] num_regions the number of regions
  */
-typedef void (*fclaw_region_set_data_t)(struct fclaw_global *glob, 
-                                       struct fclaw_region **regions, 
-                                       int *num,
-                                       int *dim);
+typedef void (*fclaw_region_init_data_t)(struct fclaw_global *glob, 
+                                         struct fclaw_region **regions, 
+                                         int *num,
+                                         int *dim);
 
 /**
  * @brief Maps region to normalized coordinates in a global [0,1]x[0,1]  domain.
@@ -108,30 +108,17 @@ typedef void (*fclaw_region_normalize_t)(struct fclaw_global *glob,
                                          double *ylower, double *yupper, 
                                          double *zlower, double *zupper);
 
-
-typedef int (*fclaw_region_intersects_patch_t)(struct fclaw_global *glob,
-                                               struct fclaw_patch *patch,
-                                               int blockno, int patchno,
-                                               struct fclaw_region *r,
-                                               double t,
-                                               int refine_flag);
-
-
 /**
  * @brief vtable for regions
  */
 typedef struct fclaw_regions_vtable
 {
     /** @brief Sets the data for each region */
-    fclaw_region_set_data_t      set_region_data;
+    fclaw_region_init_data_t      init_region_data;
 
     /** @brief Maps region to normalized coordinates in a 
         global [0,1]x[0,1] (x[0,1]) domain. */
     fclaw_region_normalize_t     normalize_coordinates;
-
-    /** @brief Routine to determine if patch intersections a 
-        region.  */
-    fclaw_region_intersects_patch_t   patch_intersects_region;
 
     /** @brief true if vtable has been set */
     int is_set;
@@ -164,18 +151,17 @@ fclaw_regions_vtable_t* fclaw_regions_vt(struct fclaw_global *glob);
 
 /* ------------------------ Virtualized region functions ------------------------------- */
 
+#if 0
 /**
- * @brief Set the data for each region
+ * @brief Set the data for each region (may be read from a file)
  * 
  * @param glob the global context
  * @param regions the array of regions
  * @param num_regions the number of regions
  */
-#if 0
-void fclaw_set_region_data(struct fclaw_global* glob, 
-                          struct fclaw_region **regions, 
-                          int *num_regions);
-#endif
+void fclaw_region_initialize_data(struct fclaw_global *glob, 
+                                  struct fclaw_region_info *region_info);
+#endif                                  
 
 /**
  * @brief Map region to normalized coordinates in a global 
@@ -196,14 +182,6 @@ void fclaw_region_normalize_coordinates(struct fclaw_global *glob,
                                       double *zlower, double *zupper);
 
 
-int fclaw_region_intersects_patch(struct fclaw_global *glob,
-                                  struct fclaw_patch *patch,
-                                  int blockno, int patchno,
-                                  struct fclaw_region *r,
-                                  double t, int refine_flag);
-
-/* ---------------------------------- Regions ------------------------------------------ */
-
 /**
  * @brief Test whether patch is in set of regions
  * 
@@ -216,10 +194,13 @@ int fclaw_region_intersects_patch(struct fclaw_global *glob,
  *                        coarsening.
  */
 
-int fclaw2d_regions_test(struct fclaw_global *glob, 
-                         struct fclaw_patch *patch,
-                         int blockno, int patchno,
-                         double t, int refine_flag);
+int fclaw_regions_test(struct fclaw_global *glob, 
+                       struct fclaw_patch *patch,
+                       int blockno, int patchno,
+                       double t, int refine_flag);
+
+/* ------------------------------- Regions access functions -------------------------- */
+
 
 
 /**

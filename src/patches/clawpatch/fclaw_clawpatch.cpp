@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_clawpatch_output_ascii.h> 
 #include <fclaw_clawpatch_output_vtk.h>
 #include <fclaw_clawpatch_pillow.h>  
+#include <fclaw_clawpatch_regions.h>
 
 #include <fclaw2d_clawpatch_fort.h>
 #include <fclaw2d_clawpatch_conservation.h>
@@ -1878,6 +1879,7 @@ void fclaw_clawpatch_vtable_initialize(fclaw_global_t* glob,
     /* Regridding  functions */
     patch_vt->tag4refinement       = clawpatch_tag4refinement;
     patch_vt->tag4coarsening       = clawpatch_tag4coarsening;
+    patch_vt->intersects_region    = fclaw_clawpatch_intersects_region;
 
     patch_vt->average2coarse       = clawpatch_average2coarse;
     patch_vt->interpolate2fine     = clawpatch_interpolate2fine;

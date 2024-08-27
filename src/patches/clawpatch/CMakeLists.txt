@@ -81,6 +81,7 @@ add_library(clawpatch
   fclaw_clawpatch_output_ascii.c
   fclaw_clawpatch_output_vtk.c
   fclaw_clawpatch_pillow.c
+  fclaw_clawpatch_regions.c
 
   fclaw2d_clawpatch_transform.c
   fclaw2d_clawpatch_conservation.c

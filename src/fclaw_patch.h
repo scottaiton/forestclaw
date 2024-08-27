@@ -200,6 +200,7 @@ struct fclaw_patch_transform_data
 struct fclaw_global;
 struct fclaw_domain;
 struct fclaw_patch;
+struct fclaw_region;
 
 
 /* ------------------------------------------------------------------------------------ */
@@ -665,6 +666,28 @@ int fclaw_patch_tag4coarsening(struct fclaw_global *glob,
                                  int blockno,
                                  int patchno,
                                  int initflag);
+
+
+
+
+/**
+ * @brief Test whether a patch is in a region
+ * 
+ * @param[in] glob the global context
+ * @param[in] patch the patch context
+ * @param[in] blockno the block number
+ * @param[in] patchno the patch number
+ * @param[in] r region struct
+ * @param[in] t current time
+ * @param[in] refine_flag (1=refinement;  0=coarsening)
+ * @return true if patch if patch intersects region
+ */
+int fclaw_patch_intersects_region(struct fclaw_global *glob,
+                                  struct fclaw_patch *patch,
+                                  int blockno, int patchno,
+                                  struct fclaw_region *r,
+                                  double t,
+                                  int refine_flag);
 
 /**
  * @brief Interpolates a set of patches from a coarse patch
@@ -1408,6 +1431,29 @@ typedef int (*fclaw_patch_tag4coarsening_t)(struct fclaw_global *glob,
                                               int this_patchno,
                                               int initflag);
 
+
+
+/**
+ * @brief Test whether a patch is in a region
+ * 
+ * @param[in] glob the global context
+ * @param[in] patch the patch context
+ * @param[in] blockno the block number
+ * @param[in] patchno the patch number
+ * @param[in] r region struct
+ * @param[in] t current time
+ * @param[in] refine_flag (1=refinement;  0=coarsening)
+ * @return true if patch if patch intersects region
+ */
+typedef int (*fclaw_patch_intersects_region_t)(struct fclaw_global *glob,
+                                               struct fclaw_patch *patch,
+                                               int blockno, int patchno,
+                                               struct fclaw_region *r,
+                                               double t,
+                                               int refine_flag);
+
+
+
 /**
  * @brief Interpolates a set of patches from a coarse patch
  * 
@@ -1707,6 +1753,9 @@ struct fclaw_patch_vtable
     fclaw_patch_average2coarse_t        average2coarse;
     /** @copybrief ::fclaw_patch_interpolate2fine_t */
     fclaw_patch_interpolate2fine_t      interpolate2fine;
+
+    /** @copybrief ::fclaw_patch_intersects_region_t */
+    fclaw_patch_intersects_region_t      intersects_region;
 
     /** @} */
 
