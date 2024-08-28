@@ -152,6 +152,7 @@ fclaw2d_domain_new (p4est_wrap_t * wrap, sc_keyvalue_t * attributes)
     local_minlevel = domain->possible_maxlevel;
     local_maxlevel = -1;
     domain->p.skip_local = 1;
+    domain->p.skip_refined = 0;
 
     /* prepare propagation of refinement/coarsening marks */
     domain->p.smooth_refine = 0;
