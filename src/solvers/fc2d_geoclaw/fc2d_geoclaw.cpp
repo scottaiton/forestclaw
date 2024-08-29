@@ -917,14 +917,6 @@ void fc2d_geoclaw_solver_initialize(fclaw_global_t* glob)
     gauges_vt->update_gauge            = geoclaw_gauge_update_default;
     gauges_vt->print_gauge_buffer      = geoclaw_print_gauges_default;
 
-#if 0
-    /* Regions */
-    fclaw_regions_vtable_t*  regions_vt = fclaw_regions_vt(glob);
-    regions_vt->set_region_data        = geoclaw_read_regions_data_default;
-    regions_vt->normalize_coordinates  = geoclaw_region_normalize_coordinates;
-    regions_vt->patch_intersects_region = geoclaw_patch_intersects_region_default;
-#endif    
-
     geoclaw_vt->is_set = 1;
 
 	fclaw_global_vtable_store(glob, "fc2d_geoclaw", geoclaw_vt, fc2d_geoclaw_vt_destroy);
