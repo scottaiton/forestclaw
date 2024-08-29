@@ -226,9 +226,6 @@ void regions_read_data_default(fclaw_global_t *glob,
 ###    and then "make .data"                        ####
 ########################################################
 
-2                    =: num_regions         
-3  3 0.00000000000000e+00  1.00000000000000e+04  -8.50000000000000e+01  -7.20000000000000e+01  -3.80000000000000e+01  -2.50000000000000e+01  
-3  3 8.00000000000000e+03  2.60000000000000e+04  -9.00000000000000e+01  -8.00000000000000e+01  -3.00000000000000e+01  -1.50000000000000e+01  
 
 */
 
@@ -252,15 +249,13 @@ void regions_read_data_default(fclaw_global_t *glob,
     /* blank line */
     fgets(line,max_line_len, f_regions_data); 
 
+    /* Read dimensions */
+    fgets(line,max_line_len, f_regions_data);
+    *dim = strtod(line,NULL);
+
     /* Read number of regions */
     fgets(line,max_line_len, f_regions_data);
     *num_regions = strtod(line,NULL);
-
-    /* 
-        In Geoclaw, the dim will always be 2, so we don't read
-        it in from the regions.data file.
-    */
-    *dim = 2;
 
     if (*num_regions == 0)
     {
