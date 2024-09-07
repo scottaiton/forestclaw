@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012-2022 Carsten Burstedde, Donna Calhoun, Scott Aiton
+Copyright (c) 2012-2024 Carsten Burstedde, Donna Calhoun, Scott Aiton
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -68,10 +68,10 @@ int fclaw_clawpatch_intersects_region(fclaw_global_t *glob,
     double dx,dy,dz;
     double xlower,ylower,zlower;
     double xupper,yupper,zupper;
-    zlower = 0;
-    zupper = 1;
     if (dim == 2)
     {
+        zlower = 0;
+        zupper = 1;
         // We are refining 
         fclaw_clawpatch_2d_grid_data(glob,patch,&mx,&my,&mbc,
                                          &xlower,&ylower,&dx,&dy);
@@ -98,14 +98,14 @@ int fclaw_clawpatch_intersects_region(fclaw_global_t *glob,
     }
 
 
-    if (xlower > xupper_reg || xupper < xlower_reg)
+    if (xlower >= xupper_reg || xupper <= xlower_reg)
         return 0;
 
-    if (ylower > yupper_reg || yupper < ylower_reg)
+    if (ylower >= yupper_reg || yupper <= ylower_reg)
         return 0;
 
     if (dim == 3)
-        if (zlower > zupper_reg || zupper < zlower_reg)
+        if (zlower >= zupper_reg || zupper <= zlower_reg)
             return 0;
 
     return 1;

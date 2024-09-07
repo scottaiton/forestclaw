@@ -31,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_clawpatch_output_ascii.h> 
 #include <fclaw_clawpatch_output_vtk.h>
 #include <fclaw_clawpatch_pillow.h>  
+
+#include <fclaw_regions.h>
 #include <fclaw_clawpatch_regions.h>
 
 #include <fclaw2d_clawpatch_fort.h>
@@ -978,26 +980,48 @@ int clawpatch_tag4refinement(fclaw_global_t *glob,
                              int blockno, int patchno,
                              int initflag)
 {
-    int meqn;
-    double *q;
-    fclaw_clawpatch_soln_data(glob,patch,&q,&meqn);
-
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
     double refine_threshold = fclaw_opt->refine_threshold;
 
-    int tag_patch;
     if (refine_threshold < 0) 
     {
         /* Always refine */
-        tag_patch = 1;
+        int tag_patch = 1;
+        return tag_patch;
     }
-    else
+
+    /* Check to see how region affect refinement.
+
+       If patch intersects one or more regions (including time interval), 
+       this routine returns :  
+
+          -- tag_patch = 0 : level >= maximum level allowed by any region 
+             intersected by this patch (no refinement allowed)
+
+          -- tag_patch = 1 : level < minimum level required by any region
+             intersected by this patch (force refinement)
+
+          -- tag_patch = -1 : Refine using usual threshold criteria.
+    */
+    int refine_flag = 1;  /* Indicates we are tagging for refinement */
+    double t = glob->curr_time;
+    int tag_patch = fclaw_regions_test(glob,patch,
+                                     blockno, patchno, 
+                                     t,refine_flag);
+
+    if (tag_patch < 0)
     {
-        tag_patch = 0;    
+        /* Region criteria above does not place any restrictions on tagging */
 
         /* This allows the user to specify a "exceeds_th" */
         fclaw_clawpatch_vtable_t* clawpatch_vt = fclaw_clawpatch_vt(glob);
 
+        int meqn;
+        double *q;
+        fclaw_clawpatch_soln_data(glob,patch,&q,&meqn);
+
+        /* Needed so we can retrieve clawpatch info from the C routine that 
+           that is called from fortran */
         fclaw_global_set_static(glob);
         if(clawpatch_vt->patch_dim == 2)
         {
@@ -1036,35 +1060,66 @@ int clawpatch_tag4coarsening(fclaw_global_t *glob,
                              int patchno,
                              int initflag)
 {
-    const int num_children = fclaw_domain_num_siblings(glob->domain);
-    fclaw_clawpatch_vtable_t* clawpatch_vt = fclaw_clawpatch_vt(glob);
-    int mx,my,mz,mbc,meqn;
-    double xlower[num_children],ylower[num_children],zlower[num_children];
-    double dx,dy,dz;
-
-    double *q[num_children];
-    for (int igrid = 0; igrid < num_children; igrid++)
-    {
-        fclaw_clawpatch_soln_data(glob,&fine_patches[igrid],&q[igrid],&meqn);
-        if(clawpatch_vt->patch_dim == 2)
-        {
-            fclaw_clawpatch_2d_grid_data(glob,&fine_patches[igrid],&mx,&my,&mbc,
-                                        &xlower[igrid],&ylower[igrid],&dx,&dy);
-        }
-        else 
-        {
-            /* For extruded meshes, zlower is the same for all patches. */
-            fclaw_clawpatch_3d_grid_data(glob,&fine_patches[igrid],&mx,&my,&mz,&mbc,
-                                        &xlower[igrid],&ylower[igrid],&zlower[igrid],&dx,&dy,&dz);
-        }
-    }
-
     const fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
     double coarsen_threshold = fclaw_opt->coarsen_threshold;
 
-    int tag_patch = 0;
-    if (coarsen_threshold > 0) 
-    {        
+    if (coarsen_threshold <= 0) 
+    {
+        /* don't ever coarsen */
+        int tag_patch = 0;
+        return tag_patch;
+    }
+
+
+    /* Test parent quadrant : If any of the four sibling patches are in the 
+       region, we consider that an intersection.  Assume Morton ordering
+       on the sibling patches (0=ll, 1=lr, 2=ul, 3=ur) 
+
+       If a sibling patch intersects one or more regions (including 
+       time interval),  this routine returns :  
+
+          -- tag_patch = 0 : level <= minimum level allowed by any region 
+             intersected by this patch (no coarsening is allowed)
+
+          -- tag_patch = 1 : level > maximum level required by any region
+             intersected by this patch (force coarsening)
+
+          -- tag_patch = -1 : Coarsen using usual threshold criteria.
+
+    */
+    double t = glob->curr_time;
+    int refine_flag = 0; /* we are tagging for coarsening */
+    int tag_patch = fclaw_regions_test(glob,fine_patches,
+                                       blockno,patchno,
+                                       t,refine_flag);
+
+    if (tag_patch < 0)
+    {
+        /* We can coarsen based on usual tagging criteria */
+
+        const int num_children = fclaw_domain_num_siblings(glob->domain);
+        fclaw_clawpatch_vtable_t* clawpatch_vt = fclaw_clawpatch_vt(glob);
+
+        double *q[num_children];
+        double xlower[num_children],ylower[num_children],zlower[num_children];
+        int mx,my,mz,mbc,meqn;
+        double dx,dy,dz;
+        for (int igrid = 0; igrid < num_children; igrid++)
+        {
+            fclaw_clawpatch_soln_data(glob,&fine_patches[igrid],&q[igrid],&meqn);
+            if(clawpatch_vt->patch_dim == 2)
+            {
+                fclaw_clawpatch_2d_grid_data(glob,&fine_patches[igrid],&mx,&my,&mbc,
+                                             &xlower[igrid],&ylower[igrid],&dx,&dy);
+            }
+            else 
+            {
+                /* For extruded meshes, zlower is the same for all patches. */
+                fclaw_clawpatch_3d_grid_data(glob,&fine_patches[igrid],&mx,&my,&mz,&mbc,
+                                        &xlower[igrid],&ylower[igrid],&zlower[igrid],&dx,&dy,&dz);
+            }
+        }
+
         fclaw_global_set_static(glob);
         if(clawpatch_vt->patch_dim == 2)
         {
@@ -1077,9 +1132,9 @@ int clawpatch_tag4coarsening(fclaw_global_t *glob,
         else if(glob->domain->refine_dim == 2)
         {
             clawpatch_vt->d3->fort_tag4coarsening_3dx(&mx,&my,&mz,&mbc,&meqn,
-                                                  xlower,ylower,zlower,&dx,&dy,&dz,
-                                                  &blockno, q[0],q[1],q[2],q[3],
-                                                  &coarsen_threshold,&initflag,&tag_patch);
+                                                      xlower,ylower,zlower,&dx,&dy,&dz,
+                                                      &blockno, q[0],q[1],q[2],q[3],
+                                                      &coarsen_threshold,&initflag,&tag_patch);
         }
         else
         {
@@ -1091,10 +1146,8 @@ int clawpatch_tag4coarsening(fclaw_global_t *glob,
         }
         fclaw_global_clear_static();
     }
-    else
-    {
-        /* Never coarsen */
-    }
+    
+    /* Why not just "return tag_patch;" ? */
     return tag_patch == 1;
 }
 
