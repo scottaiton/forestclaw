@@ -64,6 +64,7 @@ target_sources(geoclaw PRIVATE
     fc2d_geoclaw.cpp
     fc2d_geoclaw_options.c
     fc2d_geoclaw_gauges_default.c
+    fc2d_geoclaw_regions_default.c
     fc2d_geoclaw_run.c
     fc2d_geoclaw_output_ascii.c
 )

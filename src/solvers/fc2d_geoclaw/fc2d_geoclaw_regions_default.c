@@ -159,7 +159,7 @@ void geoclaw_read_regions_data_default(fclaw_global_t *glob,
     fclose(f_regions_data);    
 }
 
-
+#if 0
 void geoclaw_region_normalize_coordinates(fclaw_global_t *glob, 
                                          fclaw_block_t *block,
                                          int blockno, 
@@ -268,6 +268,7 @@ int geoclaw_patch_intersects_region_default(fclaw_global_t *glob,
 
     return 1;
 }
+#endif
 
 #ifdef __cplusplus
 }

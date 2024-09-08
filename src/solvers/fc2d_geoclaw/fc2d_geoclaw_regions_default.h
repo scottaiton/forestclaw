@@ -31,6 +31,10 @@ extern "C"
 {
 #endif
 
+#if 0
+/* Fix syntax hightlighting */
+#endif    
+
 struct fclaw_global;
 struct fclaw_region;
 struct fclaw_patch;
@@ -40,6 +44,7 @@ void geoclaw_read_regions_data_default(struct fclaw_global *glob,
                                        struct fclaw_region **regions, 
                                        int *num,int *dim);
 
+#if 0
 void geoclaw_region_normalize_coordinates(struct fclaw_global *glob, 
                                           struct fclaw_block *block,
                                           int blockno, 
@@ -54,6 +59,9 @@ int geoclaw_patch_intersects_region_default(struct fclaw_global *glob,
                                             struct fclaw_region *r,
                                             double t,
                                             int refine_flag);
+#endif
+
+
 
 #ifdef __cplusplus
 }

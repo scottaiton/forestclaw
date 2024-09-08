@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012-2022 Carsten Burstedde, Donna Calhoun, Yu-Hsuan Shih, Scott Aiton
+Copyright (c) 2012-2024 Carsten Burstedde, Donna Calhoun, Yu-Hsuan Shih, Scott Aiton
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -916,6 +916,14 @@ void fc2d_geoclaw_solver_initialize(fclaw_global_t* glob)
     gauges_vt->create_gauge_files      = geoclaw_create_gauge_files_default; 
     gauges_vt->update_gauge            = geoclaw_gauge_update_default;
     gauges_vt->print_gauge_buffer      = geoclaw_print_gauges_default;
+
+    /* We need a specialized read routine, since the GeoClaw "make data" routines
+       do not write out a dimension to the regions.data file.  This will also maintain
+       flexibilty for later Geoclaw updates */
+
+    fclaw_regions_vtable_t* regions_vt = fclaw_regions_vt(glob);
+    regions_vt->init_region_data       = geoclaw_read_regions_data_default;
+
 
     geoclaw_vt->is_set = 1;
 
