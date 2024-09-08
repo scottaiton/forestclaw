@@ -55,7 +55,6 @@ subroutine clawpack46_rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr, &
     common /comvelocity/ velocity_vec
 
     integer :: i, iface
-    integer m
 
     ! Set wave, speed, and flux differences:
     iface = ixyz
