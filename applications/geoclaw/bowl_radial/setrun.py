@@ -383,7 +383,7 @@ def setgeo(rundata):
     topo_data = rundata.topo_data
     # for topography, append lines of the form
     #    [topotype, fname]
-    topo_data.topofiles.append([2, './bowl.topotype2'])
+    topo_data.topofiles.append([2, 'bowl.topotype2'])
 
     # == setdtopo.data values ==
     dtopo_data = rundata.dtopo_data
