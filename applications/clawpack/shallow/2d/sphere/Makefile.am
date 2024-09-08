@@ -1,9 +1,10 @@
 ## Makefile.am in applications/clawpack/shallow/2d/sphere
 
-bin_PROGRAMS += applications/clawpack/shallow/2d/sphere/sphere
+bin_PROGRAMS += applications/clawpack/shallow/2d/sphere/sphere_swe
 
+TESTS += applications/clawpack/shallow/2d/sphere/regressions.sh
 
-applications_clawpack_shallow_2d_sphere_sphere_SOURCES = \
+applications_clawpack_shallow_2d_sphere_sphere_swe_SOURCES = \
 	applications/clawpack/shallow/2d/sphere/sphere.cpp \
 	applications/clawpack/shallow/2d/sphere/sphere_user.cpp \
 	applications/clawpack/shallow/2d/sphere/sphere_user.h \
@@ -45,13 +46,13 @@ EXTRA_DIST += \
 	applications/clawpack/shallow/2d/sphere/read_vars.m
 
 
-applications_clawpack_shallow_2d_sphere_sphere_CPPFLAGS = \
+applications_clawpack_shallow_2d_sphere_sphere_swe_CPPFLAGS = \
         $(AM_CPPFLAGS) \
         $(FCLAW_CLAWPACK46_CPPFLAGS) \
         $(FCLAW_CLAWPACK5_CPPFLAGS) \
         $(FCLAW_CLAWPATCH_CPPFLAGS)
 
-applications_clawpack_shallow_2d_sphere_sphere_LDADD = \
+applications_clawpack_shallow_2d_sphere_sphere_swe_LDADD = \
         $(LDADD) \
         $(FCLAW_CLAWPACK46_LDADD) \
         $(FCLAW_CLAWPACK5_LDADD) \
