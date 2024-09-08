@@ -6,8 +6,11 @@ axis off;
 yrbcolormap;
 showpatchborders(1:10);
 setpatchborderprops('linewidth',1);
-caxis([0,1])
+clim([0,1])
 view(2);
+
+rh = add_regions(t);
+set(rh,'color','r')
 
 NoQuery = 0;
 prt = false;
@@ -20,5 +23,3 @@ if (prt)
 end
 
 shg
-
-clear afterframe
