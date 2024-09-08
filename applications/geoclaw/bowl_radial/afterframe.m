@@ -23,7 +23,7 @@ if (PlotType == 1)
     plot(w*cos(th),w*sin(th),'k','linewidth',2);
     
 %     add_gauges();
-    add_regions(t);
+    add_regions(t,false);
     
     hold off;
     
