@@ -80,6 +80,7 @@ struct SinglePatchDomain {
         fopts.bz = 3;
         fopts.compute_error = true;
         fopts.subcycle = true;
+        fopts.regression_check = "";
         fclaw_options_store(glob, &fopts);
 
         opts->mx   = 5;
@@ -101,15 +102,12 @@ struct SinglePatchDomain {
 
     }
     void setup(){
-        fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
-        fclaw_patch_build(glob, &domain->blocks[0].patches[0], 0, 0, &build_mode);
+        fclaw_initialize(glob);
     }
     ~SinglePatchDomain(){
-        fclaw_patch_data_delete(glob, &domain->blocks[0].patches[0]);
-        fclaw_clawpatch_options_destroy(opts);
-        fclaw_domain_reset(glob);
-        fclaw_map_destroy(glob->cont);
+        fclaw_finalize(glob);
         fclaw_global_destroy(glob);
+        fclaw_clawpatch_options_destroy(opts);
     }
 };
 struct OctDomain {
@@ -132,6 +130,7 @@ struct OctDomain {
         fopts.bz = 3;
         fopts.compute_error = true;
         fopts.subcycle = true;
+        fopts.regression_check = "";
         fclaw_options_store(glob, &fopts);
 
         opts->mx   = 5;
@@ -153,23 +152,14 @@ struct OctDomain {
         fclaw_vtables_initialize(glob);
         fclaw_clawpatch_vtable_initialize(glob, 4);
 
-            }
+    }
     void setup(){
-        fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
-        for(int i=0; i<8; i++)
-        {
-            fclaw_patch_build(glob, &domain->blocks[0].patches[i], 0, i, &build_mode);
-        }
+        fclaw_initialize(glob);
     }
     ~OctDomain(){
-        for(int i=0; i<8; i++)
-        {
-            fclaw_patch_data_delete(glob, &domain->blocks[0].patches[i]);
-        }
-        fclaw_clawpatch_options_destroy(opts);
-        fclaw_domain_reset(glob);
-        fclaw_map_destroy(glob->cont);
+        fclaw_finalize(glob);
         fclaw_global_destroy(glob);
+        fclaw_clawpatch_options_destroy(opts);
     }
 };
 }
