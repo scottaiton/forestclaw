@@ -667,6 +667,42 @@ int fclaw_patch_tag4coarsening(struct fclaw_global *glob,
                                  int initflag);
 
 /**
+ * @brief Initialize the first fine sibling of a newly refined family.
+ *
+ * This function is called when a patch is refined.
+ * This is expected to be a lightweight operation.
+ * What should happen is that coarse data is moved from the coarse patch to the fine
+ * patch. This data should then be retrieved using fclaw_patch_get_coarse_data
+ * Which is then used to interpolate, using fclaw_patch_interpolate2fine
+ * 
+ * @param glob the global context
+ * @param coarse_patch the coarse patch
+ * @param fine_patch the first fine patch
+ */
+void fclaw_patch_init_first_fine_sibling(struct fclaw_global *glob,
+                                         struct fclaw_patch *coarse_patch,
+                                         struct fclaw_patch *fine_patch);
+
+/**
+ * @brief Get the coarse data stored in the first fine patch.
+ * 
+ * @param glob the global context
+ * @param fine_patch the first fine patch
+ * @return void* the coarse data 
+ */
+void * fclaw_patch_get_coarse_data(struct fclaw_global *glob,
+                                   struct fclaw_patch *fine_patch);
+
+/**
+ * @brief Destroy the coarse data
+ * 
+ * @param glob the global context
+ * @param coarse_data the coarse data
+ */
+void fclaw_patch_destroy_coarse_data(struct fclaw_global *glob,
+                                     void *coarse_data);
+
+/**
  * @brief Interpolates a set of patches from a coarse patch
  * 
  * @param[in] glob the global context

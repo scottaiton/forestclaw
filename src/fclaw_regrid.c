@@ -146,7 +146,7 @@ void refine_patch(fclaw_global_t *glob,
     fclaw_patch_build(glob,fine_patch,blockno,
                       fine_patchno,(void*) &build_mode);
     
-    // fclaw_patch_init_first_refined_sibling()
+    fclaw_patch_init_first_fine_sibling(glob, fine_patch, coarse_patch);
 
     /* don't try to refine this patch in the next round of refinement */
     fclaw_patch_considered_for_refinement_set(glob, fine_patch);
@@ -184,12 +184,12 @@ void refine_patch(fclaw_global_t *glob,
         int fine_patchno = new_patchno;
 
         /* get coarse data from first fine patch */
-        //void* coarse_data = fclaw_patch_get_coarse_data(glob,fine_siblings,blockno, fine_patchno);
+        void* coarse_data = fclaw_patch_get_coarse_data(glob,fine_siblings);
 
         fclaw_patch_interpolate2fine(glob,coarse_patch,fine_siblings,
                                      blockno,coarse_patchno,fine_patchno);//new_domain
 
-        //fclaw_patch_destroy_coarse_data(glob,coarse_data);
+        fclaw_patch_destroy_coarse_data(glob,coarse_data);
     }
     // }
 
