@@ -135,8 +135,25 @@ void refine_patch(fclaw_global_t *glob,
     fclaw_patch_t *fine_siblings = new_patch;
     fclaw_patch_t *coarse_patch = old_patch;
 
+    /* Set up first patch in family */
+    fclaw_patch_t *fine_patch = &fine_siblings[0];
+    int fine_patchno = new_patchno;
+    /* Reason for the following two lines: the glob contains the old domain which is incremented in ddata_old 
+       but we really want to increment the new domain. This will be fixed! */
+    --old_domain->count_set_patch;
+    ++new_domain->count_set_patch;
+
+    fclaw_patch_build(glob,fine_patch,blockno,
+                      fine_patchno,(void*) &build_mode);
+    if (domain_init)
+    {
+        fclaw_patch_initialize(glob,fine_patch,blockno,fine_patchno);//new_domain
+    }
+    /* don't try to refine this patch in the next round of refinement */
+    fclaw_patch_considered_for_refinement_set(glob, fine_patch);
+
     int i;
-    for (i = 0; i < fclaw_domain_num_siblings(old_domain); i++)
+    for (i = 1; i < fclaw_domain_num_siblings(old_domain); i++)
     {
         fclaw_patch_t *fine_patch = &fine_siblings[i];
         int fine_patchno = new_patchno + i;
