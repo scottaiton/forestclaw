@@ -154,8 +154,7 @@ void refine_patch(fclaw_global_t *glob,
 
     // if(delay_paritioning)
     // {
-    int i;
-    for (i = 1; i < fclaw_domain_num_siblings(old_domain); i++)
+    for (int i = 1; i < fclaw_domain_num_siblings(old_domain); i++)
     {
         fclaw_patch_t *fine_patch = &fine_siblings[i];
         int fine_patchno = new_patchno + i;
@@ -172,7 +171,7 @@ void refine_patch(fclaw_global_t *glob,
 
     if (domain_init)
     {
-        for (i = 0; i < fclaw_domain_num_siblings(old_domain); i++)
+        for (int i = 0; i < fclaw_domain_num_siblings(old_domain); i++)
         {
             fclaw_patch_t *fine_patch = &fine_siblings[i];
             int fine_patchno = new_patchno + i;
