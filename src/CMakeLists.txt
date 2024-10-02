@@ -122,6 +122,7 @@ install(FILES
 	fclaw_pointer_map.h
 	fclaw_filesystem.h
 	fclaw_options.h
+  fclaw_gauges.h
 	fclaw_regions.h
 	fclaw_mpi.h
 	fclaw_math.h

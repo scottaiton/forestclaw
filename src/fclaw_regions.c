@@ -234,6 +234,12 @@ void regions_read_data_default(fclaw_global_t *glob,
     char line[max_line_len];
     FILE *f_regions_data = fopen("regions.data","r");
 
+    if (f_regions_data == NULL)
+    {
+        fclaw_global_essentialf("--use-regions=T, but no regions.data file is found\n");
+        exit(1);
+    }
+
     /* Read header */
     for(int i = 0; i < 5; i++)
     {
