@@ -35,32 +35,26 @@
 
 
 static
-fclaw_domain_t* create_domain(sc_MPI_Comm mpicomm, 
-                                fclaw_options_t* fclaw_opt)
+void create_domain(fclaw_global_t* glob)
 {
-    /* Mapped, multi-block domain */
-    p4est_connectivity_t     *conn = NULL;
-    fclaw_domain_t         *domain;
-    fclaw_map_context_t    *cont = NULL;
+    fclaw_options_t *fclaw_opts = fclaw_get_options(glob);    
 
     /* Size is set by [ax,bx] x [ay, by], set in .ini file */
-    conn = p4est_connectivity_new_unitsquare();
-    cont = fclaw_map_new_nomap();
+    fclaw_domain_t *domain = 
+        fclaw_domain_new_unitsquare(glob->mpicomm, fclaw_opts->minlevel);
+    fclaw_map_context_t* cont = fclaw_map_new_nomap();
 
-    domain = fclaw2d_domain_new_conn_map (mpicomm, fclaw_opt->minlevel, conn, cont);
+    /* store domain and map in glob */
+    fclaw_global_store_domain(glob, domain);
+    fclaw_map_store(glob, cont);
+
     fclaw_domain_list_levels(domain, FCLAW_VERBOSITY_ESSENTIAL);
     fclaw_domain_list_neighbors(domain, FCLAW_VERBOSITY_DEBUG);
-
-    return domain;
 }
 
 static
 void run_program(fclaw_global_t* glob)
 {
-    fclaw_domain_t    **domain = &glob->domain;
-
-    you_can_safely_remove_this_call(*domain);
-
     fclaw_vtables_initialize(glob);
 
     fc2d_geoclaw_solver_initialize(glob);
@@ -79,6 +73,50 @@ void run_program(fclaw_global_t* glob)
 int
 main (int argc, char **argv)
 {
+    /* Initialize application */
+    fclaw_app_t *app = fclaw_app_new (&argc, &argv, NULL);
+
+    /* Options */
+    fclaw_options_t             *fclaw_opt;
+    fclaw_clawpatch_options_t *clawpatch_opt;
+    fc2d_geoclaw_options_t      *geo_opt;
+
+    /* Create new options packages */
+    fclaw_opt = fclaw_options_register(app,  NULL,       "fclaw_options.ini");
+    clawpatch_opt = fclaw_clawpatch_2d_options_register(app, "clawpatch", "fclaw_options.ini");
+    geo_opt = fc2d_geoclaw_options_register(app, "geoclaw",   "fclaw_options.ini");
+
+    /* Read configuration file(s) and command line, and process options */
+    int first_arg;
+    fclaw_exit_type_t vexit;
+    vexit =  fclaw_app_options_parse (app, &first_arg,"fclaw_options.ini.used");
+
+    /* Run the program */
+    if (!vexit)
+    {
+        int size, rank;
+        sc_MPI_Comm mpicomm = fclaw_app_get_mpi_size_rank (app, &size, &rank);
+    
+        /* Create global structure which stores the domain, timers, etc */
+        fclaw_global_t *glob = fclaw_global_new_comm(mpicomm, size, rank);
+
+        /* Store option packages in glob */
+        fclaw_options_store           (glob, fclaw_opt);
+        fclaw_clawpatch_options_store (glob, clawpatch_opt);
+        fc2d_geoclaw_options_store      (glob, geo_opt);
+
+        create_domain(glob);
+
+        run_program(glob);
+        
+        fclaw_global_destroy(glob);
+    }
+    
+    fclaw_app_destroy (app);
+
+    return 0;
+
+#if 0    
     fclaw_app_t *app;
     int first_arg;
     fclaw_exit_type_t vexit;
@@ -123,4 +161,5 @@ main (int argc, char **argv)
     fclaw_app_destroy (app);
 
     return 0;
+#endif    
 }

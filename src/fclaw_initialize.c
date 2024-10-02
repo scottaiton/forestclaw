@@ -44,6 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_vtable.h>
 #include <fclaw_restart.h>
 
+#include <fclaw_regions.h>
+
 #if defined(_OPENMP)
 #include <omp.h>
 #endif
@@ -80,6 +82,9 @@ void build_initial_domain(fclaw_global_t *glob)
 
     int minlevel = fclaw_opt->minlevel;
     int maxlevel = fclaw_opt->maxlevel;
+
+    /* Initialize regions */
+    fclaw_regions_initialize(glob);
 
     int time_interp = 0;
 

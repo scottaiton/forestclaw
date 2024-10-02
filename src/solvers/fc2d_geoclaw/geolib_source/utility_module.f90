@@ -25,6 +25,7 @@ contains
 
         search_buffer = trim(line(1:index(line,"=:") - 2))
 
+        found = .false.
         do i=1,len_trim(search_buffer)
             if (search_buffer(i:i) == " ") then
                 if (.not. found) then

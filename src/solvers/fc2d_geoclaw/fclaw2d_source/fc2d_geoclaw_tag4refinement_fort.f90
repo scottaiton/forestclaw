@@ -10,25 +10,12 @@ SUBROUTINE fc2d_geoclaw_fort_tag4refinement(mx,my,mbc,meqn,maux,xlower,ylower, &
     DOUBLE PRECISION, INTENT(in) :: aux(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
 
     !! Local variables
-    INTEGER :: i,j, mq,m
-    DOUBLE PRECISION :: xc,yc,xupper, yupper, qvec(meqn), auxvec(maux)
+    INTEGER :: i,j, m
+    DOUBLE PRECISION :: xc,yc,qvec(meqn), auxvec(maux)
     logical :: is_coarsening
 
-!!    INTEGER :: tag_patch_regions, fc2d_geoclaw_refine_using_regions
     INTEGER :: fc2d_geoclaw_flag2refine, flag_patch
 
-!!    xupper = xlower + mx*dx
-!!    yupper = ylower + my*dy
-!!
-!!    tag_patch_regions = fc2d_geoclaw_refine_using_regions(level,xlower,ylower,xupper,yupper,t)
-!!
-!!    if (tag_patch_regions .ge. 0) then
-!!        !! # Tagging based on regions is conclusive
-!!        tag_patch = tag_patch_regions
-!!        return
-!!    endif
-
-    !! We are not refining based on regions and so will use other criteria
     tag_patch = 0 
 
     is_coarsening = .false.   !! Don't loop over ghost cells.

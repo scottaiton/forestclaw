@@ -16,6 +16,7 @@ libforestclaw_installed_headers = \
 	src/fclaw_pointer_map.h \
 	src/fclaw_options.h \
 	src/fclaw_gauges.h \
+	src/fclaw_regions.h \
 	src/fclaw_mpi.h \
 	src/fclaw_math.h \
 	src/fclaw2d_defs.h \
@@ -74,6 +75,7 @@ libforestclaw_compiled_sources = \
 	src/fclaw_base.c \
 	src/fclaw_options.c \
 	src/fclaw_gauges.c \
+	src/fclaw_regions.c \
 	src/fclaw_package.c \
 	src/fclaw_packing.c \
 	src/fclaw_filesystem.cpp \

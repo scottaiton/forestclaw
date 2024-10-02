@@ -26,7 +26,7 @@ c-----------------------------------------------------------------------
 
 
       !local
-      integer m,mw,k,iter
+      integer mw,k,iter
       double precision A(3,3)
       double precision r(3,3)
       double precision lambda(3)
@@ -35,8 +35,8 @@ c-----------------------------------------------------------------------
 
       double precision delh,delhu,delphi,delb,delnorm
       double precision rare1st,rare2st,sdelta,raremin,raremax
-      double precision criticaltol,convergencetol,raretol
-      double precision s1s2bar,s1s2tilde,hbar,hLstar,hRstar,hustar
+      double precision criticaltol,convergencetol
+      double precision s1s2bar,s1s2tilde,hbar,hLstar,hRstar
       double precision huRstar,huLstar,uRstar,uLstar,hstarHLL
       double precision deldelh,deldelphi
       double precision s1m,s2m,hm
@@ -284,14 +284,12 @@ c-----------------------------------------------------------------------
 
       logical sonic
 
-      double precision delh,delhu,delphi,delb,delhdecomp,delphidecomp
+      double precision delh,delhu,delphi,delb,delphidecomp
       double precision s1s2bar,s1s2tilde,hbar,hLstar,hRstar,hustar
       double precision uRstar,uLstar,hstarHLL
-      double precision deldelh,deldelphi
+      double precision deldelphi, deldelh, delhdecomp
       double precision alpha1,alpha2,beta1,beta2,delalpha1,delalpha2
       double precision criticaltol,convergencetol
-      double precision sL,sR
-      double precision uhat,chat,sRoe1,sRoe2
 
       double precision sw(mwaves)
       double precision fw(meqn,mwaves)
@@ -396,7 +394,12 @@ c               hustar=huL+alpha1*sE1
                hRstar=hR
                hustar=huR
                hLstar=hL + alpha1 + alpha2
+            else
+               write(6,100) 'riemann_ssfsq (geoclaw) : hustar, ',
+     &            'hrstar, hlstar maybe uninitialized.'
+                  stop
             endif
+100         format(A,A)            
 !
             if (hLstar.gt.drytol) then
                uLstar=hustar/hLstar
@@ -469,8 +472,8 @@ c-----------------------------------------------------------------------
       double precision fw(meqn,mwaves)
 
       !local
-      double precision delh,delhu,delphi,delb,delhdecomp,delphidecomp
-      double precision deldelh,deldelphi
+      double precision delh,delhu,delphi,delb,delphidecomp
+      double precision deldelphi
       double precision beta1,beta2
 
 

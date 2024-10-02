@@ -38,13 +38,12 @@ c     # ----------------------------------------------------------
       double precision aux_fine(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
 
       integer mq,r2, m
-      integer i, ic1, ic2, ibc, ifine,i1
-      integer j, jc1, jc2, jbc, jfine,j1
-      integer ic_add, jc_add, ic, jc, mth
+      integer i1
+      integer j1
+      integer ic, jc, mth
       double precision gradx, grady, qc, sl, sr, value
       double precision fclaw2d_clawpatch_compute_slopes
       double precision etabarc(-1:1, -1:1), h, b
-      integer iii,jjj
 
 c     # This should be refratio*refratio.
       integer rr2
@@ -104,6 +103,10 @@ c           # this ensures that we get 'hanging' corners
                ic = 1
             elseif (iface_coarse .eq. 1) then
                ic = mx
+            else
+               write(6,*) 'fc2d_geoclaw_interpolate_fort.f : ',
+     &               'ic is unitialized'
+               stop
             endif
 
             do jc = 1,mx
@@ -177,10 +180,14 @@ c-----------------------------------------------------------------------------
                jc = 1
             elseif (iface_coarse .eq. 3) then
                jc = my
+            else
+               write(6,*) 'fc2d_geoclaw_interpolate_fort.f : ',
+     &               'jc is unitialized'
+               stop
             endif
 
             do ic = 1,mx
-    1          i1 = ic
+               i1 = ic
                j1 = jc
                call fclaw2d_clawpatch_transform_face_half(i1,j1,i2,j2,
      &               transform_ptr)
@@ -274,7 +281,7 @@ c              # ---------------------------------------------
       double precision aux_coarse(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
       double precision aux_fine(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
 
-      integer ic, jc, mq, ibc,jbc, mth,i,j
+      integer ic, jc, mq, mth
       double precision qc, sl, sr, gradx, grady
       double precision fclaw2d_clawpatch_compute_slopes, value
 
@@ -289,7 +296,6 @@ c     # This should be refratio*refratio.
       integer a(2,2), f(2)
       integer ii,jj,iff,jff,dc(2),df(2,0:rr2-1)
       double precision shiftx(0:rr2-1), shifty(0:rr2-1)
-      logical check_indices
 
       integer mbathy, refratio
 
@@ -339,6 +345,10 @@ c           # Map (0,1) to (-1/4,1/4) (locations of fine grid points)
       elseif (icorner_coarse .eq. 3) then
          ic = mx
          jc = my
+      else
+         write(6,*) 'fc2d_geoclaw_interpolate_fort.f : ',
+     &              'ic or jc is unitialized'
+          stop
       endif
 
 c     # Interpolate coarse grid corners to fine grid corner ghost cells
@@ -420,10 +430,7 @@ c     # Interpolate coarse grid corners to fine grid corner ghost cells
       integer p4est_refineFactor, refratio
       double precision qc, qf, shiftx, shifty, sl, sr, gradx, grady
       double precision fclaw2d_clawpatch_compute_slopes
-      double precision uc(-1:1,-1:1), uf
-      double precision etabarc(-1:1, -1:1), h, b, u, hfsum
-      double precision coarseumin, coarseumax
-      logical redefine
+      double precision etabarc(-1:1, -1:1), h, b, hfsum
 
       integer mbathy
 

@@ -28,6 +28,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_domain.h>
 #include <fclaw_packing.h>
 
+#include <fclaw_regions.h>
+
 #include <fclaw2d_defs.h>
 #include <fclaw3d_defs.h>
 #include <forestclaw2d.h>
@@ -596,16 +598,31 @@ int fclaw_patch_tag4refinement(fclaw_global_t *glob,
 }
 
 int fclaw_patch_tag4coarsening(fclaw_global_t *glob,
-									  fclaw_patch_t *fine_patches,
-									  int blockno,
-									  int patchno,
-                                      int initflag)
+                               fclaw_patch_t *fine_patches,
+                               int blockno,
+                               int patchno,
+                               int initflag)
 {
 	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
 	FCLAW_ASSERT(patch_vt->tag4coarsening != NULL);
 
 	return patch_vt->tag4coarsening(glob,fine_patches,
 									blockno, patchno,initflag);
+}
+
+int fclaw_patch_intersects_region(fclaw_global_t *glob,
+                                  fclaw_patch_t *patch,
+                                  int blockno, int patchno,
+                                  fclaw_region_t *r,
+                                  double t,
+                                  int refine_flag)
+{
+    fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
+    FCLAW_ASSERT(patch_vt->intersects_region != NULL);
+
+    return patch_vt->intersects_region(glob,patch,
+                                       blockno, patchno,
+                                       r,t,refine_flag);
 }
 
 void fclaw_patch_average2coarse(fclaw_global_t *glob,

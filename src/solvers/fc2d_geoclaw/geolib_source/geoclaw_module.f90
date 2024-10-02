@@ -30,7 +30,7 @@ module geoclaw_module
     real(kind=8) :: grav, rho_air, ambient_pressure, earth_radius, sea_level
     ! Water density can be an array to handle multiple layers
     real(kind=8), allocatable :: rho(:)
-    integer :: coordinate_system
+    integer :: coordinate_system, sphere_source
 
     ! Rotational velocity of Earth
     real(kind=8), parameter :: omega = 2.0d0 * pi / 86164.2d0
@@ -93,6 +93,7 @@ contains
             read(unit,*) ambient_pressure
             read(unit,*) earth_radius
             read(unit,*) coordinate_system
+            read(unit,*) sphere_source
             read(unit,*) sea_level
             read(unit,*)
             read(unit,*) coriolis_forcing
@@ -190,6 +191,21 @@ contains
             coriolis = 0.d0
         endif
     end function coriolis
+    
+    ! ==========================================================================
+    !  Calculate the absolute value of the coriolis constant f
+    !   Calling `unsigned_coriolis(y)` is the same as `abs(coriolis(y))`.
+    !   See the `coriolis` function for details.
+    ! ==========================================================================
+    real(kind=8) pure function unsigned_coriolis(y)
+
+        implicit none
+        
+        ! Input
+        real(kind=8), intent(in) :: y
+        
+        unsigned_coriolis = abs(coriolis(y))
+    end function unsigned_coriolis
 
     ! ==========================================================================
     !  Calculate the distance along a sphere

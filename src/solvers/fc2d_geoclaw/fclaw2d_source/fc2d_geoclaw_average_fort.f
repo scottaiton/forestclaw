@@ -51,15 +51,14 @@ c     # these will be empty if we are not on a manifold.
       double precision sum, qf, kf
       logical is_manifold
 
-      integer mq,r2, m, m1
-      integer ic, ic1, ibc
-      integer jc, jc1, jbc
+      integer mq,r2, m
+      integer ic, ibc
+      integer jc, jbc
 
 c     # This should be refratio*refratio.
       integer rr2
       parameter(rr2 = 4)
       integer i2(0:rr2-1),j2(0:rr2-1)
-      double precision kc
 
       logical fclaw2d_clawpatch_is_valid_average, skip_this_grid
       double precision af_sum, qv(0:rr2-1)
@@ -100,7 +99,12 @@ c              # ibc = 2 corresponds to the second layer
                   ic = 1-ibc
                elseif (iface_coarse .eq. 1) then
                   ic = mx+ibc
+               else
+                  write(6,100) 'geoclaw_tag4refinement : ',
+     &                        'ic is unitialized'
+                  stop
                endif
+100   format(A,A)                           
 
                call fclaw2d_clawpatch_transform_face_half(ic,jc,i2,j2,
      &               transform_cptr)
@@ -339,10 +343,9 @@ c     # these will be empty if we are not on a manifold.
 
       double precision sum
 
-      integer i,j,ibc,jbc,ii,jj,mq,r2
-      integer ifine, jfine
+      integer ibc,jbc,mq,r2
       logical is_manifold
-      double precision qf,kf, kc
+      double precision qf,kf
 
 c     # This should be refratio*refratio.
       integer i1,j1,m
@@ -380,7 +383,7 @@ c     # Loop over four corner cells on coarse grid
          do jbc = 1,mbc
 c           # Average fine grid corners onto coarse grid ghost corners
             if (icorner_coarse .eq. 0) then
-    1          i1 = 1-ibc
+               i1 = 1-ibc
                j1 = 1-jbc
             elseif (icorner_coarse .eq. 1) then
                i1 = mx+ibc
@@ -493,7 +496,7 @@ c               enddo
       double precision aux_coarse(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
       double precision aux_fine(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
 
-      integer i,j, ig, jg, ic_add, jc_add, ii, jj, ifine, jfine
+      integer i,j, ig, jg, ic_add, jc_add, ii, jj
       double precision etasum, hsum, husum, hvsum, etaav, hav
       double precision hc, huc, hvc
       double precision hf, huf, hvf, bf, etaf

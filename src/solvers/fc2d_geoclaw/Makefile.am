@@ -11,12 +11,12 @@ libgeoclaw_compiled_sources = \
 	src/solvers/fc2d_geoclaw/fc2d_geoclaw.cpp \
 	src/solvers/fc2d_geoclaw/fc2d_geoclaw_options.c \
 	src/solvers/fc2d_geoclaw/fc2d_geoclaw_gauges_default.c \
+    src/solvers/fc2d_geoclaw/fc2d_geoclaw_regions_default.c \
 	src/solvers/fc2d_geoclaw/fc2d_geoclaw_run.c \
 	src/solvers/fc2d_geoclaw/fc2d_geoclaw_output_ascii.c \
 	src/solvers/fc2d_geoclaw/amrlib_source/amr_module.f90 \
 	src/solvers/fc2d_geoclaw/geolib_source/utility_module.f90 \
 	src/solvers/fc2d_geoclaw/geolib_source/geoclaw_module.f90 \
-	src/solvers/fc2d_geoclaw/amrlib_source/regions_module.f90 \
 	src/solvers/fc2d_geoclaw/geolib_source/topo_module.f90 \
 	src/solvers/fc2d_geoclaw/geolib_source/qinit_module.f90 \
 	src/solvers/fc2d_geoclaw/geolib_source/fixedgrids_module.f90 \
@@ -57,7 +57,6 @@ libgeoclaw_compiled_sources = \
 	src/solvers/fc2d_geoclaw/fclaw2d_source/fc2d_geoclaw_tag4refinement_fort.f90 \
 	src/solvers/fc2d_geoclaw/fclaw2d_source/fc2d_geoclaw_tag4coarsening_fort.f90 \
 	src/solvers/fc2d_geoclaw/fclaw2d_source/fc2d_geoclaw_flag2refine_fort.f90 \
-	src/solvers/fc2d_geoclaw/fclaw2d_source/fc2d_geoclaw_test_regions.f90 \
 	src/solvers/fc2d_geoclaw/fclaw2d_source/fc2d_geoclaw_local_ghost_pack_fort.f \
 	src/solvers/fc2d_geoclaw/fclaw2d_source/fc2d_geoclaw_local_ghost_pack_aux_fort.f \
 	src/solvers/fc2d_geoclaw/fclaw2d_source/fc2d_geoclaw_diagnostics_fort.f \

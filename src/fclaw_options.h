@@ -150,7 +150,10 @@ struct fclaw_options
 
     /* Gauges */
     int output_gauges;
-    int gauge_buffer_length;       
+    int gauge_buffer_length;  
+
+    /* Regions */
+    int use_regions;     
 
     int output_rays;
 

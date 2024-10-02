@@ -11,6 +11,7 @@ libclawpatch_installed_headers = \
 	src/patches/clawpatch/fclaw_clawpatch_output_ascii.h \
 	src/patches/clawpatch/fclaw_clawpatch_output_vtk.h \
 	src/patches/clawpatch/fclaw_clawpatch_pillow.h \
+	src/patches/clawpatch/fclaw_clawpatch_regions.h \
 	\
 	src/patches/clawpatch/fclaw2d_clawpatch_transform.h \
 	src/patches/clawpatch/fclaw2d_clawpatch_fort.h \
@@ -41,6 +42,7 @@ libclawpatch_compiled_sources = \
 	src/patches/clawpatch/fclaw_clawpatch_output_ascii.c \
 	src/patches/clawpatch/fclaw_clawpatch_output_vtk.c \
 	src/patches/clawpatch/fclaw_clawpatch_pillow.c \
+	src/patches/clawpatch/fclaw_clawpatch_regions.c \
 	\
 	src/patches/clawpatch/fclaw2d_clawpatch_conservation.c \
 	src/patches/clawpatch/fclaw2d_clawpatch_transform.c \

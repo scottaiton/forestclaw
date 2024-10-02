@@ -52,7 +52,7 @@ c
       double precision  auxr(maux,1-mbc:maxm+mbc)
 
       !local only
-      integer m,i,mw,maxiter,mu,nv
+      integer i,mw,maxiter,mu,nv
       double precision wall(3)
       double precision fw(3,3)
       double precision sw(3)
@@ -60,8 +60,8 @@ c
       double precision hR,hL,huR,huL,uR,uL,hvR,hvL,vR,vL,phiR,phiL
       double precision bR,bL,sL,sR,sRoe1,sRoe2,sE1,sE2,uhat,chat
       double precision s1m,s2m
-      double precision hstar,hstartest,hstarHLL,sLtest,sRtest
-      double precision tw,dxdc
+      double precision hstar,hstartest
+      double precision dxdc
 
       logical rare1,rare2
 
@@ -249,7 +249,7 @@ c             if (s(mw,i) .gt. 316.d0) then
 c               # shouldn't happen unless h > 10 km!
 c                write(6,*) 'speed > 316: i,mw,s(mw,i): ',i,mw,s(mw,i)
 c                endif
-	           s(mw,i)=dxdc*s(mw,i)
+               s(mw,i)=dxdc*s(mw,i)
                fwave(1,mw,i)=dxdc*fwave(1,mw,i)
                fwave(2,mw,i)=dxdc*fwave(2,mw,i)
                fwave(3,mw,i)=dxdc*fwave(3,mw,i)

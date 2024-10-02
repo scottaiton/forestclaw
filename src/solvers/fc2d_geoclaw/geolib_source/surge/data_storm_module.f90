@@ -16,7 +16,6 @@ module data_storm_module
     save
 
     logical, private :: module_setup = .false.
-    logical, private :: DEBUG = .false.
 
     ! Model storm type definition
     type data_storm_type
@@ -63,7 +62,13 @@ contains
         ! Output
         real(kind=8) :: location(2)
 
+        !! DAC : Set value to avoid compiler warnings
+        location(1) = -1
+        location(2) = -1
+
         stop "Data-derived storm are not yet implemented!"
+
+
 
     end function storm_location
 
@@ -78,6 +83,9 @@ contains
         ! Input
         real(kind=8), intent(in) :: t
         type(data_storm_type), intent(in) :: storm
+
+        !! DAC : Avoid compiler warnings
+        theta = -1
 
         stop "Data-derived storm are not yet implemented!"
 

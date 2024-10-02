@@ -3,7 +3,6 @@ add_library(geoclaw_f OBJECT
     amrlib_source/amr_module.f90
     geolib_source/utility_module.f90
     geolib_source/geoclaw_module.f90
-    amrlib_source/regions_module.f90
     geolib_source/topo_module.f90
     geolib_source/qinit_module.f90
     geolib_source/fixedgrids_module.f90
@@ -43,7 +42,6 @@ add_library(geoclaw_f OBJECT
     fclaw2d_source/fc2d_geoclaw_output_ascii_fort.f
     fclaw2d_source/fc2d_geoclaw_tag4refinement_fort.f90
     fclaw2d_source/fc2d_geoclaw_tag4coarsening_fort.f90
-    fclaw2d_source/fc2d_geoclaw_test_regions.f90
     fclaw2d_source/fc2d_geoclaw_flag2refine_fort.f90
     fclaw2d_source/fc2d_geoclaw_local_ghost_pack_fort.f
     fclaw2d_source/fc2d_geoclaw_local_ghost_pack_aux_fort.f
@@ -66,6 +64,7 @@ target_sources(geoclaw PRIVATE
     fc2d_geoclaw.cpp
     fc2d_geoclaw_options.c
     fc2d_geoclaw_gauges_default.c
+    fc2d_geoclaw_regions_default.c
     fc2d_geoclaw_run.c
     fc2d_geoclaw_output_ascii.c
 )
@@ -95,7 +94,6 @@ install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/include/model_storm_module.mod
   ${CMAKE_CURRENT_BINARY_DIR}/include/qinit_module.mod
   ${CMAKE_CURRENT_BINARY_DIR}/include/refinement_module.mod
-  ${CMAKE_CURRENT_BINARY_DIR}/include/regions_module.mod
   ${CMAKE_CURRENT_BINARY_DIR}/include/storm_module.mod
   ${CMAKE_CURRENT_BINARY_DIR}/include/topo_module.mod
   ${CMAKE_CURRENT_BINARY_DIR}/include/utility_module.mod

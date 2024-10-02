@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012-2022 Carsten Burstedde, Donna Calhoun, Yu-Hsuan Shih, Scott Aiton
+Copyright (c) 2012-2024 Carsten Burstedde, Donna Calhoun, Yu-Hsuan Shih, Scott Aiton
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw_gauges.h>
 #include "fc2d_geoclaw_gauges_default.h"
+
+#include <fclaw_regions.h>
+#include "fc2d_geoclaw_regions_default.h"
 
 #include <fclaw_clawpatch.hpp>
 #include <fclaw_clawpatch.h>
@@ -417,26 +420,28 @@ int geoclaw_patch_tag4refinement(fclaw_global_t *glob,
     double t = glob->curr_time;
 
     int tag_patch;
-    /* First check to see if we are forced to refine based on regions 
-       If patch intersects a region (including time interval), this routine
-       returns :  
+    /* Check to see how region affect refinement.
 
-          -- level >= maximum level allowed by any region 
-             this patch intersects with. (tag_patch = 0)
+       If patch intersects one or more regions (including time interval), 
+       this routine returns :  
 
-          -- level < minimum level required by any region
-             this patch intersects with. (tag_patch = 1)
+          -- tag_patch = 0 : level >= maximum level allowed by any region 
+             intersected by this patch (no refinement allowed)
 
-        Otherwise, tag_patch = -1 and we should refine using usual criteria.
+          -- tag_patch = 1 : level < minimum level required by any region
+             intersected by this patch (force refinement)
+
+          -- tag_patch = -1 : Refine using usual threshold criteria.
     */
-    double xupper = xlower + mx*dx;
-    double yupper = ylower + my*dy;
-    int refine = 1;  /* We are tagging for refinement */
-    FC2D_GEOCLAW_TEST_REGIONS(&level,&xlower,&ylower,&xupper,&yupper,
-                              &t,&refine, &tag_patch);
+    int refine_flag = 1;  /* Indicates we are tagging for refinement */
+    tag_patch = fclaw_regions_test(glob,patch,
+                                     blockno, patchno, 
+                                     t,refine_flag);
 
     if (tag_patch < 0)
     {
+        /* Region tagging places no restrictions on where to tag */
+
         /* Need maxlevel to get length speed_tolerance - hackish? */
         const fclaw_options_t * fclaw_opt = fclaw_get_options(glob);
         int maxlevel = fclaw_opt->maxlevel;
@@ -471,20 +476,31 @@ int geoclaw_patch_tag4coarsening(fclaw_global_t *glob,
 
     int level = fine_patches[0].level;
     double t = glob->curr_time;
-    int tag_patch;
 
+    int tag_patch;
     /* Test parent quadrant : If any of the four sibling patches are in the 
        region, we consider that an intersection.  Assume Morton ordering
-       on the sibling patches (0=ll, 1=lr, 2=ul, 3=ur) */
-    double xupper = xlower[1] + mx*dx;
-    double yupper = ylower[2] + my*dy;
-    int refine = 0;  /* We are tagging for refinement */
-    FC2D_GEOCLAW_TEST_REGIONS(&level,&xlower[0],&ylower[0],&xupper,&yupper,
-                              &t,&refine, &tag_patch);
+       on the sibling patches (0=ll, 1=lr, 2=ul, 3=ur) 
 
+       If a sibling patch intersects one or more regions (including 
+       time interval),  this routine returns :  
+
+          -- tag_patch = 0 : level <= minimum level allowed by any region 
+             intersected by this patch (no coarsening is allowed)
+
+          -- tag_patch = 1 : level > maximum level required by any region
+             intersected by this patch (force coarsening)
+
+          -- tag_patch = -1 : Coarsen using usual threshold criteria.
+
+       */
+    int refine_flag = 0; /* we are tagging for coarsening */
+    tag_patch = fclaw_regions_test(glob,fine_patches,
+                                   blockno,patchno,
+                                   t,refine_flag);
     if (tag_patch < 0) 
     {
-        /* Region tagging is inconclusive */
+        /* Region tagging places no restrictions on where to coarsen */
         const fclaw_options_t * fclaw_opt = fclaw_get_options(glob);
         int maxlevel = fclaw_opt->maxlevel;
 
@@ -827,13 +843,13 @@ fc2d_geoclaw_vtable_t* fc2d_geoclaw_vt(fclaw_global_t* glob)
 
 void fc2d_geoclaw_solver_initialize(fclaw_global_t* glob)
 {
-	fclaw_options_t* fclaw_opt = fclaw_get_options(glob);
-	fclaw_clawpatch_options_t* clawpatch_opt = fclaw_clawpatch_get_options(glob);
 	fc2d_geoclaw_options_t* geo_opt = fc2d_geoclaw_get_options(glob);
+    fclaw_clawpatch_options_t* clawpatch_opt = fclaw_clawpatch_get_options(glob);
 
     geo_opt->method[6] = clawpatch_opt->maux;
 
     /* We have to do this so that we know how to size the ghost patches */
+    fclaw_options_t* fclaw_opt = fclaw_get_options(glob);
     if (clawpatch_opt->ghost_patch_pack_aux)
     {
         fclaw_opt->ghost_patch_pack_extra = 1;  /* Pack the bathymetry */
@@ -843,43 +859,37 @@ void fc2d_geoclaw_solver_initialize(fclaw_global_t* glob)
     int claw_version = 5;
     fclaw_clawpatch_vtable_initialize(glob, claw_version);
     
-    fclaw_gauges_vtable_t*           gauges_vt = fclaw_gauges_vt(glob);
-
-    fclaw_vtable_t*                fc_vt = fclaw_vt(glob);
-    fclaw_patch_vtable_t*          patch_vt = fclaw_patch_vt(glob);
-    fclaw_clawpatch_vtable_t*  clawpatch_vt = fclaw_clawpatch_vt(glob);
-
-    fc2d_geoclaw_vtable_t*  geoclaw_vt = fc2d_geoclaw_vt_new();
-
     /* ForestClaw virtual tables */
-    fc_vt->problem_setup               = geoclaw_setprob;  
-    // fclaw_vt->after_regrid                = geoclaw_after_regrid;  /* Handle gauges */
+    fclaw_vtable_t* fc_vt = fclaw_vt(glob);
+    fc_vt->problem_setup                  = geoclaw_setprob;  
+    fc_vt->output_frame                   = geoclaw_output;
+    // fclaw_vt->after_regrid       = geoclaw_after_regrid;  /* Handle gauges */
 
     /* Set basic patch operations */
+    fclaw_patch_vtable_t* patch_vt = fclaw_patch_vt(glob);
     patch_vt->setup                       = geoclaw_patch_setup;
     patch_vt->initialize                  = geoclaw_qinit;
     patch_vt->physical_bc                 = geoclaw_bc2;
     patch_vt->single_step_update          = geoclaw_update;  /* Includes b4step2 and src2 */
          
-    fc_vt->output_frame                = geoclaw_output;
-
     /* Regridding */
     patch_vt->tag4refinement              = geoclaw_patch_tag4refinement;
     patch_vt->tag4coarsening              = geoclaw_patch_tag4coarsening;
     patch_vt->interpolate2fine            = geoclaw_interpolate2fine;
     patch_vt->average2coarse              = geoclaw_average2coarse;
 
-    /* Ghost filling */
-    clawpatch_vt->d2->fort_copy_face          = FC2D_GEOCLAW_FORT_COPY_FACE;
-    clawpatch_vt->d2->fort_copy_corner        = FC2D_GEOCLAW_FORT_COPY_CORNER;
-
     /* Geoclaw needs specialized averaging and interpolation routines */
     patch_vt->average_face                = geoclaw_average_face;
     patch_vt->interpolate_face            = geoclaw_interpolate_face;      
     patch_vt->average_corner              = geoclaw_average_corner;
     patch_vt->interpolate_corner          = geoclaw_interpolate_corner;
+    patch_vt->remote_ghost_setup          = geoclaw_remote_ghost_setup;
 
-    patch_vt->remote_ghost_setup              = geoclaw_remote_ghost_setup;
+    /* Ghost filling */
+    fclaw_clawpatch_vtable_t*  clawpatch_vt = fclaw_clawpatch_vt(glob);
+    clawpatch_vt->d2->fort_copy_face          = FC2D_GEOCLAW_FORT_COPY_FACE;
+    clawpatch_vt->d2->fort_copy_corner        = FC2D_GEOCLAW_FORT_COPY_CORNER;
+
     clawpatch_vt->d2->fort_local_ghost_pack   = FC2D_GEOCLAW_LOCAL_GHOST_PACK;
     clawpatch_vt->local_ghost_pack_aux        = geoclaw_local_ghost_pack_aux;
   
@@ -889,6 +899,7 @@ void fc2d_geoclaw_solver_initialize(fclaw_global_t* glob)
     clawpatch_vt->d2->fort_conservation_check = FC2D_GEOCLAW_FORT_CONSERVATION_CHECK;
     clawpatch_vt->d2->fort_timeinterp         = FC2D_GEOCLAW_FORT_TIMEINTERP;
 
+    fc2d_geoclaw_vtable_t*  geoclaw_vt = fc2d_geoclaw_vt_new();
     geoclaw_vt->setprob          = NULL;                   
     geoclaw_vt->setaux           = FC2D_GEOCLAW_SETAUX;
     geoclaw_vt->qinit            = FC2D_GEOCLAW_QINIT;
@@ -898,12 +909,21 @@ void fc2d_geoclaw_solver_initialize(fclaw_global_t* glob)
     geoclaw_vt->rpn2             = FC2D_GEOCLAW_RPN2;
     geoclaw_vt->rpt2             = FC2D_GEOCLAW_RPT2;
 
-    gauges_vt->set_gauge_data     = geoclaw_read_gauges_data_default;
-    gauges_vt->create_gauge_files = geoclaw_create_gauge_files_default; 
-    gauges_vt->normalize_coordinates = geoclaw_gauge_normalize_coordinates;
+    /* Gauges */
+    fclaw_gauges_vtable_t* gauges_vt = fclaw_gauges_vt(glob);
+    gauges_vt->set_gauge_data          = geoclaw_read_gauges_data_default;
+    gauges_vt->normalize_coordinates   = geoclaw_gauge_normalize_coordinates;
+    gauges_vt->create_gauge_files      = geoclaw_create_gauge_files_default; 
+    gauges_vt->update_gauge            = geoclaw_gauge_update_default;
+    gauges_vt->print_gauge_buffer      = geoclaw_print_gauges_default;
 
-    gauges_vt->update_gauge       = geoclaw_gauge_update_default;
-    gauges_vt->print_gauge_buffer = geoclaw_print_gauges_default;
+    /* We need a specialized read routine, since the GeoClaw "make data" routines
+       do not write out a dimension to the regions.data file.  This will also maintain
+       flexibilty for later Geoclaw updates */
+
+    fclaw_regions_vtable_t* regions_vt = fclaw_regions_vt(glob);
+    regions_vt->init_region_data       = geoclaw_read_regions_data_default;
+
 
     geoclaw_vt->is_set = 1;
 

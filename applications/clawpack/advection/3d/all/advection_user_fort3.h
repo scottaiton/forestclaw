@@ -29,10 +29,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef __cplusplus
 extern "C"
 {
+#endif
+
 #if 0
-}
-#endif
-#endif
+/* Fix syntax highlighting */
+#endif    
 
 #define CLAWPACK46_RPN2ADV FCLAW_F77_FUNC(clawpack46_rpn2adv,CLAWPACK46_RPN2ADV)
 void CLAWPACK46_RPN2ADV(const int* ixy,const int* maxm, const int* meqn, 
@@ -172,9 +173,6 @@ int USER_EXCEEDS_THRESHOLD(const int* blockno,
 
 
 #ifdef __cplusplus
-#if 0
-{
-#endif
 }
 #endif
 

@@ -2,16 +2,17 @@ c    # -------------------------------------------------------------------------
 c    # Output and diagnostics
 c    # ----------------------------------------------------------------------------------
       subroutine fc2d_geoclaw_fort_conservation_check(mx,my,mbc,meqn,
-     &      dx,dy,area,q,sum)
+     &      dx,dy,area,q,sum,c_kahan)
       implicit none
 
       integer mx,my,mbc,meqn
       double precision dx, dy, dxdy
       double precision sum(meqn), c_kahan
       double precision q(meqn,1-mbc:mx+mbc,1-mbc:my+mbc)
-      double precision c, t, y
+      double precision t, y
 
-      include 'fclaw2d_metric_terms.i'
+      !!include 'fclaw2d_metric_terms.i'
+      double precision  area(-mbc:mx+mbc+1,-mbc:my+mbc+1)
 
       integer i,j,m
       integer*8 cont, fclaw_map_get_context
@@ -53,9 +54,9 @@ c     # Compute area of a patch
       double precision dx, dy
       double precision sum
 
-      include 'fclaw2d_metric_terms.i'
+      double precision  area(-mbc:mx+mbc+1,-mbc:my+mbc+1)
 
-      integer i,j,m
+      integer i,j
       integer*8 cont, fclaw_map_get_context
       logical fclaw_map_is_used
 
@@ -86,7 +87,8 @@ c     # Compute area of a patch
       double precision error_norm(meqn,3)
       double precision error(meqn,1-mbc:mx+mbc,1-mbc:my+mbc)
 
-      include 'fclaw2d_metric_terms.i'
+      !!include 'fclaw2d_metric_terms.i'
+      double precision  area(-mbc:mx+mbc+1,-mbc:my+mbc+1)
 
       integer i,j,m
       integer*8 cont, fclaw_map_get_context

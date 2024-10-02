@@ -7,6 +7,7 @@
 F                    =: wind_forcing         # (Wind source term used) 
 1                    =: drag_law             # (Type of drag law to use) 
 F                    =: pressure_forcing     # (Pressure source term used) 
+0                    =: rotation_override    # (Override storm rotation) 
 
 5                    =: wind_index           # (Index into aux array - fortran indexing) 
 7                    =: pressure_index       # (Index into aux array - fortran indexing) 
