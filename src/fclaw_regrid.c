@@ -145,13 +145,20 @@ void refine_patch(fclaw_global_t *glob,
 
     fclaw_patch_build(glob,fine_patch,blockno,
                       fine_patchno,(void*) &build_mode);
+    
+    // fclaw_patch_init_first_refined_sibling()
+
     if (domain_init)
     {
+        // this will have to be moved to another spot
         fclaw_patch_initialize(glob,fine_patch,blockno,fine_patchno);//new_domain
     }
     /* don't try to refine this patch in the next round of refinement */
     fclaw_patch_considered_for_refinement_set(glob, fine_patch);
 
+
+    // if(delay_paritioning)
+    // {
     int i;
     for (i = 1; i < fclaw_domain_num_siblings(old_domain); i++)
     {
@@ -180,6 +187,8 @@ void refine_patch(fclaw_global_t *glob,
         fclaw_patch_interpolate2fine(glob,coarse_patch,fine_siblings,
                                      blockno,coarse_patchno,fine_patchno);//new_domain
     }
+    // }
+
     /* used to pass in old_domain */
     fclaw_patch_data_delete(glob,coarse_patch);
 
