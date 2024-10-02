@@ -183,8 +183,13 @@ void refine_patch(fclaw_global_t *glob,
         int coarse_patchno = old_patchno;
         int fine_patchno = new_patchno;
 
+        /* get coarse data from first fine patch */
+        //void* coarse_data = fclaw_patch_get_coarse_data(glob,fine_siblings,blockno, fine_patchno);
+
         fclaw_patch_interpolate2fine(glob,coarse_patch,fine_siblings,
                                      blockno,coarse_patchno,fine_patchno);//new_domain
+
+        //fclaw_patch_destroy_coarse_data(glob,coarse_data);
     }
     // }
 
