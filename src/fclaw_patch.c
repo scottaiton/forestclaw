@@ -630,19 +630,6 @@ void fclaw_patch_init_first_fine_sibling(struct fclaw_global *glob,
 
 }
 
-void * fclaw_patch_get_coarse_data(struct fclaw_global *glob,
-                                   struct fclaw_patch *fine_patch)
-{
-
-}
-
-
-void fclaw_patch_destroy_coarse_data(struct fclaw_global *glob,
-                                     void *coarse_data)
-{
-
-}
-
 void fclaw_patch_interpolate2fine(fclaw_global_t* glob,
 									fclaw_patch_t* coarse_patch,
 									fclaw_patch_t* fine_patches,

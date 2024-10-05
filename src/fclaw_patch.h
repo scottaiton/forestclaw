@@ -684,25 +684,6 @@ void fclaw_patch_init_first_fine_sibling(struct fclaw_global *glob,
                                          struct fclaw_patch *fine_patch);
 
 /**
- * @brief Get the coarse data stored in the first fine patch.
- * 
- * @param glob the global context
- * @param fine_patch the first fine patch
- * @return void* the coarse data 
- */
-void * fclaw_patch_get_coarse_data(struct fclaw_global *glob,
-                                   struct fclaw_patch *fine_patch);
-
-/**
- * @brief Destroy the coarse data
- * 
- * @param glob the global context
- * @param coarse_data the coarse data
- */
-void fclaw_patch_destroy_coarse_data(struct fclaw_global *glob,
-                                     void *coarse_data);
-
-/**
  * @brief Interpolates a set of patches from a coarse patch
  * 
  * @param[in] glob the global context
