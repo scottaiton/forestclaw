@@ -1425,6 +1425,25 @@ typedef int (*fclaw_patch_tag4coarsening_t)(struct fclaw_global *glob,
                                               int this_patchno,
                                               int initflag);
 
+
+/**
+ * @brief Initialize the first fine sibling of a newly refined family.
+ *
+ * This function is called when a patch is refined.
+ * This is expected to be a lightweight operation.
+ * What should happen is that coarse data is moved from the coarse patch to the fine
+ * patch. This data should then be retrieved using fclaw_patch_get_coarse_data
+ * Which is then used to interpolate, using fclaw_patch_interpolate2fine
+ * 
+ * @param glob the global context
+ * @param coarse_patch the coarse patch
+ * @param fine_patch the first fine patch
+ */
+
+typedef void (*fclaw_patch_init_first_fine_sibling_t)(struct fclaw_global *glob,
+                                                      struct fclaw_patch *coarse_patch,
+                                                      struct fclaw_patch *fine_patch);
+
 /**
  * @brief Interpolates a set of patches from a coarse patch
  * 
@@ -1717,13 +1736,15 @@ struct fclaw_patch_vtable
     /** @{ @name Regridding Functions */
 
     /** @copybrief ::fclaw_patch_tag4refinement_t */
-    fclaw_patch_tag4refinement_t        tag4refinement;
+    fclaw_patch_tag4refinement_t          tag4refinement;
     /** @copybrief ::fclaw_patch_tag4coarsening_t */
-    fclaw_patch_tag4coarsening_t        tag4coarsening;
+    fclaw_patch_tag4coarsening_t          tag4coarsening;
     /** @copybrief ::fclaw_patch_average2coarse_t */
-    fclaw_patch_average2coarse_t        average2coarse;
+    fclaw_patch_average2coarse_t          average2coarse;
+    /** @copybrief ::fclaw_patch_init_first_fine_sibling_t */
+    fclaw_patch_init_first_fine_sibling_t init_first_fine_sibling;
     /** @copybrief ::fclaw_patch_interpolate2fine_t */
-    fclaw_patch_interpolate2fine_t      interpolate2fine;
+    fclaw_patch_interpolate2fine_t        interpolate2fine;
 
     /** @} */
 

@@ -627,6 +627,10 @@ void fclaw_patch_init_first_fine_sibling(struct fclaw_global *glob,
                                          struct fclaw_patch *coarse_patch,
                                          struct fclaw_patch *fine_patch)
 {
+	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
+	FCLAW_ASSERT(patch_vt->init_first_fine_sibling != NULL);
+
+	patch_vt->init_first_fine_sibling(glob,coarse_patch,fine_patch);
 
 }
 
