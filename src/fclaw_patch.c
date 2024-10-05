@@ -625,12 +625,16 @@ void fclaw_patch_average2coarse(fclaw_global_t *glob,
 
 void fclaw_patch_init_first_fine_sibling(struct fclaw_global *glob,
                                          struct fclaw_patch *coarse_patch,
-                                         struct fclaw_patch *fine_patch)
+                                         struct fclaw_patch *fine_patch,
+										 int this_blockno, int coarse_patchno,
+									     int fine_patchno)
 {
 	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
 	FCLAW_ASSERT(patch_vt->init_first_fine_sibling != NULL);
 
-	patch_vt->init_first_fine_sibling(glob,coarse_patch,fine_patch);
+	patch_vt->init_first_fine_sibling(glob,coarse_patch,fine_patch,
+									  this_blockno,coarse_patchno,
+									  fine_patchno);
 
 }
 

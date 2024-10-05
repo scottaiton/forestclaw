@@ -146,7 +146,8 @@ void refine_patch(fclaw_global_t *glob,
     fclaw_patch_build(glob,fine_patch,blockno,
                       fine_patchno,(void*) &build_mode);
     
-    fclaw_patch_init_first_fine_sibling(glob, fine_patch, coarse_patch);
+    fclaw_patch_init_first_fine_sibling(glob, fine_patch, coarse_patch,
+                                        blockno, old_patchno, new_patchno);
 
     /* don't try to refine this patch in the next round of refinement */
     fclaw_patch_considered_for_refinement_set(glob, fine_patch);

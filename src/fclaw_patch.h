@@ -678,10 +678,15 @@ int fclaw_patch_tag4coarsening(struct fclaw_global *glob,
  * @param glob the global context
  * @param coarse_patch the coarse patch
  * @param fine_patch the first fine patch
+ * @param this_blockno the block number
+ * @param coarse_patchno the patch number of the coarse patch
+ * @param fine_patchno the patch number of the first fine patch
  */
 void fclaw_patch_init_first_fine_sibling(struct fclaw_global *glob,
                                          struct fclaw_patch *coarse_patch,
-                                         struct fclaw_patch *fine_patch);
+                                         struct fclaw_patch *fine_patch,
+										 int this_blockno, int coarse_patchno,
+									     int fine_patchno);
 
 /**
  * @brief Interpolates a set of patches from a coarse patch
@@ -1438,11 +1443,14 @@ typedef int (*fclaw_patch_tag4coarsening_t)(struct fclaw_global *glob,
  * @param glob the global context
  * @param coarse_patch the coarse patch
  * @param fine_patch the first fine patch
+ * @param coarse_patchno the patch number of the coarse patch
+ * @param fine_patchno the patch number of the first fine patch
  */
-
 typedef void (*fclaw_patch_init_first_fine_sibling_t)(struct fclaw_global *glob,
                                                       struct fclaw_patch *coarse_patch,
-                                                      struct fclaw_patch *fine_patch);
+                                                      struct fclaw_patch *fine_patch,
+               										  int this_blockno, int coarse_patchno,
+									                  int fine_patchno);
 
 /**
  * @brief Interpolates a set of patches from a coarse patch
