@@ -1098,6 +1098,15 @@ int clawpatch_tag4coarsening(fclaw_global_t *glob,
 }
 
 static
+void clawpatch_init_first_fine_sibling(fclaw_global_t *glob,
+                                       fclaw_patch_t *coarse_patch,
+                                       fclaw_patch_t *fine_patch,
+                                       int blockno, int coarse_patchno,
+                                       int fine_patchno)
+{
+}
+
+static
 void clawpatch_interpolate2fine(fclaw_global_t* glob,
                                 fclaw_patch_t *coarse_patch,
                                 fclaw_patch_t* fine_patches,
@@ -1879,8 +1888,9 @@ void fclaw_clawpatch_vtable_initialize(fclaw_global_t* glob,
     patch_vt->tag4refinement       = clawpatch_tag4refinement;
     patch_vt->tag4coarsening       = clawpatch_tag4coarsening;
 
-    patch_vt->average2coarse       = clawpatch_average2coarse;
-    patch_vt->interpolate2fine     = clawpatch_interpolate2fine;
+    patch_vt->average2coarse          = clawpatch_average2coarse;
+    patch_vt->init_first_fine_sibling = clawpatch_init_first_fine_sibling;
+    patch_vt->interpolate2fine        = clawpatch_interpolate2fine;
 
     /* ghost patch */
     patch_vt->ghost_packsize       = clawpatch_ghost_packsize;
