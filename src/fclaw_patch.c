@@ -89,13 +89,13 @@ void patch_data_new(fclaw_global_t* glob,
 
 	++glob->domain->count_set_patch; //this is now in cb_fclaw2d_regrid_repopulate 
 	pdata->neighbors_set = 0;
-	pdata->considered_for_refinement = 0;
+	pdata->flags = 0;
 }
 
 static 
 size_t patch_data_packsize()
 {
-	return sizeof(int);
+	return sizeof(fclaw_patch_data_flags_t);
 }
 
 static
@@ -104,7 +104,7 @@ void patch_data_pack(fclaw_global_t* glob,
 					 void* pack_data_here)
 {
 	fclaw_patch_data_t *pdata = get_patch_data(this_patch);
-	fclaw_pack_int(pdata->considered_for_refinement, (char*) pack_data_here);
+	FCLAW_PACK(pdata->flags, (char*) pack_data_here);
 }
 
 static
@@ -113,7 +113,7 @@ void patch_data_unpack(fclaw_global_t* glob,
 					   void* unpack_data_from_here)
 {
 	fclaw_patch_data_t *pdata = get_patch_data(this_patch);
-	fclaw_unpack_int((char*) unpack_data_from_here, &pdata->considered_for_refinement);
+	FCLAW_UNPACK((char*) unpack_data_from_here, &pdata->flags);
 }
 
 void fclaw_patch_reset_data(fclaw_global_t* glob,
@@ -1259,22 +1259,21 @@ void fclaw_patch_considered_for_refinement_set(struct fclaw_global *glob,
                                                struct fclaw_patch* patch)
 {
     fclaw_patch_data_t *pdata = get_patch_data(patch);
-	//FCLAW_ASSERT(pdata->considered_for_refinement == 0);
-	pdata->considered_for_refinement = 1;
+	pdata->flags |= FCLAW_PATCH_DATA_CONSIDERED_FOR_REFINEMENT;
 }
 
 void fclaw_patch_considered_for_refinement_clear(struct fclaw_global *glob,
                                                  struct fclaw_patch* patch)
 {
     fclaw_patch_data_t *pdata = get_patch_data(patch);
-	pdata->considered_for_refinement = 0;
+	pdata->flags &= ~FCLAW_PATCH_DATA_CONSIDERED_FOR_REFINEMENT;
 }
 
 int fclaw_patch_considered_for_refinement(struct fclaw_global *glob,
 										 struct fclaw_patch* patch)
 {
 	fclaw_patch_data_t *pdata = get_patch_data(patch);
-	return pdata->considered_for_refinement;
+	return pdata->flags & FCLAW_PATCH_DATA_CONSIDERED_FOR_REFINEMENT;
 }
 
 static
@@ -1283,9 +1282,9 @@ void considred_for_refinement_cb(fclaw_domain_t *domain,
 								 int blockno, int patchno,
 								 void *user)
 {
-	fclaw_patch_data_t *pdata = get_patch_data(patch);
-	int *all_patches_considered = (int*) user;
-	if (!pdata->considered_for_refinement)
+	fclaw_global_iterate_t *s = (fclaw_global_iterate_t*) user;
+	int *all_patches_considered = (int*) s->user;
+	if (!fclaw_patch_considered_for_refinement(s->glob,patch))
 	{
 		*all_patches_considered = 0;
 	}
@@ -1294,7 +1293,7 @@ void considred_for_refinement_cb(fclaw_domain_t *domain,
 int fclaw_patch_all_considered_for_refinement(struct fclaw_global *glob)
 {
 	int local_all_patches_considered = 1;
-	fclaw_domain_iterate_patches(glob->domain, considred_for_refinement_cb, &local_all_patches_considered);
+	fclaw_global_iterate_patches(glob, considred_for_refinement_cb, &local_all_patches_considered);
 	int all_patches_considered;
 	sc_MPI_Allreduce(&local_all_patches_considered, &all_patches_considered, 1, sc_MPI_INT, sc_MPI_LAND, glob->mpicomm);
 	return all_patches_considered;
@@ -1306,11 +1305,11 @@ void clear_considred_for_refinement_cb(fclaw_domain_t *domain,
 								       int blockno, int patchno,
 								       void *user)
 {
-	fclaw_patch_data_t *pdata = get_patch_data(patch);
-	pdata->considered_for_refinement = 0;
+	fclaw_global_t *glob = ((fclaw_global_iterate_t*) user)->glob;
+	fclaw_patch_considered_for_refinement_clear(glob, patch);
 }
 
 void fclaw_patch_clear_all_considered_for_refinement(struct fclaw_global *glob)
 {
-	fclaw_domain_iterate_patches(glob->domain, clear_considred_for_refinement_cb, NULL);
+	fclaw_global_iterate_patches(glob, clear_considred_for_refinement_cb, NULL);
 }

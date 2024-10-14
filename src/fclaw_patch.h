@@ -65,6 +65,12 @@ typedef enum
 } fclaw_build_mode_t;
 
 
+typedef enum
+{
+    /** Patch considered for refinement */
+    FCLAW_PATCH_DATA_CONSIDERED_FOR_REFINEMENT = 0x1,
+
+} fclaw_patch_data_flags_t;
 
 /**
  * @brief Structure for user patch data
@@ -100,8 +106,8 @@ struct fclaw_patch_data
     /** Block index */
     int block_idx;
 
-    /** True if patch has been considered for refinement */
-    int considered_for_refinement;
+    /** Boolean flags */
+    fclaw_patch_data_flags_t flags;
 
     /** User defined patch structure */
     void *user_patch;
