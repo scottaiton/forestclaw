@@ -254,6 +254,7 @@ struct fclaw_options
     const char * regression_check; /**< filename of regression check values */
 
     double max_refinement_ratio; /**< Maximum refinment ratio before partitioning and continuing refinement. */
+    int refine_after_parition; /**< Refine the patches after the partitioning step */
 };
 
 struct fclaw_global;
