@@ -130,6 +130,8 @@ void refine_patch(fclaw_global_t *glob,
 				  int new_patchno,
                   int domain_init)
 {
+    fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
+
     fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
 
     fclaw_patch_t *fine_siblings = new_patch;
@@ -152,33 +154,40 @@ void refine_patch(fclaw_global_t *glob,
     /* don't try to refine this patch in the next round of refinement */
     fclaw_patch_considered_for_refinement_set(glob, fine_patch);
 
-    int i;
-    for (i = 1; i < fclaw_domain_num_siblings(old_domain); i++)
+    if(fclaw_opt->refine_after_parition)
     {
-        fclaw_patch_t *fine_patch = &fine_siblings[i];
-        int fine_patchno = new_patchno + i;
-        /* Reason for the following two lines: the glob contains the old domain which is incremented in ddata_old 
-           but we really want to increment the new domain. This will be fixed! */
-        --old_domain->count_set_patch;
-        ++new_domain->count_set_patch;
-
-        fclaw_patch_build(glob,fine_patch,blockno,
-                          fine_patchno,(void*) &build_mode);
-        if (domain_init)
-        {
-            fclaw_patch_initialize(glob,fine_patch,blockno,fine_patchno);//new_domain
-        }
-        /* don't try to refine this patch in the next round of refinement */
-        fclaw_patch_considered_for_refinement_set(glob, fine_patch);
+        fclaw_patch_store_coarse_in_fine(glob,coarse_patch,fine_patch,
+                                         blockno,old_patchno,fine_patchno);
     }
-
-    if (!domain_init)
+    else
     {
-        int coarse_patchno = old_patchno;
-        int fine_patchno = new_patchno;
+        for (int i = 1; i < fclaw_domain_num_siblings(old_domain); i++)
+        {
+            fclaw_patch_t *fine_patch = &fine_siblings[i];
+            int fine_patchno = new_patchno + i;
+            /* Reason for the following two lines: the glob contains the old domain which is incremented in ddata_old 
+               but we really want to increment the new domain. This will be fixed! */
+            --old_domain->count_set_patch;
+            ++new_domain->count_set_patch;
 
-        fclaw_patch_interpolate2fine(glob,coarse_patch,fine_siblings,
-                                     blockno,coarse_patchno,fine_patchno);//new_domain
+            fclaw_patch_build(glob,fine_patch,blockno,
+                              fine_patchno,(void*) &build_mode);
+            if (domain_init)
+            {
+                fclaw_patch_initialize(glob,fine_patch,blockno,fine_patchno);//new_domain
+            }
+            /* don't try to refine this patch in the next round of refinement */
+            fclaw_patch_considered_for_refinement_set(glob, fine_patch);
+        }
+
+        if (!domain_init)
+        {
+            int coarse_patchno = old_patchno;
+            int fine_patchno = new_patchno;
+
+            fclaw_patch_interpolate2fine(glob,coarse_patch,fine_siblings,
+                                         blockno,coarse_patchno,fine_patchno);//new_domain
+        }
     }
     /* used to pass in old_domain */
     fclaw_patch_data_delete(glob,coarse_patch);
