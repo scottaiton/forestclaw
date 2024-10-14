@@ -69,6 +69,8 @@ typedef enum
 {
     /** Patch considered for refinement */
     FCLAW_PATCH_DATA_CONSIDERED_FOR_REFINEMENT = 0x1,
+    /** Patch has coarse data and it's family needs to be refined */
+    FCLAW_PATCH_DATA_HAS_COARSE_DATA = 0x2,
 
 } fclaw_patch_data_flags_t;
 
@@ -2199,6 +2201,12 @@ void fclaw_patch_set_block_corner_count(struct fclaw_global *glob,
                                           struct fclaw_patch* this_patch,
                                           int icorner, int block_corner_count);
 
+///@}
+/* ------------------------------------------------------------------------------------ */
+///                                 @name Patch Flags
+/* ------------------------------------------------------------------------------------ */
+///@{
+
 /**
  * @brief Set that this patch has been considered for refinement
  * 
@@ -2240,6 +2248,33 @@ int fclaw_patch_all_considered_for_refinement(struct fclaw_global *glob);
  * @param glob the global context
  */
 void fclaw_patch_clear_all_considered_for_refinement(struct fclaw_global *glob);
+
+/**
+ * @brief Set that this patch has coarse data
+ * 
+ * @param glob the global context
+ * @param patch the patch context
+ */
+void fclaw_patch_has_coarse_data_set(struct fclaw_global *glob,
+                                     struct fclaw_patch* patch);
+/**
+ * @brief Clear the flag that this patch has coarse data
+ * 
+ * @param glob the global context
+ * @param patch the patch context
+ */
+void fclaw_patch_has_coarse_data_clear(struct fclaw_global *glob,
+                                       struct fclaw_patch* patch);
+
+/**
+ * @brief Returns true if a patch has coarse data
+ * 
+ * @param glob the global context
+ * @param patch the patch context
+ * @return int true if a patch has coarse data
+ */
+int fclaw_patch_has_coarse_data(struct fclaw_global *glob,
+                                struct fclaw_patch* patch);
 
 ///@}
 

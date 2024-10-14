@@ -1313,3 +1313,24 @@ void fclaw_patch_clear_all_considered_for_refinement(struct fclaw_global *glob)
 {
 	fclaw_global_iterate_patches(glob, clear_considred_for_refinement_cb, NULL);
 }
+
+void fclaw_patch_has_coarse_data_set(struct fclaw_global *glob,
+                                     struct fclaw_patch* patch)
+{
+	fclaw_patch_data_t *pdata = get_patch_data(patch);
+	pdata->flags |= FCLAW_PATCH_DATA_HAS_COARSE_DATA;
+}
+
+void fclaw_patch_has_coarse_data_clear(struct fclaw_global *glob,
+                                       struct fclaw_patch* patch)
+{
+	fclaw_patch_data_t *pdata = get_patch_data(patch);
+	pdata->flags &= ~FCLAW_PATCH_DATA_HAS_COARSE_DATA;
+}
+
+int fclaw_patch_has_coarse_data(struct fclaw_global *glob,
+                                struct fclaw_patch* patch)
+{
+	fclaw_patch_data_t *pdata = get_patch_data(patch);
+	return pdata->flags & FCLAW_PATCH_DATA_HAS_COARSE_DATA;
+}
