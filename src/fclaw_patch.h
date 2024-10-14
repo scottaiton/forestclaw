@@ -690,6 +690,37 @@ int fclaw_patch_intersects_region(struct fclaw_global *glob,
                                   int refine_flag);
 
 /**
+ * @brief Store coarse patch data in a fine patch.
+ *
+ * The data will then be retrieved later when it is needed to interpolate.
+ * 
+ * @param glob the global context
+ * @param coarse_patch the coarse patch
+ * @param fine_patch the fine patch
+ * @param blockno the block number
+ * @param coarse_patchno the coarse patch number
+ * @param fine_patchno the fine patch number
+ */
+void fclaw_patch_store_coarse_in_fine(struct fclaw_global *glob,
+                                       struct fclaw_patch *coarse_patch,
+                                       struct fclaw_patch *fine_patch,
+                                       int blockno, int coarse_patchno,
+                                       int fine_patchno);
+
+/**
+ * @brief 
+ * 
+ * @param glob 
+ * @param fine_patch 
+ * @param coarse_patch 
+ * @param blockno 
+ * @param fine_patchno 
+ */
+void fclaw_patch_get_coarse_from_fine(struct fclaw_global *glob,
+                                       struct fclaw_patch *fine_patch,
+                                       struct fclaw_patch *coarse_patch,
+                                       int blockno, int fine_patchno);
+/**
  * @brief Interpolates a set of patches from a coarse patch
  * 
  * @param[in] glob the global context

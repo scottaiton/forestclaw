@@ -639,6 +639,23 @@ void fclaw_patch_average2coarse(fclaw_global_t *glob,
 							 blockno,fine0_patchno,coarse_patchno);
 }
 
+void fclaw_patch_store_coarse_in_fine(struct fclaw_global *glob,
+                                       struct fclaw_patch *coarse_patch,
+                                       struct fclaw_patch *fine_patch,
+                                       int blockno, int coarse_patchno,
+                                       int fine_patchno)
+{
+
+}
+
+void fclaw_patch_get_coarse_from_fine(struct fclaw_global *glob,
+                                       struct fclaw_patch *fine_patch,
+                                       struct fclaw_patch *coarse_patch,
+                                       int blockno, int fine_patchno)
+{
+
+}
+
 void fclaw_patch_interpolate2fine(fclaw_global_t* glob,
 									fclaw_patch_t* coarse_patch,
 									fclaw_patch_t* fine_patches,
