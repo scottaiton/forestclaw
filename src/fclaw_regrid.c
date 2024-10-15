@@ -158,6 +158,7 @@ void refine_patch(fclaw_global_t *glob,
     {
         fclaw_patch_store_coarse_in_fine(glob,coarse_patch,fine_patch,
                                          blockno,old_patchno,fine_patchno);
+        fclaw_patch_has_coarse_data_set(glob, fine_patch);
     }
     else
     {
