@@ -194,6 +194,11 @@ void refine_patch(fclaw_global_t *glob,
 
 }
 
+void fclaw_regrid_refine_after_partition(fclaw_global_t * glob)
+{
+
+}
+
 /* ----------------------------------------------------------------
    Public interface
    -------------------------------------------------------------- */
@@ -373,6 +378,14 @@ void fclaw_regrid(fclaw_global_t *glob)
 
             /* Repartition for load balancing.  Second arg (mode) for vtk output */
             fclaw_partition_domain(glob,FCLAW_TIMER_REGRID);
+
+            /* Refine patches (if needed)*/
+            if(fclaw_opt->refine_after_parition)
+            {
+                fclaw_timer_start (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
+                fclaw_regrid_refine_after_partition(glob);
+                fclaw_timer_stop (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
+            }
 
             /* Set up ghost patches. Communication happens for indirect ghost exchanges. */
 

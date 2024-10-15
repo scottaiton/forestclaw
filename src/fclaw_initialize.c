@@ -188,6 +188,14 @@ void build_initial_domain(fclaw_global_t *glob)
                 /* Repartition domain to new processors.    */
                 fclaw_partition_domain(glob,FCLAW_TIMER_INIT);
 
+                /* refine patches (if needed) */
+                if(fclaw_opt->refine_after_parition)
+                {
+                    fclaw_timer_start (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
+                    fclaw_regrid_refine_after_partition(glob);
+                    fclaw_timer_stop (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
+                }
+
                 /* Set up ghost patches.  This probably doesn't need to be done
                    each time we add a new level. */
                 fclaw_exchange_setup(glob,FCLAW_TIMER_INIT);

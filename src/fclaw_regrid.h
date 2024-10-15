@@ -92,6 +92,13 @@ void fclaw_regrid(struct fclaw_global *glob);
 
 void fclaw_regrid_set_neighbor_types(struct fclaw_global *glob);
 
+/**
+ * @brief Perform refinenment of patches that have been delayed until after
+ *        partitioning.
+ * 
+ * @param glob the global context
+ */
+void fclaw_regrid_refine_after_partition(struct fclaw_global * glob);
 
 
 
