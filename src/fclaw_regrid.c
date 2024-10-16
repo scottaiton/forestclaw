@@ -292,6 +292,47 @@ void cb_fclaw_regrid_repopulate(fclaw_domain_t * old_domain,
     fclaw_patch_neighbors_reset(new_patch);
 }
 
+void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
+                                         fclaw_domain_t **domain,
+                                         fclaw_domain_t *new_domain,
+                                         int domain_init,
+                                         fclaw_timer_names_t timer)
+{
+    fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
+
+    /* Average to new coarse grids and interpolate to new fine grids */
+    fclaw_timer_start (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
+    fclaw_global_iterate_adapted(glob, new_domain,
+                                   cb_fclaw_regrid_repopulate,
+                                   (void *) &domain_init);
+    fclaw_timer_stop (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
+
+    /* free memory associated with old domain */
+    fclaw_domain_reset(glob);
+    *domain = new_domain;
+    new_domain = NULL;
+
+    /* Repartition for load balancing.  Second arg (mode) for vtk output */
+    fclaw_partition_domain(glob,timer);
+
+    /* Refine patches (if needed)*/
+    if(fclaw_opt->refine_after_parition)
+    {
+        fclaw_timer_start (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
+        fclaw_regrid_refine_after_partition(glob);
+        fclaw_timer_stop (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
+    }
+
+    /* Set up ghost patches. Communication happens for indirect ghost exchanges. */
+
+
+    /* This includes timers for building patches and (exclusive) communication */
+    fclaw_exchange_setup(glob,timer);
+
+    /* Get new neighbor information.  This is used to short circuit
+       ghost filling procedures in some cases */
+    fclaw_regrid_set_neighbor_types(glob);
+}
 /* ----------------------------------------------------------------
    Public interface
    -------------------------------------------------------------- */
@@ -365,42 +406,15 @@ void fclaw_regrid(fclaw_global_t *glob)
         {
             fclaw_global_infof(" -- Have new refinement\n");
 
-            /* Average to new coarse grids and interpolate to new fine grids */
-            fclaw_timer_start (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
-            fclaw_global_iterate_adapted(glob, new_domain,
-                                           cb_fclaw_regrid_repopulate,
-                                           (void *) &domain_init);
-            fclaw_timer_stop (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
-
-            /* free memory associated with old domain */
-            fclaw_domain_reset(glob);
-            *domain = new_domain;
-            new_domain = NULL;
-
-            /* Repartition for load balancing.  Second arg (mode) for vtk output */
-            fclaw_partition_domain(glob,FCLAW_TIMER_REGRID);
-
-            /* Refine patches (if needed)*/
-            if(fclaw_opt->refine_after_parition)
-            {
-                fclaw_timer_start (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
-                fclaw_regrid_refine_after_partition(glob);
-                fclaw_timer_stop (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
-            }
-
-            /* Set up ghost patches. Communication happens for indirect ghost exchanges. */
-
-
-            /* This includes timers for building patches and (exclusive) communication */
-            fclaw_exchange_setup(glob,FCLAW_TIMER_REGRID);
-
-            /* Get new neighbor information.  This is used to short circuit
-               ghost filling procedures in some cases */
-            fclaw_regrid_set_neighbor_types(glob);
+            fclaw_regrid_process_new_refinement(glob, 
+                                                domain, 
+                                                new_domain, 
+                                                domain_init, 
+                                                FCLAW_TIMER_REGRID);
 
             /* Update ghost cells.  This is needed because we have new coarse or fine
-               patches without valid ghost cells.   Time_interp = 0, since we only
-               only regrid when all levels are time synchronized. */
+              patches without valid ghost cells.   Time_interp = 0, since we only
+              only regrid when all levels are time synchronized. */
             int minlevel = (*domain)->global_minlevel;
             int maxlevel = (*domain)->global_maxlevel;
             int time_interp = 0;

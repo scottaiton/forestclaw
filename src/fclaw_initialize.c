@@ -171,38 +171,11 @@ void build_initial_domain(fclaw_global_t *glob)
             {
                 fclaw_global_infof(" -- Have new initial refinement\n");
 
-                /* Re-initialize new grids.   Ghost cell values needed for
-                   interpolation have already been set by initialization */
-                fclaw_timer_start (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
-                fclaw_global_iterate_adapted(glob, new_domain,
-                                               cb_fclaw_regrid_repopulate,
-                                               (void *) &domain_init);
-
-                fclaw_timer_stop (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
-
-                /* free all memory associated with old domain */
-                fclaw_domain_reset(glob);
-                *domain = new_domain;
-                new_domain = NULL;
-
-                /* Repartition domain to new processors.    */
-                fclaw_partition_domain(glob,FCLAW_TIMER_INIT);
-
-                /* refine patches (if needed) */
-                if(fclaw_opt->refine_after_parition)
-                {
-                    fclaw_timer_start (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
-                    fclaw_regrid_refine_after_partition(glob);
-                    fclaw_timer_stop (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
-                }
-
-                /* Set up ghost patches.  This probably doesn't need to be done
-                   each time we add a new level. */
-                fclaw_exchange_setup(glob,FCLAW_TIMER_INIT);
-                
-                /* This is normally called from regrid, once the initial domain
-                   has been set up */
-                fclaw_regrid_set_neighbor_types(glob);
+                fclaw_regrid_process_new_refinement(glob, 
+                                                    domain, 
+                                                    new_domain, 
+                                                    domain_init, 
+                                                    FCLAW_TIMER_INIT);
             }
             else
             {
