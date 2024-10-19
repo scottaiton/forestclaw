@@ -382,6 +382,15 @@ fclaw_register (fclaw_options_t* fclaw_opt, sc_options_t * opt)
                           &fclaw_opt->max_refinement_ratio, 1.0,
                           "Ratio of patches to refine before paritioning and continuing refinement. [1.0]");
 
+    kv = fclaw_opt->kv_regrid_mode = sc_keyvalue_new ();
+    sc_keyvalue_set_int (kv, "old",                    FCLAW_OPTIONS_REGRID_MODE_OLD);
+    sc_keyvalue_set_int (kv, "new",                    FCLAW_OPTIONS_REGRID_MODE_NEW); 
+    sc_keyvalue_set_int (kv, "skip-local-patches",     FCLAW_OPTIONS_REGRID_MODE_SKIP_LOCAL);
+    sc_keyvalue_set_int (kv, "refine-after-partition", FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER);
+    sc_options_add_keyvalue (opt, 0, "regrid-mode", 
+                             &fclaw_opt->regrid_mode,
+                             "old", kv, "Regrid mode [old]");
+
     fclaw_opt->is_registered = 1;
     fclaw_opt->is_unpacked = 0;
 
@@ -460,6 +469,7 @@ fclaw_options_destroy(fclaw_options_t* fclaw_opt)
 
     FCLAW_ASSERT (fclaw_opt->kv_timing_verbosity != NULL);
     sc_keyvalue_destroy (fclaw_opt->kv_timing_verbosity);
+    sc_keyvalue_destroy (fclaw_opt->kv_regrid_mode);
 
     // Strings need to be freed if this was unpacked form buffer
     if(fclaw_opt->is_unpacked){

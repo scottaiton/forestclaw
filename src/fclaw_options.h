@@ -112,8 +112,14 @@ void fclaw_options_convert_double_array (const char *array_string,
 void fclaw_options_destroy_array(void* array);
 
 
-/* Plan is to replace fclaw_options_t with fclaw_options_t.
-   Maybe use a macro as an intermediate step? */
+typedef enum fclaw_options_regrid_mode
+{
+    FCLAW_OPTIONS_REGRID_MODE_OLD,
+    FCLAW_OPTIONS_REGRID_MODE_NEW,
+    FCLAW_OPTIONS_REGRID_MODE_SKIP_LOCAL,
+    FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER
+} fclaw_options_regrid_mode_t;
+
 
 struct fclaw_options
 {
@@ -254,6 +260,9 @@ struct fclaw_options
     const char * regression_check; /**< filename of regression check values */
 
     double max_refinement_ratio; /**< Maximum refinment ratio before partitioning and continuing refinement. */
+
+    int regrid_mode; /**< Regrid mode */
+    sc_keyvalue_t *kv_regrid_mode; /**< sc_keyvalue needed for enum option type */
 };
 
 struct fclaw_global;
