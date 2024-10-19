@@ -154,7 +154,7 @@ void refine_patch(fclaw_global_t *glob,
     /* don't try to refine this patch in the next round of refinement */
     fclaw_patch_considered_for_refinement_set(glob, fine_patch);
 
-    if(0)
+    if(fclaw_opt->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER)
     {
         fclaw_patch_store_coarse_in_fine(glob,coarse_patch,fine_patch,
                                          blockno,old_patchno,fine_patchno);
@@ -292,11 +292,13 @@ void cb_fclaw_regrid_repopulate(fclaw_domain_t * old_domain,
     fclaw_patch_neighbors_reset(new_patch);
 }
 
-void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
-                                         fclaw_domain_t **domain,
-                                         fclaw_domain_t *new_domain,
-                                         int domain_init,
-                                         fclaw_timer_names_t timer)
+/* regrid using old interface */
+static
+void process_new_refinement_old(fclaw_global_t *glob,
+                                fclaw_domain_t **domain,
+                                fclaw_domain_t *new_domain,
+                                int domain_init,
+                                fclaw_timer_names_t timer)
 {
     fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
 
@@ -325,6 +327,34 @@ void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
        ghost filling procedures in some cases */
     fclaw_regrid_set_neighbor_types(glob);
 }
+
+/* use new regridding interface */
+static
+void process_new_refinement_new(fclaw_global_t *glob,
+                                fclaw_domain_t **domain,
+                                fclaw_domain_t *new_domain,
+                                int domain_init,
+                                fclaw_timer_names_t timer)
+{
+
+}
+
+void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
+                                         fclaw_domain_t **domain,
+                                         fclaw_domain_t *new_domain,
+                                         int domain_init,
+                                         fclaw_timer_names_t timer)
+{
+    if (fclaw_get_options(glob)->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_OLD)
+    {
+        process_new_refinement_old(glob, domain, new_domain, domain_init, timer);
+    }
+    else
+    {
+        process_new_refinement_new(glob, domain, new_domain, domain_init, timer);
+    }
+}
+
 /* ----------------------------------------------------------------
    Public interface
    -------------------------------------------------------------- */
