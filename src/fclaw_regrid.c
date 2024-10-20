@@ -328,6 +328,18 @@ void process_new_refinement_old(fclaw_global_t *glob,
     fclaw_regrid_set_neighbor_types(glob);
 }
 
+static
+void patch_pack_cb (fclaw_domain_t * domain,
+                      fclaw_patch_t * patch, int blockno,
+                      int patchno, void *pack_data_here,
+                      void *user)
+{
+    fclaw_global_t *glob = (fclaw_global_t *) user;
+    fclaw_patch_partition_pack(glob,patch,
+                               blockno,patchno,
+                               pack_data_here);
+}
+
 /* use new regridding interface */
 static
 void process_new_refinement_new(fclaw_global_t *glob,
@@ -337,6 +349,11 @@ void process_new_refinement_new(fclaw_global_t *glob,
                                 fclaw_timer_names_t timer)
 {
 
+    size_t psize = fclaw_patch_partition_packsize(glob);
+    fclaw_domain_partition_t *p = fclaw_domain_iterate_pack(*domain, 
+                                                            psize,
+                                                            patch_pack_cb,
+                                                            (void *) glob);
 }
 
 void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,

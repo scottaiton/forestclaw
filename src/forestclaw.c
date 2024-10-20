@@ -837,6 +837,50 @@ void fclaw_domain_iterate_partitioned(fclaw_domain_t *old_domain, fclaw_domain_t
     }
 }
 
+struct fclaw_domain_partition
+{
+
+    int refine_dim;
+    fclaw2d_domain_partition_t *d2;
+    fclaw3d_domain_partition_t *d3;
+    fclaw_pack_wrap_user_t wrap;
+};
+
+fclaw_domain_partition_t
+    * fclaw_domain_iterate_pack (fclaw_domain_t * domain,
+                                 size_t data_size,
+                                 fclaw_pack_callback_t patch_pack,
+                                 void *user)
+{
+    fclaw_domain_partition_t *partition = FCLAW_ALLOC(fclaw_domain_partition_t, 1);
+    partition->wrap.pcb = patch_pack;
+    partition->wrap.user = user;
+    if(domain->refine_dim == 2)
+    {
+        partition->refine_dim = 2;
+        partition->d2 = fclaw2d_domain_iterate_pack(domain->d2,
+                                                    data_size,
+                                                    fclaw2d_pack_wrap_cb,
+                                                    &partition->wrap);
+        partition->d3 = NULL;
+    }
+    else if (domain->refine_dim == 3)
+    {
+        partition->refine_dim = 3;
+        partition->d2 = NULL;
+        partition->d3 = fclaw3d_domain_iterate_pack(domain->d3,
+                                                    data_size,
+                                                    fclaw3d_pack_wrap_cb,
+                                                    &partition->wrap);
+    }
+    else
+    {
+        SC_ABORT_NOT_REACHED();
+    }
+
+    return partition;
+}
+
 void fclaw_domain_free_after_partition(fclaw_domain_t *domain, void ***patch_data)
 {
     if(domain->refine_dim == 2)
