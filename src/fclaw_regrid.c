@@ -292,16 +292,12 @@ void cb_fclaw_regrid_repopulate(fclaw_domain_t * old_domain,
     fclaw_patch_neighbors_reset(new_patch);
 }
 
-/* regrid using old interface */
-static
-void process_new_refinement_old(fclaw_global_t *glob,
-                                fclaw_domain_t **domain,
-                                fclaw_domain_t *new_domain,
-                                int domain_init,
-                                fclaw_timer_names_t timer)
+void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
+                                         fclaw_domain_t **domain,
+                                         fclaw_domain_t *new_domain,
+                                         int domain_init,
+                                         fclaw_timer_names_t timer)
 {
-    fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
-
     /* Average to new coarse grids and interpolate to new fine grids */
     fclaw_timer_start (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
     fclaw_global_iterate_adapted(glob, new_domain,
@@ -326,66 +322,6 @@ void process_new_refinement_old(fclaw_global_t *glob,
     /* Get new neighbor information.  This is used to short circuit
        ghost filling procedures in some cases */
     fclaw_regrid_set_neighbor_types(glob);
-}
-
-static
-void patch_pack_cb(fclaw_domain_t * domain,
-                   fclaw_patch_t * patch, int blockno,
-                   int patchno, void *pack_data_here,
-                   void *user)
-{
-    fclaw_global_t *glob = (fclaw_global_t *) user;
-    fclaw_patch_partition_pack(glob,patch,
-                               blockno,patchno,
-                               pack_data_here);
-}
-
-static
-void patch_unpack_cb(fclaw_domain_t * domain,
-                     fclaw_patch_t * patch,
-                     int blockno, int patchno,
-                     void *unpack_data_from_here,
-                     void *user)
-{
-    fclaw_global_t *glob = (fclaw_global_t *) user;
-    fclaw_patch_partition_unpack(glob,domain,patch,
-                                 blockno,patchno,
-                                 unpack_data_from_here);
-}
-
-/* use new regridding interface */
-static
-void process_new_refinement_new(fclaw_global_t *glob,
-                                fclaw_domain_t **domain,
-                                fclaw_domain_t *new_domain,
-                                int domain_init,
-                                fclaw_timer_names_t timer)
-{
-
-    size_t psize = fclaw_patch_partition_packsize(glob);
-    fclaw_domain_partition_t *p = fclaw_domain_iterate_pack(*domain, 
-                                                            psize,
-                                                            patch_pack_cb,
-                                                            (void *) glob);
-
-    fclaw_domain_iterate_unpack(new_domain, p, patch_unpack_cb, (void *) glob);
-    fclaw_domain_partition_free(p);
-}
-
-void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
-                                         fclaw_domain_t **domain,
-                                         fclaw_domain_t *new_domain,
-                                         int domain_init,
-                                         fclaw_timer_names_t timer)
-{
-    if (fclaw_get_options(glob)->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_OLD)
-    {
-        process_new_refinement_old(glob, domain, new_domain, domain_init, timer);
-    }
-    else
-    {
-        process_new_refinement_new(glob, domain, new_domain, domain_init, timer);
-    }
 }
 
 /* ----------------------------------------------------------------
