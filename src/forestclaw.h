@@ -1002,19 +1002,7 @@ void fclaw_domain_iterate_partitioned (fclaw_domain_t * old_domain,
                                        void *user);
 
 /** Data structure for storing allocated data for partition transfer. */
-typedef struct fclaw_domain_partition
-{
-    sc_array_t *src_data; /**< The patch data to send */
-    sc_array_t *src_sizes; /**< The patch data sizes to send */
-    sc_array_t *dest_data; /**< The patch data to receive */
-    sc_array_t *dest_sizes; /**< The patch data sizes to receive */
-    /** Temporary storage required for asynchronous patch data transfer.
-     * It is allocated and freed by the begin/end calls below.
-     */
-    void *async_state;
-    int inside_async;           /**< Between asynchronous begin and end? */
-}
-fclaw_domain_partition_t;
+typedef struct fclaw_domain_partition fclaw_domain_partition_t;
 
 /** Callback to pack patch data after partitioning.
  * The function \ref fclaw_domain_iterate_pack traverses every local patch in
