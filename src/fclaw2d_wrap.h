@@ -104,6 +104,18 @@ fclaw2d_pack_wrap_cb(fclaw2d_domain_t * domain,
                      void *pack_data_here,
                      void *user);
 
+/** 
+ * @brief Wraps a partition unpack callback for 2d domains.
+ * This is used by passing this callback to a function that takes a @ref fclaw2d_unpack_callback_t.
+ * The user pointer should be a pointer to a @ref fclaw_unpack_wrap_user_t.
+ */
+void
+fclaw2d_unpack_wrap_cb(fclaw2d_domain_t * domain,
+                       fclaw2d_patch_t * patch,
+                       int blockno, int patchno,
+                       void *unpack_data_from_here,
+                       void *user);
+
 /**
  * @brief Wraps a intersect callback for 2d domains.
  * This is used by passing this callback to a function that takes a @ref fclaw2d_intersect_callback_t.

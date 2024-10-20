@@ -881,6 +881,37 @@ fclaw_domain_partition_t
     return partition;
 }
 
+void fclaw_domain_iterate_unpack (fclaw_domain_t * domain,
+                                  fclaw_domain_partition_t * partition,
+                                  fclaw_unpack_callback_t patch_unpack,
+                                  void *user)
+{
+    FCLAW_ASSERT(domain->refine_dim == partition->refine_dim);
+
+    fclaw_unpack_wrap_user_t wrap;
+    wrap.ucb = patch_unpack;
+    wrap.user = user;
+
+    if(domain->refine_dim == 2)
+    {
+        fclaw2d_domain_iterate_unpack(domain->d2,
+                                      partition->d2,
+                                      fclaw2d_unpack_wrap_cb,
+                                      &wrap);
+    }
+    else if (domain->refine_dim == 3)
+    {
+        fclaw3d_domain_iterate_unpack(domain->d3,
+                                      partition->d3,
+                                      fclaw3d_unpack_wrap_cb,
+                                      &wrap);
+    }
+    else
+    {
+        SC_ABORT_NOT_REACHED();
+    }
+}
+
 void fclaw_domain_free_after_partition(fclaw_domain_t *domain, void ***patch_data)
 {
     if(domain->refine_dim == 2)

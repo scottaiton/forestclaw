@@ -329,15 +329,28 @@ void process_new_refinement_old(fclaw_global_t *glob,
 }
 
 static
-void patch_pack_cb (fclaw_domain_t * domain,
-                      fclaw_patch_t * patch, int blockno,
-                      int patchno, void *pack_data_here,
-                      void *user)
+void patch_pack_cb(fclaw_domain_t * domain,
+                   fclaw_patch_t * patch, int blockno,
+                   int patchno, void *pack_data_here,
+                   void *user)
 {
     fclaw_global_t *glob = (fclaw_global_t *) user;
     fclaw_patch_partition_pack(glob,patch,
                                blockno,patchno,
                                pack_data_here);
+}
+
+static
+void patch_unpack_cb(fclaw_domain_t * domain,
+                     fclaw_patch_t * patch,
+                     int blockno, int patchno,
+                     void *unpack_data_from_here,
+                     void *user)
+{
+    fclaw_global_t *glob = (fclaw_global_t *) user;
+    fclaw_patch_partition_unpack(glob,domain,patch,
+                                 blockno,patchno,
+                                 unpack_data_from_here);
 }
 
 /* use new regridding interface */
@@ -354,6 +367,8 @@ void process_new_refinement_new(fclaw_global_t *glob,
                                                             psize,
                                                             patch_pack_cb,
                                                             (void *) glob);
+
+    fclaw_domain_iterate_unpack(new_domain, p, patch_unpack_cb, (void *) glob);
 }
 
 void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
