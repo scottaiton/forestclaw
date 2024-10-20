@@ -912,6 +912,23 @@ void fclaw_domain_iterate_unpack (fclaw_domain_t * domain,
     }
 }
 
+void fclaw_domain_partition_free (fclaw_domain_partition_t * partition)
+{
+    if(partition->refine_dim == 2)
+    {
+        fclaw2d_domain_partition_free(partition->d2);
+    }
+    else if (partition->refine_dim == 3)
+    {
+        fclaw3d_domain_partition_free(partition->d3);
+    }
+    else
+    {
+        SC_ABORT_NOT_REACHED();
+    }
+    FCLAW_FREE(partition);
+}
+
 void fclaw_domain_free_after_partition(fclaw_domain_t *domain, void ***patch_data)
 {
     if(domain->refine_dim == 2)

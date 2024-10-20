@@ -369,6 +369,7 @@ void process_new_refinement_new(fclaw_global_t *glob,
                                                             (void *) glob);
 
     fclaw_domain_iterate_unpack(new_domain, p, patch_unpack_cb, (void *) glob);
+    fclaw_domain_partition_free(p);
 }
 
 void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
