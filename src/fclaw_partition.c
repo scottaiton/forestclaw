@@ -56,6 +56,11 @@ void patch_unpack_cb(fclaw_domain_t * domain,
     fclaw_patch_partition_unpack(glob,domain,patch,
                                  blockno,patchno,
                                  unpack_data_from_here);
+    /* Reason for the following two lines: the glob contains the old domain 
+    which is incremented in ddata_old  but we really want to increment the 
+    new domain. */
+    --glob->domain->count_set_patch;
+    ++domain->count_set_patch; 
 }
 
 static
@@ -255,6 +260,14 @@ void partition_domain(fclaw_global_t* glob,
 
         fclaw_domain_iterate_unpack(new_domain, p, patch_unpack_cb, (void *) glob);
         fclaw_domain_partition_free(p);
+
+        /* then the old domain is no longer necessary */
+        fclaw_domain_reset(glob);
+        *domain = new_domain;
+        new_domain = NULL;
+
+        /* internal clean up */
+        fclaw_domain_complete(*domain);
     }
 
     fclaw_timer_stop (&glob->timers[FCLAW_TIMER_PARTITION]);
