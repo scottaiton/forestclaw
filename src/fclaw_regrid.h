@@ -109,15 +109,6 @@ void fclaw_regrid_process_new_refinement(struct fclaw_global *glob,
                                          fclaw_domain_t *new_domain,
                                          int domain_init,
                                          int timer);
-/**
- * @brief Perform refinenment of patches that have been delayed until after
- *        partitioning.
- * 
- * @param glob the global context
- */
-void fclaw_regrid_refine_after_partition(struct fclaw_global * glob);
-
-
 
 #ifdef __cplusplus
 #if 0
