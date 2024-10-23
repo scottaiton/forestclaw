@@ -121,18 +121,12 @@ void cb_regrid_tag4coarsening(fclaw_domain_t *domain,
 
 static
 void build_and_initalize_fine_patch(fclaw_global_t *glob,
-                                    fclaw_domain_t *old_domain,
-                                    fclaw_domain_t *new_domain,
                                     fclaw_patch_t *fine_patch,
                                     int blockno,
                                     int fine_patchno,
                                     int domain_init)
 {
     fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
-    /* Reason for the following two lines: the glob contains the old domain which is incremented in ddata_old 
-       but we really want to increment the new domain. This will be fixed! */
-    --old_domain->count_set_patch;
-    ++new_domain->count_set_patch;
 
     fclaw_patch_build(glob,fine_patch,blockno,
                       fine_patchno,(void*) &build_mode);
@@ -158,8 +152,12 @@ void refine_patch(fclaw_global_t *glob,
     fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
 
     /* Set up first patch in family */
-    build_and_initalize_fine_patch(glob, old_domain, new_domain, &fine_siblings[0],
+    build_and_initalize_fine_patch(glob, &fine_siblings[0],
                                    blockno, fine_patchno + 0, domain_init);
+    /* Reason for the following two lines: the glob contains the old domain which is incremented in ddata_old 
+       but we really want to increment the new domain. This will be fixed! */
+    --old_domain->count_set_patch;
+    ++new_domain->count_set_patch;
 
     if(fclaw_opt->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER)
     {
@@ -171,9 +169,13 @@ void refine_patch(fclaw_global_t *glob,
     {
         for (int i = 1; i < fclaw_domain_num_siblings(old_domain); i++)
         {
-            build_and_initalize_fine_patch(glob, old_domain, new_domain, 
+            build_and_initalize_fine_patch(glob,
                                            &fine_siblings[i], blockno, 
                                            fine_patchno + i, domain_init);
+            /* Reason for the following two lines: the glob contains the old domain which is incremented in ddata_old 
+               but we really want to increment the new domain. This will be fixed! */
+            --old_domain->count_set_patch;
+            ++new_domain->count_set_patch;
         }
 
         if (!domain_init)
@@ -187,8 +189,33 @@ void refine_patch(fclaw_global_t *glob,
 
 }
 
-void fclaw_regrid_refine_after_partition(fclaw_global_t * glob)
+static
+void cb_refine_after_partition(fclaw_domain_t *domain,
+                               fclaw_patch_t *patch,
+                               int blockno,
+                               int patchno,
+                               void *user)
 {
+    fclaw_global_iterate_t *g = (fclaw_global_iterate_t*) user;
+    int domain_init = *((int*) g->user);
+
+    if(fclaw_patch_has_coarse_data(g->glob, patch))
+    {
+        /* initialize other patches in family */
+
+        /* families of patches are contiguous, next patches will be null */
+        for(int i=1; 
+            (patch+i)->user == NULL && i < fclaw_domain_num_siblings(domain); 
+            i++)
+        {
+            build_and_initalize_fine_patch(g->glob,
+                                           patch+i, 
+                                           blockno, 
+                                           patchno+i, 
+                                           domain_init);
+        }
+    }
+    
 
 }
 
@@ -288,8 +315,10 @@ void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
                                          fclaw_domain_t **domain,
                                          fclaw_domain_t *new_domain,
                                          int domain_init,
-                                         fclaw_timer_names_t timer)
+                                         int timer)
 {
+    fclaw_options_t *fclaw_opt = fclaw_get_options(glob);
+
     /* Average to new coarse grids and interpolate to new fine grids */
     fclaw_timer_start (&glob->timers[FCLAW_TIMER_REGRID_BUILD]);
     fclaw_global_iterate_adapted(glob, new_domain,
@@ -304,6 +333,13 @@ void fclaw_regrid_process_new_refinement(fclaw_global_t *glob,
 
     /* Repartition for load balancing.  Second arg (mode) for vtk output */
     fclaw_partition_domain(glob,timer);
+
+    /* refine after partition (if_needed) */
+    if(fclaw_opt->regrid_mode == FCLAW_OPTIONS_REGRID_MODE_REFINE_AFTER)
+    {
+        fclaw_global_iterate_patches(glob, cb_refine_after_partition,
+                                     (void *) &domain_init);
+    }
 
     /* Set up ghost patches. Communication happens for indirect ghost exchanges. */
 
