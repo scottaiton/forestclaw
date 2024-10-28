@@ -109,7 +109,7 @@ struct fclaw_patch_data
     int block_idx;
 
     /** Boolean flags */
-    fclaw_patch_data_flags_t flags;
+    int flags;
 
     /** User defined patch structure */
     void *user_patch;
