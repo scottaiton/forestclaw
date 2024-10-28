@@ -47,6 +47,7 @@ fclaw_global_t* global_new (void)
     glob = FCLAW_ALLOC (fclaw_global_t, 1);
 
     /* these variables need to be set after calling this function */
+    glob->domain = NULL;
     glob->mpicomm = sc_MPI_COMM_NULL;
     glob->mpisize = 0;
     glob->mpirank = -1;
