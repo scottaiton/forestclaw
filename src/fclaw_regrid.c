@@ -40,6 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_domain.h>
 #include <fclaw_patch.h>
 
+#include <forestclaw2d.h>
+
 /* This is also called from fclaw2d_initialize, so is not made static */
 void cb_fclaw_regrid_tag4refinement(fclaw_domain_t *domain,
 									  fclaw_patch_t *this_patch,
@@ -214,6 +216,41 @@ void cb_refine_after_partition(fclaw_domain_t *domain,
                                            patchno+i, 
                                            domain_init);
         }
+        if(!domain_init)
+        {
+            fclaw2d_patch_t artificial_patch_2d;
+            artificial_patch_2d.level  = patch->level-1;
+            artificial_patch_2d.xlower = patch->xlower;
+            artificial_patch_2d.ylower = patch->ylower;
+            artificial_patch_2d.xupper = patch->xupper + patch->xupper - patch->xlower;
+            artificial_patch_2d.yupper = patch->yupper + patch->yupper - patch->ylower;
+            artificial_patch_2d.flags  = patch->d2->flags;
+            fclaw_patch_t artificial_patch;
+            artificial_patch.level  = artificial_patch_2d.level;
+            artificial_patch.xlower = artificial_patch_2d.xlower;
+            artificial_patch.ylower = artificial_patch_2d.ylower;
+            artificial_patch.xupper = artificial_patch_2d.xupper;
+            artificial_patch.yupper = artificial_patch_2d.yupper;
+            artificial_patch.d2 = &artificial_patch_2d;
+            artificial_patch.refine_dim = 2;
+            artificial_patch_2d.user = &artificial_patch;
+
+            fclaw_build_mode_t build_mode = FCLAW_BUILD_FOR_UPDATE;
+
+            fclaw_patch_build(g->glob,&artificial_patch,blockno,
+                              -1,(void*) &build_mode);
+
+            fclaw_patch_get_coarse_from_fine(g->glob,&artificial_patch,patch,
+                                             blockno,patchno);
+            fclaw_patch_has_coarse_data_clear(g->glob, patch);
+
+            fclaw_patch_interpolate2fine(g->glob,&artificial_patch,&patch[0],
+                                         blockno,-1,patchno+0);
+        
+            fclaw_patch_data_delete(g->glob, &artificial_patch);
+        
+        }
+
     }
     
 
