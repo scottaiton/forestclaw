@@ -380,7 +380,7 @@ c              # Fill in refined values on coarse grid cell (ic,jc)
 
       if (manifold .ne. 0) then
          call fclaw2d_clawpatch5_fort_fixcapaq2(mx,my,mbc,meqn,
-     &         qcoarse,qfine,areacoarse,areafine,igrid)
+     &         qcoarse,qfine,areafine,igrid)
       endif
 
 
@@ -404,7 +404,7 @@ c> @param[in] areacoarse, areafine the areas of the fine and coarse grids
 c> @param[in] igrid the index of the fine grid in the child array
 c--------------------------------------------------------------------
       subroutine fclaw2d_clawpatch5_fort_fixcapaq2(mx,my,mbc,meqn,
-     &      qcoarse,qfine, areacoarse,areafine,igrid)
+     &      qcoarse,qfine, areafine,igrid)
       implicit none
 
       integer mx,my,mbc,meqn, refratio, igrid
@@ -412,7 +412,6 @@ c--------------------------------------------------------------------
 
       double precision qcoarse(meqn,1-mbc:mx+mbc,1-mbc:my+mbc)
       double precision qfine(meqn,1-mbc:mx+mbc,1-mbc:my+mbc)
-      double precision areacoarse(-mbc:mx+mbc+1,-mbc:my+mbc+1)
       double precision   areafine(-mbc:mx+mbc+1,-mbc:my+mbc+1)
 
       integer i,j,ii, jj, ifine, jfine, m, ig, jg, ic_add, jc_add
@@ -440,6 +439,7 @@ c     # -------------------------------------------------------
          do i = 1,mx/p4est_refineFactor
             do j = 1,my/p4est_refineFactor
                sum = 0.d0
+               kc = 0.d0
                do ii = 1,refratio
                   do jj = 1,refratio
                      ifine = (i-1)*refratio + ii
@@ -447,10 +447,10 @@ c     # -------------------------------------------------------
                      kf = areafine(ifine,jfine)
                      qf = qfine(m,ifine,jfine)
                      sum = sum + kf*qf
+                     kc = kc + kf
                   enddo
                enddo
 
-               kc = areacoarse(i+ic_add,j+jc_add)
                qc = qcoarse(m,i+ic_add, j+jc_add)
                cons_diff = (qc*kc - sum)/r2
 
