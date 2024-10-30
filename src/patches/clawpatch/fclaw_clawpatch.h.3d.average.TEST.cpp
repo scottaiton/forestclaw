@@ -166,7 +166,6 @@ TEST_CASE("3d clawpatch average")
               const int* meqn,
               double qcoarse[], 
               double qfine[],
-              double areacoarse[], 
               double areafine[],
               const int* igrid, 
               const int* manifold)

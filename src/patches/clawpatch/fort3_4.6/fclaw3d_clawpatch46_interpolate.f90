@@ -369,7 +369,7 @@ end subroutine fclaw3d_clawpatch46_fort_interpolate_corner
 
 !! # Conservative intepolation to fine grid patch
 subroutine fclaw3d_clawpatch46_fort_interpolate2fine & 
-          (mx,my,mz,mbc,meqn,qcoarse, qfine, volcoarse, &
+          (mx,my,mz,mbc,meqn,qcoarse, qfine, &
            volfine, igrid, manifold)
     implicit none
 
@@ -379,7 +379,6 @@ subroutine fclaw3d_clawpatch46_fort_interpolate2fine &
     double precision :: qcoarse(1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc,meqn)
     double precision ::   qfine(1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc,meqn)
 
-    double precision :: volcoarse(-mbc:mx+mbc+1,-mbc:my+mbc+1,-mbc:mz+mbc+1)
     double precision ::   volfine(-mbc:mx+mbc+1,-mbc:my+mbc+1,-mbc:mz+mbc+1)
 
     integer :: ii, jj, kk, i,j,k, i1, i2, j1, j2, k1, k2, ig, jg, kg, mq, mth

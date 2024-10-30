@@ -969,7 +969,7 @@ TEST_CASE("3dx fclaw_clawpatch interpolate2fine")
 
     clawpatch_vt->d3->fort_interpolate2fine = [](const int *mx, const int *my, const int *mz, 
                                                  const int *mbc, const int *meqn, 
-                                                 double qcoarse[], double qfine[], double areacoarse[], double areafine[], 
+                                                 double qcoarse[], double qfine[], double areafine[], 
                                                  const int *igrid, const int *manifold)
     {
         CHECK(*mx == i2f_cp->mx);

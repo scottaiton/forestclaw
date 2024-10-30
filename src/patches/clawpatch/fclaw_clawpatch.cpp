@@ -1214,7 +1214,6 @@ void clawpatch_interpolate2fine(fclaw_global_t* glob,
         }
         else 
         {
-            double *volcoarse = clawpatch_get_volume(glob, coarse_patch);
             double *volfine = NULL;
             if (fclaw_opt->manifold)
                  volfine = clawpatch_get_volume(glob, fine_patch);
@@ -1223,7 +1222,7 @@ void clawpatch_interpolate2fine(fclaw_global_t* glob,
             int my = clawpatch_opt->my;
             int mz = clawpatch_opt->mz;
             clawpatch_vt->d3->fort_interpolate2fine(&mx,&my,&mz, &mbc,&meqn,qcoarse,qfine,
-                                                    volcoarse, volfine, &igrid,
+                                                    volfine, &igrid,
                                                     &fclaw_opt->manifold);
         }
     }

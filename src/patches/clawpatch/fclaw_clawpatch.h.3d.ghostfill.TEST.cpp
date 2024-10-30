@@ -598,7 +598,6 @@ TEST_CASE("3d clawpatch ghost fill on cube with refinement")
               const int* meqn,
               double qcoarse[], 
               double qfine[],
-              double areacoarse[], 
               double areafine[],
               const int* igrid, 
               const int* manifold)
@@ -705,7 +704,6 @@ TEST_CASE("3d clawpatch ghost fill on cube with refinement coarse interior")
               const int* meqn,
               double qcoarse[], 
               double qfine[],
-              double areacoarse[], 
               double areafine[],
               const int* igrid, 
               const int* manifold)
@@ -869,7 +867,6 @@ TEST_CASE("3d clawpatch ghost fill on 2x2x2 brick with refinement on one block")
               const int* meqn,
               double qcoarse[], 
               double qfine[],
-              double areacoarse[], 
               double areafine[],
               const int* igrid, 
               const int* manifold)
@@ -980,7 +977,6 @@ TEST_CASE("3d clawpatch ghost fill on 2x2x2 brick with refinement on all but one
               const int* meqn,
               double qcoarse[], 
               double qfine[],
-              double areacoarse[], 
               double areafine[],
               const int* igrid, 
               const int* manifold)
@@ -1096,7 +1092,6 @@ TEST_CASE("3d clawpatch ghost fill on 2x2x2 brick with refinement coarse interio
               const int* meqn,
               double qcoarse[], 
               double qfine[],
-              double areacoarse[], 
               double areafine[],
               const int* igrid, 
               const int* manifold)
@@ -1212,7 +1207,6 @@ TEST_CASE("3d clawpatch ghost fill on 2x2x2 brick with refinement 2")
               const int* meqn,
               double qcoarse[], 
               double qfine[],
-              double areacoarse[], 
               double areafine[],
               const int* igrid, 
               const int* manifold)
