@@ -1152,6 +1152,29 @@ int clawpatch_tag4coarsening(fclaw_global_t *glob,
 }
 
 static
+void clawpatch_store_coarse_in_fine(struct fclaw_global *glob,
+                                    struct fclaw_patch *coarse_patch,
+                                    struct fclaw_patch *fine_patch,
+                                    int blockno, int coarse_patchno,
+                                    int fine_patchno)
+{
+    fclaw_clawpatch_t *coarse_cp = get_clawpatch(coarse_patch);
+    fclaw_clawpatch_t *fine_cp = get_clawpatch(fine_patch);
+    fine_cp->griddata = coarse_cp->griddata;
+}
+
+static
+void clawpatch_get_coarse_from_fine(struct fclaw_global *glob,
+                                    struct fclaw_patch *fine_patch,
+                                    struct fclaw_patch *coarse_patch,
+                                    int blockno, int fine_patchno)
+{
+    fclaw_clawpatch_t *fine_cp = get_clawpatch(fine_patch);
+    fclaw_clawpatch_t *coarse_cp = get_clawpatch(coarse_patch);
+    coarse_cp->griddata = fine_cp->griddata;
+}
+
+static
 void clawpatch_interpolate2fine(fclaw_global_t* glob,
                                 fclaw_patch_t *coarse_patch,
                                 fclaw_patch_t* fine_patches,
@@ -1936,6 +1959,8 @@ void fclaw_clawpatch_vtable_initialize(fclaw_global_t* glob,
 
     patch_vt->average2coarse       = clawpatch_average2coarse;
     patch_vt->interpolate2fine     = clawpatch_interpolate2fine;
+    patch_vt->store_coarse_in_fine = clawpatch_store_coarse_in_fine;
+    patch_vt->get_coarse_from_fine = clawpatch_get_coarse_from_fine;
 
     /* ghost patch */
     patch_vt->ghost_packsize       = clawpatch_ghost_packsize;

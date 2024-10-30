@@ -240,7 +240,7 @@ void cb_refine_after_partition(fclaw_domain_t *domain,
             fclaw_patch_build(g->glob,&artificial_patch,blockno,
                               -1,(void*) &build_mode);
 
-            fclaw_patch_get_coarse_from_fine(g->glob,&artificial_patch,patch,
+            fclaw_patch_get_coarse_from_fine(g->glob,patch,&artificial_patch,
                                              blockno,patchno);
             fclaw_patch_has_coarse_data_clear(g->glob, patch);
 

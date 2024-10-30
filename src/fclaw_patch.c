@@ -645,7 +645,12 @@ void fclaw_patch_store_coarse_in_fine(struct fclaw_global *glob,
                                        int blockno, int coarse_patchno,
                                        int fine_patchno)
 {
+	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
+	FCLAW_ASSERT(patch_vt->store_coarse_in_fine != NULL);
 
+	patch_vt->store_coarse_in_fine(glob,coarse_patch,fine_patch,
+								   blockno,coarse_patchno,
+								   fine_patchno);
 }
 
 void fclaw_patch_get_coarse_from_fine(struct fclaw_global *glob,
@@ -653,7 +658,11 @@ void fclaw_patch_get_coarse_from_fine(struct fclaw_global *glob,
                                        struct fclaw_patch *coarse_patch,
                                        int blockno, int fine_patchno)
 {
+	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
+	FCLAW_ASSERT(patch_vt->get_coarse_from_fine != NULL);
 
+	patch_vt->get_coarse_from_fine(glob,fine_patch,coarse_patch,
+								   blockno,fine_patchno);
 }
 
 void fclaw_patch_interpolate2fine(fclaw_global_t* glob,

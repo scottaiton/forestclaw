@@ -1472,6 +1472,17 @@ typedef int (*fclaw_patch_tag4coarsening_t)(struct fclaw_global *glob,
 
 
 
+typedef void (*fclaw_patch_store_coarse_in_fine_t)(struct fclaw_global *glob,
+                                                    struct fclaw_patch *coarse_patch,
+                                                    struct fclaw_patch *fine_patch,
+                                                    int blockno, int coarse_patchno,
+                                                    int fine_patchno);
+
+typedef void (*fclaw_patch_get_coarse_from_fine_t)(struct fclaw_global *glob,
+                                                    struct fclaw_patch *fine_patch,
+                                                    struct fclaw_patch *coarse_patch,
+                                                    int blockno, int fine_patchno);
+
 /**
  * @brief Test whether a patch is in a region
  * 
@@ -1792,6 +1803,8 @@ struct fclaw_patch_vtable
     fclaw_patch_average2coarse_t        average2coarse;
     /** @copybrief ::fclaw_patch_interpolate2fine_t */
     fclaw_patch_interpolate2fine_t      interpolate2fine;
+    fclaw_patch_store_coarse_in_fine_t  store_coarse_in_fine;
+    fclaw_patch_get_coarse_from_fine_t  get_coarse_from_fine;
 
     /** @copybrief ::fclaw_patch_intersects_region_t */
     fclaw_patch_intersects_region_t      intersects_region;
