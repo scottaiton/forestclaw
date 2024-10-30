@@ -461,7 +461,7 @@ subroutine fclaw3d_clawpatch46_fort_interpolate2fine &
         !!write(6,*) 'interpolate:fixcapaq2 : Manifold not yet implemented in 3D'
         !!stop
         call fclaw3d_clawpatch46_fort_fixcapaq2(mx,my,mz,mbc,meqn, & 
-                        qcoarse,qfine, volcoarse,volfine,igrid)
+                        qcoarse,qfine, volfine,igrid)
     endif
 
 
@@ -474,73 +474,76 @@ end subroutine  fclaw3d_clawpatch46_fort_interpolate2fine
     !! # be used by the ghost cell routines as well?
     !! # ------------------------------------------------------
 subroutine fclaw3d_clawpatch46_fort_fixcapaq2(mx,my,mz,mbc,meqn, & 
-           qcoarse,qfine, volcoarse,volfine,igrid)
+           qcoarse,qfine, volfine,igrid)
     implicit none
 
     integer :: mx,my,mz,mbc,meqn, refratio, igrid
-    integer :: p4est_refineFactor
+    integer :: p8est_refineFactor
 
     double precision ::  qcoarse(1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc,meqn)
     double precision ::    qfine(1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc,meqn)
-    double precision ::  volcoarse(-mbc:mx+mbc+1,-mbc:my+mbc+1,-mbc:mz+mbc+1)
     double precision ::    volfine(-mbc:mx+mbc+1,-mbc:my+mbc+1,-mbc:mz+mbc+1)
 
-    integer :: i,j,k,ii, jj, ifine, jfine, m, ig, jg, ic_add, jc_add
-    double precision :: kf, kc, r2, sum, cons_diff, qf, qc, volf, dz, volc
+    integer :: i,j,k, ii,jj,kk, ifine,jfine,kfine, m, ig,jg,kg, ic_add,jc_add,kc_add
+    double precision :: kf, kc, r3, sum, cons_diff, qf, qc, volf, dz
 
-    p4est_refineFactor = 2
+    p8est_refineFactor = 2
     refratio = 2
 
-    !! This is a bogus value, since we shouldn't end up here (yet). 
-    dz = 1
-
-    !! # Get (ig,jg) for grid from linear (igrid) coordinates
+    !! Get (ig,jg,kg) for grid from linear (igrid) coordinates
+    !! igrid = ig + refratio*jg + refratio*refratio*kg
     ig = mod(igrid,refratio)
-    jg = (igrid-ig)/refratio
+    jg = mod((igrid-ig)/refratio,refratio)
+    kg = (igrid-ig-refratio*jg)/(refratio**2)
 
     !! # Get rectangle in coarse grid for fine grid.
-    ic_add = ig*mx/p4est_refineFactor
-    jc_add = jg*my/p4est_refineFactor
+    ic_add = ig*mx/p8est_refineFactor
+    jc_add = jg*my/p8est_refineFactor
+    kc_add = kg*mz/p8est_refineFactor
 
     !! # ------------------------------------------------------
     !! # This routine ensures that the interpolated solution
     !! # has the same mass as the coarse grid solution
     !! # -------------------------------------------------------
 
-    r2 = refratio*refratio
+    r3 = refratio**3
     mq_loop : do m = 1,meqn
-        k_loop : do k = 1,mz
-            do i = 1,mx/p4est_refineFactor
-                do j = 1,my/p4est_refineFactor
+        do k = 1,mz/p8est_refineFactor
+            do j = 1,my/p8est_refineFactor
+                do i = 1,mx/p8est_refineFactor
                     sum = 0.d0
-                    do ii = 1,refratio
+                    kc = 0.d0
+                    do kk = 1,refratio
                         do jj = 1,refratio
-                           ifine = (i-1)*refratio + ii
-                           jfine = (j-1)*refratio + jj
-                           kf = volfine(ifine,jfine,k)
-                           volf = kf*dz
-                           qf = qfine(ifine,jfine,k,m)
-                           sum = sum + volf*qf
+                            do ii = 1,refratio
+                                ifine = (i-1)*refratio + ii
+                                jfine = (j-1)*refratio + jj
+                                kfine = (k-1)*refratio + kk
+                                kf = volfine(ifine,jfine,kfine)
+                                qf = qfine(ifine,jfine,kfine,m)
+                                sum = sum + kf*qf
+                                kc = kc + kf
+                            enddo
                         enddo
                     enddo
 
-                    kc = volcoarse(i+ic_add,j+jc_add,k)
-                    volc = kc*dz
-                    qc = qcoarse(i+ic_add, j+jc_add,k,m)
-                    cons_diff = (qc*volc - sum)/r2
+                    qc = qcoarse(i+ic_add, j+jc_add, k+kc_add, m)
+                    cons_diff = (qc*kc - sum)/r3
 
-                    do ii = 1,refratio
+                    do kk = 1,refratio
                         do jj = 1,refratio
-                           ifine  = (i-1)*refratio + ii
-                           jfine  = (j-1)*refratio + jj
-                           kf = volfine(ifine,jfine,k)
-                           volf = kf*dz
-                           qfine(ifine,jfine,k,m) = qfine(ifine,jfine,k,m) + cons_diff/volf
+                            do ii = 1,refratio
+                                ifine  = (i-1)*refratio + ii
+                                jfine  = (j-1)*refratio + jj
+                                kfine  = (k-1)*refratio + kk
+                                kf = volfine(ifine,jfine,kfine)
+                                qfine(ifine,jfine,kfine,m) = qfine(ifine,jfine,kfine,m) + cons_diff/kf
+                            end do
                        end do
                     end do
-                end do !! j loop
-            enddo !! i loop
-        enddo k_loop
+                enddo !! i loop
+            end do !! j loop
+        enddo !! k loop
     enddo mq_loop
 
 end
