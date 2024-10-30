@@ -374,7 +374,7 @@ subroutine fclaw3dx_clawpatch46_fort_interpolate2fine &
         !!write(6,*) 'interpolate:fixcapaq2 : Manifold not yet implemented in 3D'
         !!stop
         call fclaw3dx_clawpatch46_fort_fixcapaq2(mx,my,mz,mbc,meqn, & 
-                        qcoarse,qfine, volcoarse,volfine,igrid)
+                        qcoarse,qfine, volfine,igrid)
     endif
 
 
@@ -387,7 +387,7 @@ end subroutine  fclaw3dx_clawpatch46_fort_interpolate2fine
     !! # be used by the ghost cell routines as well?
     !! # ------------------------------------------------------
 subroutine fclaw3dx_clawpatch46_fort_fixcapaq2(mx,my,mz,mbc,meqn, & 
-           qcoarse,qfine, volcoarse,volfine,igrid)
+           qcoarse,qfine, volfine,igrid)
     implicit none
 
     integer :: mx,my,mz,mbc,meqn, refratio, igrid
@@ -399,7 +399,7 @@ subroutine fclaw3dx_clawpatch46_fort_fixcapaq2(mx,my,mz,mbc,meqn, &
     double precision ::    volfine(-mbc:mx+mbc+1,-mbc:my+mbc+1,-mbc:mz+mbc+1)
 
     integer :: i,j,k,ii, jj, ifine, jfine, m, ig, jg, ic_add, jc_add
-    double precision :: kf, kc, r2, sum, cons_diff, qf, qc, volf, dz, volc
+    double precision :: kf, r2, sum, cons_diff, qf, qc, volf, dz, volc
 
     p4est_refineFactor = 2
     refratio = 2
@@ -426,6 +426,7 @@ subroutine fclaw3dx_clawpatch46_fort_fixcapaq2(mx,my,mz,mbc,meqn, &
             do i = 1,mx/p4est_refineFactor
                 do j = 1,my/p4est_refineFactor
                     sum = 0.d0
+                    volc = 0.d0
                     do ii = 1,refratio
                         do jj = 1,refratio
                            ifine = (i-1)*refratio + ii
@@ -434,11 +435,10 @@ subroutine fclaw3dx_clawpatch46_fort_fixcapaq2(mx,my,mz,mbc,meqn, &
                            volf = kf*dz
                            qf = qfine(ifine,jfine,k,m)
                            sum = sum + volf*qf
+                           volc = volc + volf
                         enddo
                     enddo
 
-                    kc = volcoarse(i+ic_add,j+jc_add,k)
-                    volc = kc*dz
                     qc = qcoarse(i+ic_add, j+jc_add,k,m)
                     cons_diff = (qc*volc - sum)/r2
 
