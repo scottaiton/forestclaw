@@ -104,7 +104,7 @@ void FCLAW2D_CLAWPATCH46_FORT_TAG4COARSENING(const int* mx, const int* my,
 void FCLAW2D_CLAWPATCH46_FORT_INTERPOLATE2FINE(const int* mx,const int* my,
                                                const int* mbc, const int* meqn,
                                                double qcoarse[], double qfine[],
-                                               double areacoarse[], double areafine[],
+                                               double areafine[],
                                                const int* igrid, const int* manifold);
   
 /** Fortran subroutine name */

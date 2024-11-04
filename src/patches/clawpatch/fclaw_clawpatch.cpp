@@ -1201,7 +1201,6 @@ void clawpatch_interpolate2fine(fclaw_global_t* glob,
 
         if(clawpatch_opt->patch_dim == 2)
         {
-            double *areacoarse = clawpatch_get_area(glob, coarse_patch);
             double *areafine = NULL;
             if (fclaw_opt->manifold)
                 areafine = clawpatch_get_area(glob, fine_patch);
@@ -1209,7 +1208,7 @@ void clawpatch_interpolate2fine(fclaw_global_t* glob,
             int mx = clawpatch_opt->mx;
             int my = clawpatch_opt->my;
             clawpatch_vt->d2->fort_interpolate2fine(&mx,&my,&mbc,&meqn,qcoarse,qfine,
-                                                    areacoarse, areafine, &igrid,
+                                                    areafine, &igrid,
                                                     &fclaw_opt->manifold);
         }
         else 

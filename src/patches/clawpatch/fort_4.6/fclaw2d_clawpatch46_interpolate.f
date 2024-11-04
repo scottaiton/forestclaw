@@ -322,7 +322,7 @@ c>
 c> @details @copydetails ::clawpatch_fort_interpolate2fine_t
 c--------------------------------------------------------------------
       subroutine fclaw2d_clawpatch46_fort_interpolate2fine
-     &     (mx,my,mbc,meqn,qcoarse, qfine, areacoarse, 
+     &     (mx,my,mbc,meqn,qcoarse, qfine, 
      &      areafine, igrid, manifold)
       implicit none
 
@@ -332,7 +332,6 @@ c--------------------------------------------------------------------
       double precision qcoarse(1-mbc:mx+mbc,1-mbc:my+mbc,meqn)
       double precision qfine(1-mbc:mx+mbc,1-mbc:my+mbc,meqn)
 
-      double precision areacoarse(-mbc:mx+mbc+1,-mbc:my+mbc+1)
       double precision   areafine(-mbc:mx+mbc+1,-mbc:my+mbc+1)
 
       integer ii, jj, i,j, i1, i2, j1, j2, ig, jg, mq, mth

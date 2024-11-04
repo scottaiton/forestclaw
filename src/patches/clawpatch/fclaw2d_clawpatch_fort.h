@@ -257,7 +257,6 @@ typedef int (*clawpatch_fort_exceeds_threshold_t)(const int *blockno,
  * @param[in]  meqn the number of equations
  * @param[in]  qcoarse the coarse solution
  * @param[out] qfine the fine solution
- * @param[in]  areacoarse the area of the coarse cells
  * @param[in]  areafine the area of the fine cells
  * @param[in]  igrid the index of the fine patch in the siblings array
  * @param[in]  manifold true if using manifold
@@ -265,7 +264,7 @@ typedef int (*clawpatch_fort_exceeds_threshold_t)(const int *blockno,
 typedef void (*clawpatch_fort_interpolate2fine_t)(const int* mx, const int* my,
 												  const int* mbc, const int* meqn,
 												  double qcoarse[], double qfine[],
-												  double areacoarse[], double areafine[],
+												  double areafine[],
 												  const int* igrid, const int* manifold);
 	
 /** 
