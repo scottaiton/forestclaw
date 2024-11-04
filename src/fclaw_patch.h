@@ -736,13 +736,14 @@ void fclaw_patch_get_coarse_from_fine(struct fclaw_global *glob,
  * @param[in,out] fine_patches the fine patch contexts
  * @param[in] blockno the block number
  * @param[in] coarse_patchno the patch number of the coarse patch
- * @param[in] fine0_patchno the patch number of the first fine patch
+ * @param[in] fine_patchno the patch number of the fine patch
+ * @param[in] igrid the index of the fine patch in the child array
  */
 void fclaw_patch_interpolate2fine(struct fclaw_global *glob,
                                     struct fclaw_patch* coarse_patch,
-                                    struct fclaw_patch* fine_patches,
+                                    struct fclaw_patch* fine_patch,
                                     int this_blockno, int coarse_patchno,
-                                    int fine0_patchno);
+                                    int fine_patchno, int igrid);
 
 /**
  * @brief Averages from a set of fine patches to a coarse patch
@@ -1512,13 +1513,14 @@ typedef int (*fclaw_patch_intersects_region_t)(struct fclaw_global *glob,
  * @param[in,out] fine_patches the fine patch contexts
  * @param[in] blockno the block number
  * @param[in] coarse_patchno the patch number of the coarse patch
- * @param[in] fine_patchno the patch number of the first fine patch
+ * @param[in] fine_patchno the patch number of the fine patch
+ * @param[in] igrid the index of the fine patch in the child array
  */
 typedef void (*fclaw_patch_interpolate2fine_t)(struct fclaw_global *glob,
                                                  struct fclaw_patch *coarse_patch,
-                                                 struct fclaw_patch* fine_patches,
+                                                 struct fclaw_patch* fine_patch,
                                                  int blockno, int coarse_patchno,
-                                                 int fine_patchno);
+                                                 int fine_patchno, int igrid);
 /**
  * @brief Averages from a set of fine patches to a coarse patch
  * 

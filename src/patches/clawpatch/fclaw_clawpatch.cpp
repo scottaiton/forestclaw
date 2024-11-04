@@ -1177,53 +1177,48 @@ void clawpatch_get_coarse_from_fine(struct fclaw_global *glob,
 static
 void clawpatch_interpolate2fine(fclaw_global_t* glob,
                                 fclaw_patch_t *coarse_patch,
-                                fclaw_patch_t* fine_patches,
+                                fclaw_patch_t* fine_patch,
                                 int this_blockno, int coarse_patchno,
-                                int fine0_patchno)
+                                int fine_patchno, int igrid)
 {
 
     const fclaw_clawpatch_options_t *clawpatch_opt = fclaw_clawpatch_get_options(glob);
     int mbc = clawpatch_opt->mbc;
     int meqn = clawpatch_opt->meqn;
 
-    /* Loop over four siblings (z-ordering) */
-    for (int igrid = 0; igrid < fclaw_domain_num_siblings(glob->domain); igrid++)
+    double *qfine = fclaw_clawpatch_get_q(glob,fine_patch);
+
+    const fclaw_options_t* fclaw_opt = fclaw_get_options(glob);
+
+    fclaw_clawpatch_vtable_t* clawpatch_vt = fclaw_clawpatch_vt(glob);
+
+
+    double *qcoarse = fclaw_clawpatch_get_q(glob,coarse_patch);
+
+    if(clawpatch_opt->patch_dim == 2)
     {
-        fclaw_patch_t *fine_patch = &fine_patches[igrid];
-        double *qfine = fclaw_clawpatch_get_q(glob,fine_patch);
+        double *areafine = NULL;
+        if (fclaw_opt->manifold)
+            areafine = clawpatch_get_area(glob, fine_patch);
 
-        const fclaw_options_t* fclaw_opt = fclaw_get_options(glob);
+        int mx = clawpatch_opt->mx;
+        int my = clawpatch_opt->my;
+        clawpatch_vt->d2->fort_interpolate2fine(&mx,&my,&mbc,&meqn,qcoarse,qfine,
+                                                areafine, &igrid,
+                                                &fclaw_opt->manifold);
+    }
+    else 
+    {
+        double *volfine = NULL;
+        if (fclaw_opt->manifold)
+             volfine = clawpatch_get_volume(glob, fine_patch);
 
-        fclaw_clawpatch_vtable_t* clawpatch_vt = fclaw_clawpatch_vt(glob);
-
-
-        double *qcoarse = fclaw_clawpatch_get_q(glob,coarse_patch);
-
-        if(clawpatch_opt->patch_dim == 2)
-        {
-            double *areafine = NULL;
-            if (fclaw_opt->manifold)
-                areafine = clawpatch_get_area(glob, fine_patch);
-
-            int mx = clawpatch_opt->mx;
-            int my = clawpatch_opt->my;
-            clawpatch_vt->d2->fort_interpolate2fine(&mx,&my,&mbc,&meqn,qcoarse,qfine,
-                                                    areafine, &igrid,
-                                                    &fclaw_opt->manifold);
-        }
-        else 
-        {
-            double *volfine = NULL;
-            if (fclaw_opt->manifold)
-                 volfine = clawpatch_get_volume(glob, fine_patch);
-
-            int mx = clawpatch_opt->mx;
-            int my = clawpatch_opt->my;
-            int mz = clawpatch_opt->mz;
-            clawpatch_vt->d3->fort_interpolate2fine(&mx,&my,&mz, &mbc,&meqn,qcoarse,qfine,
-                                                    volfine, &igrid,
-                                                    &fclaw_opt->manifold);
-        }
+        int mx = clawpatch_opt->mx;
+        int my = clawpatch_opt->my;
+        int mz = clawpatch_opt->mz;
+        clawpatch_vt->d3->fort_interpolate2fine(&mx,&my,&mz, &mbc,&meqn,qcoarse,qfine,
+                                                volfine, &igrid,
+                                                &fclaw_opt->manifold);
     }
 }
 

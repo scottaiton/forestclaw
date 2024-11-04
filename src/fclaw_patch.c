@@ -667,16 +667,16 @@ void fclaw_patch_get_coarse_from_fine(struct fclaw_global *glob,
 
 void fclaw_patch_interpolate2fine(fclaw_global_t* glob,
 									fclaw_patch_t* coarse_patch,
-									fclaw_patch_t* fine_patches,
+									fclaw_patch_t* fine_patch,
 									int this_blockno, int coarse_patchno,
-									int fine0_patchno)
+									int fine_patchno, int igrid)
 {
 	fclaw_patch_vtable_t *patch_vt = fclaw_patch_vt(glob);
 	FCLAW_ASSERT(patch_vt->interpolate2fine != NULL);
 
-	patch_vt->interpolate2fine(glob,coarse_patch,fine_patches,
+	patch_vt->interpolate2fine(glob,coarse_patch,fine_patch,
 							   this_blockno,coarse_patchno,
-							   fine0_patchno);
+							   fine_patchno, igrid);
 }
 
 /* ---------------------------- Ghost patches (local and remote) ---------------------- */

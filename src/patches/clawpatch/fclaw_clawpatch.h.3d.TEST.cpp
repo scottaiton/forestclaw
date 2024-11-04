@@ -960,7 +960,7 @@ namespace{
     fclaw_clawpatch_t* i2f_cp1;
     fclaw_clawpatch_t* i2f_cp2;
     fclaw_clawpatch_t* i2f_cp3;
-    std::bitset<8> i2f_igrids;
+    int i2f_igrid;
     int i2f_manifold;
 }
 TEST_CASE("3d fclaw_clawpatch interpolate2fine")
@@ -1015,15 +1015,16 @@ TEST_CASE("3d fclaw_clawpatch interpolate2fine")
         }
 #endif
 
-        CHECK(i2f_igrids[*igrid] == false);
-        i2f_igrids[*igrid] = true;
+        CHECK_EQ(*igrid, i2f_igrid);
         CHECK(*manifold == i2f_manifold);
     };
 
-    fclaw_patch_interpolate2fine(coarse_test_data.glob,
-                                   &coarse_test_data.domain->blocks[0].patches[0],
-                                   &fine_test_data.domain->blocks[0].patches[0],
-                                   0, 0, 0);
-
-    CHECK(i2f_igrids.all());
+    for(int i = 0; i < 8; i++)
+    {
+        i2f_igrid = i;
+        fclaw_patch_interpolate2fine(coarse_test_data.glob,
+                                       &coarse_test_data.domain->blocks[0].patches[0],
+                                       &fine_test_data.domain->blocks[0].patches[i],
+                                       0, 0, 0, i);
+    }
 }

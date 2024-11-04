@@ -182,8 +182,11 @@ void refine_patch(fclaw_global_t *glob,
 
         if (!domain_init)
         {
-            fclaw_patch_interpolate2fine(glob,coarse_patch,fine_siblings,
-                                         blockno,coarse_patchno,fine_patchno);//new_domain
+            for(int i = 0; i < fclaw_domain_num_siblings(old_domain); i++)
+            {
+                fclaw_patch_interpolate2fine(glob,coarse_patch,&fine_siblings[i],
+                                             blockno,coarse_patchno,fine_patchno+i,i);//new_domain
+            }
         }
     }
     /* used to pass in old_domain */
@@ -244,8 +247,8 @@ void cb_refine_after_partition(fclaw_domain_t *domain,
                                              blockno,patchno);
             fclaw_patch_has_coarse_data_clear(g->glob, patch);
 
-            fclaw_patch_interpolate2fine(g->glob,&artificial_patch,&patch[0],
-                                         blockno,-1,patchno+0);
+            //fclaw_patch_interpolate2fine(g->glob,&artificial_patch,&patch[0],
+            //                             blockno,-1,patchno+0);
         
             fclaw_patch_data_delete(g->glob, &artificial_patch);
         
