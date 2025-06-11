@@ -26,6 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FCLAW_GAUGES_H
 #define FCLAW_GAUGES_H
 
+#include <fclaw_base.h>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -161,6 +163,27 @@ typedef void (*fclaw_gauge_print_t)(struct fclaw_global *glob,
                                     struct fclaw_gauge *gauge);
 
 /**
+ * @brief Pack buffer into byte array
+ * 
+ * @param glob the global context
+ * @param gauge the gauge
+ * @param i the index of the data in the buffer to pack
+ * @param pack_data_here the byte array to pack the data into
+ */
+typedef void (*fclaw_gauge_buffer_pack_t)(struct fclaw_global *glob, 
+                                          struct fclaw_gauge *gauge, 
+                                          int i, 
+                                          char *pack_data_here);
+
+
+/**
+ * @brief Packed size of a buffer entry in the gauge
+ *
+ * @return the size of the packed buffer entry in bytes
+ */
+typedef size_t (*fclaw_gauge_buffer_packsize_t)(struct fclaw_global *glob);
+
+/**
  * @brief vtable for gauges
  */
 typedef struct fclaw_gauges_vtable
@@ -173,6 +196,11 @@ typedef struct fclaw_gauges_vtable
     fclaw_gauge_update_t        update_gauge;
     /** @brief Prints the buffer to a file */
     fclaw_gauge_print_t         print_gauge_buffer;
+
+    /** @brief Pack buffer into byte array */
+    fclaw_gauge_buffer_pack_t buffer_pack;
+    /** @brief Buffer packsize */
+    fclaw_gauge_buffer_packsize_t buffer_packsize;
 
     /** @brief Maps gauge to normalized coordinates in a global [0,1]x[0,1]  domain. */
     fclaw_gauge_normalize_t     normalize_coordinates;
