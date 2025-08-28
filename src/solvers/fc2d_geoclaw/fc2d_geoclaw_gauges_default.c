@@ -36,6 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_options.h>
 #include <fclaw_global.h>
 
+#include <sc_scda.h>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -175,6 +177,15 @@ void geoclaw_read_gauges_data_default(fclaw_global_t *glob,
     FCLAW_FREE(line);
 }
 
+static void geoclaw_destroy_gauge_file(void* data)
+{
+    sc_scda_fcontext_t *fc = (sc_scda_fcontext_t *) data;
+    sc_scda_ferror_t errcode;
+    if (fc != NULL)
+    {
+        sc_scda_fclose(fc, &errcode);
+    }
+}
 /* This function can be virtualized so the user can specify their 
    gauge output */
 
@@ -208,6 +219,17 @@ void geoclaw_create_gauge_files_default(fclaw_global_t *glob,
         fprintf(fp, "# Columns: level time h    hu    hv    eta\n");
         fclose(fp);
     }
+
+    sc_scda_fcontext_t *fc;
+    sc_scda_ferror_t errcode;
+    fc = sc_scda_fopen_write(glob->mpicomm,
+                             "gauges.scda",
+                             "ForestClaw Guages", NULL,
+                             NULL, &errcode);
+    sc_array_t sc_num_eqns;
+    sc_array_init_data(&sc_num_eqns, &num_eqns, sizeof(int), 1);
+    sc_scda_fwrite_block(fc, "num_eqns", NULL, &sc_num_eqns, sc_num_eqns.elem_size, 0, 0, &errcode);
+    fclaw_global_attribute_store(glob, "gauges_scda_fcontext", fc, NULL, geoclaw_destroy_gauge_file);
 }
 
 void geoclaw_gauge_normalize_coordinates(fclaw_global_t *glob, 
@@ -318,6 +340,61 @@ void geoclaw_print_gauges_default(fclaw_global_t *glob,
         FCLAW_FREE(guser);
     }
     fclose(fp);
+    sc_scda_fcontext_t *fc = 
+        (sc_scda_fcontext_t *) fclaw_global_get_attribute(glob, "gauges_scda_fcontext");
+
+    for(k = 0; k < kmax; k++)
+    {
+        geoclaw_user_t *guser = gauge_buffer[k];
+
+        double eta = guser->qvar[0] + guser->avar[0];
+        eta = fabs(eta) < 1e-99 ? 0 : eta; /* For reading in Matlab */
+        fprintf(fp, "%5d %15.7e %15.7e %15.7e %15.7e %15.7e\n",
+                guser->level, guser->tcurr,
+                guser->qvar[0],guser->qvar[1],
+                guser->qvar[2],eta);
+
+        FCLAW_FREE(guser);
+    }
+    
+}
+
+void geoclaw_guage_pack_buffer_default(fclaw_global_t *glob, 
+                                           fclaw_gauge_t *gauge, 
+                                           int i, 
+                                           char *pack_data_here)
+{
+    geoclaw_user_t *guser = (geoclaw_user_t*) gauge->buffer[i];
+    /* get gauge data */
+    int num, dim;
+    double xc,yc,zc, t1, t2;
+    fclaw_gauge_get_data(glob,gauge,&num, &dim, &xc, &yc, &zc, &t1, &t2);
+
+
+    /* Pack the gauge data into the buffer */
+    *((int*)pack_data_here) = guser->level;
+    pack_data_here += sizeof(int);
+
+    *((double*)pack_data_here) = guser->tcurr;
+    pack_data_here += sizeof(double);
+
+    *((double*)pack_data_here) = xc; /* Normalized x coordinate */
+    pack_data_here += sizeof(double);
+    *((double*)pack_data_here) = yc; /* Normalized y coordinate */
+    pack_data_here += sizeof(double);
+
+    for(int m = 0; m < 3; m++)
+    {
+        *((double*)pack_data_here) = guser->qvar[m];
+        pack_data_here += sizeof(double);
+    }
+    *((double*)pack_data_here) = guser->avar[0]; /* Bathymetry */
+}
+
+size_t geoclaw_gauge_buffer_packsize_default(fclaw_global_t *glob)
+{
+    /* Pack size is level (int) + tcurr (double) + (xc,yc) (double) + 3 qvars (double) + 1 avar (double) */
+    return sizeof(int) + sizeof(double) +2*sizeof(double) + 3*sizeof(double) + sizeof(double);
 }
 
 #ifdef __cplusplus

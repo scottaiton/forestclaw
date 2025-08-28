@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fclaw_map_brick.h>
 #include <fclaw_map.h>
 #include <fclaw_map_query.h>
+#include <sc_scda.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -56,6 +57,7 @@ typedef struct fclaw_gauge_info
 {
     sc_array_t *block_offsets;
     sc_array_t *coordinates;
+    int single_file; /* If true, all gauges are in a single file */
 } fclaw_gauge_info_t;
 
 static
@@ -110,6 +112,7 @@ void gauge_initialize(fclaw_global_t* glob, void** acc)
                                  gauge_info,
                                  NULL,
                                  NULL);
+    gauge_info->single_file = 1;
 
     if (num_gauges > 0)
     {
@@ -288,6 +291,122 @@ void gauge_initialize(fclaw_global_t* glob, void** acc)
 }
 
 
+void fclaw_print_all_gauges(fclaw_global_t *glob, 
+                            fclaw_gauge_t **gauges, 
+                            int num_gauges)
+{
+    sc_scda_fcontext_t *fc = 
+        (sc_scda_fcontext_t *) fclaw_global_get_attribute(glob, "gauges_scda_fcontext");
+    
+    fclaw_gauges_vtable_t *gauges_vt = fclaw_gauges_vt(glob);
+
+    int local_buffer_length = 0;
+    for(int i = 0; i < num_gauges; i++)
+    {
+        fclaw_gauge_t *g = gauges[i];
+        if(g->is_local)
+        {
+            local_buffer_length += g->next_buffer_location;
+        }
+    }
+    int global_buffer_length;
+    sc_MPI_Allreduce(&local_buffer_length, 
+                     &global_buffer_length, 1, 
+                     sc_MPI_INT, sc_MPI_SUM, glob->mpicomm);
+
+    if (global_buffer_length == 0)
+    {
+        /* No gauges to print */
+        return;
+    }
+
+
+    int elem_size = sizeof(int) +  /* gauge id */
+                    gauges_vt->buffer_packsize(glob); /* 4 variables */
+                    
+    sc_array_t *buffer_data = sc_array_new_size(elem_size, local_buffer_length);
+    size_t curr_index = 0;
+    for(int i = 0; i < num_gauges; i++)
+    {
+        fclaw_gauge_t *g = gauges[i];
+        if(g->is_local)
+        {
+        for(int k = 0; k < g->next_buffer_location; k++)
+        {
+            char *data_ptr = (char*) sc_array_index(buffer_data, curr_index);
+
+            /* Store the gauge id in the first 4 bytes */
+            int gauge_id = fclaw_gauge_get_id(glob, g);
+            *((int*)data_ptr) = gauge_id;
+            data_ptr += sizeof(int); /* Move past the gauge id */
+
+            /* Pack the gauge data into the buffer */
+            gauges_vt->buffer_pack(glob, g, k, data_ptr);
+
+            curr_index++;
+        }
+        }
+    }
+    sc_array_t *elem_counts = sc_array_new_size(sizeof(sc_scda_ulong), glob->mpisize);
+    *((sc_scda_ulong*) sc_array_index(elem_counts, glob->mpirank)) = 
+        (sc_scda_ulong) local_buffer_length;
+    sc_MPI_Allgather(sc_array_index(elem_counts, glob->mpirank),
+                     sizeof(sc_scda_ulong), 
+                     sc_MPI_BYTE,
+                     sc_array_index(elem_counts, 0), 
+                     sizeof(sc_scda_ulong), 
+                     sc_MPI_BYTE,
+                     glob->mpicomm);
+
+    sc_scda_ferror_t errcode;
+    sc_scda_fwrite_array(fc, 
+                         "gauge_buffers",
+                         NULL,
+                         buffer_data,
+                         elem_counts,
+                         elem_size,
+                         0,
+                         0,
+                         &errcode);
+    //FCLAW_ASSERT(errcode == SC_SCDA_FERR_SUCCESS);
+    sc_array_destroy(buffer_data);
+    sc_array_destroy(elem_counts);
+}
+/**
+ * @brief Print all gauges that have data in their buffer.
+ * 
+ * @param glob 
+ * @param gauges 
+ * @param num_gauges 
+ */
+static
+void print_all_gauges(fclaw_global_t *glob, 
+                            fclaw_gauge_t *gauges, int num_gauges)
+{
+    fclaw_gauge_t ** gauges_to_print = FCLAW_ALLOC(fclaw_gauge_t*,num_gauges);
+    int num_gauges_to_print = 0;
+    for(int i = 0; i < num_gauges; i++)
+    {
+        fclaw_gauge_t *g = &gauges[i];
+        if (g->is_local && g->next_buffer_location > 0)
+        {
+            /* If this gauge is local and has data in the buffer, add it to the 
+               local_gauges list */
+            gauges_to_print[num_gauges_to_print] = g;
+            num_gauges_to_print++;
+        }
+    }
+
+    fclaw_print_all_gauges(glob, gauges_to_print, num_gauges_to_print);
+
+    for(int i = 0; i < num_gauges_to_print; i++)
+    {
+        fclaw_gauge_t *g = gauges_to_print[i];
+        g->next_buffer_location = 0; /* Reset buffer */
+    }
+    FCLAW_FREE(gauges_to_print);
+}
+
 static
 void gauge_update(fclaw_global_t *glob, void* acc)
 {
@@ -302,12 +421,15 @@ void gauge_update(fclaw_global_t *glob, void* acc)
 
     fclaw_gauge_acc_t* gauge_acc = (fclaw_gauge_acc_t*) acc;
     fclaw_gauge_t *gauges = gauge_acc->gauges;
+    fclaw_gauge_info_t* gauge_info = 
+        (fclaw_gauge_info_t *) fclaw_global_get_attribute(glob,"gauge_info");
 
     int buffer_len = fclaw_opt->gauge_buffer_length;
     tcurr = glob->curr_time;
     num_gauges = gauge_acc->num_gauges;
 
 
+    int all_gauges_need_to_be_printed = 0;
     for (i = 0; i < num_gauges; i++)
     {
         g = &gauges[i];
@@ -332,8 +454,15 @@ void gauge_update(fclaw_global_t *glob, void* acc)
                 
                 if (g->next_buffer_location == buffer_len)
                 {
-                    fclaw_print_gauge_buffer(glob,g);
-                    g->next_buffer_location = 0;
+                    if(gauge_info->single_file)
+                    {
+                        all_gauges_need_to_be_printed = 1;
+                    }
+                    else
+                    {
+                        fclaw_print_gauge_buffer(glob,g);
+                        g->next_buffer_location = 0;
+                    }
                 }  
             }
             else
@@ -343,6 +472,10 @@ void gauge_update(fclaw_global_t *glob, void* acc)
                 FCLAW_ASSERT(g->next_buffer_location == 0);
             }
         }
+    }
+    if(all_gauges_need_to_be_printed)
+    {
+        print_all_gauges(glob, gauges, num_gauges);
     }
 }
 
@@ -373,26 +506,63 @@ void fclaw_locate_gauges(fclaw_global_t *glob)
                                gauge_info->block_offsets,
                                gauge_info->coordinates, results);
 
-    for (i = 0; i < gauge_acc->num_gauges; ++i)
+    if(gauge_info->single_file)
     {
-        g = &gauge_acc->gauges[i];
+        fclaw_gauge_t ** gauges_to_print = FCLAW_ALLOC(fclaw_gauge_t*, num);
+        int num_gauges_to_print = 0;
 
-        index = g->location_in_results;
-        FCLAW_ASSERT(index >= 0 && index < num);
-
-        /* patchno == -1  : Patch is not on this processor
-           patchno >= 0   : Patch number is in local patch list.
-        */
-
-        /* Current patch no (patches can move under gauges, but blocks 
-           remain fixed. */
-        g->patchno = *((int *) sc_array_index_int(results, index));
-        g->is_local = (g->patchno >= 0);  /* Local to this processor */
-        if (!g->is_local && g->next_buffer_location > 0)
+        for (i = 0; i < gauge_acc->num_gauges; ++i)
         {
-            /* Patch moved off of processor, but the buffer is not empty. */
-            fclaw_print_gauge_buffer(glob,g);
-            g->next_buffer_location = 0;
+            g = &gauge_acc->gauges[i];
+
+            index = g->location_in_results;
+            FCLAW_ASSERT(index >= 0 && index < num);
+
+            /* patchno == -1  : Patch is not on this processor
+               patchno >= 0   : Patch number is in local patch list.
+            */
+
+            /* Current patch no (patches can move under gauges, but blocks 
+               remain fixed. */
+            g->patchno = *((int *) sc_array_index_int(results, index));
+            g->is_local = (g->patchno >= 0);  /* Local to this processor */
+            if (!g->is_local && g->next_buffer_location > 0)
+            {
+                /* Patch moved off of processor, but the buffer is not empty. */
+                gauges_to_print[num_gauges_to_print] = g;
+                num_gauges_to_print++;
+            }
+        }
+        fclaw_print_all_gauges(glob, gauges_to_print, num_gauges_to_print);
+        for(int j = 0; j < num_gauges_to_print; j++)
+        {
+            fclaw_gauge_t *g = gauges_to_print[j];
+            g->next_buffer_location = 0; /* Reset buffer */
+        }
+    }
+    else
+    {
+        for (i = 0; i < gauge_acc->num_gauges; ++i)
+        {
+            g = &gauge_acc->gauges[i];
+
+            index = g->location_in_results;
+            FCLAW_ASSERT(index >= 0 && index < num);
+
+            /* patchno == -1  : Patch is not on this processor
+               patchno >= 0   : Patch number is in local patch list.
+            */
+
+            /* Current patch no (patches can move under gauges, but blocks 
+               remain fixed. */
+            g->patchno = *((int *) sc_array_index_int(results, index));
+            g->is_local = (g->patchno >= 0);  /* Local to this processor */
+            if (!g->is_local && g->next_buffer_location > 0)
+            {
+                /* Patch moved off of processor, but the buffer is not empty. */
+                fclaw_print_gauge_buffer(glob,g);
+                g->next_buffer_location = 0;
+            }
         }
     }
     sc_array_destroy(results);
@@ -407,6 +577,10 @@ void gauge_finalize(fclaw_global_t *glob, void** acc)
     fclaw_gauge_info_t* gauge_info = 
         (fclaw_gauge_info_t *) fclaw_global_get_attribute(glob,"gauge_info");
 
+    if(gauge_info->single_file)
+    {
+        print_all_gauges(glob, gauges, gauge_acc->num_gauges);
+    }
     for(int i = 0; i < gauge_acc->num_gauges; i++)
     {
         fclaw_gauge_t *g = &gauges[i];
@@ -414,7 +588,7 @@ void gauge_finalize(fclaw_global_t *glob, void** acc)
         /* Every processor owns every gauge (which will scale up to a few 
         hundred gauges).  But we only want to print those gauge buffers that 
         for gauges that are on the local processor */        
-        if (g->is_local)
+        if (!gauge_info->single_file && g->is_local)
         {
             fclaw_print_gauge_buffer(glob,g);
         }

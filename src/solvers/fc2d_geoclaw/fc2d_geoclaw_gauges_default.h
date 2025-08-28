@@ -26,6 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FC2D_GEOCLAW_GAUGES_DEFAULT_H
 #define FC2D_GEOCLAW_GAUGES_DEFAULT_H
 
+#include <fclaw_base.h>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -59,6 +61,13 @@ void geoclaw_gauge_update_default(struct fclaw_global* glob,
 
 void geoclaw_print_gauges_default(struct fclaw_global *glob, 
                                   struct fclaw_gauge *gauge);
+
+void geoclaw_guage_pack_buffer_default(struct fclaw_global *glob, 
+                                       struct fclaw_gauge *gauge, 
+                                       int i, 
+                                       char *pack_data_here);
+
+size_t geoclaw_gauge_buffer_packsize_default(struct fclaw_global *glob);
 
 #ifdef __cplusplus
 }

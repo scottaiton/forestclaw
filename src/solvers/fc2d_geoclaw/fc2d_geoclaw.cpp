@@ -911,6 +911,8 @@ void fc2d_geoclaw_solver_initialize(fclaw_global_t* glob)
     gauges_vt->create_gauge_files      = geoclaw_create_gauge_files_default; 
     gauges_vt->update_gauge            = geoclaw_gauge_update_default;
     gauges_vt->print_gauge_buffer      = geoclaw_print_gauges_default;
+    gauges_vt->buffer_pack            = geoclaw_guage_pack_buffer_default;
+    gauges_vt->buffer_packsize        = geoclaw_gauge_buffer_packsize_default;
 
     /* We need a specialized read routine, since the GeoClaw "make data" routines
        do not write out a dimension to the regions.data file.  This will also maintain
