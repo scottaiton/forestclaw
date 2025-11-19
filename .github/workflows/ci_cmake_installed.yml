@@ -1,0 +1,135 @@
+name: CI for CMake with Installed sc and p4est
+
+on:
+  push:
+    paths-ignore:
+       - '.github/workflows/*.yml'
+       - '!.github/workflows/ci_cmake_installed.yml'
+  pull_request:
+  release:
+    types: [published]
+
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  CTEST_NO_TESTS_ACTION: "error"
+  CMAKE_INSTALL_PREFIX: ~/local
+  CMAKE_PREFIX_PATH: ~/local
+
+jobs:
+
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - name: "Serial Minimal"
+          configure_flags: ""
+          ubuntu_packages: ""
+        - name: "Serial With Clawpack"
+          configure_flags: "-Dclawpack=ON"
+          ubuntu_packages: ""
+        - name: "MPI Minimal"
+          configure_flags: "-Dmpi=ON"
+          ubuntu_packages: "libopenmpi-dev openmpi-bin"
+        - name: "MPI With Clawpack"
+          configure_flags: "-Dmpi=ON -Dclawpack=ON"
+          ubuntu_packages: "libopenmpi-dev openmpi-bin"
+
+    name: CMake Installed ${{ matrix.name }} Build on Linux
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout source code
+      with:
+        submodules: recursive
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update -yq
+        sudo apt-get install -yq --no-install-recommends \
+            ${{ matrix.ubuntu_packages }}
+
+    - name: Build and install sc from submodule
+      run: |
+        cd sc
+        cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSC_ENABLE_MPI=${{ contains(matrix.configure_flags, '-Dmpi=ON') && 'ON' || 'OFF' }}
+        cmake --build build
+        cmake --install build
+
+    - name: Build and install p4est from submodule
+      run: |
+        cd p4est
+        cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DP4EST_USE_SYSTEM_SC=ON -Dmpi=${{ contains(matrix.configure_flags, '-Dmpi=ON') && 'ON' || 'OFF' }}
+        cmake --build build
+        cmake --install build
+
+    - name: CMake configure forestclaw (using installed sc and p4est)
+      run: cmake --preset ci -Dsubmodules=OFF ${{ matrix.configure_flags }}
+
+    - name: CMake build forestclaw
+      run: cmake --build --preset ci
+
+    - name: CMake test forestclaw
+      run: ctest --preset default
+
+    - name: CMake install forestclaw (for examples)
+      run: cmake --install build
+
+    - name: CMake configure examples
+      run: cmake -B applications/build -S applications --preset ci
+
+    - name: CMake build examples
+      run: cmake --build applications/build
+
+
+  mac:
+    runs-on: macos-14
+    name: CMake Installed build on MacOS
+    env:
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+      CC: gcc-14
+      CXX: g++-14
+      FC: gfortran-14
+
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout source code
+      with:
+        submodules: recursive
+
+    - name: Install system dependencies
+      run: brew install open-mpi ninja
+
+    - name: Build and install sc from submodule
+      run: |
+        cd sc
+        cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSC_ENABLE_MPI=ON
+        cmake --build build
+        cmake --install build
+
+    - name: Build and install p4est from submodule
+      run: |
+        cd p4est
+        cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DP4EST_USE_SYSTEM_SC=ON -Dmpi=ON
+        cmake --build build
+        cmake --install build
+
+    - name: CMake configure forestclaw (using installed sc and p4est)
+      run: cmake --preset mac -Dsubmodules=OFF -Dclawpack=ON -Dgeoclaw=ON
+
+    - name: CMake build forestclaw
+      run: cmake --build --preset default
+
+    - name: CMake test forestclaw
+      run: ctest --preset default
+
+    - name: CMake install forestclaw (for examples)
+      run: cmake --install build
+
+    - name: CMake configure examples
+      run: cmake -B applications/build -S applications
+
+    - name: CMake build examples
+      run: cmake --build applications/build
