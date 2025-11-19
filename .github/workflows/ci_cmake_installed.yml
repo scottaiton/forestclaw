@@ -15,6 +15,9 @@ env:
   CMAKE_INSTALL_PREFIX: ~/local
   CMAKE_PREFIX_PATH: ~/local
 
+permissions:
+  contents: read
+
 jobs:
 
   linux:
