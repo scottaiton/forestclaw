@@ -42,14 +42,6 @@ typedef struct fc2d_thunderegg_options fc2d_thunderegg_options_t;
 
 
 typedef enum {
-    STARPATCH = 0,  /* ThunderEgg operator */
-    FIVEPOINT,      /* Laplacian (no beta) */
-    VARPOISSON,      /* Variable Poisson operator */
-    HEAT,      /* Variable Poisson operator */
-    USER_OPERATOR
-} fc2d_thunderegg_operator_types;
-
-typedef enum {
     FFT = 0,    /* Must use starpatch or fivepoint */
     BICG,       /* Can be used with any operator */
     CG,         /* Can be used with any operator */
@@ -85,9 +77,6 @@ struct fc2d_thunderegg_options
     /* iterative patch solver settings*/
     int patch_iter_max_it;
     double patch_iter_tol;
-
-    int patch_operator;
-    sc_keyvalue_t *kv_patch_operator;
 
     int patch_solver;
     sc_keyvalue_t *kv_patch_solver;

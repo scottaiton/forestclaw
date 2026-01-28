@@ -87,7 +87,6 @@ void thunderegg_solve(fclaw_global_t* glob)
     fc2d_thunderegg_physical_bc(glob);
 
     fc2d_thunderegg_vtable_t  *mg_vt  = fc2d_thunderegg_vt(glob);  
-    fc2d_thunderegg_options_t *mg_opt = fc2d_thunderegg_get_options(glob);
 
     /* Operators are now in example code, not in the library */
     if (mg_vt->patch_operator == NULL)

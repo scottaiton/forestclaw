@@ -87,16 +87,6 @@ thunderegg_register (fc2d_thunderegg_options_t* mg_opt, sc_options_t * opt)
                            "Max allowed iterations for patch-based iterative solvers [1000]");
 
 
-    /* Set operator type (starpatch, fivepoint) */
-    sc_keyvalue_t *kv_op = mg_opt->kv_patch_operator = sc_keyvalue_new ();
-    sc_keyvalue_set_int (kv_op, "starpatch",  STARPATCH);     /* Uses FFT, CG or BICG */
-    sc_keyvalue_set_int (kv_op, "fivepoint",  FIVEPOINT);     /* Uses FFT, CG or BICG */
-    sc_keyvalue_set_int (kv_op, "varpoisson", VARPOISSON);   /* Uses BICG or CG */
-    sc_keyvalue_set_int (kv_op, "heat",       HEAT);   /* Uses BICG or CG */
-    sc_keyvalue_set_int (kv_op, "user_operator",  USER_OPERATOR);   /* Uses BICG or CG */
-    sc_options_add_keyvalue (opt, 0, "patch_operator", &mg_opt->patch_operator,
-                             "fivepoint", kv_op, "Set patch operator type [fivepoint]");
-
     /* Set solver type (FFT, BICG) */
     sc_keyvalue_t *kv_s = mg_opt->kv_patch_solver = sc_keyvalue_new ();
     sc_keyvalue_set_int (kv_s, "bicg", BICG);
@@ -130,9 +120,6 @@ static
 void thunderegg_destroy (fc2d_thunderegg_options_t * mg_opt)
 {
     fclaw_options_destroy_array (mg_opt->boundary_conditions);
-
-    FCLAW_ASSERT (mg_opt->kv_patch_operator != NULL);
-    sc_keyvalue_destroy (mg_opt->kv_patch_operator);
 
     FCLAW_ASSERT (mg_opt->kv_patch_solver != NULL);
     sc_keyvalue_destroy (mg_opt->kv_patch_solver);
