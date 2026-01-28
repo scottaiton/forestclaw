@@ -9,6 +9,8 @@ applications_elliptic_2d_heat_heat_SOURCES = \
 	applications/elliptic/2d/heat/heat_run.c \
 	applications/elliptic/2d/heat/heat_user.cpp \
 	applications/elliptic/2d/heat/heat_user.h \
+	applications/elliptic/2d/heat/heat_operator.cpp \
+	applications/elliptic/2d/heat/heat_operator.h \
 	applications/elliptic/2d/heat/heat_options.c \
 	applications/elliptic/2d/heat/heat_diagnostics.c \
 	applications/elliptic/2d/heat/hsmooth.f90 \

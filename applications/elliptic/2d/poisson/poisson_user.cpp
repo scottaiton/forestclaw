@@ -398,10 +398,8 @@ void poisson_link_solvers(fclaw_global_t *glob)
 
     fc2d_thunderegg_options_t *mg_opt = fc2d_thunderegg_get_options(glob);
 
-    if (mg_opt->patch_operator == USER_OPERATOR)
-    {
-        mg_vt->patch_operator = fc2d_thunderegg_fivepoint_solve;        
-    }
+    /* Set the patch operator - now owned by the example */
+    mg_vt->patch_operator = poisson_fivepoint_solve;
 
     /* Diagnostics - most need to be modified because different number of fields are
        used for the elliptic problem then for the hyperbolic problem */

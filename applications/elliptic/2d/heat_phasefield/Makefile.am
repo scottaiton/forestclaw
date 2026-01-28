@@ -10,6 +10,8 @@ applications_elliptic_2d_heat_phasefield_heat_phasefield_SOURCES = \
 	applications/elliptic/2d/heat_phasefield/heat/heat_run.c \
 	applications/elliptic/2d/heat_phasefield/heat/heat_user.cpp \
 	applications/elliptic/2d/heat_phasefield/heat/heat_user.h \
+	applications/elliptic/2d/heat_phasefield/heat/heat_operator.cpp \
+	applications/elliptic/2d/heat_phasefield/heat/heat_operator.h \
 	applications/elliptic/2d/heat_phasefield/heat/heat_options.c \
 	applications/elliptic/2d/heat_phasefield/heat/heat_diagnostics.c \
 	applications/elliptic/2d/heat_phasefield/heat/hsmooth.f90 \

@@ -14,6 +14,7 @@ add_executable(poisson
   poisson_user.cpp 
   poisson_options.c 
   poisson_diagnostics.c 
+  poisson_fivepoint_operator.cpp
   $<TARGET_OBJECTS:poisson_f>
 )
 

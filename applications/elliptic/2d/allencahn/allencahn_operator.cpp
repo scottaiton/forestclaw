@@ -23,9 +23,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "operators/fc2d_thunderegg_heat.h"
+#include "allencahn_operator.h"
 
-#include "fc2d_thunderegg.h"
+#include <fc2d_thunderegg.h>
 #include "fc2d_thunderegg_options.h"
 #include "fc2d_thunderegg_vector.hpp"
 
@@ -86,13 +86,13 @@ public:
 /* Set static variable to default value;  lambda for this problem should be <= 0 */
 double heat::lambda{999};
 
-void fc2d_thunderegg_heat_set_lambda(double lambda)
+void allencahn_operator_set_lambda(double lambda)
 {
     heat::lambda = lambda;
 
 }
 
-double fc2d_thunderegg_heat_get_lambda()
+double allencahn_operator_get_lambda()
 {
     return heat::lambda;
 }
@@ -102,7 +102,7 @@ heat::heat(fclaw_global_t *glob,
            const GhostFiller<2>& ghost_filler) 
                     : PatchOperator<2>(domain,ghost_filler)
 {
-    /* User should call 'fc2d_thunderegg_heat_set_lambda' before calling elliptic solve */
+    /* User should call 'allencahn_operator_set_lambda' before calling elliptic solve */
     FCLAW_ASSERT(heat::lambda <= 0);
 
     /* Get scale needed to apply homogeneuous Dirichlet conditions. 
@@ -329,7 +329,7 @@ void heat::modifyRHSForInternalBoundaryConditions(const PatchInfo<2>& pinfo,
 }
  
 
-void fc2d_thunderegg_heat_solve(fclaw_global_t *glob) 
+void allencahn_operator_solve(fclaw_global_t *glob) 
 {
     // get needed options
     fclaw_clawpatch_options_t *clawpatch_opt =

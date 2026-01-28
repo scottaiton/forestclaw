@@ -44,9 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fclaw_domain.h>
 
-#include "operators/fc2d_thunderegg_fivepoint.h"
-#include "operators/fc2d_thunderegg_heat.h"
-
 
 
 /* --------------------- ThunderEgg solver (required) ------------------------- */
@@ -92,26 +89,11 @@ void thunderegg_solve(fclaw_global_t* glob)
     fc2d_thunderegg_vtable_t  *mg_vt  = fc2d_thunderegg_vt(glob);  
     fc2d_thunderegg_options_t *mg_opt = fc2d_thunderegg_get_options(glob);
 
-    /* Should the operators be part of the thunderegg library? Yes, for now, at least */
-    switch (mg_opt->patch_operator)
+    /* Operators are now in example code, not in the library */
+    if (mg_vt->patch_operator == NULL)
     {
-        case FIVEPOINT:
-            mg_vt->patch_operator = fc2d_thunderegg_fivepoint_solve;
-            break;
-        case HEAT:
-            mg_vt->patch_operator = fc2d_thunderegg_heat_solve;
-            break;
-#if 0
-        case USER_OPERATOR:
-            if (mg_vt->patch_operator == NULL)
-            {
-                fclaw_global_essentialf("thunderegg_solve : User specified operator not set\n");
-                exit(0);
-            }
-#endif            
-        default:
-            break;
-            /* user has specified something, hopefully */
+        fclaw_global_essentialf("thunderegg_solve : User must set patch_operator\n");
+        exit(0);
     }
     
     FCLAW_ASSERT(mg_vt->patch_operator != NULL);

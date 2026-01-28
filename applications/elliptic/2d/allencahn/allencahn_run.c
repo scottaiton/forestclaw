@@ -23,6 +23,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "allencahn_operator.h"
 #include "allencahn_user.h"
 
 #include <fclaw_clawpatch.h>
@@ -192,7 +193,7 @@ void outstyle_1(fclaw_global_t *glob)
 
             /* Set lambda for Backward Euler */
             double lambda = -1/dt_step;
-            fc2d_thunderegg_heat_set_lambda(lambda);
+            allencahn_operator_set_lambda(lambda);
 
             /* Solve the elliptic problem; RHS is set here */
             fclaw_elliptic_solve(glob);
@@ -300,7 +301,7 @@ void outstyle_3(fclaw_global_t *glob)
         glob->curr_dt = dt_step;
         /* Set lambda for Backward Euler */
         double lambda = -1/dt_step;
-        fc2d_thunderegg_heat_set_lambda(lambda);
+        allencahn_operator_set_lambda(lambda);
 
 
         /* Solve the elliptic problem; RHS is set here */

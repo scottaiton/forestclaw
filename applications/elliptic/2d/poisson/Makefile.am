@@ -8,6 +8,8 @@ applications_elliptic_2d_poisson_poisson_SOURCES = \
 	applications/elliptic/2d/poisson/poisson.cpp \
 	applications/elliptic/2d/poisson/poisson_user.cpp \
 	applications/elliptic/2d/poisson/poisson_user.h \
+	applications/elliptic/2d/poisson/poisson_fivepoint_operator.cpp \
+	applications/elliptic/2d/poisson/poisson_fivepoint_operator.h \
 	applications/elliptic/2d/poisson/poisson_options.c \
 	applications/elliptic/2d/poisson/poisson_diagnostics.c \
 	applications/elliptic/2d/poisson/hsmooth.f90 \

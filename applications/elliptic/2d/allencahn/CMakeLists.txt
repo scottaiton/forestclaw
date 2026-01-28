@@ -15,6 +15,7 @@ add_executable(allencahn
   allencahn.cpp 
   allencahn_run.c 
   allencahn_user.cpp 
+  allencahn_operator.cpp
   allencahn_options.c 
   $<TARGET_OBJECTS:allencahn_f>
 )

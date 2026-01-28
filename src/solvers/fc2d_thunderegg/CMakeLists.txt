@@ -18,8 +18,6 @@ target_sources(fc2d_thunderegg PRIVATE
   fc2d_thunderegg_options.c
   fc2d_thunderegg_vector.cpp
   fc2d_thunderegg_physical_bc.c
-  operators/fc2d_thunderegg_fivepoint.cpp
-  operators/fc2d_thunderegg_heat.cpp
   $<TARGET_OBJECTS:fc2d_thunderegg_f>
 )
 
@@ -27,7 +25,6 @@ target_link_libraries(fc2d_thunderegg PUBLIC forestclaw clawpatch ThunderEgg::Th
 
 target_include_directories(fc2d_thunderegg PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/operators>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
 )
@@ -39,8 +36,6 @@ install(FILES
 	fc2d_thunderegg_options.h
 	fc2d_thunderegg_physical_bc.h
 	fc2d_thunderegg_vector.hpp
-	operators/fc2d_thunderegg_fivepoint.h
-	operators/fc2d_thunderegg_heat.h
   TYPE INCLUDE
 )
 

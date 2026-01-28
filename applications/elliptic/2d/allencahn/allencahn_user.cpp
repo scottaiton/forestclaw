@@ -38,6 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fc2d_thunderegg_options.h>
 #include <fc2d_thunderegg_physical_bc.h>
 
+#include "allencahn_operator.h"
+
 #include <fclaw_elliptic_solver.h>
 
 
@@ -339,6 +341,10 @@ void allencahn_link_solvers(fclaw_global_t *glob)
 
     /* Multigrid vtable */
     fc2d_thunderegg_vtable_t*  mg_vt = fc2d_thunderegg_vt(glob);
+    
+    /* Set the patch operator - now owned by the example */
+    mg_vt->patch_operator = allencahn_operator_solve;
+    
     //mg_vt->fort_rhs       = &ALLENCAHN_FORT_RHS;
 
     mg_vt->fort_beta      = &ALLENCAHN_FORT_BETA;

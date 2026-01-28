@@ -24,6 +24,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "heat_user.h"
+#include "heat_operator.h"
 
 #include <fclaw_clawpatch.h>
 #include <fclaw_patch.h>
@@ -194,7 +195,7 @@ void outstyle_1(fclaw_global_t *glob)
 
             /* Set lambda for Backward Euler */
             double lambda = -1/dt_step;
-            fc2d_thunderegg_heat_set_lambda(lambda);
+            heat_operator_set_lambda(lambda);
 
             /* Solve the elliptic problem; RHS is set here */
             fclaw_elliptic_solve(glob);
@@ -302,7 +303,7 @@ void outstyle_3(fclaw_global_t *glob)
         glob->curr_dt = dt_step;
         /* Set lambda for Backward Euler */
         double lambda = -1/dt_step;
-        fc2d_thunderegg_heat_set_lambda(lambda);
+        heat_operator_set_lambda(lambda);
 
 
         /* Solve the elliptic problem; RHS is set here */

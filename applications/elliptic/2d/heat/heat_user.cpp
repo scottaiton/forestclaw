@@ -39,6 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fc2d_thunderegg_options.h>
 #include <fc2d_thunderegg_physical_bc.h>
 
+#include "heat_operator.h"
+
 #include <fclaw_elliptic_solver.h>
 
 
@@ -135,7 +137,7 @@ void heat_rhs(fclaw_global_t *glob,
 
     /* This function supplies an analytic right hand side. */
     int method = 1;
-    double lambda = fc2d_thunderegg_heat_get_lambda();    
+    double lambda = heat_operator_get_lambda();    
     HEAT_FORT_RHS(&blockno, &mbc, &mx, &my, &meqn, &mfields,
                   &xlower, &ylower, &dx, &dy,&lambda, &method,q,rhs);
 
@@ -397,6 +399,10 @@ void heat_link_solvers(fclaw_global_t *glob)
 
     /* Multigrid vtable */
     fc2d_thunderegg_vtable_t*  mg_vt = fc2d_thunderegg_vt(glob);
+    
+    /* Set the patch operator - now owned by the example */
+    mg_vt->patch_operator = heat_operator_solve;
+    
     //mg_vt->fort_rhs       = &HEAT_FORT_RHS;
     //mg_vt->fort_beta      = &HEAT_FORT_BETA;
     

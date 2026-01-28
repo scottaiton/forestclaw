@@ -23,8 +23,8 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FC2D_THUNDEREGG_HEAT_H
-#define FC2D_THUNDEREGG_HEAT_H
+#ifndef HEAT_OPERATOR_H
+#define HEAT_OPERATOR_H
 
 #ifdef __cplusplus
 extern "C"
@@ -41,11 +41,11 @@ extern "C"
 struct fclaw_global;
 
 
-void fc2d_thunderegg_heat_solve(struct fclaw_global *glob);
+void heat_operator_solve(struct fclaw_global *glob);
 
-void fc2d_thunderegg_heat_set_lambda(double lambda);
+void heat_operator_set_lambda(double lambda);
 
-double fc2d_thunderegg_heat_get_lambda();
+double heat_operator_get_lambda();
 
 
 #ifdef __cplusplus
@@ -56,5 +56,5 @@ double fc2d_thunderegg_heat_get_lambda();
 #endif
 
 
-#endif /* !FC2D_THUNDEREGG_FIVEPOINT_H */
+#endif /* !HEAT_OPERATOR_H */
 

@@ -24,6 +24,7 @@ target_link_libraries(heat_c PRIVATE
 add_executable(heat 
   heat.cpp 
   heat_user.cpp 
+  heat_operator.cpp
   $<TARGET_OBJECTS:heat_f>
   $<TARGET_OBJECTS:heat_c>
 )

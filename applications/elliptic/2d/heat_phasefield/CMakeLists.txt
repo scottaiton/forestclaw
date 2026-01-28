@@ -26,6 +26,7 @@ add_executable(heat_phasefield
   heat_phasefield.cpp 
   heat/heat.cpp 
   heat/heat_user.cpp 
+  heat/heat_operator.cpp
   heat/heat_run.c 
   heat/heat_options.c 
   heat/heat_diagnostics.c 

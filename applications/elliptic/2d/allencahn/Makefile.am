@@ -9,6 +9,8 @@ applications_elliptic_2d_allencahn_allencahn_SOURCES = \
 	applications/elliptic/2d/allencahn/allencahn_run.c \
 	applications/elliptic/2d/allencahn/allencahn_user.cpp \
 	applications/elliptic/2d/allencahn/allencahn_user.h \
+	applications/elliptic/2d/allencahn/allencahn_operator.cpp \
+	applications/elliptic/2d/allencahn/allencahn_operator.h \
 	applications/elliptic/2d/allencahn/allencahn_options.c \
 	applications/elliptic/2d/allencahn/hsmooth.f90 \
 	applications/elliptic/2d/allencahn/fortran/allencahn_setprob.f90 \

@@ -4,17 +4,13 @@ libthunderegg_generated_headers =
 libthunderegg_installed_headers = \
 	src/solvers/fc2d_thunderegg/fc2d_thunderegg.h \
 	src/solvers/fc2d_thunderegg/fc2d_thunderegg_options.h \
-	src/solvers/fc2d_thunderegg/fc2d_thunderegg_physical_bc.h \
-	src/solvers/fc2d_thunderegg/operators/fc2d_thunderegg_fivepoint.h \
-	src/solvers/fc2d_thunderegg/operators/fc2d_thunderegg_heat.h
+	src/solvers/fc2d_thunderegg/fc2d_thunderegg_physical_bc.h
 
 libthunderegg_compiled_sources = \
 	src/solvers/fc2d_thunderegg/fc2d_thunderegg.cpp \
 	src/solvers/fc2d_thunderegg/fc2d_thunderegg_options.c \
 	src/solvers/fc2d_thunderegg/fc2d_thunderegg_vector.cpp \
 	src/solvers/fc2d_thunderegg/fc2d_thunderegg_physical_bc.c \
-	src/solvers/fc2d_thunderegg/operators/fc2d_thunderegg_fivepoint.cpp \
-	src/solvers/fc2d_thunderegg/operators/fc2d_thunderegg_heat.cpp \
 	src/solvers/fc2d_thunderegg/fort_4.6/thunderegg_apply_bc_default.f90 \
 	src/solvers/fc2d_thunderegg/fort_4.6/thunderegg_eval_bc_default.f90
 
