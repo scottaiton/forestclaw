@@ -46,8 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "operators/fc2d_thunderegg_fivepoint.h"
 #include "operators/fc2d_thunderegg_heat.h"
-#include "operators/fc2d_thunderegg_starpatch.h"
-#include "operators/fc2d_thunderegg_varpoisson.h"
 
 
 
@@ -97,14 +95,8 @@ void thunderegg_solve(fclaw_global_t* glob)
     /* Should the operators be part of the thunderegg library? Yes, for now, at least */
     switch (mg_opt->patch_operator)
     {
-        case STARPATCH:
-            mg_vt->patch_operator = fc2d_thunderegg_starpatch_solve;
-            break;
         case FIVEPOINT:
             mg_vt->patch_operator = fc2d_thunderegg_fivepoint_solve;
-            break;
-        case VARPOISSON:
-            mg_vt->patch_operator = fc2d_thunderegg_varpoisson_solve;
             break;
         case HEAT:
             mg_vt->patch_operator = fc2d_thunderegg_heat_solve;

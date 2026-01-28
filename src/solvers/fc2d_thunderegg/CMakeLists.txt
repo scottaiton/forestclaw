@@ -18,9 +18,7 @@ target_sources(fc2d_thunderegg PRIVATE
   fc2d_thunderegg_options.c
   fc2d_thunderegg_vector.cpp
   fc2d_thunderegg_physical_bc.c
-  operators/fc2d_thunderegg_starpatch.cpp
   operators/fc2d_thunderegg_fivepoint.cpp
-  operators/fc2d_thunderegg_varpoisson.cpp
   operators/fc2d_thunderegg_heat.cpp
   $<TARGET_OBJECTS:fc2d_thunderegg_f>
 )
@@ -41,9 +39,7 @@ install(FILES
 	fc2d_thunderegg_options.h
 	fc2d_thunderegg_physical_bc.h
 	fc2d_thunderegg_vector.hpp
-	operators/fc2d_thunderegg_starpatch.h
 	operators/fc2d_thunderegg_fivepoint.h
-	operators/fc2d_thunderegg_varpoisson.h
 	operators/fc2d_thunderegg_heat.h
   TYPE INCLUDE
 )
